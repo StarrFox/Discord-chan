@@ -47,7 +47,7 @@ class snipe:
             return await ctx.send("I don't have that many messages recorded")
         msg = self.snipe_dict[channel.id][index]
         e = discord.Embed(
-            color=discord.Color.dark_purple(),
+            color=discord.Color.blurple(),
             description=msg.content
         )
         e.set_author(
@@ -69,14 +69,14 @@ class snipe:
         if not channel.id in self.snipe_dict:
             return await ctx.send("This channel has no recorded messages")
         pager = paginator(self.bot)
-        e = discord.Embed(color=discord.Color.dark_purple())
+        e = discord.Embed(color=discord.Color.blurple())
         Set = 1
         for msg in self.snipe_dict[channel.id]:
             if len(e.fields) >= 5:
                 e.set_footer(text=f"{Set*5-4}-{Set*5}/{len(self.snipe_dict[channel.id])-1}")
                 Set += 1
                 pager.add_page(data=e)
-                e = discord.Embed(color=discord.Color.dark_purple())
+                e = discord.Embed(color=discord.Color.blurple())
             else:
                 e.add_field(
                     name=f"**{msg.author.display_name}** said in **#{msg.channel.name}**",

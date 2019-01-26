@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import asyncio
+from os import system
 
 class owner:
 
@@ -17,6 +18,13 @@ class owner:
     @commands.is_owner()
     async def shutdown(self, ctx):
         await ctx.send(":c")
+        await self.bot.logout()
+
+    @commands.command()
+    @commands.is_owner()
+    async def restart(self, ctx):
+        await ctx.send('😡')
+        system('start restart.py')
         await self.bot.logout()
 
 def setup(bot):

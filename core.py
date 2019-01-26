@@ -17,7 +17,7 @@ class DiscordChan(commands.AutoShardedBot):
         ]
         self.db = None
         self.prefixes = {}
-        self.uptime = datetime.utcnow()
+        self.uptime = datetime.now()
         super().__init__(
             command_prefix=self.get_prefix,
             case_insensitive=True,
@@ -57,6 +57,7 @@ class DiscordChan(commands.AutoShardedBot):
     async def on_ready(self):
         await self.connect_db()
         await self.load_prefixes()
+        await self.load_mods()
         print("Connected as:")
         print(f"User: {self.user}")
         print(f"ID: {self.user.id}")
@@ -77,7 +78,7 @@ class DiscordChan(commands.AutoShardedBot):
         await self.db.execute("DELETE FROM prefixes;")
         await self.db.executemany("INSERT INTO prefixes(guild_id, prefixes) VALUES ($1, $2)", self.prefixes.items())
 
-    def run(self):
+    async def load_mods(self):
         self.load_extension('jishaku')
         loaded = []
         failed = []
@@ -92,6 +93,8 @@ class DiscordChan(commands.AutoShardedBot):
                 print(e)
         print(f"Loaded: {loaded}")
         print(f"Failed: {failed}")
+
+    def run(self):
         super().run(self.settings['token'])
 
     async def logout(self):
@@ -107,7 +110,7 @@ class DiscordChan(commands.AutoShardedBot):
                 self.remove_cog(cog)
             except Exception:
                 pass
-        await asyncio.sleep(10)
+        await asyncio.sleep(5)
         await self.db.close()
         await super().logout()
 
