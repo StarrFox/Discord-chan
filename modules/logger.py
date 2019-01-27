@@ -12,7 +12,7 @@ class logger:
         self.bot = bot
         self.guild_logs = self.bot.get_channel(527440788934754314)
         self.pm_logs = self.bot.get_channel(521116687437791233)
-        self.command_logs = self.bot.get_channel(531494671600451664)
+        self.command_logs = self.bot.get_channel(538653229639270410)
         self.error_logs = self.bot.get_channel(531497184781139968)
 
     async def on_guild_join(self, guild):
@@ -42,6 +42,8 @@ class logger:
             await self.pm_logs.send(embed=e)
 
     async def on_command_completion(self, ctx):
+        if ctx.author.id in self.bot.owners:
+            return
         e = discord.Embed(title=f"Command run log", color=discord.Color.dark_purple())
         e.set_thumbnail(url=ctx.author.avatar_url)
         e.add_field(name="Guild:", value=f"Name: {ctx.guild.name}\nID: {ctx.guild.id}")

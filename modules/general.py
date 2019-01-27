@@ -59,7 +59,7 @@ class general:
     async def quote(self, ctx, user: discord.Member, *, message: str):
         """Send a message as someone else"""
         hook = await ctx.channel.create_webhook(name=user.display_name)
-        await hook.send(message, avatar_url=user.avatar_url)
+        await hook.send(message, avatar_url=user.avatar_url_as(format='png'))
         await hook.delete()
 
     @commands.command(aliases=['tobin'])
@@ -105,7 +105,7 @@ class general:
             message['content'] = message['content'][:97] + "..."
         message['embeds'] = len(message['embeds'])
         json_msg = json.dumps(message, indent=4)
-        json_msg = json_msg.replace("``", "`\u200b``")
+        json_msg = json_msg.replace("`", "`\u200b")
         await ctx.send(f"```json\n{json_msg}```")
 
 def setup(bot):

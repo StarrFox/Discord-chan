@@ -40,7 +40,7 @@ class snipe:
         if not channel:
             channel = ctx.channel
         if ctx.channel.is_nsfw() is False and channel.is_nsfw() is True:
-            return await ctx.send("You cannot snipe a nsfw channel for a non-nsfw channel")
+            return await ctx.send("You cannot snipe a nsfw channel from a non-nsfw channel")
         if not channel.id in self.snipe_dict:
             return await ctx.send("This channel has no recorded messages")
         if len(self.snipe_dict[channel.id])-1 < index:
@@ -61,11 +61,11 @@ class snipe:
 
     @_snipe.command(name='list')
     async def _list(self, ctx, channel: discord.TextChannel = None):
-        """List last 5 deleted messages in a channel"""
+        """List deleted/edited messages for a channel"""
         if not channel:
             channel = ctx.channel
         if ctx.channel.is_nsfw() is False and channel.is_nsfw() is True:
-            return await ctx.send("You cannot snipe a nsfw channel for a non-nsfw channel")
+            return await ctx.send("You cannot snipe a nsfw channel from a non-nsfw channel")
         if not channel.id in self.snipe_dict:
             return await ctx.send("This channel has no recorded messages")
         pager = paginator(self.bot)
