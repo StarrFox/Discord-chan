@@ -9,6 +9,10 @@ class info:
         self.bot = bot
 
     @commands.command()
+    async def source(self, ctx):
+        await ctx.send("<https://github.com/StarrFox/Discord-chan>")
+
+    @commands.command()
     async def info(self, ctx):
         """View bot info"""
         owner = "StarrFox#6312"

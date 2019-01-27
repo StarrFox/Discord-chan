@@ -6,6 +6,17 @@ import os
 from datetime import datetime
 import asyncpg
 
+class subcontext(commands.Context):
+
+    async def check(self, message = None):
+        await self.message.add_reaction("\u2705")
+        if message:
+            await self.send(message)
+
+    @property
+    def when(self):
+        return self.message.created_at
+
 class DiscordChan(commands.AutoShardedBot):
 
     def __init__(self):
@@ -23,12 +34,19 @@ class DiscordChan(commands.AutoShardedBot):
             case_insensitive=True,
             reconnect=True
         )
-        self.add_command(commands.Command("loadjsk", self.loadjsk))
+        self.add_command(self.loadjsk)
         self.loop.create_task(self.presence_loop(300))
 
+    @commands.command()
+    @commands.is_owner()
     async def loadjsk(self, ctx):
         self.load_extension('jishaku')
         await ctx.send('Loaded jsk')
+
+    @commands.command(name='help')
+    async def _help(self, ctx, command: str):
+        """Shows this command"""
+        return
 
     async def presence_loop(self, time):
         await self.wait_until_ready()
@@ -96,6 +114,9 @@ class DiscordChan(commands.AutoShardedBot):
 
     def run(self):
         super().run(self.settings['token'])
+
+    async def get_context(self, message):
+        return await super().get_context(message, cls=subcontext)
 
     async def logout(self):
         if self.prefixes:
