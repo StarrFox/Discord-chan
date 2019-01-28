@@ -4,6 +4,7 @@ import asyncio
 from os import system
 
 class owner:
+    """Owner commands"""
 
     def __init__(self, bot):
         self.bot = bot

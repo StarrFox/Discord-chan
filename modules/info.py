@@ -4,12 +4,14 @@ import humanize
 from extras.paginator import paginator
 
 class info:
+    """Informational commands"""
 
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command()
     async def source(self, ctx):
+        """Get the bot's source link"""
         await ctx.send("<https://github.com/StarrFox/Discord-chan>")
 
     @commands.command()

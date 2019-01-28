@@ -35,18 +35,14 @@ class DiscordChan(commands.AutoShardedBot):
             reconnect=True
         )
         self.add_command(self.loadjsk)
+        self.base_help = self.remove_command('help')
         self.loop.create_task(self.presence_loop(300))
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.is_owner()
     async def loadjsk(self, ctx):
         self.load_extension('jishaku')
         await ctx.send('Loaded jsk')
-
-    @commands.command(name='help')
-    async def _help(self, ctx, command: str):
-        """Shows this command"""
-        return
 
     async def presence_loop(self, time):
         await self.wait_until_ready()
@@ -115,8 +111,8 @@ class DiscordChan(commands.AutoShardedBot):
     def run(self):
         super().run(self.settings['token'])
 
-    async def get_context(self, message):
-        return await super().get_context(message, cls=subcontext)
+    async def get_context(self, message, cls = None):
+        return await super().get_context(message, cls = cls or subcontext)
 
     async def logout(self):
         if self.prefixes:

@@ -7,6 +7,7 @@ from extras import checks
 import json
 
 class general:
+    """General use commands"""
 
     def __init__(self, bot):
         self.bot = bot
