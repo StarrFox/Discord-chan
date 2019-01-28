@@ -5,7 +5,7 @@ import asyncio
 import typing
 
 class mod:
-    """"Moderation commands"""
+    """Moderation commands"""
 
     def __init__(self, bot):
         self.bot = bot
