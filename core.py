@@ -136,3 +136,5 @@ class DiscordChan(commands.AutoShardedBot):
         await super().logout()
 
 DiscordChan().run()
+                                    
+# hellow~~ owo
