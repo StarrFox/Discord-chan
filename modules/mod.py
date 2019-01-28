@@ -5,6 +5,7 @@ import asyncio
 import typing
 
 class mod:
+    """"Moderation commands"""
 
     def __init__(self, bot):
         self.bot = bot
@@ -27,9 +28,11 @@ class mod:
     async def add(self, ctx, prefix: str):
         """Add a prefix for this server"""
         guild = ctx.guild
-        if len(prefix) > 20:
-            return await ctx.send("Prefix too long (max is 20 chars)")
+        if len(prefix) > 50:
+            return await ctx.send("Prefix too long (max is 50 chars)")
         if guild.id in self.bot.prefixes:
+            if prefix in self.bot.prefixes[guild.id]:
+                return await ctx.send("Prefix already added")
             if len(self.bot.prefixes[guild.id]) >= 10:
                 return await ctx.send('Can only have 10 prefixes, remove one to add this one')
             else:
@@ -98,6 +101,7 @@ class mod:
     @commands.command()
     @checks.serverowner_or_permissions(manage_messages=True)
     async def clean(self, ctx, num: int = 20):
+        """Clean's up the bot's messages"""
         if num > 100:
             return await ctx.send("Use purge for deleting more than 100 messages")
         def check(msg):

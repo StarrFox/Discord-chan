@@ -2,7 +2,8 @@ import discord
 import asyncio
 import traceback
 
-#Modified version of https://github.com/XuaTheGrate/Thanatos/blob/master/utils/paginator.py
+#Modified version of Xua's paginator
+#Original link taken down
 
 class paginator:
     def __init__(self, bot):
@@ -27,7 +28,7 @@ class paginator:
         cont = True
         while cont:
             try:
-                reaction, user = await ctx.bot.wait_for(
+                reaction, user = await ctx.bot.wait_for( #pylint: disable w0612
                     "reaction_add", check=lambda r, u: u == ctx.author and r.message.id == paginator.id, timeout=60.0
                 )
             except asyncio.TimeoutError:
