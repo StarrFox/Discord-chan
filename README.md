@@ -2,6 +2,11 @@
 
 >Discord chan is a discord bot written in the [discord.py (Rewite) lib](https://github.com/Rapptz/discord.py/tree/rewrite)
 
+### Snipe commands
+Command | Disc
+------------ | -------------
+dc!snipe (list)| shows you deleted/edited commands (can provide a channel to snipe from), the list subcommand list all the snipes in a channel
+
 ### General commands
 Command | Disc
 ------------ | -------------

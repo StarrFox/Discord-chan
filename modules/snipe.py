@@ -4,7 +4,7 @@ import asyncio
 import typing
 from extras.paginator import paginator
 
-class snipe_commands:
+class snipe:
     """Snipe and related events"""
 
     def __init__(self, bot):
@@ -89,4 +89,4 @@ class snipe_commands:
         await pager.do_paginator(ctx)
 
 def setup(bot):
-    bot.add_cog(snipe_commands(bot))
+    bot.add_cog(snipe(bot))
