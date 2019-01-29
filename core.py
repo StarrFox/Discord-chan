@@ -5,6 +5,7 @@ import json
 import os
 from datetime import datetime
 import asyncpg
+import aiohttp
 
 class subcontext(commands.Context):
 
@@ -20,6 +21,11 @@ class subcontext(commands.Context):
 class DiscordChan(commands.AutoShardedBot):
 
     def __init__(self):
+        super().__init__(
+            command_prefix=self.get_prefix,
+            case_insensitive=True,
+            reconnect=True
+        )
         with open('settings.json') as tf:
             self.settings = json.load(tf)
             tf.close()
@@ -29,11 +35,7 @@ class DiscordChan(commands.AutoShardedBot):
         self.db = None
         self.prefixes = {}
         self.uptime = datetime.now()
-        super().__init__(
-            command_prefix=self.get_prefix,
-            case_insensitive=True,
-            reconnect=True
-        )
+        self.session = aiohttp.ClientSession(loop=self.loop)
         self.add_command(self.loadjsk)
         self.base_help = self.remove_command('help')
         self.loop.create_task(self.presence_loop(300))
@@ -43,6 +45,12 @@ class DiscordChan(commands.AutoShardedBot):
     async def loadjsk(self, ctx):
         self.load_extension('jishaku')
         await ctx.send('Loaded jsk')
+
+    async def get_pic(self, url):
+        """Takes a url and returns a discord.File"""
+        async with self.session.get(url) as rsp:
+            init_bytes = await rsp.read()
+        return discord.File(init_bytes, filename='picture.png')
 
     async def presence_loop(self, time):
         await self.wait_until_ready()
