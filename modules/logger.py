@@ -23,6 +23,7 @@ class logger:
         e.add_field(name="Owner:", value=str(guild.owner))
         e.add_field(name="Member count", value=guild.member_count)
         await self.guild_logs.send(embed=e)
+        self.bot.logger.info(f"Joined {guild.name}")
 
     async def on_guild_remove(self, guild):
         e = discord.Embed(title="Guild remove", color=discord.Color.dark_purple())
@@ -32,6 +33,7 @@ class logger:
         e.add_field(name="Owner:", value=str(guild.owner))
         e.add_field(name="Member count", value=guild.member_count)
         await self.guild_logs.send(embed=e)
+        self.bot.logger.info(f"Left {guild.name}")
 
     async def on_message(self, message):
         if message.guild is None and not message.author.bot:
@@ -42,6 +44,7 @@ class logger:
             await self.pm_logs.send(embed=e)
 
     async def on_command_completion(self, ctx):
+        self.bot.logger.info(f"{str(ctx.author)}: {ctx.message.content}")
         if ctx.author.id in self.bot.owners:
             return
         e = discord.Embed(title=f"Command run log", color=discord.Color.dark_purple())
