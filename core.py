@@ -6,6 +6,12 @@ import os
 from datetime import datetime
 import asyncpg
 import aiohttp
+import logging
+import traceback
+
+logging.basicConfig(
+    format="[%(asctime)s] [%(levelname)s:%(name)s] %(message)s", level=logging.INFO
+)
 
 class subcontext(commands.Context):
 
@@ -29,6 +35,7 @@ class DiscordChan(commands.AutoShardedBot):
         with open('settings.json') as tf:
             self.settings = json.load(tf)
             tf.close()
+        self.logger = logging.getLogger(__name__)
         self.owners = [
             285148358815776768
         ]
@@ -80,41 +87,37 @@ class DiscordChan(commands.AutoShardedBot):
         await self.connect_db()
         await self.load_prefixes()
         await self.load_mods()
-        print("Connected as:")
-        print(f"User: {self.user}")
-        print(f"ID: {self.user.id}")
-        print(f"With {len(self.commands)} cmds loaded")
+        self.logger.info("Bot ready")
 
     async def connect_db(self):
         self.db = await asyncpg.connect(
             'postgresql://postgres@localhost/discordchan',
             password=self.settings['db_pass']
         )
+        self.logger.info("Connected to DB")
 
     async def load_prefixes(self):
+        count = 0
         for guild_id, prefix_list in await self.db.fetch("SELECT * FROM prefixes;"):
+            count += 1
             self.prefixes[guild_id] = prefix_list
-            print("Prefixes loaded")
+        self.logger.info(f"loaded {count} prefixes")
 
     async def unload_prefixes(self):
         await self.db.execute("DELETE FROM prefixes;")
         await self.db.executemany("INSERT INTO prefixes(guild_id, prefixes) VALUES ($1, $2)", self.prefixes.items())
+        self.logger.info("Unloaded prefixes")
 
     async def load_mods(self):
         self.load_extension('jishaku')
-        loaded = []
-        failed = []
         for ext in os.listdir('modules'):
             try:
                 if not ext.endswith(".py"):
                     continue
                 self.load_extension(f"modules.{ext.replace('.py', '')}")
-                loaded.append(ext.replace('.py', ''))
-            except Exception as e:
-                failed.append(ext.replace('.py', ''))
-                print(e)
-        print(f"Loaded: {loaded}")
-        print(f"Failed: {failed}")
+                self.logger.info(f"Loaded {ext}")
+            except:
+                self.logger.critical(f"{ext} failed:\n{traceback.format_exc()}")
 
     def run(self):
         super().run(self.settings['token'])

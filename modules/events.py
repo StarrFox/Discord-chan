@@ -2,6 +2,7 @@ import discord
 import asyncio
 import dbl
 import json
+import traceback
 
 class events:
 
@@ -33,8 +34,8 @@ class events:
 
     async def start_dbl(self, time):
         """Starts our dbl and bots.gg events"""
-        #These two are disabled until we get verifed
-        #self.tasks.append(self.bot.loop.create_task(self.dbl(time)))
+        #This one is disabled until we get verifed
+        self.tasks.append(self.bot.loop.create_task(self.dbl(time)))
         #self.tasks.append(self.bot.loop.create_task(self.botsgg(time)))
         self.tasks.append(self.bot.loop.create_task(self.boats(time)))
 
@@ -49,7 +50,9 @@ class events:
         while not self.bot.is_closed():
             try:
                 await self.dbl_client.post_server_count()
+                self.bot.logger.info(f"Sent {len(self.bot.guilds)} to DBL")
             except:
+                self.bot.logger.error(f"DBL updated failed\n{traceback.format_exc()}")
                 pass
             await asyncio.sleep(time)
 
@@ -86,14 +89,13 @@ class events:
                 "server_count": len(self.bot.guilds)
             }
             try:
-                testing = await self.bot.session.post(
+                await self.bot.session.post(
                     f"https://discord.boats/api/bot/{self.bot.user.id}",
                     headers = heads,
                     json = guild_count
                 )
             except:
                 pass
-            print(testing)
             await asyncio.sleep(time)
 
 def setup(bot):
