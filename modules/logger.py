@@ -44,7 +44,6 @@ class logger:
             await self.pm_logs.send(embed=e)
 
     async def on_command_completion(self, ctx):
-        self.bot.logger.info(f"{str(ctx.author)}: {ctx.message.content}")
         if ctx.author.id in self.bot.owners:
             return
         e = discord.Embed(title=f"Command run log", color=discord.Color.dark_purple())
