@@ -33,14 +33,14 @@ class events:
         self.bot.prefixes.pop(guild.id)
 
     async def start_dbl(self, time):
-        """Starts our dbl and bots.gg events"""
+        """Starts our update events"""
         #This one is disabled until we get verifed
         self.tasks.append(self.bot.loop.create_task(self.dbl(time)))
         #self.tasks.append(self.bot.loop.create_task(self.botsgg(time)))
         self.tasks.append(self.bot.loop.create_task(self.boats(time)))
 
     async def stop_dbl(self):
-        """Stops out dbl and bots.gg events"""
+        """Stops our update events"""
         for task in self.tasks:
             task.cancel()
         self.tasks = []
@@ -62,19 +62,20 @@ class events:
         No api so we'll have to make our own request"""
         while not self.bot.is_closed():
             headers = {
-                "Authentication": self.tokens['bots.gg'],
-                "Content-Type": "application/json"
+                "Authentication": self.tokens['bots.gg']
             }
-            subcount = {
+            guild_count = {
                 "guildCount": len(self.bot.guilds)
             }
             try:
                 await self.bot.session.post(
                     f"https://discord.bots.gg/api/v1/bots/{self.bot.user.id}/stats",
                     headers = headers,
-                    json = subcount
+                    data = guild_count
                 )
+                self.bot.logger.info(f"Sent {len(self.bot.guilds)} to bots.gg")
             except:
+                self.bot.logger.error(f"bots.gg updated failed\n{traceback.format_exc()}")
                 pass
             await asyncio.sleep(1800)
 
@@ -82,8 +83,7 @@ class events:
         """Updates discord.boats guild count"""
         while not self.bot.is_closed():
             heads = {
-                "Authentication": self.tokens['boats'],
-                "Content-Type": "application/json"
+                "Authentication": self.tokens['boats']
             }
             guild_count = {
                 "server_count": len(self.bot.guilds)
@@ -92,9 +92,11 @@ class events:
                 await self.bot.session.post(
                     f"https://discord.boats/api/bot/{self.bot.user.id}",
                     headers = heads,
-                    json = guild_count
+                    data = guild_count
                 )
+                self.bot.logger.info(f"Sent {len(self.bot.guilds)} to bots.gg")
             except:
+                self.bot.logger.error(f"Boats updated failed\n{traceback.format_exc()}")
                 pass
             await asyncio.sleep(time)
 
