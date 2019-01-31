@@ -34,9 +34,8 @@ class events:
 
     async def start_dbl(self, time):
         """Starts our update events"""
-        #This one is disabled until we get verifed
         self.tasks.append(self.bot.loop.create_task(self.dbl(time)))
-        #self.tasks.append(self.bot.loop.create_task(self.botsgg(time)))
+        self.tasks.append(self.bot.loop.create_task(self.botsgg(time)))
         self.tasks.append(self.bot.loop.create_task(self.boats(time)))
 
     async def stop_dbl(self):
@@ -94,7 +93,7 @@ class events:
                     headers = heads,
                     data = guild_count
                 )
-                self.bot.logger.info(f"Sent {len(self.bot.guilds)} to bots.gg")
+                self.bot.logger.info(f"Sent {len(self.bot.guilds)} to discord.boats")
             except:
                 self.bot.logger.error(f"Boats updated failed\n{traceback.format_exc()}")
                 pass
