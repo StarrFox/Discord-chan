@@ -13,7 +13,7 @@ class snipe:
 
     async def on_message_delete(self, msg):
         """Saves deleted messages to snipe dict"""
-        if not msg.content:
+        if not msg.content or msg.author.bot:
             return
         if not msg.channel.id in self.snipe_dict:
             self.snipe_dict[msg.channel.id] = []
@@ -25,7 +25,8 @@ class snipe:
             before.content == after.content,
             before.embeds != after.embeds and before.content == after.content,
             not after.content,
-            before.pinned != after.pinned
+            before.pinned != after.pinned,
+            before.author.bot
         ]
         if any(checks):
             return
