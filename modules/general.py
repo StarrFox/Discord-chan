@@ -79,7 +79,7 @@ class general:
         else:
             await ctx.send(final)
 
-    @commands.command(aliases=['fbin'])
+    @commands.command(aliases=['fbin', 'frombin'])
     async def frombinary(self, ctx, *entry: str):
         """Convery binary to text"""
         final = ""
@@ -95,7 +95,7 @@ class general:
             final = final.replace('@', '@\u200b')
             await ctx.send(final)
 
-    @commands.command()
+    @commands.command(aliases=['msgsource', 'msgsrc'])
     async def msgraw(self, ctx, id: int):
         """Get the raw message data"""
         try:

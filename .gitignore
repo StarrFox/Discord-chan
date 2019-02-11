@@ -106,3 +106,6 @@ venv.bak/
 # additions
 settings.json
 misc_tokens.json
+
+#unfinished
+run.py
