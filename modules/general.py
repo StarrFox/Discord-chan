@@ -102,9 +102,6 @@ class general:
             message = await self.bot.http.get_message(ctx.channel.id, id)
         except:
             return await ctx.send("Invalid message id")
-        if len(message['content']) >= 100:
-            message['content'] = message['content'][:97] + "..."
-        message['embeds'] = len(message['embeds'])
         json_msg = json.dumps(message, indent=4)
         json_msg = json_msg.replace("`", "`\u200b")
         await ctx.send(f"```json\n{json_msg}```")
