@@ -100,7 +100,7 @@ class DiscordChan(commands.AutoShardedBot):
 
     async def connect_db(self):
         self.db = await asyncpg.connect(
-            'postgresql://postgres@localhost/discordchan',
+            self.settings['db'],
             password=self.settings['db_pass']
         )
         self.logger.info("Connected to DB")
