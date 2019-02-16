@@ -238,7 +238,7 @@ class music:
         used = humanize.naturalsize(node.stats.memory_used)
         total = humanize.naturalsize(node.stats.memory_allocated)
         free = humanize.naturalsize(node.stats.memory_free)
-        dex = f'**Wavelink version:** {wavelink.__version__}\n' \
+        dex = f'Version: {wavelink.__version__}\n' \
               f'Nodes: {len(self.bot.wavelink.nodes)}\n' \
               f'Players: {len(self.bot.wavelink.players)}'
         e = discord.Embed(

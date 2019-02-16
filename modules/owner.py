@@ -17,17 +17,10 @@ class owner:
         await user.send(msg)
         await ctx.send("message sent")
 
-    @commands.command()
+    @commands.command(aliases="restart")
     @commands.is_owner()
     async def shutdown(self, ctx):
-        await ctx.send(":c")
-        await self.bot.logout()
-
-    @commands.command()
-    @commands.is_owner()
-    async def restart(self, ctx):
-        await ctx.send('😡')
-        system('start restart.py')
+        await ctx.send("😡")
         await self.bot.logout()
 
     @commands.command()
