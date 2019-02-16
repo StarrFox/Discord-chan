@@ -17,7 +17,7 @@ class owner:
         await user.send(msg)
         await ctx.send("message sent")
 
-    @commands.command(aliases="restart")
+    @commands.command(aliases=["restart"])
     @commands.is_owner()
     async def shutdown(self, ctx):
         await ctx.send("😡")
