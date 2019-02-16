@@ -1,5 +1,6 @@
 {
     "token": "Token",
     "db_pass": "Db password",
-    "db": "your asyncpg db, ex: postgresql://postgres@localhost/discordchan"
+    "db": "Your asyncpg db, ex: postgresql://postgres@localhost/discordchan",
+    "wavelink_pass": "Your lavalink server password"
 }
