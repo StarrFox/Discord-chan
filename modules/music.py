@@ -79,3 +79,6 @@ class music:
         await ctx.send(f'Added {tmsg} to the queue', delete_after=15)
         if first_song:
             await status.next()
+
+def setup(bot):
+    bot.add_cog(music(bot))
