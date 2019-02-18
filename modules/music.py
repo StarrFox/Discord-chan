@@ -4,7 +4,7 @@ import asyncio
 import wavelink
 import re
 
-class status:
+class Status:
 
     def __init__(self, bot, guild_id):
         self.bot = bot
@@ -51,7 +51,7 @@ class music:
         try:
             status = self.statuses[guild_id]
         except KeyError:
-            status = status(self.bot, guild_id)
+            status = Status(self.bot, guild_id)
             self.statuses[guild_id] = status
         return status
 
