@@ -58,7 +58,10 @@ class music:
     async def join(self, ctx):
         """Joins a vc"""
         player = self.bot.wavelink.get_player(ctx.guild.id)
-        await player.connect(ctx.channel.id)
+        if ctx.author.voice:
+            await player.connect(ctx.author.voice.channel.id)
+        else:
+            return await ctx.send("You must be in a voice channel to use this command")
 
     @commands.command()
     async def play(self, ctx, *, entry):
