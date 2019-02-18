@@ -71,7 +71,7 @@ class music:
         player = self.bot.wavelink.get_player(ctx.guild.id)
         if not player.is_connected:
             await self.join(ctx)
-        status = self.get_status(ctx)
+        status = await self.get_status(ctx)
         if len(status.queue) == 0:
             first_song = True
         status.queue.append(tracks)
