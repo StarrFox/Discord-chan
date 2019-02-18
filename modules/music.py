@@ -196,7 +196,10 @@ class music:
             return await ctx.send('Nothing currently playing')
 
         controller = self.get_controller(ctx)
-        await controller.now_playing.delete()
+        try:
+            await controller.now_playing.delete()
+        except:
+            pass
 
         controller.now_playing = await ctx.send(f'Now playing: `{player.current}`')
 
