@@ -63,9 +63,9 @@ class music:
     @commands.command()
     async def play(self, ctx, *, entry):
         """Plays a song or adds it to queue"""
-        if not RURL.match(query):
-            query = f'ytsearch:{query}'
-        tracks = await self.bot.wavelink.get_tracks(query)
+        if not RURL.match(entry):
+            entry = f'ytsearch:{entry}'
+        tracks = await self.bot.wavelink.get_tracks(entry)
         if not tracks: #No songs found
             return await ctx.send('Nothing found for that entry')
         player = self.bot.wavelink.get_player(ctx.guild.id)
