@@ -10,6 +10,7 @@ class Status:
         self.bot = bot
         self.guild_id = guild_id
         self.queue = []
+        self.current = None
 
     async def next(self):
         player = self.bot.wavelink.get_player(self.guild_id)
@@ -17,6 +18,7 @@ class Status:
             song = self.queue[0]
             await player.play(song)
             self.queue.remove(song)
+            self.current = song
 
 RURL = re.compile('https?:\/\/(?:www\.)?.+')
 
@@ -78,8 +80,6 @@ class music:
         if not player.is_connected:
             await self.join(ctx)
         status = await self.get_status(ctx)
-        if len(status.queue) == 0:
-            first_song = True
         if url:
             for i in tracks:
                 status.queue.append(i)
@@ -88,7 +88,7 @@ class music:
             status.queue.append(tracks[0])
             tmsg = tracks[0].title
         await ctx.send(f'Added {tmsg} to the queue', delete_after=15)
-        if first_song:
+        if not status.current:
             await status.next()
 
 def setup(bot):
