@@ -35,12 +35,6 @@ class music:
         self.bot.wavelink = wavelink.Client(self.bot)
         self.bot.loop.create_task(self.start_nodes())
 
-    async def __local_check(self, ctx):
-        if not ctx.author.voice:
-            await ctx.send("You must be in a vc to use this command")
-            return False
-        return True
-
     async def start_nodes(self):
         await self.bot.wait_until_ready()
         node = await self.bot.wavelink.initiate_node(host='0.0.0.0',
@@ -78,6 +72,8 @@ class music:
     @commands.command()
     async def play(self, ctx, *, entry):
         """Plays a song or adds it to queue"""
+        if not ctx.author.voice:
+            return await ctx.send("You must be in a vc to use this command")
         if not RURL.match(entry):
             entry = f'ytsearch:{entry}'
             url = False
@@ -106,6 +102,8 @@ class music:
     @commands.command(aliases=['next'])
     async def skip(self, ctx):
         """Skip the current song"""
+        if not ctx.author.voice:
+            return await ctx.send("You must be in a vc to use this command")
         status = await self.get_status(ctx)
         if not status.current:
             return await ctx.send("Nothing to skip")
@@ -117,9 +115,11 @@ class music:
     @commands.command()
     async def pause(self, ctx):
         """Pause the song"""
+        if not ctx.author.voice:
+            return await ctx.send("You must be in a vc to use this command")
         status = await self.get_status(ctx)
         if not status.is_dj(ctx.author.id) and not ctx.author.guild_permissions.administrator:
-            return await ctx.send("You aren't and admin or the dj")
+            return await ctx.send("You aren't an admin or the dj")
         player = self.bot.wavelink.get_player(ctx.guild.id)
         if not player.is_playing:
             return await ctx.send('Not playing anything', delete_after=15)
@@ -129,9 +129,11 @@ class music:
     @commands.command()
     async def resume(self, ctx):
         """Resume the song"""
+        if not ctx.author.voice:
+            return await ctx.send("You must be in a vc to use this command")
         status = await self.get_status(ctx)
         if not status.is_dj(ctx.author.id) and not ctx.author.guild_permissions.administrator:
-            return await ctx.send("You aren't and admin or the dj")
+            return await ctx.send("You aren't an admin or the dj")
         player = self.bot.wavelink.get_player(ctx.guild.id)
         if not player.paused:
             return await ctx.send("Isn't paused", delete_after=15)
@@ -141,11 +143,13 @@ class music:
     @commands.command()
     async def volume(self, ctx, num: int):
         """Set the volume"""
+        if not ctx.author.voice:
+            return await ctx.send("You must be in a vc to use this command")
         if not 0 <= num <= 100:
             return await ctx.send("Volume must be between 0 and 100")
         status = await self.get_status(ctx)
         if not status.is_dj(ctx.author.id) and not ctx.author.guild_permissions.administrator:
-            return await ctx.send("You aren't and admin or the dj")
+            return await ctx.send("You aren't an admin or the dj")
         player = self.bot.wavelink.get_player(ctx.guild.id)
         await player.set_volume(num)
         await ctx.send(f"Volume set to {num}")
@@ -153,7 +157,12 @@ class music:
     @commands.command(aliases=['leave', 'dc', 'disconnect'])
     async def stop(self, ctx):
         """Stop playing and leave"""
+        if not ctx.author.voice:
+            return await ctx.send("You must be in a vc to use this command")
         player = self.bot.wavelink.get_player(ctx.guild.id)
+        status = await self.get_status(ctx)
+        if not status.is_dj(ctx.author.id) and not ctx.author.guild_permissions.administrator:
+            return await ctx.send("You aren't an admin or the dj")
         try:
             del self.statuses[ctx.guild.id]
         except KeyError:
@@ -162,7 +171,7 @@ class music:
         await player.disconnect()
         await ctx.send('Stopped', delete_after=20)
 
-    @commands.command(aliases=['queue', 'np', 'playing'])
+    @commands.group(aliases=['queue', 'np', 'playing'], invoke_without_command=True)
     async def current(self, ctx):
         """Get info on the current song and the next 5 in queue"""
         player = self.bot.wavelink.get_player(ctx.guild.id)
@@ -171,6 +180,29 @@ class music:
         status = await self.get_status(ctx)
         nxt5 = "\n".join([i.title for i in status.queue[:5]])
         await ctx.send(f"```Current:\n{status.current}\n\nUpcomming:\n{nxt5}```")
+
+    @current.command()
+    async def clear(self, ctx):
+        """Clear the queue"""
+        if not ctx.author.voice:
+            return await ctx.send("You must be in a vc to use this command")
+        player = self.bot.wavelink.get_player(ctx.guild.id)
+        if not player.is_playing:
+            return await ctx.send("Not playing anything")
+        status = await self.get_status(ctx)
+        if not status.is_dj(ctx.author.id) and not ctx.author.guild_permissions.administrator:
+            return await ctx.send("You aren't an admin or the dj")
+        status.queue = []
+        await ctx.send("Queue cleared")
+
+    @commands.command()
+    async def dj(self, ctx, dj: discord.Member):
+        """Swap dj to someone else"""
+        status = await self.get_status(ctx)
+        if not status.is_dj(ctx.author.id) and not ctx.author.guild_permissions.administrator:
+            return await ctx.send("You aren't an admin or the dj")
+        status.dj = dj.id
+        await ctx.send(f"Made {dj.display_name} the dj")
 
     @commands.command(aliases=['wl'])
     async def wlinfo(self, ctx):
