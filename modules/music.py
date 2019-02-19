@@ -68,6 +68,9 @@ class music:
         """Plays a song or adds it to queue"""
         if not RURL.match(entry):
             entry = f'ytsearch:{entry}'
+            url = False
+        else:
+            url = True
         tracks = await self.bot.wavelink.get_tracks(entry)
         if not tracks: #No songs found
             return await ctx.send('Nothing found for that entry')
@@ -77,8 +80,13 @@ class music:
         status = await self.get_status(ctx)
         if len(status.queue) == 0:
             first_song = True
-        status.queue.append(tracks)
-        tmsg = ", ".join([i.title for i in tracks])
+        if url:
+            for i in tracks:
+                status.queue.append(i)
+            tmsg = ", ".join([i.title for i in tracks])
+        else:
+            status.queue.append(tracks[0])
+            tmsg = tracks[0].title
         await ctx.send(f'Added {tmsg} to the queue', delete_after=15)
         if first_song:
             await status.next()
