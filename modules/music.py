@@ -118,7 +118,7 @@ class music:
     async def pause(self, ctx):
         """Pause the song"""
         status = await self.get_status(ctx)
-        if not status.is_dj(ctx.author.id) or not ctx.author.guild_permissions.administrator:
+        if not status.is_dj(ctx.author.id) and not ctx.author.guild_permissions.administrator:
             return await ctx.send("You aren't and admin or the dj")
         player = self.bot.wavelink.get_player(ctx.guild.id)
         if not player.is_playing:
@@ -130,7 +130,7 @@ class music:
     async def resume(self, ctx):
         """Resume the song"""
         status = await self.get_status(ctx)
-        if not status.is_dj(ctx.author.id) or not ctx.author.guild_permissions.administrator:
+        if not status.is_dj(ctx.author.id) and not ctx.author.guild_permissions.administrator:
             return await ctx.send("You aren't and admin or the dj")
         player = self.bot.wavelink.get_player(ctx.guild.id)
         if not player.paused:
@@ -144,7 +144,7 @@ class music:
         if not 0 <= num <= 100:
             return await ctx.send("Volume must be between 0 and 100")
         status = await self.get_status(ctx)
-        if not status.is_dj(ctx.author.id) or not ctx.author.guild_permissions.administrator:
+        if not status.is_dj(ctx.author.id) and not ctx.author.guild_permissions.administrator:
             return await ctx.send("You aren't and admin or the dj")
         player = self.bot.wavelink.get_player(ctx.guild.id)
         await player.set_volume(num)
