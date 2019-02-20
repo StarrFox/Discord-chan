@@ -179,7 +179,7 @@ class music:
             return await ctx.send("Not playing anything")
         status = await self.get_status(ctx)
         nxt5 = "\n".join([i.title for i in status.queue[:5]])
-        await ctx.send(f"```Current:\n{status.current}\n\nUpcomming:\n{nxt5}```")
+        await ctx.send(f"```Current:\n{status.current}\n\nUpcoming:\n{nxt5}```")
 
     @current.command()
     async def clear(self, ctx):
