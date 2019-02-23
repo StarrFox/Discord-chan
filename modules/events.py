@@ -3,6 +3,7 @@ import asyncio
 import dbl
 import json
 import traceback
+from discord.ext import commands
 
 class events(commands.Cog):
 

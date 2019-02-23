@@ -106,7 +106,8 @@ venv.bak/
 # additions
 settings.json
 misc_tokens.json
-music_example.py
 
 #unfinished
 run.py
+help.1.py
+music_example.py
