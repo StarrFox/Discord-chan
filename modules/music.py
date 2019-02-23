@@ -5,7 +5,7 @@ import wavelink
 import re
 import humanize
 
-class Status:
+class Status(commands.Cog):
 
     def __init__(self, bot, guild_id, dj):
         self.bot = bot

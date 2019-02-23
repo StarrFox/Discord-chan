@@ -4,7 +4,7 @@ import dbl
 import json
 import traceback
 
-class events:
+class events(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
@@ -17,18 +17,22 @@ class events:
         self.dbl_client = dbl.Client(self.bot, self.tokens['dbl'])
         self.tasks = []
 
+    @commands.Cog.listener()
     async def on_message(self, message):
         """Handles all incoming messages"""
         return
 
+    @commands.Cog.listener()
     async def on_message_edit(self, before, after):
         if not after.embeds:
             await self.bot.process_commands(after)
 
+    @commands.Cog.listener()
     async def on_guild_join(self, guild):
         self.bot.prefixes[guild.id] = []
         self.bot.prefixes[guild.id].append('dc!')
 
+    @commands.Cog.listener()
     async def on_guild_remove(self, guild):
         self.bot.prefixes.pop(guild.id)
 

@@ -6,7 +6,7 @@ from datetime import datetime
 from extras import checks
 import json
 
-class general:
+class general(commands.Cog):
     """General use commands"""
 
     def __init__(self, bot):

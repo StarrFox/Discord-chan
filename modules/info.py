@@ -3,7 +3,7 @@ from discord.ext import commands
 import humanize
 from extras.paginator import paginator
 
-class info:
+class info(commands.Cog):
     """Informational commands"""
 
     def __init__(self, bot):

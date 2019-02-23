@@ -6,7 +6,7 @@ import aiohttp
 from os import system
 import sys
 
-class logger:
+class logger(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
@@ -15,6 +15,7 @@ class logger:
         self.command_logs = self.bot.get_channel(538653229639270410)
         self.error_logs = self.bot.get_channel(531497184781139968)
 
+    @commands.Cog.listener()
     async def on_guild_join(self, guild):
         e = discord.Embed(title="Guild add", color=discord.Color.dark_purple())
         e.set_thumbnail(url=guild.icon_url)
@@ -25,6 +26,7 @@ class logger:
         await self.guild_logs.send(embed=e)
         self.bot.logger.info(f"Joined {guild.name}")
 
+    @commands.Cog.listener()
     async def on_guild_remove(self, guild):
         e = discord.Embed(title="Guild remove", color=discord.Color.dark_purple())
         e.set_thumbnail(url=guild.icon_url)
@@ -35,6 +37,7 @@ class logger:
         await self.guild_logs.send(embed=e)
         self.bot.logger.info(f"Left {guild.name}")
 
+    @commands.Cog.listener()
     async def on_message(self, message):
         if message.guild is None and not message.author.bot:
             e = discord.Embed(title=f"Dm from {str(message.author)}", color=discord.Color.dark_purple())
@@ -43,6 +46,7 @@ class logger:
             e.add_field(name="Content:", value=message.content, inline=False)
             await self.pm_logs.send(embed=e)
 
+    @commands.Cog.listener()
     async def on_command_completion(self, ctx):
         if ctx.author.id in self.bot.owners:
             return
@@ -57,6 +61,7 @@ class logger:
             await self.command_logs.send("Error in command_complete")
             await self.error_logs.send(exe)
 
+    @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         error = getattr(error, 'original', error)
         ignored = (commands.CommandNotFound, commands.UserInputError, commands.CheckFailure)

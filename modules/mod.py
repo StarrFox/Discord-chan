@@ -4,7 +4,7 @@ from extras import checks
 import asyncio
 import typing
 
-class mod:
+class mod(commands.Cog):
     """Moderation commands"""
 
     def __init__(self, bot):
