@@ -11,12 +11,17 @@ class help_command(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.bot.old_help = self.bot.remove_command('help')
         self.bl = [
             'help',
             'events',
             'logger',
             'owner'
         ]
+
+    def cog_unload(self):
+        self.bot.remove_command('help')
+        self.bot.add_command(self.bot.old_help)
 
     @commands.command(name='help')
     async def _help(self, ctx, *, command: str = None):
@@ -41,7 +46,7 @@ class help_command(commands.Cog):
     async def cog_embed(self, ctx, cog):
         cog = self.bot.get_cog(cog)
         cog_name = cog.__class__.__name__
-        entries = sorted(ctx.bot.get_cog_commands(cog_name), key=lambda c: c.name)
+        entries = sorted(cog.walk_commands(), key=lambda c: c.name)
         entries = [cmd for cmd in entries if (await cmd.can_run(ctx)) and not cmd.hidden]
         embeds = []
         def init_e():

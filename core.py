@@ -53,7 +53,6 @@ class DiscordChan(commands.AutoShardedBot):
         self.uptime = datetime.now()
         self.session = aiohttp.ClientSession(loop=self.loop)
         self.add_command(self.loadjsk)
-        self.base_help = self.remove_command('help')
         self.loop.create_task(self.presence_loop(300))
 
     @commands.command(hidden=True)
