@@ -4,7 +4,7 @@ import asyncio
 from os import system
 import typing
 
-class owner:
+class owner(commands.Cog):
     """Owner commands"""
 
     def __init__(self, bot):

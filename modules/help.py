@@ -7,7 +7,7 @@ from extras.paginator import paginator
 
 #Really bad help command
 
-class help_command:
+class help_command(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot

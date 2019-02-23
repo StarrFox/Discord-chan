@@ -4,13 +4,14 @@ import asyncio
 import typing
 from extras.paginator import paginator
 
-class sniping:
+class sniping(commands.Cog):
     """Snipe and related events"""
 
     def __init__(self, bot):
         self.bot = bot
         self.snipe_dict = {}
 
+    @commands.Cog.listener()
     async def on_message_delete(self, msg):
         """Saves deleted messages to snipe dict"""
         if not msg.content or msg.author.bot:
@@ -19,6 +20,7 @@ class sniping:
             self.snipe_dict[msg.channel.id] = []
         self.snipe_dict[msg.channel.id].insert(0, msg)
 
+    @commands.Cog.listener()
     async def on_message_edit(self, before, after):
         """Saves edited messages to snipe dict"""
         checks = [
