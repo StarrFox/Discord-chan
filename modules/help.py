@@ -44,7 +44,7 @@ class help_command(commands.Cog):
     async def cog_embed(self, ctx, cog):
         cog = self.bot.get_cog(cog)
         cog_name = cog.__class__.__name__
-        entries = sorted(cog.commands(), key=lambda c: c.name)
+        entries = sorted(cog.get_commands(), key=lambda c: c.name)
         entries = [cmd for cmd in entries if (await cmd.can_run(ctx)) and not cmd.hidden]
         e = discord.Embed(
             title = f"Commands in {cog_name}",
@@ -99,7 +99,7 @@ class help_command(commands.Cog):
                 color = discord.Color.blurple()
             )
             e.set_thumbnail(url=self.bot.user.avatar_url)
-            for cmd in cog.commands():
+            for cmd in cog.get_commands():
                 e.add_field(
                     name = cog.name,
                     value = f"{cmd.signature}: {cmd.help}",
