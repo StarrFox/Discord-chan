@@ -5,7 +5,7 @@ import wavelink
 import re
 import humanize
 
-class Status(commands.Cog):
+class Status:
 
     def __init__(self, bot, guild_id, dj):
         self.bot = bot
@@ -27,7 +27,7 @@ class Status(commands.Cog):
 
 RURL = re.compile('https?:\/\/(?:www\.)?.+')
 
-class music:
+class music(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
