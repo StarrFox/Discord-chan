@@ -5,15 +5,13 @@ import itertools
 import re
 from extras.paginator import paginator
 
-#Really bad help command
-
 class help_command(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
         self.bot.old_help = self.bot.remove_command('help')
         self.bl = [
-            'help',
+            'help_command',
             'events',
             'logger',
             'owner'
@@ -23,8 +21,8 @@ class help_command(commands.Cog):
         self.bot.remove_command('help')
         self.bot.add_command(self.bot.old_help)
 
-    @commands.command(name='help')
-    async def _help(self, ctx, *, command: str = None):
+    @commands.command()
+    async def help(self, ctx, *, command: str = None):
         """Shows this message"""
         if command in self.bl:
             return await ctx.send("Didn't find a command or cog matching that entry")
@@ -46,30 +44,20 @@ class help_command(commands.Cog):
     async def cog_embed(self, ctx, cog):
         cog = self.bot.get_cog(cog)
         cog_name = cog.__class__.__name__
-        entries = sorted(cog.walk_commands(), key=lambda c: c.name)
+        entries = sorted(cog.commands(), key=lambda c: c.name)
         entries = [cmd for cmd in entries if (await cmd.can_run(ctx)) and not cmd.hidden]
-        embeds = []
-        def init_e():
-            e = discord.Embed(
-                title = f"{cog_name}'s commands",
-                description = inspect.getdoc(cog),
-                color = discord.Color.blurple()
-            )
-            e.set_thumbnail(url=self.bot.user.avatar_url)
-            return e
-        e = init_e()
-        for ent in entries:
+        e = discord.Embed(
+            title = f"Commands in {cog_name}",
+            color = discord.Color.blurple()
+        )
+        e.set_thumbnail(url=self.bot.user.avatar_url)
+        for cmd in entries:
             e.add_field(
-                name = ent.signature,
-                value = ent.short_doc,
+                name = cmd.name,
+                value = f"{cmd.signature}: {cmd.help}",
                 inline = False
             )
-            if len(e.fields) >= 5:
-                embeds.append(e)
-                e = init_e()
-        if e.fields:
-            embeds.append(e)
-        return embeds
+        return e
 
     async def command_embed(self, ctx, command):
         command = self.bot.get_command(command)
@@ -104,18 +92,20 @@ class help_command(commands.Cog):
         return embeds
 
     async def all_commands(self, ctx):
-        ext = self.bot.extensions.keys()
-        ext = list(ext)
-        for i in self.bl:
-            i = "modules." + i
-            ext.remove(i)
-        les = []
         embeds = []
-        for e in ext:
-            les.append(await self.cog_embed(ctx, e.replace('modules.', '')))
-        for le in les:
-            for l in le:
-                embeds.append(l)
+        for cog in [cog for cog in self.bot.cogs if not cog.name in self.bl]:
+            e = discord.Embed(
+                title = cog.__class__.__name__,
+                color = discord.Color.blurple()
+            )
+            e.set_thumbnail(url=self.bot.user.avatar_url)
+            for cmd in cog.commands():
+                e.add_field(
+                    name = cog.name,
+                    value = f"{cmd.signature}: {cmd.help}",
+                    inline = False
+                )
+            embeds.append(e)
         return embeds
 
 def setup(bot):
