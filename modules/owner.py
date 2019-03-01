@@ -4,6 +4,7 @@ import asyncio
 from os import system
 import typing
 from tabulate import tabulate
+import traceback
 
 class owner(commands.Cog):
     """Owner commands"""
@@ -52,18 +53,18 @@ class owner(commands.Cog):
     @commands.is_owner()
     async def sql(self, ctx, *, entry: str):
         """Sql command"""
-        is_multistatement = query.count(';') > 1
+        is_multistatement = entry.count(';') > 1
         if is_multistatement:
             strategy = self.bot.db.execute
         else:
             strategy = self.bot.db.fetch
         try:
-            results = await strategy(query)
+            results = await strategy(entry)
         except Exception:
             return await ctx.send(f'```py\n{traceback.format_exc()}\n```')
         rows = len(results)
         if is_multistatement or rows == 0:
-            return await ctx.send(f'`{dt:.2f}ms: {results}`')
+            return await ctx.send(f'`{results}`')
         tube = []
         header = list(results[0].keys)
         tube.append(list(i.values()) for i in results)
