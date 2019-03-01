@@ -66,7 +66,7 @@ class owner(commands.Cog):
         if is_multistatement or rows == 0:
             return await ctx.send(f'`{results}`')
         tube = []
-        header = list(results[0].keys)
+        header = list(results[0].keys())
         tube.append(list(i.values()) for i in results)
         tab = tabulate(tube, header, tablefmt='fancy_grid')
         await ctx.send(f"```py\n{tab}```")
