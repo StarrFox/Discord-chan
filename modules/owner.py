@@ -70,5 +70,11 @@ class owner(commands.Cog):
         tab = tabulate(tube, header, tablefmt='fancy_grid')
         await ctx.send(f"```py\n{tab}```")
 
+    @commands.command()
+    @commands.is_owner()
+    async def blacklist(self, ctx, user: discord.User):
+        """Add a user to the blacklist"""
+        return
+
 def setup(bot):
     bot.add_cog(owner(bot))

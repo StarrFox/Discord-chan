@@ -1,112 +1,76 @@
-import discord
+#Stolen from a cheese grater
+#https://github.com/XuaTheGrate/Adventure/blob/master/cogs/help.py#L45-L72
+
+# -> Pip packages
 from discord.ext import commands
-import inspect
-import itertools
-import re
-from extras.paginator import paginator
+import discord
 
-class help_command(commands.Cog):
-
+class Help(commands.Cog):
+    """Cog to handle the *super awesome* ***HELP COMMAND***."""
     def __init__(self, bot):
         self.bot = bot
-        self.bot.old_help = self.bot.remove_command('help')
-        self.bl = [
-            'help_command',
-            'events',
-            'logger',
-            'owner'
-        ]
 
-    def cog_unload(self):
-        self.bot.remove_command('help')
-        self.bot.add_command(self.bot.old_help)
+    def formatter(self, i, stack=1, ignore_hidden=False):
+        for cmd in i:
+            if cmd.hidden and not ignore_hidden:
+                continue
+            yield "\u200b " * (stack*2) + f"►{cmd}\n"
+            if isinstance(cmd, commands.Group):
+                yield from self.formatter(cmd.commands, stack+1)
 
-    @commands.command()
-    async def help(self, ctx, *, command: str = None):
-        """Shows this message"""
-        if command in self.bl:
-            return await ctx.send("Didn't find a command or cog matching that entry")
-        embeds = None
-        if not command:
-            embeds = await self.all_commands(ctx)
-        if not embeds:
-            if self.bot.get_cog(command):
-                embeds = await self.cog_embed(ctx, command)
-            elif self.bot.get_command(command):
-                embeds = await self.command_embed(ctx, command)
-            else:
-                return await ctx.send("Didn't find a command or cog matching that entry")
-        pager = paginator(self.bot)
-        for embed in embeds:
-            pager.add_page(data=embed)
-        await pager.do_paginator(ctx)
-
-    async def cog_embed(self, ctx, cog):
-        cog = self.bot.get_cog(cog)
-        cog_name = cog.__class__.__name__
-        entries = sorted(cog.get_commands(), key=lambda c: c.name)
-        entries = [cmd for cmd in entries if (await cmd.can_run(ctx)) and not cmd.hidden]
-        e = discord.Embed(
-            title = f"Commands in {cog_name}",
-            color = discord.Color.blurple()
-        )
-        e.set_thumbnail(url=self.bot.user.avatar_url)
-        for cmd in entries:
-            e.add_field(
-                name = cmd.name,
-                value = f"{cmd.signature}: {cmd.help}",
-                inline = False
-            )
-        return e
-
-    async def command_embed(self, ctx, command):
-        command = self.bot.get_command(command)
-        try:
-            entries = sorted(command.commands, key=lambda c: c.name)
-        except AttributeError:
-            entries = []
+    def format_help_for(self, item):
+        embed = discord.Embed(colour=discord.Colour.blurple())
+        embed.set_footer(text="Use *help <command> for more information.")
+        if isinstance(item, commands.Cog):
+            embed.title = item.qualified_name
+            embed.description = type(item).__doc__
+            embed.add_field(name="Commands", value=''.join([t for t in self.formatter(item.get_commands())]))
+            return embed
+        elif isinstance(item, commands.Group):
+            embed.title = item.signature
+            embed.description = item.help
+            fmt = "".join([c for c in self.formatter(item.commands)])
+            embed.add_field(name="Subcommands", value=fmt)
+            return embed
+        elif isinstance(item, commands.Command):
+            embed.title = item.signature
+            embed.description = item.help
+            return embed
         else:
-            entries = [cmd for cmd in entries if (await cmd.can_run(ctx)) and not cmd.hidden]
-        embeds = []
-        def init_e():
-            e = discord.Embed(color = discord.Color.blurple())
-            e.add_field(
-                name = command.signature,
-                value = command.short_doc,
-                inline = False
-            )
-            e.set_thumbnail(url=self.bot.user.avatar_url)
-            return e
-        e = init_e()
-        for ent in entries:
-            e.add_field(
-                name = ent.signature,
-                value = ent.short_doc,
-                inline = False
-            )
-            if len(e.fields) >= 5:
-                embeds.append(e)
-                e = init_e()
-        if e.fields:
-            embeds.append(e)
-        return embeds
+            raise RuntimeError("??")
 
-    async def all_commands(self, ctx):
-        embeds = []
-        for cog in [cog for cog in self.bot.cogs if not cog.name in self.bl]:
-            e = discord.Embed(
-                title = cog.__class__.__name__,
-                color = discord.Color.blurple()
-            )
-            e.set_thumbnail(url=self.bot.user.avatar_url)
-            for cmd in cog.get_commands():
-                e.add_field(
-                    name = cog.name,
-                    value = f"{cmd.signature}: {cmd.help}",
-                    inline = False
-                )
-            embeds.append(e)
-        return embeds
+    @commands.command(name="help")
+    async def _help(self, ctx, *, cmd: commands.clean_content=None):
+        """The help command.
+        Use this to view other commands."""
+        if cmd == "all":
+            _all = True
+            cmd = None
+        else:
+            _all = False
+        if not cmd:
+            embed = discord.Embed(color=discord.Color.blurple())
+            embed.set_author(name=f"{ctx.me.display_name}'s Commands.", icon_url=ctx.me.avatar_url_as(format="png",
+                                                                                                      size=32))
+            embed.set_footer(text=f"Prefix: {ctx.prefix}")
+            n = []
+            for cog in self.bot.cogs.values():
+                if sum(1 for n in cog.get_commands() if not (n.hidden and not _all)) == 0:
+                    continue
+                n.append(f"**{cog.qualified_name}**\n")
+                for cmd in self.formatter(cog.get_commands(), ignore_hidden=_all):
+                    n.append(cmd)
+            embed.description = "".join(n)
+            await ctx.send(embed=embed)
+        else:
+            item = self.bot.get_cog(cmd) or self.bot.get_command(cmd)
+            if not item:
+                return await ctx.send(f"Couldn't find any cog/command named '{cmd}'.")
+            await ctx.send(embed=self.format_help_for(item))
 
 def setup(bot):
-    bot.add_cog(help_command(bot))
+    bot.old_help = bot.remove_command("help")
+    bot.add_cog(Help(bot))
+
+def teardown(bot):
+    bot.add_command(bot.old_help)
