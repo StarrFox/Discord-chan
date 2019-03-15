@@ -18,9 +18,9 @@ class Help(commands.Cog):
             if isinstance(cmd, commands.Group):
                 yield from self.formatter(cmd.commands, stack+1)
 
-    def format_help_for(self, item):
+    def format_help_for(self, item, ctx):
         embed = discord.Embed(colour=discord.Colour.blurple())
-        embed.set_footer(text="Use *help <command> for more information.")
+        embed.set_footer(text=f"Use {ctx.prefix} <command> for more information.")
         if isinstance(item, commands.Cog):
             embed.title = item.qualified_name
             embed.description = type(item).__doc__
@@ -66,7 +66,7 @@ class Help(commands.Cog):
             item = self.bot.get_cog(cmd) or self.bot.get_command(cmd)
             if not item:
                 return await ctx.send(f"Couldn't find any cog/command named '{cmd}'.")
-            await ctx.send(embed=self.format_help_for(item))
+            await ctx.send(embed=self.format_help_for(item, ctx))
 
 def setup(bot):
     bot.old_help = bot.remove_command("help")
