@@ -65,6 +65,8 @@ class mod(commands.Cog):
     async def purge(self, ctx, number: int, user: typing.Optional[discord.Member] = None, *, text: str = None):
         """Purges messages from certain user or certain text"""
         channel = ctx.message.channel
+        if not 1 < number < 100:
+            await ctx.send("Purge amount must be between 1 and 100")
         number += 1
         if not user and not text:
             try:
