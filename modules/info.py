@@ -10,6 +10,11 @@ class info(commands.Cog):
         self.bot = bot
 
     @commands.command()
+    async def support(self, ctx):
+        """Links to the support server"""
+        await ctx.send("<https://discord.gg/WsgQfxC>")
+
+    @commands.command()
     async def source(self, ctx):
         """Get the bot's source link"""
         await ctx.send("<https://github.com/StarrFox/Discord-chan>")
