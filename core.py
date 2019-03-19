@@ -46,7 +46,8 @@ class DiscordChan(commands.AutoShardedBot):
             tf.close()
         self.logger = logging.getLogger(__name__)
         self.owners = [
-            285148358815776768
+            285148358815776768, #Self
+            455289384187592704 #Xua
         ]
         self.db = None
         self.prefixes = {}
