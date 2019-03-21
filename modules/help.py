@@ -90,4 +90,4 @@ def setup(bot):
 
 
 def teardown(bot):
-bot.add_command(bot.old_help)
+    bot.add_command(bot.old_help)
