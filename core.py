@@ -117,7 +117,6 @@ class DiscordChan(commands.AutoShardedBot):
         self.logger.info("Unloaded prefixes")
 
     async def load_mods(self):
-        self.load_extension('jishaku')
         self.load_extension("extras.helps.starrhelp") #Default help
         for ext in os.listdir('modules'):
             try:
