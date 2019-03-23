@@ -118,7 +118,7 @@ class DiscordChan(commands.AutoShardedBot):
 
     async def load_mods(self):
         self.load_extension('jishaku')
-        self.load_extension(extras.helps.starrhelp) #Default help
+        self.load_extension("extras.helps.starrhelp") #Default help
         for ext in os.listdir('modules'):
             try:
                 if not ext.endswith(".py") or ext == "help.py": #Temp fix
