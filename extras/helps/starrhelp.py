@@ -16,6 +16,10 @@ class StarrHelp(commands.MinimalHelpCommand):
             joined = ', '.join(f"`{c.name}`" for c in commands)
             self.paginator.add_line(f'**{heading}** - {joined}')
 
+    def add_aliases_formatting(self, aliases):
+        if not aliases: return
+        self.paginator.add_line('**%s** %s' % (self.aliases_heading, ', '.join(aliases)), empty=True)
+
     def add_command_formatting(self, command):
         if command.description:
             self.paginator.add_line(command.description, empty=True)
