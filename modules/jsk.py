@@ -1,7 +1,9 @@
-import jishaku
+from jishaku import cog
 
-jishaku.cog.JISHAKU_RETAIN = True
-jishaku.cog.JISHAKU_HIDE = True
+cog.JISHAKU_RETAIN = True
+cog.JISHAKU_HIDE = True
+
+class sub_jsk(cog.Jishaku): pass
 
 def setup(bot):
-    bot.add_cog(jishaku.cog.Jishaku(bot))
+    bot.add_cog(sub_jsk(bot))
