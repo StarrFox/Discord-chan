@@ -19,14 +19,13 @@ class general(commands.Cog):
             return await ctx.send(message)
         auth = ctx.author
         checks = [
-            auth.id not in self.bot.owners,
-            not auth.guild_permissions.administrator,
-            not auth.guild_permissions.manage_channels
+            auth.id in self.bot.owners,
+            auth.guild_permissions.administrator,
+            auth.guild_permissions.manage_channels
         ]
         if any(checks):
-            return await ctx.message.add_reaction("\u274c")
-        else:
-            await channel.send(message)
+            return await channel.send(message)
+        await ctx.message.add_reaction("\u274c")
 
     @commands.command()
     async def ping(self, ctx):
