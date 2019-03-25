@@ -23,10 +23,13 @@ class reactor_sub(ReplResponseReactor):
         self.raised = True
         if isinstance(exc_val, (asyncio.TimeoutError, subprocess.TimeoutExpired)):
             await attempt_add_reaction(self.message, timeout_error)
+            await send_traceback(self.message.channel, 0, exc_type, exc_val, exc_tb)
         elif isinstance(exc_val, SyntaxError):
             await attempt_add_reaction(self.message, syntax_error)
+            await send_traceback(self.message.channel, 0, exc_type, exc_val, exc_tb)
         else:
             await attempt_add_reaction(self.message, error)
+            await send_traceback(self.message.author, 8, exc_type, exc_val, exc_tb)
 
 cog.ReplResponseReactor = reactor_sub
 cog.JISHAKU_RETAIN = True
