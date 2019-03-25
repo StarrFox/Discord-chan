@@ -70,6 +70,29 @@ class owner(commands.Cog):
         tab = tabulate(tube, header, tablefmt='fancy_grid')
         await ctx.send(f"```py\n{tab}```")
 
+
+    @commands.command()
+    @commands.is_owner()
+    async def noprefix(self, ctx, toggle: bool = None):
+        """Toogles having no prefix"""
+        if toogle is None:
+            if self.bot.noprefix:
+                return await ctx.send("No prefix is currently on.")
+            return await ctx.send("No prefix is currently off.")
+
+        if toogle:
+            if self.bot.noprefix:
+                return await ctx.send("No prefix is already on.")
+
+            self.bot.noprefix = True
+            return await ctx.send("No prefix turned on.")
+
+        if not self.bot.noprefix:
+            return await ctx.send("No prefix is already off.")
+
+        self.bot.noprefix = False
+        return await ctx.send("No prefix turned off.")
+
     @commands.command()
     @commands.is_owner()
     async def blacklist(self, ctx, user: discord.User):

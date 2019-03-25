@@ -22,7 +22,7 @@ class subcontext(commands.Context):
             fp = io.BytesIO(content.encode('utf-8'))
             await self.send("Output too long, dmed your results")
             return await self.author.send(file=discord.File(fp, 'message.txt'))
-        return await super().send(content=content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after)
+        await super().send(content=content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after)
 
     async def check(self, message = None):
         await self.message.add_reaction("\u2705")
@@ -54,6 +54,7 @@ class DiscordChan(commands.AutoShardedBot):
         self.session = aiohttp.ClientSession(loop=self.loop)
         self.add_command(self.loadjsk)
         self.loop.create_task(self.presence_loop(300))
+        self.noprefix = False
 
     @commands.command(hidden=True)
     @commands.is_owner()
@@ -82,6 +83,8 @@ class DiscordChan(commands.AutoShardedBot):
 
     async def get_prefix(self, message):
         if not message.guild:
+            return ""
+        if self.noprefix and await self.is_owner(message.author):
             return ""
         elif message.guild.id in self.prefixes:
             return commands.when_mentioned_or(*self.prefixes[message.guild.id])(self, message)
