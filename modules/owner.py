@@ -14,6 +14,7 @@ class owner(commands.Cog):
         self.dbl_state = False
         self.blacklist = None
         self.open_bl()
+        self.bot.add_check(self.bl_check)
 
     async def bl_check(self, ctx):
         """Blacklist function"""
@@ -120,9 +121,9 @@ class owner(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
-    async def blacklist(self, ctx, user: discord.User):
+    async def blacklist(self, ctx, id):
         """Add a user to the blacklist"""
-        self.blacklist.append(user.id)
+        self.blacklist.append(id)
         self.save_bl()
         await ctx.send("Added")
 
