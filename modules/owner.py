@@ -12,6 +12,25 @@ class owner(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.dbl_state = False
+        self.blacklist = None
+        self.open_bl()
+
+    async def bl_check(self, ctx):
+        """Blacklist function"""
+        if ctx.author.id in self.blacklist:
+            return False
+        return True
+
+    def open_bl(self):
+        try:
+            with open("prod_data/bl_ids.txt", 'r') as f:
+                self.blacklist = eval(f.read())
+        except:
+            pass
+
+    def save_bl(self):
+        with open("prod_data/bl_ids.txt", 'w+') as f:
+            f.write(self.blacklist)
 
     @commands.command()
     @commands.is_owner()
@@ -103,7 +122,9 @@ class owner(commands.Cog):
     @commands.is_owner()
     async def blacklist(self, ctx, user: discord.User):
         """Add a user to the blacklist"""
-        return
+        self.blacklist.append(user.id)
+        self.save_bl()
+        await ctx.send("Added")
 
 def setup(bot):
     bot.add_cog(owner(bot))
