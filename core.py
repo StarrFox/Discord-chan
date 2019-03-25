@@ -52,15 +52,8 @@ class DiscordChan(commands.AutoShardedBot):
         self.prefixes = {}
         self.uptime = datetime.now()
         self.session = aiohttp.ClientSession(loop=self.loop)
-        self.add_command(self.loadjsk)
         self.loop.create_task(self.presence_loop(300))
         self.noprefix = False
-
-    @commands.command(hidden=True)
-    @commands.is_owner()
-    async def loadjsk(self, ctx):
-        self.load_extension('jishaku')
-        await ctx.send('Loaded jsk')
 
     async def get_pic(self, url):
         """Takes a url and returns a discord.File"""
