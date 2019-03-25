@@ -12,26 +12,6 @@ class owner(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.dbl_state = False
-        self.blacklist = None
-        self.open_bl()
-        self.bot.add_check(self.bl_check)
-
-    async def bl_check(self, ctx):
-        """Blacklist function"""
-        if ctx.author.id in self.blacklist:
-            return False
-        return True
-
-    def open_bl(self):
-        try:
-            with open("prod_data/bl_ids.txt", 'r') as f:
-                self.blacklist = eval(f.read())
-        except:
-            pass
-
-    def save_bl(self):
-        with open("prod_data/bl_ids.txt", 'w+') as f:
-            f.write(self.blacklist)
 
     @commands.command()
     @commands.is_owner()
@@ -118,14 +98,6 @@ class owner(commands.Cog):
     async def loadjsk(self, ctx):
         self.bot.load_extension('jishaku')
         await ctx.send('Loaded jsk')
-
-    @commands.command()
-    @commands.is_owner()
-    async def blacklist(self, ctx, id):
-        """Add a user to the blacklist"""
-        self.blacklist.append(id)
-        self.save_bl()
-        await ctx.send("Added")
 
 def setup(bot):
     bot.add_cog(owner(bot))
