@@ -25,7 +25,7 @@ class subcontext(commands.Context):
             fp = io.BytesIO(content.encode('utf-8'))
             await self.send("Output too long, dmed your results")
             return await self.author.send(file=discord.File(fp, 'message.txt'))
-        await super().send(content=content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after)
+        return await super().send(content=content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after)
 
     async def check(self, message = None):
         await self.message.add_reaction("\u2705")
