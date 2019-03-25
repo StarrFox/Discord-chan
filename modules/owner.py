@@ -75,12 +75,12 @@ class owner(commands.Cog):
     @commands.is_owner()
     async def noprefix(self, ctx, toggle: bool = None):
         """Toogles having no prefix"""
-        if toogle is None:
+        if toggle is None:
             if self.bot.noprefix:
                 return await ctx.send("No prefix is currently on.")
             return await ctx.send("No prefix is currently off.")
 
-        if toogle:
+        if toggle:
             if self.bot.noprefix:
                 return await ctx.send("No prefix is already on.")
 
