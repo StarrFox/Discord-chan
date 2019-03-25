@@ -1,4 +1,5 @@
 from jishaku.exception_handling import *
+from jishaku import cog
 
 #emojis
 task = "thonk:536720018545573928"
