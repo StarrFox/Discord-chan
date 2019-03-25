@@ -95,6 +95,12 @@ class owner(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
+    async def loadjsk(self, ctx):
+        self.bot.load_extension('jishaku')
+        await ctx.send('Loaded jsk')
+
+    @commands.command()
+    @commands.is_owner()
     async def blacklist(self, ctx, user: discord.User):
         """Add a user to the blacklist"""
         return
