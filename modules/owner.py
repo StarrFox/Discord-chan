@@ -93,11 +93,16 @@ class owner(commands.Cog):
         self.bot.noprefix = False
         return await ctx.send("No prefix turned off.")
 
-    @commands.command()
+    @commands.group(invoke_without_command=True)
     @commands.is_owner()
     async def loadjsk(self, ctx):
         self.bot.load_extension('jishaku')
         await ctx.send('Loaded jsk')
+
+    @loadjsk.command()
+    async def sub(self, ctx):
+        self.bot.load_extension('modules.jsk')
+        await ctx.send("Sub_jsk loaded")
 
 def setup(bot):
     bot.add_cog(owner(bot))

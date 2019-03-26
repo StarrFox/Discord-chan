@@ -35,7 +35,7 @@ cog.ReplResponseReactor = reactor_sub
 cog.JISHAKU_RETAIN = True
 cog.JISHAKU_HIDE = True
 
-#This allows us to reload the cog
+#This allows us to unload the cog
 class sub_jsk(cog.Jishaku): pass
 
 def setup(bot):
