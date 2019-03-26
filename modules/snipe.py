@@ -12,6 +12,7 @@ class snipe_msg:
         self.content = message.content
         self.author = message.author
         self.time = message.created_at
+        self.channel = message.channel
 
 class snipe(commands.Cog):
     """Snipe and related events"""
