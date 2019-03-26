@@ -14,7 +14,7 @@ class snipe_msg:
         self.time = message.created_at
         self.channel = message.channel
 
-class snipe(commands.Cog):
+class sniping(commands.Cog):
     """Snipe and related events"""
 
     def __init__(self, bot):
@@ -97,4 +97,4 @@ class snipe(commands.Cog):
         await pager.do_paginator(ctx)
 
 def setup(bot):
-    bot.add_cog(snipe(bot))
+    bot.add_cog(sniping(bot))
