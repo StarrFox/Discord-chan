@@ -31,6 +31,8 @@ class reactor_sub(ReplResponseReactor):
             await attempt_add_reaction(self.message, error)
             await send_traceback(self.message.author, 8, exc_type, exc_val, exc_tb)
 
+        return True
+
 cog.ReplResponseReactor = reactor_sub
 cog.JISHAKU_RETAIN = True
 cog.JISHAKU_HIDE = True
