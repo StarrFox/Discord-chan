@@ -45,7 +45,8 @@ class snipe(commands.Cog):
         msg = self.snipe_dict[channel.id][index]
         e = discord.Embed(
             color=discord.Color.blurple(),
-            description=msg.content
+            description=msg.content,
+            timestamp=msg.created_at
         )
         e.set_author(
             name=msg.author.name,
