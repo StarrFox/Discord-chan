@@ -3,6 +3,7 @@ from discord.ext import commands
 import asyncio
 import typing
 from extras.paginator import paginator
+from datetime import datetime
 
 class snipe(commands.Cog):
     """Snipe and related events"""
@@ -16,6 +17,7 @@ class snipe(commands.Cog):
         """Saves deleted messages to snipe dict"""
         if not msg.content or msg.author.bot:
             return
+        msg.created_at = datetime.utcnow()
         if not msg.channel.id in self.snipe_dict:
             self.snipe_dict[msg.channel.id] = []
         self.snipe_dict[msg.channel.id].insert(0, msg)
@@ -25,6 +27,7 @@ class snipe(commands.Cog):
         """Saves edited messages to snipe dict"""
         if not before.content != after.content or not before.content:
             return
+        before.created_at = datetime.utcnow()
         if not before.channel.id in self.snipe_dict:
             self.snipe_dict[before.channel.id] = []
         self.snipe_dict[before.channel.id].insert(0, before)
