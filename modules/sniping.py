@@ -4,12 +4,12 @@ import asyncio
 import typing
 from extras.paginator import paginator
 
-class sniping(commands.Cog):
+class snipe(commands.Cog):
     """Snipe and related events"""
 
     def __init__(self, bot):
         self.bot = bot
-        self.snipe_dict = {}
+        self.snipe_dict = {} #Channel_id: list of discord.Message
 
     @commands.Cog.listener()
     async def on_message_delete(self, msg):
@@ -23,21 +23,14 @@ class sniping(commands.Cog):
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
         """Saves edited messages to snipe dict"""
-        checks = [
-            before.content == after.content,
-            before.embeds != after.embeds and before.content == after.content,
-            not after.content,
-            before.pinned != after.pinned,
-            before.author.bot
-        ]
-        if any(checks):
+        if not before.content != after.content:
             return
         if not before.channel.id in self.snipe_dict:
             self.snipe_dict[before.channel.id] = []
         self.snipe_dict[before.channel.id].insert(0, before)
 
     @commands.group(name='snipe', invoke_without_command=True)
-    async def _snipe(self, ctx, channel: typing.Optional[discord.TextChannel] = None, index: int = 0):
+    async def snipe_command(self, ctx, channel: typing.Optional[discord.TextChannel] = None, index: int = 0):
         """Snipe messages deleted/edited in a channel"""
         if index < 0:
             return await ctx.send("Positive numbers only")
@@ -63,8 +56,8 @@ class sniping(commands.Cog):
         )
         await ctx.send(embed=e)
 
-    @_snipe.command(name='list')
-    async def _list(self, ctx, channel: discord.TextChannel = None):
+    @snipe_command.command(name='list')
+    async def snipe_list(self, ctx, channel: discord.TextChannel = None):
         """List deleted/edited messages for a channel"""
         if not channel:
             channel = ctx.channel
@@ -77,8 +70,6 @@ class sniping(commands.Cog):
         Set = 1
         for msg in self.snipe_dict[channel.id]:
             if len(e.fields) >= 5:
-                e.set_footer(text=f"{Set*5-4}-{Set*5}/{len(self.snipe_dict[channel.id])-1}")
-                Set += 1
                 pager.add_page(data=e)
                 e = discord.Embed(color=discord.Color.blurple())
             else:
@@ -87,9 +78,8 @@ class sniping(commands.Cog):
                     value=msg.content[:100],
                     inline=False
                 )
-        e.set_footer(text=f"{Set*5-4}-{Set*5}/{len(self.snipe_dict[channel.id])-1}")
         pager.add_page(data=e)
         await pager.do_paginator(ctx)
 
 def setup(bot):
-    bot.add_cog(sniping(bot))
+    bot.add_cog(snipe(bot))

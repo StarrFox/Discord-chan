@@ -6,7 +6,7 @@ import traceback
 #Original link taken down
 
 class paginator:
-    def __init__(self, bot):
+    def __init__(self, bot, autofoot = True):
         self.pages = []  # list of embeds
         self.active = None
         self.reactions = {
@@ -16,11 +16,13 @@ class paginator:
             "\U0001f522": self.jump,
         }
         self.bot = bot
+        self.autofoot = autofoot
 
     def add_page(self, *, data: discord.Embed):
         self.pages.append(data)
 
     async def do_paginator(self, ctx):
+        await self.fix_footers(ctx)
         if len(self.pages) == 1:
             paginator = await self.one_page(ctx)
         else:
@@ -40,6 +42,13 @@ class paginator:
             cont = await self.parse_reaction(
                 await ctx.bot.get_context(paginator, ), ctx, str(reaction)
             )
+
+    async def fix_footers(self, ctx):
+        if not self.autofoot:
+            return
+        for emb in self.pages:
+            emb.set_footer(text=f"Page: {self.pages.index(emb)+1}/{len(self.pages)}")
+        return
 
     async def one_page(self, ctx):
         msg = await ctx.send(embed=self.pages[0])
