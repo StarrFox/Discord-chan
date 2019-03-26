@@ -5,6 +5,14 @@ import typing
 from extras.paginator import paginator
 from datetime import datetime
 
+# For some stupid reason discord.Message can't be overwritten so here we are
+class snipe_msg:
+
+    def __init__(self, message:
+        self.content = message.content
+        self.author = message.author
+        self.time = message.created_at
+
 class snipe(commands.Cog):
     """Snipe and related events"""
 
@@ -20,17 +28,20 @@ class snipe(commands.Cog):
         msg.created_at = datetime.utcnow()
         if not msg.channel.id in self.snipe_dict:
             self.snipe_dict[msg.channel.id] = []
-        self.snipe_dict[msg.channel.id].insert(0, msg)
+        snipe_obj = snipe_msg(msg)
+        snipe_obj.time = datetime.utcnow()
+        self.snipe_dict[msg.channel.id].insert(0, snipe_obj)
 
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
         """Saves edited messages to snipe dict"""
         if not before.content != after.content or not before.content:
             return
-        before.created_at = datetime.utcnow()
         if not before.channel.id in self.snipe_dict:
             self.snipe_dict[before.channel.id] = []
-        self.snipe_dict[before.channel.id].insert(0, before)
+        snipe_obj = snipe_msg(before)
+        snipe_obj.time = datetime.utcnow()
+        self.snipe_dict[before.channel.id].insert(0, snipe_obj)
 
     @commands.group(name='snipe', invoke_without_command=True)
     async def snipe_command(self, ctx, channel: typing.Optional[discord.TextChannel] = None, index: int = 0):
@@ -49,7 +60,7 @@ class snipe(commands.Cog):
         e = discord.Embed(
             color=discord.Color.blurple(),
             description=msg.content,
-            timestamp=msg.created_at
+            timestamp=msg.time
         )
         e.set_author(
             name=msg.author.name,
