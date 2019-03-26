@@ -8,7 +8,7 @@ from datetime import datetime
 # For some stupid reason discord.Message can't be overwritten so here we are
 class snipe_msg:
 
-    def __init__(self, message:
+    def __init__(self, message):
         self.content = message.content
         self.author = message.author
         self.time = message.created_at
