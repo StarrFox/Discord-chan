@@ -25,7 +25,6 @@ class snipe(commands.Cog):
         """Saves deleted messages to snipe dict"""
         if not msg.content or msg.author.bot:
             return
-        msg.created_at = datetime.utcnow()
         if not msg.channel.id in self.snipe_dict:
             self.snipe_dict[msg.channel.id] = []
         snipe_obj = snipe_msg(msg)
