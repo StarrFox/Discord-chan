@@ -23,7 +23,7 @@ class snipe(commands.Cog):
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
         """Saves edited messages to snipe dict"""
-        if not before.content != after.content:
+        if not before.content != after.content or not before.content:
             return
         if not before.channel.id in self.snipe_dict:
             self.snipe_dict[before.channel.id] = []
