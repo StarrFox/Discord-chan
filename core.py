@@ -119,7 +119,7 @@ class DiscordChan(commands.AutoShardedBot):
             try:
                 if not ext.endswith(".py") or ext == "help.py": #Temp fix
                     continue
-                self.load_extension(f"modules.{ext.replace('.py', '')}")
+                self.load_extension(f"cogs.{ext.replace('.py', '')}")
                 self.logger.info(f"Loaded {ext}")
             except:
                 self.logger.critical(f"{ext} failed:\n{traceback.format_exc()}")
