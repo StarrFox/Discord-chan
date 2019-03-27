@@ -46,7 +46,8 @@ class DiscordChan(commands.AutoShardedBot):
             tf.close()
         self.logger = logging.getLogger(__name__)
         self.owners = [
-            285148358815776768
+            285148358815776768,
+            455289384187592704
         ]
         self.db = None
         self.prefixes = {}
@@ -114,7 +115,7 @@ class DiscordChan(commands.AutoShardedBot):
 
     async def load_mods(self):
         self.load_extension("extras.helps.starrhelp") #Default help
-        for ext in os.listdir('modules'):
+        for ext in os.listdir('cogs'):
             try:
                 if not ext.endswith(".py") or ext == "help.py": #Temp fix
                     continue
