@@ -1,93 +1,78 @@
-#Stolen from a cheese grater
-#https://github.com/XuaTheGrate/Adventure/blob/master/cogs/help.py#L45-L72
-
-# -> Pip packages
 from discord.ext import commands
-import discord
 
+class StarrHelp(commands.MinimalHelpCommand):
+    """Main help command"""
 
-class Help(commands.Cog):
-    """Cog to handle the *super awesome* ***HELP COMMAND***."""
-    def __init__(self, bot):
-        self.bot = bot
+    def get_opening_note(self):
+        command_name = self.context.invoked_with
+        return f"Use `{self.clean_prefix}{command_name} <command/cog>` for more info on a command/cog."
 
-    def formatter(self, i, stack=1, ignore_hidden=False):
-        for cmd in i:
-            if cmd.hidden and not ignore_hidden:
-                continue
-            line = '- ' + cmd.help.split("\n")[0] if cmd.help else ""
-            yield "\u200b " * (stack*2) + f"►**{cmd}** {line}\n"
-            if isinstance(cmd, commands.Group):
-                yield from self.formatter(cmd.commands, stack+1)
+    def get_ending_note(self):
+        return f"For more help join the support guild via: `{self.clean_prefix}support`"
 
-    def format_help_for(self, item):
-        embed = discord.Embed(colour=discord.Colour.blurple())
-        embed.set_footer(text=f"Use {self.bot.config.PREFIX}help <command> for more information.")
-        if isinstance(item, commands.Cog):
-            embed.title = item.qualified_name
-            embed.description = type(item).__doc__ or "Nothing provided."
-            embed.add_field(name="Commands", value=''.join([t for t in self.formatter(item.get_commands())]) or
-                            "No visible commands.")
-            return embed
-        elif isinstance(item, commands.Group):
-            embed.title = f"{item.qualified_name} {item.signature}"
-            embed.description = item.help or "Nothing provided."
-            fmt = "".join([c for c in self.formatter(item.commands)])
-            embed.add_field(name="Subcommands", value=fmt)
-            return embed
-        elif isinstance(item, commands.Command):
-            embed.title = f"{item.qualified_name} {item.signature}"
-            embed.description = item.help or "Nothing provided."
-            return embed
+    def add_bot_commands_formatting(self, commands, heading):
+        if commands:
+            # U+2002 Middle Dot, space
+            joined = ', '.join(f"`{c.name}`" for c in commands)
+            self.paginator.add_line(f'**{heading}** - {joined}')
+
+    def add_aliases_formatting(self, aliases):
+        if not aliases: return
+        self.paginator.add_line('**%s** %s' % (self.aliases_heading, ', '.join(aliases)), empty=True)
+
+    def add_command_formatting(self, command):
+        if command.description:
+            self.paginator.add_line(command.description, empty=True)
+        self.add_aliases_formatting(command.aliases)
+        signature = self.get_command_signature(command)
+        self.paginator.add_line("```")
+        if command.aliases:
+            self.paginator.add_line(signature)
         else:
-            raise RuntimeError("??")
+            self.paginator.add_line(signature, empty=True)
+        if command.help:
+            try:
+                self.paginator.add_line(command.help, empty=True)
+            except RuntimeError:
+                for line in command.help.splitlines():
+                    self.paginator.add_line(line)
+                    self.paginator.add_line()
+        self.paginator.add_line("```")
 
-    @commands.command(name="help")
-    async def _help(self, ctx, *, cmd: commands.clean_content = None):
-        """The help command.
-        Use this to view other commands."""
-        if cmd == "all":
-            _all = True
-            cmd = None
-        else:
-            _all = False
-        if not cmd:
-            embed = discord.Embed(color=discord.Color.blurple())
-            embed.set_author(name=f"{ctx.me.display_name}'s Commands.", icon_url=ctx.me.avatar_url_as(format="png",
-                                                                                                      size=32))
-            embed.set_footer(text=f"Prefix: {ctx.prefix}")
-            n = []
-            for cog in self.bot.cogs.values():
-                if sum(1 for n in cog.get_commands() if not (n.hidden and not _all)) == 0:
-                    continue
-                n.append(f"**{cog.qualified_name}**\n")
-                for cmd in self.formatter(cog.get_commands(), ignore_hidden=_all):
-                    n.append(cmd)
-            join = "".join(n)
-            if len(join) < 2048:
-                embed.description = join
-                await ctx.send(embed=embed)
-            else:
-                try:
-                    await ctx.author.send("")
-                except discord.Forbidden:
-                    return await ctx.send("Cannot DM you!")
-                except discord.HTTPException:
-                    pass
-                await ctx.message.add_reaction("\U0001f4ec")
-                for chunk in [n[x:x+25] for x in range(0, len(n), 25)]:
-                    await ctx.author.send("".join(chunk))
-        else:
-            item = self.bot.get_cog(cmd) or self.bot.get_command(cmd)
-            if not item:
-                return await ctx.send(f"Couldn't find any cog/command named '{cmd}'.")
-            await ctx.send(embed=self.format_help_for(item))
+    async def send_group_help(self, group):
+        note = self.get_opening_note()
+        if note:
+            self.paginator.add_line(note, empty=True)
+        self.add_command_formatting(group)
+        filtered = await self.filter_commands(group.commands, sort=self.sort_commands)
+        if filtered:
+            self.paginator.add_line('**%s**:' % self.commands_heading)
+            for command in filtered:
+                self.add_subcommand_formatting(command)
+            note = self.get_ending_note()
+            if note:
+                self.paginator.add_line()
+                self.paginator.add_line(note)
+        await self.send_pages()
 
+    async def send_cog_help(self, cog):
+        bot = self.context.bot
+        if bot.description:
+            self.paginator.add_line(bot.description, empty=True)
+        note = self.get_opening_note()
+        if note:
+            self.paginator.add_line(note, empty=True)
+        filtered = await self.filter_commands(cog.get_commands(), sort=self.sort_commands)
+        if filtered:
+            self.paginator.add_line('**%s %s**' % (cog.qualified_name, self.commands_heading.lower()))
+            for command in filtered:
+                self.add_subcommand_formatting(command)
+
+            note = self.get_ending_note()
+            if note:
+                self.paginator.add_line()
+                self.paginator.add_line(note)
+        await self.send_pages()
 
 def setup(bot):
-    bot.old_help = bot.remove_command("help")
-    bot.add_cog(Help(bot))
-
-
-def teardown(bot):
-    bot.add_command(bot.old_help)
+    bot.help_command = StarrHelp()

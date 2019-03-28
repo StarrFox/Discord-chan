@@ -114,10 +114,9 @@ class DiscordChan(commands.AutoShardedBot):
         self.logger.info("Unloaded prefixes")
 
     async def load_mods(self):
-        self.load_extension("extras.helps.starrhelp") #Default help
         for ext in os.listdir('cogs'):
             try:
-                if not ext.endswith(".py") or ext == "help.py": #Temp fix
+                if not ext.endswith(".py"):
                     continue
                 self.load_extension(f"cogs.{ext.replace('.py', '')}")
                 self.logger.info(f"Loaded {ext}")
