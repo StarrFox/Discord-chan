@@ -105,5 +105,10 @@ class general(commands.Cog):
         json_msg = json_msg.replace("`", "`\u200b")
         await ctx.send(f"```json\n{json_msg}```")
 
+    @commands.command()
+    async def epic(self, ctx):
+        """Epic"""
+        await ctx.send("Epic:sunglasses:")
+
 def setup(bot):
     bot.add_cog(general(bot))
