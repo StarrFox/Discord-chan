@@ -110,5 +110,12 @@ class general(commands.Cog):
         """Epic"""
         await ctx.send("Epic:sunglasses:")
 
+    @commands.command(hidden=True)
+    async def trans(self, ctx, *, entry: str):
+        i = "abcdefghijklmnopqrstuvwxyz"
+        o = "12345678901234567890123456"
+        table = str.maketrans(i, o)
+        await ctx.send(entry.translate(table))
+
 def setup(bot):
     bot.add_cog(general(bot))
