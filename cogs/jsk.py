@@ -40,5 +40,7 @@ cog.JISHAKU_HIDE = True
 #This allows us to unload the cog
 class sub_jsk(cog.Jishaku): pass
 
+
+
 def setup(bot):
     bot.add_cog(sub_jsk(bot))

@@ -4,6 +4,9 @@ from extras import checks
 import asyncio
 import typing
 
+def is_above(invoker, user):
+    return invoker.top_role > user.top_role
+
 class mod(commands.Cog):
     """Moderation commands"""
 
@@ -117,6 +120,48 @@ class mod(commands.Cog):
             await ctx.message.add_reaction("\u2705")
         except:
             pass
+
+    @commands.command()
+    @checks.serverowner_or_permissions(ban_members=True)
+    async def ban(self, ctx, member: discord.Member, *, reason = None):
+        """
+        Bans a member
+        """
+        if not is_above(ctx.author, member):
+            return await ctx.send("You can't ban someone with a higher role")
+        try:
+            await member.ban(reason=reason)
+            await ctx.send(f"{member.name} was banned")
+        except:
+            await ctx.send("I couldn't ban them :c")
+
+    @commands.command()
+    @checks.serverowner_or_permissions(ban_members=True)
+    async def hackban(self, ctx, id: int, *, reason = None):
+        """
+        Bans using an id
+        """
+        if ctx.guild.get_member(id):
+            return await ctx.send(f"This id belongs to a member use {ctx.prefix}ban for this")
+        try:
+            await ctx.guild.ban(discord.Object(id=id), reason=reason)
+            await ctx.send(f"Banned {id}")
+        except:
+            await ctx.send("I couldn't ban them :c")
+
+    @commands.command()
+    @checks.serverowner_or_permissions(kick_members=True)
+    async def kick(self, ctx, member: discord.Member, *, reason = None):
+        """
+        Kicks a member
+        """
+        if not is_above(ctx.author, member):
+            return await ctx.send("You can't kick someone with a higher role")
+        try:
+            await member.kick(reason=reason)
+            await ctx.send(f"{member.name} has been kicked")
+        except:
+            await ctx.send("I was unable to kick them")
 
 def setup(bot):
     bot.add_cog(mod(bot))
