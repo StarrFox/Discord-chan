@@ -159,10 +159,12 @@ class sub_jsk(cog.Jishaku):
         await ctx.send("Scope has been reset.")
 
     @jsk.command(name="py", aliases=["python"])
-    async def jsk_python(self, ctx: commands.Context, *, argument: CodeblockConverter):
+    async def jsk_python(self, ctx: commands.Context, *, argument: CodeblockConverter = None):
         """
         Direct evaluation of Python code.
         """
+        if argument is None:
+            return await ctx.send(self._scope.globals.keys())
         arg_dict = sub_get_var_dict_from_ctx(ctx)
         scope = self.scope
         scope.clean()
