@@ -164,7 +164,10 @@ class sub_jsk(cog.Jishaku):
         Direct evaluation of Python code.
         """
         if argument is None:
-            return await ctx.send(self._scope.globals.keys())
+            keys = self._scope.globals.keys()
+            if keys:
+                return await ctx.send("Current scope is: " + ", ".join(keys) + ".")
+            return await ctx.send("Default scope only.")
         arg_dict = sub_get_var_dict_from_ctx(ctx)
         scope = self.scope
         scope.clean()
