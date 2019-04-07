@@ -49,7 +49,8 @@ def sub_get_var_dict_from_ctx(ctx):
         '_guild': ctx.guild,
         '_message': ctx.message,
         '_msg': ctx.message,
-        '_get': discord.utils.get
+        '_get': discord.utils.get,
+        '_send': ctx.send
     }
 
 class reactor_sub(ReplResponseReactor):
