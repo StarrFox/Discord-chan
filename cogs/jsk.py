@@ -40,6 +40,18 @@ syntax_error = "glowanix:536720254022320167"
 timeout_error = "error:539157627385413633"
 error = "glowanix:536720254022320167"
 
+def sub_get_var_dict_from_ctx(ctx):
+    return {
+        '_author': ctx.author,
+        '_bot': ctx.bot,
+        '_channel': ctx.channel,
+        '_ctx': ctx,
+        '_guild': ctx.guild,
+        '_message': ctx.message,
+        '_msg': ctx.message,
+        '_get': discord.utils.get
+    }
+
 class reactor_sub(ReplResponseReactor):
 
     async def __aenter__(self):
@@ -150,7 +162,7 @@ class sub_jsk(cog.Jishaku):
         """
         Direct evaluation of Python code.
         """
-        arg_dict = get_var_dict_from_ctx(ctx)
+        arg_dict = sub_get_var_dict_from_ctx(ctx)
         scope = self.scope
         scope.clean()
         arg_dict["_"] = self.last_result
