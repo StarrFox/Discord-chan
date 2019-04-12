@@ -14,6 +14,9 @@ class snipe_msg:
         self.time = message.created_at
         self.channel = message.channel
 
+    def __repr__(self):
+        return f"<snipe_msg author={self.author} channel={self.channel} time={self.time}>"
+
 class sniping(commands.Cog):
     """Snipe and related events"""
 
