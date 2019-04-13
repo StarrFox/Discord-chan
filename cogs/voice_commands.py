@@ -57,7 +57,7 @@ class voice_commands(commands.Cog):
                         slice = buffer.bytes[:idx]
                     audio = sr.AudioData(bytes(slice), buffer.sample_rate, buffer.sample_width)
                 try:
-                    msg = recog.recognize_wit(audio, key=self.bot.settings.wit_token)
+                    msg = recog.recognize_wit(audio, key=self.bot.settings["wit"])
                 except sr.UnknownValueError:
                     asyncio.run_coroutine_threadsafe(channel.send("Cannot interpret"), self.bot.loop)
                 except sr.RequestError as e:
