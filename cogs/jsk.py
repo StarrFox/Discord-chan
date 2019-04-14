@@ -120,7 +120,7 @@ class sub_jsk(cog.Jishaku):
             mode = "manually sharded"
         else:
             mode = "unsharded"
-        summary.append(f"Bot stats: {mode} {len(self.bot.commands)} command(s), {len(self.bot.cogs)} cog(s), "
+        summary.append(f"Bot stats: {mode}, {len(self.bot.commands)} command(s), {len(self.bot.cogs)} cog(s), "
                        f"{len(self.bot.guilds)} guild(s), {len(self.bot.users)} user(s)")
         summary.append(f"Ping: {round(self.bot.latency * 1000, 2)}ms")
         await ctx.send("\n".join(summary))
