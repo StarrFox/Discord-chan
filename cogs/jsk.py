@@ -114,14 +114,13 @@ class sub_jsk(cog.Jishaku):
                 thread_count = proc.num_threads()
                 summary.append(f"Process: name {name}, id {pid}, threads {thread_count}")
                 summary.append("")  # blank line
-        cache_summary = f""
         if isinstance(self.bot, discord.AutoShardedClient):
-            summary.append(f"Mode: autosharded")
+            mode = "autosharded"
         elif self.bot.shard_count:
-            summary.append(f"Mode: manually sharded")
+            mode = "manually sharded"
         else:
-            summary.append(f"Mode: unsharded")
-        summary.append(f"Bot stats: {len(self.bot.commands)} command(s), {len(self.bot.cogs)} cog(s), "
+            mode = "unsharded"
+        summary.append(f"Bot stats: {mode} {len(self.bot.commands)} command(s), {len(self.bot.cogs)} cog(s), "
                        f"{len(self.bot.guilds)} guild(s), {len(self.bot.users)} user(s)")
         summary.append(f"Ping: {round(self.bot.latency * 1000, 2)}ms")
         await ctx.send("\n".join(summary))
@@ -158,7 +157,7 @@ class sub_jsk(cog.Jishaku):
         self._scope = Scope()
         await ctx.send("Scope has been reset.")
 
-    @jsk.command(name="py", aliases=["python"])
+    @jsk.command(name="py", aliases=["python", "p"])
     async def jsk_python(self, ctx: commands.Context, *, argument: CodeblockConverter = None):
         """
         Direct evaluation of Python code.
@@ -198,7 +197,7 @@ class sub_jsk(cog.Jishaku):
                         else:
                             if result.strip() == '':
                                 result = "\u200b"
-                            await ctx.send(result.replace(self.bot.http.token, "[token omitted]"))
+                            await ctx.send(f"```py\n{result.replace(self.bot.http.token, '[token omitted]')}```")
 
 def setup(bot):
     bot.add_cog(sub_jsk(bot))
