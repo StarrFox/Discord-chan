@@ -169,35 +169,34 @@ class sub_jsk(cog.Jishaku):
             return await ctx.send("Default scope only.")
         arg_dict = sub_get_var_dict_from_ctx(ctx)
         scope = self.scope
-        scope.clean()
         arg_dict["_"] = self.last_result
-        async with reactor_sub(ctx.message):
-            with self.submit(ctx):
-                async for result in AsyncCodeExecutor(argument.content, scope, arg_dict=arg_dict):
-                    if result is None:
-                        continue
-                    self.last_result = result
-                    if isinstance(result, discord.File):
-                        await ctx.send(file=result)
-                    elif isinstance(result, discord.Embed):
-                        await ctx.send(embed=result)
-                    elif isinstance(result, PaginatorInterface):
-                        await result.send_to(ctx)
-                    else:
-                        if not isinstance(result, str):
-                            # repr all non-strings
-                            result = repr(result)
-                        if len(result) > 2000:
-                            # inconsistency here, results get wrapped in codeblocks when they are too large
-                            #  but don't if they're not. probably not that bad, but noting for later review
-                            paginator = WrappedPaginator(prefix='```py', suffix='```', max_size=1985)
-                            paginator.add_line(result)
-                            interface = PaginatorInterface(ctx.bot, paginator, owner=ctx.author)
-                            await interface.send_to(ctx)
+        try:
+            async with reactor_sub(ctx.message):
+                with self.submit(ctx):
+                    async for result in AsyncCodeExecutor(argument.content, scope, arg_dict=arg_dict):
+                        if result is None:
+                            continue
+                        self.last_result = result
+                        if isinstance(result, discord.File):
+                            await ctx.send(file=result)
+                        elif isinstance(result, discord.Embed):
+                            await ctx.send(embed=result)
+                        elif isinstance(result, PaginatorInterface):
+                            await result.send_to(ctx)
                         else:
-                            if result.strip() == '':
-                                result = "\u200b"
-                            await ctx.send(f"```py\n{result.replace(self.bot.http.token, '[token omitted]')}```")
+                            if not isinstance(result, str):
+                                result = repr(result)
+                            if len(result) > 2000:
+                                paginator = WrappedPaginator(prefix='```py', suffix='```', max_size=1985)
+                                paginator.add_line(result)
+                                interface = PaginatorInterface(ctx.bot, paginator, owner=ctx.author)
+                                await interface.send_to(ctx)
+                            else:
+                                if result.strip() == '':
+                                    result = "\u200b"
+                                await ctx.send(f"```py\n{result.replace(self.bot.http.token, '[token omitted]')}```")
+        finally:
+            scope.clear_intersection(arg_dict)
 
 def setup(bot):
     bot.add_cog(sub_jsk(bot))
