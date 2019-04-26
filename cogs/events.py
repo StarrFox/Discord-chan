@@ -32,10 +32,12 @@ class events(commands.Cog):
     async def on_guild_join(self, guild):
         self.bot.prefixes[guild.id] = []
         self.bot.prefixes[guild.id].append('dc!')
+        self.bot.logger.info(f"Joined {guild.name}")
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
         self.bot.prefixes.pop(guild.id)
+        self.bot.logger.info(f"Left {guild.name}")
 
     async def start_dbl(self, time):
         """Starts our update events"""
@@ -62,7 +64,7 @@ class events(commands.Cog):
 
     async def botsgg(self, time):
         """Updates discord.bots.gg guild stats
-        
+
         No api so we'll have to make our own request"""
         while not self.bot.is_closed():
             headers = {
