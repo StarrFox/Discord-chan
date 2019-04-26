@@ -35,7 +35,7 @@ class logger(commands.Cog):
         g = None
         if ctx.guild:
             g = ctx.guild.id
-        log = f"Commandlog path={ctx.command.full_parent_name + ctx.command.name} g/c/u={g}/{ctx.channel.id}/{ctx.author.id} content={ctx.message.content}"
+        log = f"Commandlog path={ctx.command.full_parent_name} {ctx.command.name} g/c/u={g}/{ctx.channel.id}/{ctx.author.id} content={ctx.message.content}"
         await utils.paginate(log, self.log_channel)
 
     @commands.Cog.listener()
