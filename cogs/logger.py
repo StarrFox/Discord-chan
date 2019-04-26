@@ -5,6 +5,7 @@ import traceback
 import aiohttp
 from os import system
 import sys
+from extras import utils
 
 class logger(commands.Cog):
 
@@ -53,8 +54,8 @@ class logger(commands.Cog):
             g = ctx.guild.id
         log = f"Commandlog path={ctx.command.full_parent_name + ctx.command.name} g/c/u={g}/{ctx.channel.id}/{ctx.author.id}"
         invoke = f"content={ctx.message.content}"
-        await self.command_logs.box(log)
-        await self.command_logs.box(invoke)
+        await self.command_logs.send(utils.block(log))
+        await self.command_logs.send(utils.block(invoke))
         self.bot.logs.append(log+invoke)
 
     @commands.Cog.listener()
