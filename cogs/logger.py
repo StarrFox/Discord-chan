@@ -21,7 +21,7 @@ class logger(commands.Cog):
         e.add_field(name="ID:", value=guild.id)
         e.add_field(name="Owner:", value=str(guild.owner))
         e.add_field(name="Member count", value=guild.member_count)
-        await self.guild_logs.send(embed=e)
+        await self.log_channel.send(embed=e)
         self.bot.logger.info(f"Joined {guild.name}")
 
     @commands.Cog.listener()
@@ -32,7 +32,7 @@ class logger(commands.Cog):
         e.add_field(name="ID:", value=guild.id)
         e.add_field(name="Owner:", value=str(guild.owner))
         e.add_field(name="Member count", value=guild.member_count)
-        await self.guild_logs.send(embed=e)
+        await self.log_channel.send(embed=e)
         self.bot.logger.info(f"Left {guild.name}")
 
     #Pm logger
@@ -43,7 +43,7 @@ class logger(commands.Cog):
             e.set_thumbnail(url=message.author.avatar_url)
             e.add_field(name="Author ID:", value=message.author.id)
             e.add_field(name="Content:", value=message.content, inline=False)
-            await self.pm_logs.send(embed=e)
+            await self.log_channel.send(embed=e)
 
     @commands.Cog.listener()
     async def on_command_completion(self, ctx):
@@ -54,8 +54,8 @@ class logger(commands.Cog):
             g = ctx.guild.id
         log = f"Commandlog path={ctx.command.full_parent_name + ctx.command.name} g/c/u={g}/{ctx.channel.id}/{ctx.author.id}"
         invoke = f"content={ctx.message.content}"
-        await self.command_logs.send(utils.block(log))
-        await self.command_logs.send(utils.block(invoke))
+        await self.log_channel.send(utils.block(log))
+        await self.log_channel.send(utils.block(invoke))
         self.bot.logs.append(log+invoke)
 
     @commands.Cog.listener()
@@ -77,7 +77,7 @@ class logger(commands.Cog):
         e.add_field(name="Invoker", value=f"Name: {str(ctx.author)}\nID: {ctx.author.id}")
         if len(ctx.message.content) <= 1024:
             e.add_field(name="Content:", value=ctx.message.content)
-        await self.error_logs.send(embed=e)
+        await self.log_channel.send(embed=e)
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
 
 def setup(bot):
