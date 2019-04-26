@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-class StarrHelp(commands.MinimalHelpCommand):
+class Help(commands.MinimalHelpCommand):
     """Main help command"""
 
     def get_opening_note(self):
@@ -75,4 +75,4 @@ class StarrHelp(commands.MinimalHelpCommand):
         await self.send_pages()
 
 def setup(bot):
-    bot.help_command = StarrHelp()
+    bot.help_command = Help()
