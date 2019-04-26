@@ -40,18 +40,19 @@ syntax_error = "glowanix:536720254022320167"
 timeout_error = "error:539157627385413633"
 error = "glowanix:536720254022320167"
 
-def sub_get_var_dict_from_ctx(ctx):
-    return {
-        '_author': ctx.author,
-        '_bot': ctx.bot,
-        '_channel': ctx.channel,
-        '_ctx': ctx,
-        '_guild': ctx.guild,
-        '_message': ctx.message,
-        '_msg': ctx.message,
-        '_get': discord.utils.get,
-        '_send': ctx.send
+def sub_get_var_dict_from_ctx(ctx, prefix: str = '_'):
+    raw_var_dict = {
+        'author': ctx.author,
+        'bot': ctx.bot,
+        'channel': ctx.channel,
+        'ctx': ctx,
+        'guild': ctx.guild,
+        'message': ctx.message,
+        'msg': ctx.message,
+        'get': discord.utils.get,
+        'send': ctx.send
     }
+    return {f'{prefix}{k}': v for k, v in raw_var_dict.items()}
 
 class reactor_sub(ReplResponseReactor):
 
@@ -87,6 +88,7 @@ class sub_jsk(cog.Jishaku):
         self.start_time = datetime.datetime.now()
         self.tasks = collections.deque()
         self.task_count: int = 0
+        self.arg_prefix
 
     @commands.group(name="jishaku", aliases=["jsk"], hidden=True, invoke_without_command=True, ignore_extra=False)
     async def jsk(self, ctx):
@@ -167,7 +169,7 @@ class sub_jsk(cog.Jishaku):
             if keys:
                 return await ctx.send("Current scope is: " + ", ".join(keys) + ".")
             return await ctx.send("Default scope only.")
-        arg_dict = sub_get_var_dict_from_ctx(ctx)
+        arg_dict = sub_get_var_dict_from_ctx(ctx, self.arg_prefix)
         scope = self.scope
         arg_dict["_"] = self.last_result
         try:
