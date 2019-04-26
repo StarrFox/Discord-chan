@@ -9,6 +9,7 @@ import aiohttp
 import logging
 import traceback
 import io
+from extras import utils
 
 logging.basicConfig(
     format="[%(asctime)s] [%(levelname)s:%(name)s] %(message)s", level=logging.INFO
@@ -18,10 +19,9 @@ class subcontext(commands.Context):
 
     async def send(self, content=None, *, tts=False, embed=None, file=None, files=None, delete_after=None, nonce=None):
         """Subclassed send to have all 2000+ chars in file"""
-        if content and len(content) >= 2000:
-            fp = io.BytesIO(content.encode('utf-8'))
-            await self.send("Output too long, dmed your results")
-            return await self.author.send(file=discord.File(fp, 'message.txt'))
+        if content and len(content) > 2000:
+            await self.add_reaction("\N{OPEN MAILBOX WITH RAISED FLAG}")
+            return await utils.paginate(content, self.author)
         return await super().send(content=content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after)
 
     async def check(self, message = None):
@@ -55,7 +55,6 @@ class DiscordChan(commands.AutoShardedBot):
         self.session = aiohttp.ClientSession(loop=self.loop)
         self.loop.create_task(self.presence_loop(300))
         self.noprefix = False
-        self.logs = []
         self.ignored_cogs = [
             'voice_commands.py'
         ]
