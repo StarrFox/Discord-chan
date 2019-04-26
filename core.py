@@ -55,6 +55,7 @@ class DiscordChan(commands.AutoShardedBot):
         self.session = aiohttp.ClientSession(loop=self.loop)
         self.loop.create_task(self.presence_loop(300))
         self.noprefix = False
+        self.logs = []
 
     async def get_pic(self, url):
         """Takes a url and returns a discord.File"""

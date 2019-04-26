@@ -10,10 +10,7 @@ class logger(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.guild_logs = self.bot.get_channel(527440788934754314)
-        self.pm_logs = self.bot.get_channel(521116687437791233)
-        self.command_logs = self.bot.get_channel(538653229639270410)
-        self.error_logs = self.bot.get_channel(531497184781139968)
+        self.log_channel = bot.get_channel(571132727902863376)
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
@@ -37,6 +34,7 @@ class logger(commands.Cog):
         await self.guild_logs.send(embed=e)
         self.bot.logger.info(f"Left {guild.name}")
 
+    #Pm logger
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.guild is None and not message.author.bot:
@@ -50,16 +48,14 @@ class logger(commands.Cog):
     async def on_command_completion(self, ctx):
         if ctx.author.id in self.bot.owners:
             return
-        e = discord.Embed(title=f"Command run log", color=discord.Color.dark_purple())
-        e.set_thumbnail(url=ctx.author.avatar_url)
-        e.add_field(name="Guild:", value=f"Name: {ctx.guild.name}\nID: {ctx.guild.id}")
-        e.add_field(name="Invoker", value=f"Name: {str(ctx.author)}\nID: {ctx.author.id}")
-        e.add_field(name="Content:", value=ctx.message.content)
-        try:
-            await self.command_logs.send(embed=e)
-        except Exception as exe:
-            await self.command_logs.send("Error in command_complete")
-            await self.error_logs.send(exe)
+        g = None
+        if ctx.guild:
+            g = ctx.guild.id
+        log = f"Commandlog path={ctx.command.full_parent_name + ctx.command.name} g/c/u={g}/{ctx.channel.id}/{ctx.author.id}"
+        invoke = f"content={ctx.message.content}"
+        await self.command_logs.box(log)
+        await self.command_logs.box(invoke)
+        self.bot.logs.append(log+invoke)
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
