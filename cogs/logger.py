@@ -32,6 +32,8 @@ class logger(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command_completion(self, ctx):
+        if self.bot.is_owner(ctx.author):
+            return
         g = None
         if ctx.guild:
             g = ctx.guild.id
@@ -51,7 +53,8 @@ class logger(commands.Cog):
             return await ctx.send_help(ctx.command)
         elif isinstance(error, commands.CheckFailure):
             return await ctx.send("You are missing required permission(s)")
-        log = f"Errorlog guild={ctx.guild.id} author={ctx.author.id} content={ctx.message.content} traceback={error.__traceback__}"
+        trace = traceback(type(error), error, error.__traceback__)
+        log = f"Errorlog guild={ctx.guild.id} author={ctx.author.id} content={ctx.message.content} traceback={trace}"
         await utils.paginate(log, self.log_channel)
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
 
