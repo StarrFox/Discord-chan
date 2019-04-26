@@ -20,7 +20,7 @@ class subcontext(commands.Context):
     async def send(self, content=None, *, tts=False, embed=None, file=None, files=None, delete_after=None, nonce=None):
         """Subclassed send to have all 2000+ chars in file"""
         if content and len(content) > 2000:
-            await self.add_reaction("\N{OPEN MAILBOX WITH RAISED FLAG}")
+            await self.message.add_reaction("\N{OPEN MAILBOX WITH RAISED FLAG}")
             return await utils.paginate(content, self.author)
         return await super().send(content=content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after)
 
