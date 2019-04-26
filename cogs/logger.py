@@ -53,7 +53,7 @@ class logger(commands.Cog):
             return await ctx.send_help(ctx.command)
         elif isinstance(error, commands.CheckFailure):
             return await ctx.send("You are missing required permission(s)")
-        trace = traceback(type(error), error, error.__traceback__)
+        trace = traceback.format_exception(type(error), error, error.__traceback__)
         log = f"Errorlog guild={ctx.guild.id} author={ctx.author.id} content={ctx.message.content} traceback={trace}"
         await utils.paginate(log, self.log_channel)
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
