@@ -1,5 +1,5 @@
 import discord
-from discord.ext.commmands import Cog
+from discord.ext.commands import Cog
 
 class Patches(Cog):
     """Lib Patches"""
