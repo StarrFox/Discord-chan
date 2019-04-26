@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands 
+from discord.ext import commands
 
 def block(content, lang='py'):
     """Returns a codeblock"""
@@ -11,7 +11,7 @@ async def paginate(log, destination):
     while log:
         try:
             paginator.add_line(log)
-            del log
+            log = ''
         except:
             paginator.add_line(log[:1992])
             log = log[1992:]
