@@ -52,14 +52,8 @@ class logger(commands.Cog):
         g = None
         if ctx.guild:
             g = ctx.guild.id
-        log = f"Commandlog path={ctx.command.full_parent_name + ctx.command.name} g/c/u={g}/{ctx.channel.id}/{ctx.author.id}"
-        invoke = f"Content={ctx.message.content}"
-        if len(log+invoke)+8 >= 2000:
-            await self.log_channel.send(utils.block(log))
-            await self.log_channel.send(utils.block(invoke))
-        else:
-            await self.log_channel.send(utils.block(log+invoke))
-        self.bot.logs.append(log+invoke)
+        log = f"Commandlog path={ctx.command.full_parent_name + ctx.command.name} g/c/u={g}/{ctx.channel.id}/{ctx.author.id} content={ctx.message.content}"
+        await utils.paginate(log)
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
