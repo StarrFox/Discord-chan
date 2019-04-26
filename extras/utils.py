@@ -4,7 +4,7 @@ def block(content, lang='py'):
     """Returns a codeblock"""
     return f"```{lang}\n{content}```"
 
-async def paginate(self, log, destination):
+async def paginate(log, destination):
     """Paginates and sends to a channel"""
     paginator = commands.Paginator()
     while log:
