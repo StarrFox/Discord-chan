@@ -88,7 +88,7 @@ class sub_jsk(cog.Jishaku):
         self.start_time = datetime.datetime.now()
         self.tasks = collections.deque()
         self.task_count: int = 0
-        self.arg_prefix
+        self.arg_prefix = ''
 
     @commands.group(name="jishaku", aliases=["jsk"], hidden=True, invoke_without_command=True, ignore_extra=False)
     async def jsk(self, ctx):
