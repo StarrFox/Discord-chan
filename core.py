@@ -56,7 +56,8 @@ class DiscordChan(commands.AutoShardedBot):
         self.loop.create_task(self.presence_loop(300))
         self.noprefix = False
         self.ignored_cogs = [
-            'voice_commands.py'
+            'voice_commands.py',
+            'music.py'
         ]
 
     async def get_pic(self, url):
