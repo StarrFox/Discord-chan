@@ -17,3 +17,17 @@ async def paginate(log, destination):
             log = log[1992:]
         for page in paginator.pages:
             await destination.send(page)
+
+async def msg_resend(msg: discord.Message, destination):
+    if len(msg.content) == 0: content = None
+    else: content = msg.content
+    try: embed = msg.embeds[0]
+    except: pass
+    await destination.send(
+        content=content,
+        *,
+        tts=msg.tts,
+        embed=embed,
+        delete_after=msg.delete_after,
+        nonce=msg.nonce
+    )
