@@ -4,6 +4,7 @@ import dbl
 import json
 import traceback
 from discord.ext import commands
+from extras import utils
 
 class events(commands.Cog):
 
@@ -17,11 +18,13 @@ class events(commands.Cog):
             pass
         self.dbl_client = dbl.Client(self.bot, self.tokens['dbl'])
         self.tasks = []
+        self.copycat = self.bot.get_channel(573606808384438292)
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        """Handles all incoming messages"""
-        return
+        """Handles incoming messages"""
+        if message.channel.id == 381979045090426881:
+            await utils.msg_resend(message, self.copycat)
 
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
