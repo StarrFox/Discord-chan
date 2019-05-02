@@ -24,8 +24,7 @@ async def msg_resend(msg: discord.Message, destination):
     try: embed = msg.embeds[0]
     except: pass
     await destination.send(
-        content=content,
-        * ,
+        content,
         tts=msg.tts,
         embed=embed,
         delete_after=msg.delete_after,
