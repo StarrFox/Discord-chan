@@ -25,7 +25,7 @@ async def msg_resend(msg: discord.Message, destination):
     except: pass
     await destination.send(
         content=content,
-        *,
+        * ,
         tts=msg.tts,
         embed=embed,
         delete_after=msg.delete_after,
