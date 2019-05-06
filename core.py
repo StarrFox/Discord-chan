@@ -25,7 +25,7 @@ class subcontext(commands.Context):
         return await super().send(content=content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after)
 
     async def check(self, message = None):
-        await self.message.add_reaction("\u2705")
+        await self.message.add_reaction("glowacheck:536720140025200641")
         if message:
             await self.send(message)
 
