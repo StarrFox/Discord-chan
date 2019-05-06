@@ -13,20 +13,21 @@ class owner(commands.Cog):
         self.bot = bot
         self.dbl_state = False
 
+    async def cog_check(self, ctx):
+        if not self.bot.is_owner(ctx.author):
+            raise commands.NotOwner('You do not own this bot.')
+
     @commands.command()
-    @commands.is_owner()
     async def dm(self, ctx, user: discord.User, *, msg: str):
         await user.send(msg)
         await ctx.send("message sent")
 
     @commands.command(aliases=["restart"])
-    @commands.is_owner()
     async def shutdown(self, ctx):
         await ctx.send("😡")
         await self.bot.logout()
 
     @commands.command()
-    @commands.is_owner()
     async def dbl(self, ctx, toggle: typing.Optional[bool] = None, time: int = 1800):
         if toggle is None:
             if self.dbl_state:
@@ -50,7 +51,6 @@ class owner(commands.Cog):
 #https://github.com/Rapptz/RoboDanny/blob/rewrite/cogs/admin.py#L209-L250
 
     @commands.command()
-    @commands.is_owner()
     async def sql(self, ctx, *, entry: str):
         """Sql command"""
         is_multistatement = entry.count(';') > 1
@@ -72,29 +72,23 @@ class owner(commands.Cog):
 
 
     @commands.command()
-    @commands.is_owner()
     async def noprefix(self, ctx, toggle: bool = None):
         """Toogles having no prefix"""
         if toggle is None:
             if self.bot.noprefix:
                 return await ctx.send("No prefix is currently on.")
             return await ctx.send("No prefix is currently off.")
-
         if toggle:
             if self.bot.noprefix:
                 return await ctx.send("No prefix is already on.")
-
             self.bot.noprefix = True
             return await ctx.send("No prefix turned on.")
-
         if not self.bot.noprefix:
             return await ctx.send("No prefix is already off.")
-
         self.bot.noprefix = False
         return await ctx.send("No prefix turned off.")
 
     @commands.group(invoke_without_command=True)
-    @commands.is_owner()
     async def loadjsk(self, ctx):
         self.bot.load_extension('jishaku')
         await ctx.send('Loaded jsk')
@@ -103,6 +97,16 @@ class owner(commands.Cog):
     async def sub(self, ctx):
         self.bot.load_extension('modules.jsk')
         await ctx.send("Sub_jsk loaded")
+
+    @commands.command()
+    async def emoji(self, ctx, name, link):
+        """Creates an emoji"""
+        async with bot.session.get(link) as res:
+            try:
+                await ctx.guild.create_custom_emoji(name=name, image=await res.read())
+                await ctx.check()
+            except Exception as e:
+                await ctx.send(e)
 
 def setup(bot):
     bot.add_cog(owner(bot))

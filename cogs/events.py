@@ -23,7 +23,11 @@ class events(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         """Handles incoming messages"""
+        if not self.copycat:
+            return
         if message.channel.id == 381979045090426881:
+            await utils.msg_resend(message, self.copycat)
+        elif message.channel.id == 381965829857738772:
             await utils.msg_resend(message, self.copycat)
 
     @commands.Cog.listener()
