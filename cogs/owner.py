@@ -14,7 +14,7 @@ class owner(commands.Cog):
         self.dbl_state = False
 
     async def cog_check(self, ctx):
-        if not self.bot.is_owner(ctx.author):
+        if not await self.bot.is_owner(ctx.author):
             raise commands.NotOwner('You do not own this bot.')
 
     @commands.command()
