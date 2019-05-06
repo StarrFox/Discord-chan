@@ -16,6 +16,7 @@ class owner(commands.Cog):
     async def cog_check(self, ctx):
         if not await self.bot.is_owner(ctx.author):
             raise commands.NotOwner('You do not own this bot.')
+        return True
 
     @commands.command()
     async def dm(self, ctx, user: discord.User, *, msg: str):
