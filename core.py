@@ -30,7 +30,7 @@ class subcontext(commands.Context):
             await self.send(message)
 
     @property
-    def when(self):
+    def created_at(self):
         return self.message.created_at
 
 class DiscordChan(commands.AutoShardedBot):
