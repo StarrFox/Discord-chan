@@ -56,7 +56,7 @@ class nubby(commands.Cog):
         target_msg = await ctx.send("React with \N{HEAVY PLUS SIGN} to add their roles, one by one #Nubbyfied")
         await target_msg.add_reaction("\N{HEAVY PLUS SIGN}")
         while len(processed) != 0:
-            def check(r, u):
+            async def check(r, u):
                 checks = [
                     await above_mod(u),
                     r.message.id == target_msg.id,
