@@ -28,6 +28,9 @@ class nubby(commands.Cog):
             "I'm not in the mood for your bull shit. Purchase a razor and slit your throat for all I care. Waste of carbon anyways.",
             "Well... I would be lying if I didn't have a hatred towards lesser beings that purposes intends to remain a lesser being.",
             "Non sense, I'm perfectly fine and civil like a gentleman.",
+            "leave my fursuit out of this!",
+            "I cOuLD bE pLaYiNg AnImAL CoVe",
+            "Too be honest, I've had more toxic talk on barrens chat in World of Warcraft and these haters would be called pussys for their epic fail attempted of bashing.",
             "Since most of you dumb shits didn't even bother watching the producer's video; that flat out told you these updates were coming and they didn't put these on test realms so people like nubby wouldn't data mine it so there's something to look forward too; you just spewed your bull shit as usual.",
             "You miserable ungrateful piss ants! How dare you insects go after me!",
             "Laval Prideland here, you guys know nothing. Contrary to what Justin says, I am much smarter than him, and possibly all of you here. I have every move that any of you can make against me mapped, predicted, and destroyed. Simpletons. Surely you believe I am a close friend of sir Decius? He shows me everything including the new mobile games that Kingsisle is making. I am not here for the riffraff of the Discords, I am only here for my holy lord, Nubby. I deeply hope he will show me the secrets of datamining and the Kingsisle games. In fact, I am the only one here who has a chance of getting that. None of you trolls know anything about me or the ethereal secrets of Wizard101. I applaud your arrogance and cunning, but certainly, you know of my wittiness? Any joke that you make me the butt of, will be reversed right back on you. Don't even bother, you will only be outwitted and humiliated in front of the good people of the Kingsisle community. As you ridicule me, I will ridicule you back in a thousand different ways that you cannot even comprehend. And no, I do not accept acts of sexual nature, to any of the female humans here who admire me, as I am celibate. Again, I must warn you, back down before you make fools out of yourselves against the minotaur of Kingsisle Entertainment, me. I will show no mercy on idiots such as the likes of you."
@@ -49,16 +52,16 @@ class nubby(commands.Cog):
     @commands.command()
     @commands.check(is_above_mod)
     async def twoweeks(self, ctx):
-        target_roles = [self.guild.get_role(i) for i in [501092781473792020, 501092781473792020]]
+        target_roles = [self.guild.get_role(i) for i in [501092781473792020, 439723470667120640]]
         processed = [] #Returned positive
         for member in self.guild.members:
             checks = [
                 member.bot,
-                target_roles[0] in member.roles or target_roles[1] in member.roles,
+                target_roles[0] in member.roles and target_roles[1] in member.roles,
                 not member.joined_at + datetime.timedelta(weeks=2) < datetime.datetime.utcnow()
             ]
             if any(checks):
-                return
+                continue
             processed.append(member)
         if not processed:
             return await ctx.send("Everything is balanced, as it should be.")
@@ -75,10 +78,13 @@ class nubby(commands.Cog):
                 ]
                 return all(checks)
             try:
-                self.bot.wait_for("reaction_add", check=check, timeout=300)
+                reaction, _ = await self.bot.wait_for("reaction_add", check=check, timeout=300)
                 target = processed[-1]
                 for role in target_roles:
                     await target.add_roles(role)
+                async for user in reaction.users():
+                    if user.id != self.bot.user.id:
+                        await reaction.remove(user)
                 await ctx.send(f"Added {target.name}'s roles")
                 processed.remove(target)
             except:
