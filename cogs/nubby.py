@@ -2,6 +2,7 @@ from discord.ext import commands
 import discord
 import datetime
 from extras import utils
+import random
 
 #Checks for commands
 async def is_nubby_or_owner(ctx):
@@ -23,6 +24,11 @@ class nubby(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.guild = bot.get_guild(390607785437691916)
+        self.laval_quotes = [
+            "I'm not in the mood for your bull shit. Purchase a razor and slit your throat for all I care. Waste of carbon anyways.",
+            "You miserable ungrateful piss ants! How dare you insects go after me!",
+            "Laval Prideland here, you guys know nothing. Contrary to what Justin says, I am much smarter than him, and possibly all of you here. I have every move that any of you can make against me mapped, predicted, and destroyed. Simpletons. Surely you believe I am a close friend of sir Decius? He shows me everything including the new mobile games that Kingsisle is making. I am not here for the riffraff of the Discords, I am only here for my holy lord, Nubby. I deeply hope he will show me the secrets of datamining and the Kingsisle games. In fact, I am the only one here who has a chance of getting that. None of you trolls know anything about me or the ethereal secrets of Wizard101. I applaud your arrogance and cunning, but certainly, you know of my wittiness? Any joke that you make me the butt of, will be reversed right back on you. Don't even bother, you will only be outwitted and humiliated in front of the good people of the Kingsisle community. As you ridicule me, I will ridicule you back in a thousand different ways that you cannot even comprehend. And no, I do not accept acts of sexual nature, to any of the female humans here who admire me, as I am celibate. Again, I must warn you, back down before you make fools out of yourselves against the minotaur of Kingsisle Entertainment, me. I will show no mercy on idiots such as the likes of you."
+        ]
 
     async def cog_check(self, ctx):
         return ctx.guild == self.guild
@@ -35,7 +41,7 @@ class nubby(commands.Cog):
 
     @commands.command()
     async def laval(self, ctx):
-        await ctx.send("You miserable ungrateful piss ants! How dare you insects go after me!")
+        await ctx.send(random.choice(self.laval_quotes))
 
     @commands.command()
     @commands.check(is_above_mod)
@@ -51,6 +57,8 @@ class nubby(commands.Cog):
             if any(checks):
                 return
             processed.append(member)
+        if not processed:
+            return await ctx.send("Everything is balanced, as it should be.") 
         msg = "Members that need the roles:\n"+"\n".join([i.name for i in processed])
         await utils.paginate(msg, ctx)
         target_msg = await ctx.send("React with \N{HEAVY PLUS SIGN} to add their roles, one by one #Nubbyfied")
