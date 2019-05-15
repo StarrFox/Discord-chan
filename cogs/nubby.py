@@ -8,11 +8,11 @@ import random
 async def is_nubby_or_owner(ctx):
     return await ctx.bot.is_owner(ctx.author) or ctx.author.id == 176796254821548033
 
-async def is_above_mod(ctx):
+def is_above_mod(ctx):
     mod_role = ctx.bot.get_guild(390607785437691916).get_role(396797202779078657)
     return ctx.author.top_role.position >= mod_role.position
 
-async def above_mod(member):
+def above_mod(member):
     mod_role = member.guild.get_role(396797202779078657)
     return member.top_role.position >= mod_role.position
 
@@ -70,9 +70,10 @@ class nubby(commands.Cog):
         target_msg = await ctx.send("React with \N{HEAVY PLUS SIGN} to add their roles, one by one #Nubbyfied")
         await target_msg.add_reaction("\N{HEAVY PLUS SIGN}")
         while len(processed) != 0:
-            async def check(r, u):
+            def check(r, u):
                 checks = [
-                    await above_mod(u),
+                    above_mod(u),
+                    not u.bot,
                     r.message.id == target_msg.id,
                     str(r) == "\N{HEAVY PLUS SIGN}"
                 ]
