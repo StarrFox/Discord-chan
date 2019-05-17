@@ -82,7 +82,10 @@ class nubby(commands.Cog):
         if message.content == str(hash(nub_g)) and not message.guild or message.content == str(hash(nub_g)) and message.channel == self.verify_chat:
             await nub_g.add_roles(self.member_role)
             await nub_g.remove_roles(self.verify_role)
-            await message.delete()
+            try:
+                await message.delete()
+            except:
+                pass
             await self.verify_logs.send(utils.block(f"Verified {nub_g.name} after {humanize.naturaltime(nub_g.joined_at)} ({nub_g.joined_at.strftime('%c')})"))
 
     @commands.Cog.listener()
