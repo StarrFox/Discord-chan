@@ -3,6 +3,7 @@ import discord
 import datetime
 from extras import utils
 import random
+import humanize
 
 #Checks for commands
 async def is_nubby_or_owner(ctx):
@@ -30,6 +31,7 @@ class nubby(commands.Cog):
             "Non sense, I'm perfectly fine and civil like a gentleman.",
             "leave my fursuit out of this!",
             "I cOuLD bE pLaYiNg AnImAL CoVe",
+            "I wasn't talking to you Aaron, you could be raped and left for dead on the road and I still wouldn't bat an eye",
             "Too be honest, I've had more toxic talk on barrens chat in World of Warcraft and these haters would be called pussys for their epic fail attempted of bashing.",
             "Since most of you dumb shits didn't even bother watching the producer's video; that flat out told you these updates were coming and they didn't put these on test realms so people like nubby wouldn't data mine it so there's something to look forward too; you just spewed your bull shit as usual.",
             "You miserable ungrateful piss ants! How dare you insects go after me!",
@@ -37,9 +39,57 @@ class nubby(commands.Cog):
         ]
         self.command_channel = self.bot.get_channel(442823830902145034)
         self.check_twoweeks.start()
+        self.verify_role = self.guild.get_role(578777612701401090)
+        self.verify_chat = self.bot.get_channel(578771669288615936)
+        self.verify_logs = self.bot.get_channel(578771629312704513)
+        self.member_role = self.guild.get_role(439723301238210560)
+        self.verify_dm_msgs = {} #member.id: message
+        self.verify_off = False
 
     async def cog_check(self, ctx):
         return ctx.guild == self.guild
+
+    async def verify(self, member):
+        await member.add_roles(self.verify_role)
+        await self.verify_logs.send(utils.block(f"Verify process started for {member.name} created: {member.created_at.strftime('%c')} ({humanize.naturaltime(member.created_at)})"))
+        try:
+            await member.send(f"Hello and welcome to Nubby's spoiler discord\nIn order to join the rest of the discord you must first verify by sending `{hash(member)}` here")
+        except:
+            self.verify_dm_msgs[member.id] = await self.verify_chat.send(f"Hey {member.mention} can you turn on dms so I can verify you; send `ready` to start the process")
+            await self.verify_logs.send(utils.block(f"{member.name} had dms off so I sent them a message in #{self.verify_chat.name}"))
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if verify_off:
+            return
+        nub_g = self.guild.get_member(message.author.id)
+        if not nub_g or not self.verify_role in nub_g.roles:
+            return
+        if message.channel == self.verify_chat and message.content.lower() == "ready" and nub_g.id in self.verify_dm_msgs.keys():
+            if nub_g.is_on_mobile():
+                help_link = "https://cdn.discordapp.com/attachments/439732172598018049/578809194560356362/3.png"
+            else:
+                help_link = "https://cdn.discordapp.com/attachments/439732172598018049/578799171260252181/unknown.png"
+            try:
+                await self.verify_dm_msgs[nub_g.id].delete()
+                await message.delete()
+            except:
+                pass
+            try:
+                await nub_g.send(f"Hello and welcome to Nubby's spoiler discord\nIn order to join the rest of the discord you must first verify by sending `{hash(nub_g)}` here")
+            except:
+                self.verify_dm_msgs[nub_g.id] = await self.verify_chat.send(f"{nub_g.mention} you still have dms off; use this picture and send `ready` after finishing {help_link}")
+        if message.content == str(hash(nub_g)) and not message.guild or message.content == str(hash(nub_g)) and message.channel == self.verify_chat:
+            await nub_g.add_roles(self.member_role)
+            await nub_g.remove_roles(self.verify_role)
+            await message.delete()
+            await self.verify_logs.send(utils.block(f"Verified {nub_g.name} after {humanize.naturaltime(nub_g.joined_at)} ({nub_g.joined_at.strftime('%c')})"))
+
+    @commands.Cog.listener()
+    async def on_member_join(self, member):
+        if member.guild != self.guild:
+            return
+        await self.verify(member)
 
     @commands.command()
     async def cool(self, ctx, member: discord.Member = None):
@@ -58,6 +108,7 @@ class nubby(commands.Cog):
             checks = [
                 member.bot,
                 target_roles[0] in member.roles and target_roles[1] in member.roles,
+                self.verify_role in member.roles,
                 not member.joined_at + datetime.timedelta(weeks=2) < datetime.datetime.utcnow()
             ]
             if any(checks):
@@ -70,6 +121,22 @@ class nubby(commands.Cog):
         processed = await self.get_twoweeks()
         if processed:
             await self.command_channel.send(f"@here there are/is {len(processed)} without required roles use dc!twoweeks to add them")
+
+    @commands.command(name="verify")
+    @commands.check(is_above_mod)
+    async def verify_command(self, ctx, mode: bool = None):
+        """
+        Toggles the current verify state
+        """
+        if mode is None:
+            if not self.verify_off:
+                return await ctx.send("Verify is currently on")
+            return await ctx.send("Verify is currentrly off")
+        if mode:
+            self.verify_off = True
+            return await ctx.send("Turned verify off")
+        self.verify_off = False
+        await ctx.send("Turned verify on")
 
     @commands.command()
     @commands.check(is_above_mod)
