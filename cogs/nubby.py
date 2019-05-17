@@ -60,7 +60,7 @@ class nubby(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if verify_off:
+        if self.verify_off:
             return
         nub_g = self.guild.get_member(message.author.id)
         if not nub_g or not self.verify_role in nub_g.roles:
