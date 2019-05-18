@@ -136,10 +136,10 @@ class nubby(commands.Cog):
                 return await ctx.send("Verify is currently on")
             return await ctx.send("Verify is currentrly off")
         if mode:
-            self.verify_off = True
-            return await ctx.send("Turned verify off")
-        self.verify_off = False
-        await ctx.send("Turned verify on")
+            self.verify_off = False
+            return await ctx.send("Turned verify on")
+        self.verify_off = True
+        await ctx.send("Turned verify off")
 
     @commands.command()
     @commands.check(is_above_mod)
