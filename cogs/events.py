@@ -28,8 +28,7 @@ class events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
-        self.bot.prefixes[guild.id] = []
-        self.bot.prefixes[guild.id].append('dc!')
+        self.bot.prefixes[guild.id] = ['dc!']
         self.bot.logger.info(f"Joined {guild.name}")
 
     @commands.Cog.listener()

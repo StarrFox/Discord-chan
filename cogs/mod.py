@@ -31,13 +31,11 @@ class mod(commands.Cog):
     async def add(self, ctx, prefix: str):
         """Add a prefix for this server"""
         guild = ctx.guild
-        if len(prefix) > 50:
-            return await ctx.send("Prefix too long (max is 50 chars)")
         if guild.id in self.bot.prefixes:
             if prefix in self.bot.prefixes[guild.id]:
                 return await ctx.send("Prefix already added")
-            if len(self.bot.prefixes[guild.id]) >= 10:
-                return await ctx.send('Can only have 10 prefixes, remove one to add this one')
+            if len(self.bot.prefixes[guild.id]) >= 20:
+                return await ctx.send('Can only have 20 prefixes, remove one to add this one')
             else:
                 self.bot.prefixes[guild.id].append(prefix)
                 await ctx.send("Prefix added")
@@ -68,20 +66,16 @@ class mod(commands.Cog):
     async def purge(self, ctx, number: int, user: typing.Optional[discord.Member] = None, *, text: str = None):
         """Purges messages from certain user or certain text"""
         channel = ctx.message.channel
-        if not 1 < number < 100:
-            await ctx.send("Purge amount must be between 1 and 100")
-        number += 1
+        try:
+            await ctx.message.delete()
+        except:
+            pass
         if not user and not text:
             try:
                 deleted = await channel.purge(limit=number)
-                msg = await channel.send(f"Deleted {len(deleted)} messages (deleted invoke message also)")
+                await channel.send(f"Deleted {len(deleted)} messages (deleted invoke message also)", delete_after=5)
             except:
-                msg = await channel.send("Unable to delete messages")
-            await asyncio.sleep(5)
-            try:
-                await msg.delete()
-            except:
-                pass
+                await channel.send("Unable to delete messages", delete_after=5)
             return
         def msgcheck(msg):
             if user and text:
@@ -96,12 +90,7 @@ class mod(commands.Cog):
                 if text in msg.content.lower():
                     return True
         deleted = await channel.purge(limit=number, check=msgcheck)
-        msg = await channel.send(f'Deleted {len(deleted)} message(s)')
-        await asyncio.sleep(5)
-        try:
-            await msg.delete()
-        except:
-            pass
+        await channel.send(f'Deleted {len(deleted)} message(s)', delete_after=5)
 
     @commands.command()
     @checks.serverowner_or_permissions(manage_messages=True)
