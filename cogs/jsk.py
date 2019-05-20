@@ -127,38 +127,6 @@ class sub_jsk(cog.Jishaku):
         summary.append(f"Ping: {round(self.bot.latency * 1000, 2)}ms")
         await ctx.send("\n".join(summary))
 
-    @jsk.group(name="retain", invoke_without_command=True, ignore_extra=False)
-    async def jsk_retain(self, ctx, *, toggle: bool = None):
-        """
-        Turn variable retention for REPL on or off.
-        Provide no argument for current status.
-        """
-        if toggle is None:
-            if self.retain:
-                return await ctx.send("Variable retention is set to ON.")
-            return await ctx.send("Variable retention is set to OFF.")
-        if toggle:
-            if self.retain:
-                return await ctx.send("Variable retention is already set to ON.")
-            self.retain = True
-            self._scope = Scope()
-            return await ctx.send("Variable retention is ON. Future REPL sessions will retain their scope.")
-        if not self.retain:
-            return await ctx.send("Variable retention is already set to OFF.")
-        self.retain = False
-        return await ctx.send("Variable retention is OFF. Future REPL sessions will dispose their scope when done.")
-
-    @jsk_retain.command(name="reset", aliases=["r"])
-    async def jsk_retain_reset(self, ctx):
-        """
-        Resets the current scope
-        if there is one
-        """
-        if not self.retain:
-            return await ctx.send("Variable retention must be set to ON to reset.")
-        self._scope = Scope()
-        await ctx.send("Scope has been reset.")
-
     @jsk.command(name="py", aliases=["python", "p"])
     async def jsk_python(self, ctx: commands.Context, *, argument: CodeblockConverter = None):
         """

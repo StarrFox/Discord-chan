@@ -1,3 +1,5 @@
+# Dont look at this :rage:
+
 from discord.ext import commands, tasks
 import discord
 import datetime

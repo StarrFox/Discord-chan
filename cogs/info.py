@@ -19,7 +19,7 @@ class info(commands.Cog):
         """Get the bot's source link"""
         await ctx.send("<https://github.com/StarrFox/Discord-chan>")
 
-    @commands.command()
+    @commands.command(aliases=['about'])
     async def info(self, ctx):
         """View bot info"""
         owner = "StarrFox#6312"
@@ -62,9 +62,9 @@ class info(commands.Cog):
             e.add_field(name=f"{len(user.roles)-1} role(s):", value=", ".join([r.mention for r in user.roles if r != ctx.guild.default_role]))
         await ctx.send(embed=e)
 
-    @commands.group(aliases=['si', 'gi', 'guildinfo'])
-    async def serverinfo(self, ctx):
-        """Get info on a server"""
+    @commands.group(aliases=['si', 'gi', 'serverinfo'])
+    async def guildinfo(self, ctx):
+        """Get info on a guild"""
         guild = ctx.guild
         bots = 0
         humans = 0

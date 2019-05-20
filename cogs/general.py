@@ -62,38 +62,6 @@ class general(commands.Cog):
         await hook.send(message, avatar_url=user.avatar_url_as(format='png'))
         await hook.delete()
 
-    @commands.command(aliases=['tobin'])
-    async def tobinary(self, ctx, *, entry: str):
-        """Convert text to binary"""
-        final = ""
-        for c in entry:
-            x = ord(c)
-            x = bin(x)
-            x = x.replace('b', '')
-            final += x + " "
-        if len(final) > 1000:
-            fp = io.BytesIO(final.encode('utf-8'))
-            await ctx.send("Output too long, dmed your file")
-            await ctx.author.send(file=discord.File(fp, 'results.txt'))
-        else:
-            await ctx.send(final)
-
-    @commands.command(aliases=['fbin', 'frombin'])
-    async def frombinary(self, ctx, *entry: str):
-        """Convery binary to text"""
-        final = ""
-        for c in entry:
-            x = int(c, 2)
-            x = chr(x)
-            final += x
-        if len(final) > 1000:
-            fp = io.BytesIO(final.encode('utf-8'))
-            await ctx.send("Output too long, dmed your file")
-            await ctx.author.send(file=discord.File(fp, 'results.txt'))
-        else:
-            final = final.replace('@', '@\u200b')
-            await ctx.send(final)
-
     @commands.command(aliases=['msgsource', 'msgsrc'])
     async def msgraw(self, ctx, id: int):
         """Get the raw message data"""
@@ -104,18 +72,6 @@ class general(commands.Cog):
         json_msg = json.dumps(message, indent=4)
         json_msg = json_msg.replace("`", "`\u200b")
         await ctx.send(f"```json\n{json_msg}```")
-
-    @commands.command()
-    async def epic(self, ctx):
-        """Epic"""
-        await ctx.send("Epic:sunglasses:")
-
-    @commands.command(hidden=True)
-    async def trans(self, ctx, *, entry: str):
-        i = "abcdefghijklmnopqrstuvwxyz"
-        o = "12345678901234567890123456"
-        table = str.maketrans(i, o)
-        await ctx.send(entry.translate(table))
 
 def setup(bot):
     bot.add_cog(general(bot))
