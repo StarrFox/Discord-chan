@@ -73,7 +73,7 @@ class DiscordChan(commands.AutoShardedBot):
             toggle = True
         await self.change_presence(activity=discord.Game(prez))
 
-    @presence_cycle.before_loop()
+    @presence_cycle.before_loop
     async def presence_cycle_befoe(self):
         await self.wait_until_ready()
 
