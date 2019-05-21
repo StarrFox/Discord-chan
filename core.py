@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 import asyncio
 import json
 import os
@@ -53,12 +53,8 @@ class DiscordChan(commands.AutoShardedBot):
         self.prefixes = {}
         self.uptime = datetime.now()
         self.session = aiohttp.ClientSession(loop=self.loop)
-        self.loop.create_task(self.presence_loop(300))
+        self.presence_cycle.start()
         self.noprefix = False
-        self.ignored_cogs = [
-            'voice_commands.py',
-            'music.py'
-        ]
 
     async def get_pic(self, url):
         """Takes a url and returns a discord.File"""
@@ -66,18 +62,20 @@ class DiscordChan(commands.AutoShardedBot):
             init_bytes = await rsp.read()
         return discord.File(init_bytes, filename='picture.png')
 
-    async def presence_loop(self, time):
-        await self.wait_until_ready()
+    @tasks.loop(minutes=5)
+    async def presence_cycle(self):
         toggle = True
-        while True:
-            if toggle:
-                prez = f"dc!help | {len(self.guilds)} servers"
-                toggle = False
-            else:
-                prez = f"dc!help | {len(self.users)} users"
-                toggle = True
-            await self.change_presence(activity=discord.Game(prez))
-            await asyncio.sleep(time)
+        if toggle:
+            prez = f"dc!help | {len(self.guilds)} servers"
+            toggle = False
+        else:
+            prez = f"dc!help | {len(self.users)} users"
+            toggle = True
+        await self.change_presence(activity=discord.Game(prez))
+
+    @presence_cycle.before_loop()
+    async def presence_cycle_befoe(self):
+        await self.wait_until_ready()
 
     async def get_prefix(self, message):
         if not message.guild:
@@ -120,7 +118,7 @@ class DiscordChan(commands.AutoShardedBot):
     async def load_mods(self):
         for ext in os.listdir('cogs'):
             try:
-                if not ext.endswith(".py") or ext in self.ignored_cogs:
+                if not ext.endswith(".py"):
                     continue
                 self.load_extension(f"cogs.{ext.replace('.py', '')}")
                 self.logger.info(f"Loaded {ext}")

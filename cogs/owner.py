@@ -11,7 +11,6 @@ class owner(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.dbl_state = False
 
     async def cog_check(self, ctx):
         if not await self.bot.is_owner(ctx.author):
@@ -50,7 +49,6 @@ class owner(commands.Cog):
         tube = [list(i.values()) for i in results]
         tab = tabulate(tube, header, tablefmt='fancy_grid')
         await ctx.send(f"```py\n{tab}```")
-
 
     @commands.command()
     async def noprefix(self, ctx, toggle: bool = None):
