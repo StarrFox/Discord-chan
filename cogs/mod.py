@@ -93,7 +93,6 @@ class mod(commands.Cog):
         await channel.send(f'Deleted {len(deleted)} message(s)', delete_after=5)
 
     @commands.command()
-    @checks.serverowner_or_permissions(manage_messages=True)
     async def clean(self, ctx, num: int = 20):
         """Clean's up the bot's messages"""
         if num > 100:
