@@ -33,6 +33,7 @@ class nubby(commands.Cog):
             "Non sense, I'm perfectly fine and civil like a gentleman.",
             "leave my fursuit out of this!",
             "I cOuLD bE pLaYiNg AnImAL CoVe",
+            "If I wanted a bromance for the night, all I have to do is buy a man a beer of his choice and a bag of chips",
             "I wasn't talking to you Aaron, you could be raped and left for dead on the road and I still wouldn't bat an eye",
             "Too be honest, I've had more toxic talk on barrens chat in World of Warcraft and these haters would be called pussys for their epic fail attempted of bashing.",
             "Since most of you dumb shits didn't even bother watching the producer's video; that flat out told you these updates were coming and they didn't put these on test realms so people like nubby wouldn't data mine it so there's something to look forward too; you just spewed your bull shit as usual.",
