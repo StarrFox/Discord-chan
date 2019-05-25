@@ -55,6 +55,9 @@ class DiscordChan(commands.AutoShardedBot):
         self.session = aiohttp.ClientSession(loop=self.loop)
         self.presence_cycle.start()
         self.noprefix = False
+        self.ignored_cogs = [
+            "jay.py"
+        ]
 
     async def get_pic(self, url):
         """Takes a url and returns a discord.File"""
@@ -118,12 +121,13 @@ class DiscordChan(commands.AutoShardedBot):
     async def load_mods(self):
         for ext in os.listdir('cogs'):
             try:
-                if not ext.endswith(".py"):
+                if not ext.endswith(".py") or ext in self.ignored_cogs:
                     continue
                 self.load_extension(f"cogs.{ext.replace('.py', '')}")
                 self.logger.info(f"Loaded {ext}")
             except:
                 self.logger.critical(f"{ext} failed:\n{traceback.format_exc()}")
+        self.load_extension("cogs.jay")
 
     def run(self):
         super().run(self.settings['token'])
