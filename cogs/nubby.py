@@ -79,14 +79,14 @@ class nubby(commands.Cog):
     async def verify(self, member):
         if self.verify_settings["kick_under_one_hour"] and member.created_at > datetime.datetime.utcnow() - datetime.timedelta(hours=1):
             await member.kick(reason="Made less than an hour ago")
-            return await self.verify_settings["logs"].send(utils.block(f"{member.name} kicked for being made less than an hour ago"))
+            return await self.verify_settings["logs"].send(utils.block(f"{member} ({member.id}) kicked for being made less than an hour ago"))
         await member.add_roles(self.verify_settings["role"])
-        await self.verify_settings["logs"].send(utils.block(f"Verify process started for {member.name} created: {member.created_at.strftime('%c')} ({humanize.naturaltime(member.created_at)})"))
+        await self.verify_settings["logs"].send(utils.block(f"Verify process started for {member} ({member.id}) created: {member.created_at.strftime('%c')} ({humanize.naturaltime(member.created_at)})"))
         try:
             await member.send(f"Hello and welcome to Nubby's spoiler discord\nIn order to join the rest of the discord you must first verify by sending `{hash(member)}` here")
         except:
             self.verify_dm_msgs[member.id] = await self.verify_settings["chat"].send(f"Hey {member.mention} can you turn on dms so I can verify you; send `ready` to start the process")
-            await self.verify_settings["logs"].send(utils.block(f"{member.name} had dms off so I sent them a message in #{self.verify_settings['chat'].name}"))
+            await self.verify_settings["logs"].send(utils.block(f"{member} ({member.id}) had dms off so I sent them a message in #{self.verify_settings['chat'].name}"))
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -116,7 +116,7 @@ class nubby(commands.Cog):
                 await message.delete()
             except:
                 pass
-            await self.verify_settings["logs"].send(utils.block(f"Verified {nub_g.name} after {humanize.naturaltime(nub_g.joined_at).replace(' ago', '')} ({nub_g.joined_at.strftime('%c')})"))
+            await self.verify_settings["logs"].send(utils.block(f"Verified {nub_g} ({nub_g.id}) after {humanize.naturaltime(nub_g.joined_at).replace(' ago', '')} ({nub_g.joined_at.strftime('%c')})"))
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -187,6 +187,15 @@ class nubby(commands.Cog):
             await target.remove_roles(self.verify_settings["role"])
             await target.add_roles(self.guild_settings["member_role"])
         await ctx.send(f"Verified {len(members)} members")
+
+    @commands.command()
+    @is_above_mod()
+    async def raid(self, ctx, value: bool = True):
+        """
+        Shortcut to settings block_verify True/False
+        """
+        self.verify_settings["block_verify"] = value
+        await ctx.send("changed")
 
     @commands.group()
     @is_above_mod()
