@@ -129,6 +129,7 @@ class nubby(commands.Cog):
         await ctx.send(f"Thanks {member.display_name if member else 'Laval'}, very cool!")
 
     @commands.command()
+    @commands.check(lambda c: c.author.id != 145897775274524672)
     async def laval(self, ctx):
         await ctx.send(random.choice(self.laval_quotes))
 
