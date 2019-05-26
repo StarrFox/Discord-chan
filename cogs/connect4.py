@@ -167,7 +167,7 @@ class connect_board():
         await self.add_reactions()
         while self.is_running:
             try:
-                reaction, _ = await self.ctx.bot.wait_for(
+                reaction, user = await self.ctx.bot.wait_for(
                     "reaction_add",
                     check=lambda r, u: r.message.id == self.message.id and u == self.current_player and str(r) in self.emojis,
                     timeout=300
@@ -179,6 +179,10 @@ class connect_board():
                     pass
                 await self.message.edit(content="Timed out due to inactivity")
                 break
+            try:
+                await reaction.remove(user)
+            except:
+                pass
             await self.phrase_reaction(str(reaction))
 
 class connect4(commands.Cog):
