@@ -34,7 +34,7 @@ class logger(commands.Cog):
     async def on_command_completion(self, ctx):
         if await self.bot.is_owner(ctx.author):
             return
-        log = f"Commandlog path={ctx.command.full_parent_name} {ctx.command.name} c/a={ctx.channel.id}/{ctx.author.id} content={ctx.message.content}"
+        log = f"Commandlog path={ctx.command.full_parent_name} {ctx.command.name} g/c/a={ctx.guild.id if ctx.guild else None}/{ctx.channel.id}/{ctx.author.id} content={ctx.message.content}"
         await utils.paginate(log, self.log_channel)
 
     @commands.Cog.listener()
