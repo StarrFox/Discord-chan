@@ -192,8 +192,8 @@ class connect4(commands.Cog):
 
     @commands.command()
     async def c4(self, ctx, target: discord.Member):
-        if target == ctx.author:
-            return await ctx.send("You cannot play against yourself")
+        if target == ctx.author or target.bot:
+            return await ctx.send("You cannot play against yourself or a bot")
         board = connect_board(ctx.author, target, ctx)
         await board.do_game()
 
