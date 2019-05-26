@@ -58,6 +58,8 @@ class connect_board():
     async def phrase_reaction(self, reaction):
         num = self.emojis.index(reaction)
         next = await self.find_free(num)
+        if next is None:
+            return
         self.board[next][num] = self.red if self.current_player == self.player_one else self.blue
         await self.check_wins()
         await self.message.edit(embed=self.make_embed())
