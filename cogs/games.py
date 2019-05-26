@@ -1,10 +1,7 @@
 from discord.ext import commands
 import discord
 
-class connect_board():
-    """
-    The actual game
-    """
+class connect4():
 
     def __init__(self, p1, p2, ctx):
         self.player_one = p1
@@ -21,7 +18,7 @@ class connect_board():
         self.is_first_run = True
 
     def phrase_board(self):
-        return "\n".join(map(''.join, self.board))+"\n"+''.join(self.emojis)
+        return "\n".join(map(''.join, self.board)) + "\n" + ''.join(self.emojis)
 
     def create_board(self):
         return [[self.filler] * 7 for _ in range(6)]
@@ -187,17 +184,17 @@ class connect_board():
                 pass
             await self.phrase_reaction(str(reaction))
 
-class connect4(commands.Cog):
-    """
-    User input
-    """
+class games(commands.Cog):
 
     @commands.command()
-    async def c4(self, ctx, target: discord.Member):
-        if target == ctx.author or target.bot:
+    async def c4(self, ctx, member: discord.Member):
+        """
+        Play connect4 with another member
+        """
+        if member == ctx.author or member.bot:
             return await ctx.send("You cannot play against yourself or a bot")
-        board = connect_board(ctx.author, target, ctx)
+        board = connect4(ctx.author, target, ctx)
         await board.do_game()
 
 def setup(bot):
-    bot.add_cog(connect4())
+    bot.add_cog(games())

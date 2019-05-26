@@ -41,6 +41,7 @@ class DiscordChan(commands.AutoShardedBot):
             case_insensitive=True,
             reconnect=True
         )
+        self.first_run = True
         with open('settings.json') as tf:
             self.settings = json.load(tf)
             tf.close()
@@ -94,10 +95,13 @@ class DiscordChan(commands.AutoShardedBot):
         return member.id in self.owners
 
     async def on_ready(self):
+        if not self.first_run:
+            return
         await self.connect_db()
         await self.load_prefixes()
         await self.load_mods()
         self.logger.info("Bot ready")
+        self.first_run = False
 
     async def connect_db(self):
         self.db = await asyncpg.connect(
