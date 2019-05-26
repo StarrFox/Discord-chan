@@ -193,7 +193,7 @@ class games(commands.Cog):
         """
         if member == ctx.author or member.bot:
             return await ctx.send("You cannot play against yourself or a bot")
-        board = connect4(ctx.author, target, ctx)
+        board = connect4(ctx.author, member, ctx)
         await board.do_game()
 
 def setup(bot):
