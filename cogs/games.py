@@ -23,11 +23,13 @@ class connect4():
     def create_board(self):
         return [[self.filler] * 7 for _ in range(6)]
 
-    def make_embed(self):
+    def make_embed(self, *, last_play=None):
         embed = discord.Embed(
             description = self.phrase_board()
         )
         embed.add_field(name="Players:", value=f"{self.red}: {self.player_one.mention}\n{self.blue}: {self.player_two.mention}")
+        if not self.is_first_run:
+            embed.add_field(name="Last move:", value=f"{self.current_player.mention}: {last_play+1}", inline=False)
         if self.is_running:
             if self.is_first_run:
                 embed.add_field(name="Current turn:", value=self.player_one.mention, inline=False)
@@ -43,10 +45,6 @@ class connect4():
         for r in self.emojis:
             await self.message.add_reaction(r)
 
-    async def remove_reactions(self):
-        for r in self.emojis:
-            await self.message.remove_reaction(r)
-
     async def find_free(self, num):
         for i in range(6)[::-1]:
             if self.board[i][num] == self.filler:
@@ -59,7 +57,7 @@ class connect4():
             return
         self.board[next][num] = self.red if self.current_player == self.player_one else self.blue
         await self.check_wins()
-        await self.message.edit(embed=self.make_embed())
+        await self.message.edit(embed=self.make_embed(last_play=num))
         self.current_player = self.player_two if self.current_player == self.player_one else self.player_one
 
     async def check_wins(self):
@@ -172,10 +170,6 @@ class connect4():
                     timeout=300
                 )
             except:
-                try:
-                    await self.remove_reactions()
-                except:
-                    pass
                 await self.message.edit(content="Timed out due to inactivity")
                 break
             try:
@@ -183,6 +177,10 @@ class connect4():
             except:
                 pass
             await self.phrase_reaction(str(reaction))
+        try:
+            await self.message.clear_reactions()
+        except:
+            pass
 
 class games(commands.Cog):
 
