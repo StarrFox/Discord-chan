@@ -63,9 +63,9 @@ async def traceback_sender(basemsg, tmsg, bot):
             check = lambda r, u: u == basemsg.author and str(r) == traceback_send and r.message.id == basemsg.id,
             timeout = 60
         )
+        await basemsg.channel.send(tmsg.content)
     except:
         pass
-    await basemsg.channel.send(tmsg.content)
 
 class reactor_sub(ReplResponseReactor):
 
