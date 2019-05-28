@@ -96,7 +96,7 @@ class reactor_sub(ReplResponseReactor):
         else:
             await attempt_add_reaction(self.message, error)
             tmsg = await send_traceback(self.message.author, 8, exc_type, exc_val, exc_tb)
-        self.loop.create_task(traceback_sender(self.message, tmsg, bot))
+        self.loop.create_task(traceback_sender(self.message, tmsg, self.bot))
         return True
 
 class sub_jsk(cog.Jishaku):
