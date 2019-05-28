@@ -72,7 +72,7 @@ class reactor_sub(ReplResponseReactor):
     def __init__(self, message:discord.Message, bot):
         self.message = message
         self.bot = bot
-        self.loop = loop or asyncio.get_event_loop()
+        self.loop = asyncio.get_event_loop()
         self.handle = None
         self.raised = False
 
