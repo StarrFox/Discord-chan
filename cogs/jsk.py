@@ -60,7 +60,7 @@ async def traceback_sender(basemsg, tmsg, bot):
     try:
         await bot.wait_for(
             "reaction_add",
-            check = lambda: r, u, u == basemsg.author and str(r) == traceback_send and r.message.id == basemsg.id,
+            check = lambda r, u: u == basemsg.author and str(r) == traceback_send and r.message.id == basemsg.id,
             timeout = 60
         )
     except:
