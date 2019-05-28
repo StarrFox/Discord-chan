@@ -39,6 +39,7 @@ done = "<a:dancin:582409853918511165>"
 syntax_error = "<a:default:577017740016222229>"
 timeout_error = "error:539157627385413633"
 error = "<a:default:577017740016222229>"
+traceback_send = "\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}"
 
 def sub_get_var_dict_from_ctx(ctx, prefix: str = '_'):
     raw_var_dict = {
@@ -54,7 +55,26 @@ def sub_get_var_dict_from_ctx(ctx, prefix: str = '_'):
     }
     return {f'{prefix}{k}': v for k, v in raw_var_dict.items()}
 
+async def traceback_sender(basemsg, tmsg, bot):
+    await basemsg.add_reaction(traceback_send)
+    try:
+        await bot.wait_for(
+            "reaction_add",
+            check = lambda: r, u, u == basemsg.author and str(r) == traceback_send and r.message.id == basemsg.id,
+            timeout = 60
+        )
+    except:
+        pass
+    await basemsg.channel.send(tmsg.content)
+
 class reactor_sub(ReplResponseReactor):
+
+    def __init__(self, message:discord.Message, bot):
+        self.message = message
+        self.bot = bot
+        self.loop = loop or asyncio.get_event_loop()
+        self.handle = None
+        self.raised = False
 
     async def __aenter__(self):
         self.handle = self.loop.create_task(do_after_sleep(1, attempt_add_reaction, self.message, task))
@@ -69,13 +89,14 @@ class reactor_sub(ReplResponseReactor):
         self.raised = True
         if isinstance(exc_val, (asyncio.TimeoutError, subprocess.TimeoutExpired)):
             await attempt_add_reaction(self.message, timeout_error)
-            await send_traceback(self.message.channel, 0, exc_type, exc_val, exc_tb)
+            tmsg = await send_traceback(self.message.channel, 0, exc_type, exc_val, exc_tb)
         elif isinstance(exc_val, SyntaxError):
             await attempt_add_reaction(self.message, syntax_error)
-            await send_traceback(self.message.channel, 0, exc_type, exc_val, exc_tb)
+            tmsg = await send_traceback(self.message.channel, 0, exc_type, exc_val, exc_tb)
         else:
             await attempt_add_reaction(self.message, error)
-            await send_traceback(self.message.author, 8, exc_type, exc_val, exc_tb)
+            tmsg = await send_traceback(self.message.author, 8, exc_type, exc_val, exc_tb)
+        self.loop.create_task(traceback_sender(self.message, tmsg, bot))
         return True
 
 class sub_jsk(cog.Jishaku):
@@ -141,7 +162,7 @@ class sub_jsk(cog.Jishaku):
         scope = self.scope
         arg_dict["_"] = self.last_result
         try:
-            async with reactor_sub(ctx.message):
+            async with reactor_sub(ctx.message, self.bot):
                 with self.submit(ctx):
                     async for result in AsyncCodeExecutor(argument.content, scope, arg_dict=arg_dict):
                         if result is None:
