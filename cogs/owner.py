@@ -74,7 +74,7 @@ class owner(commands.Cog):
 
     @loadjsk.command()
     async def sub(self, ctx):
-        self.bot.load_extension('modules.jsk')
+        self.bot.load_extension('cogs.jsk')
         await ctx.send("Sub_jsk loaded")
 
     @commands.command()
