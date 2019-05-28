@@ -36,9 +36,9 @@ except ImportError:
 #emojis
 task = "<a:sonic:577005444191485952>"
 done = "<a:dancin:582409853918511165>"
-syntax_error = "<a:default:577017740016222229> "
+syntax_error = "<a:default:577017740016222229>"
 timeout_error = "error:539157627385413633"
-error = "<a:default:577017740016222229> "
+error = "<a:default:577017740016222229>"
 
 def sub_get_var_dict_from_ctx(ctx, prefix: str = '_'):
     raw_var_dict = {
