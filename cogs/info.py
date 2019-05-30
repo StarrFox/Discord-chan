@@ -1,6 +1,9 @@
 import discord
 from discord.ext import commands
+
 import humanize
+from datetime import datetime
+
 from extras.paginator import paginator
 
 class info(commands.Cog):
@@ -22,24 +25,17 @@ class info(commands.Cog):
     @commands.command(aliases=['about'])
     async def info(self, ctx):
         """View bot info"""
-        owner = "StarrFox#6312"
-        guilds = len(self.bot.guilds)
-        users = len(self.bot.users)
-        channels = len([c for c in self.bot.get_all_channels()])
-        support_server = "https://discord.gg/WsgQfxC"
-        top_role = ctx.message.guild.me.top_role.name
-        top_role_pos = (ctx.message.guild.roles[::-1].index(ctx.message.guild.me.top_role))+1
-        invite = "https://discordapp.com/api/oauth2/authorize?client_id=529631910985596930&permissions=8&scope=bot"
-        uptime = humanize.naturaltime(self.bot.uptime)
-        e = discord.Embed(title="Discord Chan", color=discord.Color.blurple())
-        e.set_thumbnail(url=self.bot.user.avatar_url)
-        e.add_field(name="Owner:", value=owner)
-        e.add_field(name="Connected to:", value=f"Guilds: {guilds}\nChannels: {channels}\nUsers: {users}")
-        e.add_field(name="Top role", value=f"{top_role} in pos #{top_role_pos}")
-        e.add_field(name="Uptime", value=f"Been up since {uptime}")
-        e.add_field(name="Support server", value=f"[Join here]({support_server})")
-        e.add_field(name="Invite me", value=f"[Invite here]({invite})")
-        await ctx.send(embed=e)
+        await ctx.send(
+            f"""
+            ```
+            Owner: StarrFox#6312
+            Guilds: {len(self.bot.guilds)}
+            Channels: {len([c for c in self.bot.get_all_channels()])}
+            Top role: #{(ctx.guild.roles[::-1].index(ctx.guild.me.top_role))+1} {ctx.guild.me.top_role.name}
+            Up for: {self.bot.uptime-datetime.utcnow()}
+            ```
+            """
+        )
 
     @commands.command(aliases=['ui'])
     async def userinfo(self, ctx, user: discord.Member = None):
