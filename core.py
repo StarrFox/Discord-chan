@@ -56,12 +56,6 @@ class DiscordChan(commands.AutoShardedBot):
         self.presence_cycle.start()
         self.noprefix = False
 
-    async def get_pic(self, url):
-        """Takes a url and returns a discord.File"""
-        async with self.session.get(url) as rsp:
-            init_bytes = await rsp.read()
-        return discord.File(init_bytes, filename='picture.png')
-
     @tasks.loop(minutes=5)
     async def presence_cycle(self):
         toggle = True

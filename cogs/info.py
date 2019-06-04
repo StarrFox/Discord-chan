@@ -5,6 +5,7 @@ import humanize
 from datetime import datetime
 
 from extras.paginator import paginator
+from extras import utils
 
 class info(commands.Cog):
     """Informational commands"""
@@ -22,24 +23,24 @@ class info(commands.Cog):
         """Get the bot's source link"""
         await ctx.send("<https://github.com/StarrFox/Discord-chan>")
 
+    def time_diff(self, time: datetime):
+        return str(datetime.utcnow() - time).split(",")[0]
+
     @commands.command(aliases=['about'])
     async def info(self, ctx):
         """View bot info"""
-        await ctx.send(
-            f"""
-            ```
-            Owner: StarrFox#6312
-            Guilds: {len(self.bot.guilds)}
-            Channels: {len([c for c in self.bot.get_all_channels()])}
-            Top role: #{(ctx.guild.roles[::-1].index(ctx.guild.me.top_role))+1} {ctx.guild.me.top_role.name}
-            Up for: {self.bot.uptime-datetime.utcnow()}
-            ```
-            """
-        )
+        msg = [
+            "Owner: StarrFox#6312",
+            f"Guilds: {len(self.bot.guilds)}",
+            f"Channels: {len([c for c in self.bot.get_all_channels()])}",
+            f"Top role: #{(ctx.guild.roles[::-1].index(ctx.guild.me.top_role))+1} {ctx.guild.me.top_role.name}",
+            f"Up for: {self.time_diff(self.bot.uptime)}"
+        ]
+        await ctx.send(utils.block("\n".join(msg)))
 
     @commands.command(aliases=['ui'])
-    async def userinfo(self, ctx, user: discord.Member = None):
-        """Get info on a server member"""
+    async def userinfo(self, ctx, member: discord.Member = None):
+        """Get info on a guild member"""
         if not user:
             user = ctx.author
         joined = humanize.naturaldate(user.joined_at)
@@ -49,13 +50,8 @@ class info(commands.Cog):
         e = discord.Embed(color=user.color)
         e.add_field(name="Name#discrim", value=str(user))
         e.add_field(name="ID:", value=user.id)
-        e.set_thumbnail(url=user.avatar_url)
         e.add_field(name="Joined guild:", value=joined)
-        e.add_field(name="Joined discord:", value=joined_dis)
-        e.add_field(name="Status:", value=f"Web: {user.web_status}\nDesktop: {user.desktop_status}\nMobile: {user.mobile_status}")
-        e.add_field(name="Top role:", value=f"{top_role} in pos #{top_role_pos}")
-        if len(user.roles)-1 > 0:
-            e.add_field(name=f"{len(user.roles)-1} role(s):", value=", ".join([r.mention for r in user.roles if r != ctx.guild.default_role]))
+        e.add_field(name="Joined discord:", value=joined_dis
         await ctx.send(embed=e)
 
     @commands.group(aliases=['si', 'gi', 'serverinfo'])
