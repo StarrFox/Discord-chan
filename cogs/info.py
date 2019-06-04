@@ -51,7 +51,7 @@ class info(commands.Cog):
         e.add_field(name="Name#discrim", value=str(user))
         e.add_field(name="ID:", value=user.id)
         e.add_field(name="Joined guild:", value=joined)
-        e.add_field(name="Joined discord:", value=joined_dis
+        e.add_field(name="Joined discord:", value=joined_dis)
         await ctx.send(embed=e)
 
     @commands.group(aliases=['si', 'gi', 'serverinfo'])
