@@ -63,6 +63,7 @@ class nubby(commands.Cog):
             "third_strike": guild.get_role(579370928987963396)
         }
         self.verify_settings = {
+            "on": True,
             "block_verify": False,
             "kick_under_one_hour": False,
             "role": guild.get_role(578777612701401090),
@@ -80,6 +81,8 @@ class nubby(commands.Cog):
         if self.verify_settings["kick_under_one_hour"] and member.created_at > datetime.datetime.utcnow() - datetime.timedelta(hours=1):
             await member.kick(reason="Made less than an hour ago")
             return await self.verify_settings["logs"].send(utils.block(f"{member} ({member.id}) kicked for being made less than an hour ago"))
+        if not self.verify_settings["on"]:
+            return await member.add_roles(self.guild_settings["member_role"])
         await member.add_roles(self.verify_settings["role"])
         await self.verify_settings["logs"].send(utils.block(f"Verify process started for {member} ({member.id}) created: {member.created_at.strftime('%c')} ({humanize.naturaltime(member.created_at)})"))
         try:
@@ -129,7 +132,6 @@ class nubby(commands.Cog):
         await ctx.send(f"Thanks {member.display_name if member else 'Laval'}, very cool!")
 
     @commands.command()
-    @commands.check(lambda c: c.author.id != 145897775274524672)
     async def laval(self, ctx):
         await ctx.send(random.choice(self.laval_quotes))
 
@@ -157,22 +159,6 @@ class nubby(commands.Cog):
         processed = await self.get_twoweeks()
         if processed:
             await self.guild_settings["commands_channel"].send(f"@here there are/is {len(processed)} without required roles use dc!twoweeks to add them")
-
-#    @commands.command(name="verify")
-#    @commands.check(is_above_mod)
-#    async def verify_command(self, ctx, mode: bool = None):
-#        """
-#        Toggles the current verify state
-#        """
-#        if mode is None:
-#            if not self.verify_off:
-#                return await ctx.send("Verify is currently on")
-#            return await ctx.send("Verify is currentrly off")
-#        if mode:
-#            self.verify_off = False
-#            return await ctx.send("Turned verify on")
-#        self.verify_off = True
-#        await ctx.send("Turned verify off")
 
     @commands.command(name="verify")
     @is_above_mod()
