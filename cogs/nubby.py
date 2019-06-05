@@ -63,7 +63,7 @@ class nubby(commands.Cog):
             "third_strike": guild.get_role(579370928987963396)
         }
         self.verify_settings = {
-            "on": True,
+            "on": False,
             "block_verify": False,
             "kick_under_one_hour": False,
             "role": guild.get_role(578777612701401090),
