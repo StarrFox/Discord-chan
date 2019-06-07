@@ -151,5 +151,20 @@ class mod(commands.Cog):
         except:
             await ctx.send("I was unable to kick them")
 
+    @commands.command()
+    @checks.serverowner_or_permissions(manage_emojis=True)
+    async def emoji(self, ctx, name, link):
+        """Creates an emoji"""
+        async with self.bot.session.get(link) as res:
+            try:
+                await ctx.guild.create_custom_emoji(name=name, image=await res.read())
+                await ctx.check()
+            except Exception as e:
+                if isinstance(e, discord.errors.Forbidden):
+                    return await ctx.send("I dont have the perms to add emojis")
+                elif isinstance(e, discord.errors.HTTPException):
+                    return await ctx.send("File too large")
+                await ctx.send(e)
+
 def setup(bot):
     bot.add_cog(mod(bot))
