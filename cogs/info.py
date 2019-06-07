@@ -41,15 +41,15 @@ class info(commands.Cog):
     @commands.command(aliases=['ui'])
     async def userinfo(self, ctx, member: discord.Member = None):
         """Get info on a guild member"""
-        if not user:
-            user = ctx.author
-        joined = humanize.naturaldate(user.joined_at)
-        joined_dis = humanize.naturaldate(user.created_at)
-        top_role = user.top_role.name
-        top_role_pos = (ctx.message.guild.roles[::-1].index(user.top_role))+1
-        e = discord.Embed(color=user.color)
-        e.add_field(name="Name#discrim", value=str(user))
-        e.add_field(name="ID:", value=user.id)
+        if not member:
+            member = ctx.author
+        joined = humanize.naturaldate(member.joined_at)
+        joined_dis = humanize.naturaldate(member.created_at)
+        top_role = member.top_role.name
+        top_role_pos = (ctx.message.guild.roles[::-1].index(member.top_role))+1
+        e = discord.Embed(color=member.color)
+        e.add_field(name="Name:", value=str(member))
+        e.add_field(name="ID:", value=member.id)
         e.add_field(name="Joined guild:", value=joined)
         e.add_field(name="Joined discord:", value=joined_dis)
         await ctx.send(embed=e)
