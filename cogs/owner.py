@@ -77,15 +77,5 @@ class owner(commands.Cog):
         self.bot.load_extension('cogs.jsk')
         await ctx.send("Sub_jsk loaded")
 
-    @commands.command()
-    async def emoji(self, ctx, name, link):
-        """Creates an emoji"""
-        async with self.bot.session.get(link) as res:
-            try:
-                await ctx.guild.create_custom_emoji(name=name, image=await res.read())
-                await ctx.check()
-            except Exception as e:
-                await ctx.send(e)
-
 def setup(bot):
     bot.add_cog(owner(bot))
