@@ -1,6 +1,33 @@
 from discord.ext import commands
 import discord
 
+c4_diagonal_data = [
+    [(3,0),(2,1),(1,2),(0,3)],
+    [(4,0),(3,1),(2,2),(1,3)],
+    [(3,1),(2,2),(1,3),(0,4)],
+    [(5,0),(4,1),(3,2),(2,3)],
+    [(4,1),(3,2),(2,3),(1,4)],
+    [(3,2),(2,3),(1,4),(0,5)],
+    [(5,1),(4,2),(3,3),(2,4)],
+    [(4,2),(3,3),(2,4),(1,5)],
+    [(3,3),(2,4),(1,5),(0,6)],
+    [(5,2),(4,3),(3,4),(2,5)],
+    [(4,3),(3,4),(2,5),(1,6)],
+    [(5,3),(4,4),(3,5),(2,6)],
+    [(3,6),(2,5),(1,4),(0,3)],
+    [(4,6),(3,5),(2,4),(1,3)],
+    [(3,5),(2,4),(1,3),(0,2)],
+    [(5,6),(4,5),(3,4),(2,3)],
+    [(4,5),(3,4),(2,3),(1,2)],
+    [(3,4),(2,3),(1,2),(0,1)],
+    [(5,5),(4,4),(3,3),(2,2)],
+    [(4,4),(3,3),(2,2),(1,1)],
+    [(3,3),(2,2),(1,1),(0,0)],
+    [(5,4),(4,3),(3,2),(2,1)],
+    [(4,3),(3,2),(2,1),(1,0)],
+    [(5,3),(4,2),(3,1),(2,0)]
+]
+
 class connect4():
 
     def __init__(self, p1, p2, ctx):
@@ -79,81 +106,10 @@ class connect4():
                 if check_slice(c[i:i+4]):
                     self.is_running = False
                     return
-        diagonal = [
-            [
-                self.board[3][0], self.board[2][1], self.board[1][2], self.board[0][3]
-            ],
-            [
-                self.board[4][0], self.board[3][1], self.board[2][2], self.board[1][3]
-            ],
-            [
-                self.board[3][1], self.board[2][2], self.board[1][3], self.board[0][4]
-            ],
-            [
-                self.board[5][0], self.board[4][1], self.board[3][2], self.board[2][3]
-            ],
-            [
-                self.board[4][1], self.board[3][2], self.board[2][3], self.board[1][4]
-            ],
-            [
-                self.board[3][2], self.board[2][3], self.board[1][4], self.board[0][5]
-            ],
-            [
-                self.board[5][1], self.board[4][2], self.board[3][3], self.board[2][4]
-            ],
-            [
-                self.board[4][2], self.board[3][3], self.board[2][4], self.board[1][5]
-            ],
-            [
-                self.board[3][3], self.board[2][4], self.board[1][5], self.board[0][6]
-            ],
-            [
-                self.board[5][2], self.board[4][3], self.board[3][4], self.board[2][5]
-            ],
-            [
-                self.board[4][3], self.board[3][4], self.board[2][5], self.board[1][6]
-            ],
-            [
-                self.board[5][3], self.board[4][4], self.board[3][5], self.board[2][6]
-            ],
-            [
-                self.board[3][6], self.board[2][5], self.board[1][4], self.board[0][3]
-            ],
-            [
-                self.board[4][6], self.board[3][5], self.board[2][4], self.board[1][3]
-            ],
-            [
-                self.board[3][5], self.board[2][4], self.board[1][3], self.board[0][2]
-            ],
-            [
-                self.board[5][6], self.board[4][5], self.board[3][4], self.board[2][3]
-            ],
-            [
-                self.board[4][5], self.board[3][4], self.board[2][3], self.board[1][2]
-            ],
-            [
-                self.board[3][4], self.board[2][3], self.board[1][2], self.board[0][1]
-            ],
-            [
-                self.board[5][5], self.board[4][4], self.board[3][3], self.board[2][2]
-            ],
-            [
-                self.board[4][4], self.board[3][3], self.board[2][2], self.board[1][1]
-            ],
-            [
-                self.board[3][3], self.board[2][2], self.board[1][1], self.board[0][0]
-            ],
-            [
-                self.board[5][4], self.board[4][3], self.board[3][2], self.board[2][1]
-            ],
-            [
-                self.board[4][3], self.board[3][2], self.board[2][1], self.board[1][0]
-            ],
-            [
-                self.board[5][3], self.board[4][2], self.board[3][1], self.board[2][0]
-            ]
-        ]
-        for d in diagonal:
+        diagonals = []
+        for c4_d in c4_diagonal_data:
+            diagonals.append([self.board[i[0]][i[1]] for i in c4_d])
+        for d in diagonals:
             if check_slice(d):
                 self.is_running = False
                 return
