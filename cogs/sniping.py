@@ -95,6 +95,7 @@ class sniping(commands.Cog):
             msg = msgs[index]
         elif channel:
             msg = self.snipe_dict[channel.id][index]
+            msgs = self.snipe_dict[channel.id]
         e = discord.Embed(
             color=discord.Color.blurple(),
             description=msg.content,
