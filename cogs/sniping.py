@@ -39,7 +39,7 @@ class sniping(commands.Cog):
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
         """Saves edited messages to snipe dict"""
-        if not before.content != after.content or not before.content or before.author.bot:
+        if not before.content != after.content or not before.content:
             return
         if not before.channel.id in self.snipe_dict:
             self.snipe_dict[before.channel.id] = []
@@ -95,7 +95,6 @@ class sniping(commands.Cog):
             msg = msgs[index]
         elif channel:
             msg = self.snipe_dict[channel.id][index]
-            msgs = self.snipe_dict[channel.id]
         e = discord.Embed(
             color=discord.Color.blurple(),
             description=msg.content,
