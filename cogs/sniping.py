@@ -85,7 +85,7 @@ class sniping(commands.Cog):
         elif author:
             snipes = []
             for i in self.snipe_dict.values():
-                snipes.append(i[0])
+                snipes += i
             msgs = []
             for i in snipes:
                 if i.author == author:
@@ -141,7 +141,7 @@ class sniping(commands.Cog):
         elif author:
             snipes = []
             for i in self.snipe_dict.values():
-                snipes.append(i[0])
+                snipes += i
             msgs = []
             for i in snipes:
                 if i.author == author:
