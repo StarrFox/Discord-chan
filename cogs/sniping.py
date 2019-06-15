@@ -28,7 +28,7 @@ class sniping(commands.Cog):
     @commands.Cog.listener()
     async def on_message_delete(self, msg):
         """Saves deleted messages to snipe dict"""
-        if not msg.content or msg.author.bot:
+        if not msg.content:
             return
         if not msg.channel.id in self.snipe_dict:
             self.snipe_dict[msg.channel.id] = []
