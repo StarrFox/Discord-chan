@@ -68,9 +68,9 @@ class connect4():
         if self.is_running:
             if self.is_first_run:
                 embed.add_field(name="Current turn:", value=self.player_one.mention, inline=False)
-            elif self.current_player == self.player_one and not invert:
+            elif self.current_player == self.player_one and not inverse:
                 embed.add_field(name="Current turn:", value=self.player_two.mention, inline=False)
-            elif self.current_player == self.player_two and not invert:
+            elif self.current_player == self.player_two and not inverse:
                 embed.add_field(name="Current turn:", value=self.player_one.mention, inline=False)
             elif self.current_player == self.player_one:
                 embed.add_field(name="Current turn:", value=self.current_player.mention, inline=False)
