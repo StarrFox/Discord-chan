@@ -43,6 +43,7 @@ class connect4():
         self.message = None
         self.current_player = p1
         self.is_first_run = True
+        self.last_play = None
 
     def phrase_board(self):
         return "\n".join(map(''.join, self.board)) + "\n" + ''.join(self.emojis)
@@ -50,13 +51,13 @@ class connect4():
     def create_board(self):
         return [[self.filler] * 7 for _ in range(6)]
 
-    def make_embed(self, *, last_play=None):
+    def make_embed(self):
         embed = discord.Embed(
             description = self.phrase_board()
         )
         embed.add_field(name="Players:", value=f"{self.red}: {self.player_one.mention}\n{self.blue}: {self.player_two.mention}")
         if not self.is_first_run:
-            embed.add_field(name="Last move:", value=f"{self.current_player.mention}: {last_play+1}", inline=False)
+            embed.add_field(name="Last move:", value=f"{self.current_player.mention}: {self.last_play+1}", inline=False)
         if self.is_running:
             if self.is_first_run:
                 embed.add_field(name="Current turn:", value=self.player_one.mention, inline=False)
@@ -86,7 +87,8 @@ class connect4():
         self.board[next][num] = self.red if self.current_player == self.player_one else self.blue
         await self.check_wins()
         self.is_first_run = False
-        await self.message.edit(embed=self.make_embed(last_play=num))
+        self.last_play = num
+        await self.message.edit(embed=self.make_embed())
         self.current_player = self.player_two if self.current_player == self.player_one else self.player_one
 
     async def check_wins(self):
