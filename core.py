@@ -126,6 +126,6 @@ class DiscordChan(bot_stuff.Bot):
         await self.db.close()
         await super().logout()
 
-bot = DiscordChan("cogs")
+bot = DiscordChan()
 bot.load_extension("bot_stuff.jsk", **jsk_settings)
 bot.run()
