@@ -12,8 +12,7 @@ jsk_settings = {
     "syntax": "<a:default:577017740016222229>",
     "timeout": "error:539157627385413633",
     "error": "<a:default:577017740016222229>",
-    "tracebacks": "\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}",
-    "scope_prefix": ""
+    "tracebacks": "\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}"
 }
 
 class owner(commands.Cog):
