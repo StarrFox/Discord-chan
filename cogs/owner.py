@@ -77,9 +77,9 @@ class owner(commands.Cog):
         self.bot.noprefix = False
         return await ctx.send("No prefix turned off.")
 
-    @commands.group(invoke_without_command=True)
+    @commands.command()
     async def loadjsk(self, ctx):
-        self.bot.load_extension('bot_tools.jsk', **jsk_settings)
+        self.bot.load_extension('bot_stuff.jsk', **jsk_settings)
         await ctx.send('Loaded jsk')
 
 def setup(bot):
