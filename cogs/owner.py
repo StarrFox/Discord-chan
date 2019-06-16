@@ -6,6 +6,16 @@ import typing
 from tabulate import tabulate
 import traceback
 
+jsk_settings = {
+    "task": "<a:sonic:577005444191485952>",
+    "done": "<a:dancin:582409853918511165>",
+    "syntax": "<a:default:577017740016222229>",
+    "timeout": "error:539157627385413633",
+    "error": "<a:default:577017740016222229>",
+    "tracebacks": "\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}",
+    "scope_prefix": ""
+}
+
 class owner(commands.Cog):
     """Owner commands"""
 
@@ -69,13 +79,8 @@ class owner(commands.Cog):
 
     @commands.group(invoke_without_command=True)
     async def loadjsk(self, ctx):
-        self.bot.load_extension('jishaku')
+        self.bot.load_extension('bot_tools.jsk', **jsk_settings)
         await ctx.send('Loaded jsk')
-
-    @loadjsk.command()
-    async def sub(self, ctx):
-        self.bot.load_extension('cogs.jsk')
-        await ctx.send("Sub_jsk loaded")
 
 def setup(bot):
     bot.add_cog(owner(bot))
