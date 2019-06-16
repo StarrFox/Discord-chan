@@ -33,7 +33,7 @@ class DiscordChan(bot_stuff.Bot):
     def __init__(self):
         super().__init__(
             prefix=self.get_prefix,
-            owners = [285148358815776768, 455289384187592704]
+            owners = [285148358815776768, 455289384187592704],
             extension_dir = "cogs",
             case_insensitive=True,
             reconnect=True
