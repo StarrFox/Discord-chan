@@ -30,6 +30,7 @@ class owner(commands.Cog):
             "timeout": "error:539157627385413633",
             "error": "<a:default:577017740016222229>",
             "tracebacks": "\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}",
+            "scope_prefix": "",
             "retain": True
         }
 
@@ -77,7 +78,7 @@ class owner(commands.Cog):
         if isinstance(self.jsk_settings[item], bool):
             self.jsk_settings[item] = bool_dict[value.lower()]
         else:
-            self.jsksettings[item] = value
+            self.jsk_settings[item] = value
         await ctx.send("changed")
 
 def setup(bot):
