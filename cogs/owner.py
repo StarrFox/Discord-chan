@@ -1,10 +1,19 @@
 import discord
 from discord.ext import commands
-import asyncio
+
 from os import system
-import typing
-from tabulate import tabulate
 import traceback
+import typing
+import asyncio
+
+bool_dict = {
+    "true": True,
+    "on": True,
+    "1": True,
+    "false": False,
+    "off": False,
+    "0": False
+}
 
 jsk_settings = {
     "task": "<a:sonic:577005444191485952>",
@@ -20,6 +29,15 @@ class owner(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.jsk_settings = {
+            "task": "<a:sonic:577005444191485952>",
+            "done": "<a:dancin:582409853918511165>",
+            "syntax": "<a:default:577017740016222229>",
+            "timeout": "error:539157627385413633",
+            "error": "<a:default:577017740016222229>",
+            "tracebacks": "\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}",
+            "retain": True
+        }
 
     async def cog_check(self, ctx):
         if not await self.bot.is_owner(ctx.author):
@@ -35,29 +53,6 @@ class owner(commands.Cog):
     async def shutdown(self, ctx):
         await ctx.send("😡")
         await self.bot.logout()
-
-#Modified from
-#https://github.com/Rapptz/RoboDanny/blob/rewrite/cogs/admin.py#L209-L250
-
-    @commands.command()
-    async def sql(self, ctx, *, entry: str):
-        """Sql command"""
-        is_multistatement = entry.count(';') > 1
-        if is_multistatement:
-            strategy = self.bot.db.execute
-        else:
-            strategy = self.bot.db.fetch
-        try:
-            results = await strategy(entry)
-        except Exception:
-            return await ctx.send(f'```py\n{traceback.format_exc()}\n```')
-        rows = len(results)
-        if is_multistatement or rows == 0:
-            return await ctx.send(f'`{results}`')
-        header = list(results[0].keys())
-        tube = [list(i.values()) for i in results]
-        tab = tabulate(tube, header, tablefmt='fancy_grid')
-        await ctx.send(f"```py\n{tab}```")
 
     @commands.command()
     async def noprefix(self, ctx, toggle: bool = None):
@@ -80,6 +75,16 @@ class owner(commands.Cog):
     async def loadjsk(self, ctx):
         self.bot.load_extension('bot_stuff.jsk', **jsk_settings)
         await ctx.send('Loaded jsk')
+
+    @commands.command()
+    async def jskset(self, ctx, item: typing.Optional[str] = None, value: str = None):
+        if item is None or value is None:
+            return await ctx.send(utils.block(json.dumps(self.jsk_settings, indent=4)))
+        if isinstance(self.jsk_settings[item], bool):
+            self.jsk_settings[item] = bool_dict[value.lower()]
+        else:
+            self.jsksettings[item] = value
+        await ctx.send("changed")
 
 def setup(bot):
     bot.add_cog(owner(bot))
