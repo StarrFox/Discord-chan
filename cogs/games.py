@@ -71,6 +71,7 @@ class connect4():
     async def add_reactions(self):
         for r in self.emojis:
             await self.message.add_reaction(r)
+        await self.message.add_reaction("\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}")
 
     async def find_free(self, num):
         for i in range(6)[::-1]:
@@ -84,6 +85,7 @@ class connect4():
             return
         self.board[next][num] = self.red if self.current_player == self.player_one else self.blue
         await self.check_wins()
+        self.is_first_run = False
         await self.message.edit(embed=self.make_embed(last_play=num))
         self.current_player = self.player_two if self.current_player == self.player_one else self.player_one
 
@@ -116,13 +118,12 @@ class connect4():
 
     async def do_game(self):
         self.message = await self.ctx.send(embed=self.make_embed())
-        self.is_first_run = False
         await self.add_reactions()
         while self.is_running:
             try:
                 reaction, user = await self.ctx.bot.wait_for(
                     "reaction_add",
-                    check=lambda r, u: r.message.id == self.message.id and u == self.current_player and str(r) in self.emojis,
+                    check=lambda r, u: r.message.id == self.message.id and u == self.current_player and str(r) in self.emojis + ["\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}"],
                     timeout=300
                 )
             except:
@@ -132,7 +133,12 @@ class connect4():
                 await reaction.remove(user)
             except:
                 pass
-            await self.phrase_reaction(str(reaction))
+            if str(reaction) == "\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}":
+                await self.message.delete()
+                self.message = await self.ctx.send(embed=self.make_embed())
+                await self.add_reactions()
+            else:
+                await self.phrase_reaction(str(reaction))
         try:
             await self.message.clear_reactions()
         except:
