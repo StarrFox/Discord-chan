@@ -42,18 +42,12 @@ class DiscordChan(bot_stuff.Bot):
         with open('settings.json') as tf:
             self.settings = json.load(tf)
             tf.close()
-        self.logger = logging.getLogger(__name__)
-        self.owners = [
-            285148358815776768,
-            455289384187592704
-        ]
         self.db = None
         self.prefixes = {}
         self.uptime = datetime.now()
         self.session = aiohttp.ClientSession(loop=self.loop)
         self.presence_cycle.start()
         self.noprefix = False
-        self.extension_dir = "cogs"
 
     @tasks.loop(minutes=5)
     async def presence_cycle(self):
