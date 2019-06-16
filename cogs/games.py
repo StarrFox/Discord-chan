@@ -51,20 +51,29 @@ class connect4():
     def create_board(self):
         return [[self.filler] * 7 for _ in range(6)]
 
-    def make_embed(self):
+    def make_embed(self, *, inverse = False):
         embed = discord.Embed(
             description = self.phrase_board()
         )
         embed.add_field(name="Players:", value=f"{self.red}: {self.player_one.mention}\n{self.blue}: {self.player_two.mention}")
         if not self.is_first_run:
-            embed.add_field(name="Last move:", value=f"{self.current_player.mention}: {self.last_play+1}", inline=False)
+            if not inverse:
+                embed.add_field(name="Last move:", value=f"{self.current_player.mention}: {self.last_play+1}", inline=False)
+            else:
+                if self.current_player == self.player_two:
+                    dex = self.player_one.mention
+                else:
+                    dex = self.player_two.mention
+                embed.add_field(name="Last move:", value=f"{dex}: {self.last_play+1}", inline=False)
         if self.is_running:
             if self.is_first_run:
                 embed.add_field(name="Current turn:", value=self.player_one.mention, inline=False)
-            elif self.current_player == self.player_one:
+            elif self.current_player == self.player_one and not invert:
                 embed.add_field(name="Current turn:", value=self.player_two.mention, inline=False)
-            elif self.current_player == self.player_two:
+            elif self.current_player == self.player_two and not invert:
                 embed.add_field(name="Current turn:", value=self.player_one.mention, inline=False)
+            elif self.current_player == self.player_one:
+                embed.add_field(name="Current turn:", value=self.current_player.mention, inline=False)
         else:
             embed.add_field(name="Winner:", value=self.current_player.mention, inline=False)
         return embed
@@ -137,7 +146,7 @@ class connect4():
                 pass
             if str(reaction) == "\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}":
                 await self.message.delete()
-                self.message = await self.ctx.send(embed=self.make_embed())
+                self.message = await self.ctx.send(embed=self.make_embed(inverse=True))
                 await self.add_reactions()
             else:
                 await self.phrase_reaction(str(reaction))
