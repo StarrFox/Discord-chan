@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands, tasks
+
 import asyncio
 import json
 import os
@@ -9,30 +10,25 @@ import aiohttp
 import logging
 import traceback
 import io
+import bot_stuff
+
 from extras import utils
 
 logging.basicConfig(
     format="[%(asctime)s] [%(levelname)s:%(name)s] %(message)s", level=logging.INFO
 )
 
-class subcontext(commands.Context):
+jsk_settings = {
+    "task": "<a:sonic:577005444191485952>",
+    "done": "<a:dancin:582409853918511165>",
+    "syntax": "<a:default:577017740016222229>",
+    "timeout": "error:539157627385413633",
+    "error": "<a:default:577017740016222229>",
+    "tracebacks": "\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}",
+    "scope_prefix": ""
+}
 
-    async def send(self, content=None, *, tts=False, embed=None, file=None, files=None, delete_after=None, nonce=None):
-        if content and len(str(content)) > 2000:
-            await self.message.add_reaction("\N{OPEN MAILBOX WITH RAISED FLAG}")
-            return await utils.paginate(content, self.author)
-        return await super().send(content=content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after)
-
-    async def check(self, message = None):
-        await self.message.add_reaction("glowacheck:536720140025200641")
-        if message:
-            await self.send(message)
-
-    @property
-    def created_at(self):
-        return self.message.created_at
-
-class DiscordChan(commands.AutoShardedBot):
+class DiscordChan(bot_stuff.Bot):
 
     def __init__(self):
         super().__init__(
@@ -81,9 +77,6 @@ class DiscordChan(commands.AutoShardedBot):
         else:
             return "dc!"
 
-    async def is_owner(self, member):
-        return member.id in self.owners
-
     async def on_ready(self):
         if not self.first_run:
             return
@@ -112,21 +105,8 @@ class DiscordChan(commands.AutoShardedBot):
         await self.db.executemany("INSERT INTO prefixes(guild_id, prefixes) VALUES ($1, $2)", self.prefixes.items())
         self.logger.info("Unloaded prefixes")
 
-    async def load_mods(self):
-        for ext in os.listdir('cogs'):
-            try:
-                if not ext.endswith(".py"):
-                    continue
-                self.load_extension(f"cogs.{ext.replace('.py', '')}")
-                self.logger.info(f"Loaded {ext}")
-            except:
-                self.logger.critical(f"{ext} failed:\n{traceback.format_exc()}")
-
     def run(self):
         super().run(self.settings['token'])
-
-    async def get_context(self, message, cls = None):
-        return await super().get_context(message, cls = cls or subcontext)
 
     async def logout(self):
         if self.prefixes:
@@ -145,6 +125,6 @@ class DiscordChan(commands.AutoShardedBot):
         await self.db.close()
         await super().logout()
 
-DiscordChan().run()
-
-# hellow~~ owo
+bot = DiscordChan("", [285148358815776768, 455289384187592704], "cogs")
+bot.load_extension("bot_stuff.jsk", **jsk_settings)
+bot.run()
