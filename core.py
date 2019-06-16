@@ -51,6 +51,7 @@ class DiscordChan(bot_stuff.Bot):
         self.session = aiohttp.ClientSession(loop=self.loop)
         self.presence_cycle.start()
         self.noprefix = False
+        self.extension_dir = "cogs"
 
     @tasks.loop(minutes=5)
     async def presence_cycle(self):
@@ -125,6 +126,6 @@ class DiscordChan(bot_stuff.Bot):
         await self.db.close()
         await super().logout()
 
-bot = DiscordChan("", [285148358815776768, 455289384187592704], "cogs")
+bot = DiscordChan("cogs")
 bot.load_extension("bot_stuff.jsk", **jsk_settings)
 bot.run()
