@@ -74,5 +74,9 @@ class general(commands.Cog):
         json_msg = json_msg.replace("`", "`\u200b")
         await ctx.send(f"```json\n{json_msg}```")
 
+    @commands.command(hidden=True)
+    async def ham(self, ctx):
+        await ctx.send("https://youtu.be/yCei3RrNSmY")
+
 def setup(bot):
     bot.add_cog(general(bot))
