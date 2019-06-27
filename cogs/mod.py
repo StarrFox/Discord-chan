@@ -158,7 +158,7 @@ class mod(commands.Cog):
         async with self.bot.session.get(link) as res:
             try:
                 await ctx.guild.create_custom_emoji(name=name, image=await res.read())
-                await ctx.check()
+                await ctx.message.add_reaction("\N{WHITE HEAVY CHECK MARK}")
             except Exception as e:
                 if isinstance(e, discord.errors.Forbidden):
                     return await ctx.send("I dont have the perms to add emojis")
