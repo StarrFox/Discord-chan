@@ -80,7 +80,7 @@ class DiscordChan(bot_stuff.Bot):
             return
         await self.connect_db()
         await self.load_prefixes()
-        await self.load_extensions()
+        await self.load_mods()
         self.logger.info("Bot ready")
         self.first_run = False
 
