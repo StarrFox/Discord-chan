@@ -31,7 +31,8 @@ class owner(commands.Cog):
             "error": "<a:default:577017740016222229>",
             "tracebacks": "\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}",
             "scope_prefix": "",
-            "retain": True
+            "retain": True,
+            "bot_level_cmds": True
         }
 
     async def cog_check(self, ctx):
