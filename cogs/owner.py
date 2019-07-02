@@ -45,8 +45,8 @@ class owner(commands.Cog):
         await user.send(msg)
         await ctx.send("message sent")
 
-    @commands.command(aliases=["restart"])
-    async def shutdown(self, ctx):
+    @commands.command()
+    async def restart(self, ctx):
         await ctx.send("😡")
         await self.bot.logout()
 
