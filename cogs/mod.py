@@ -153,8 +153,13 @@ class mod(commands.Cog):
 
     @commands.command()
     @checks.serverowner_or_permissions(manage_emojis=True)
-    async def emoji(self, ctx, name, link):
-        """Creates an emoji"""
+    async def emoji(self, ctx, name, link = None):
+        """Creates an emoji
+        Can supply an attacment instead of a link also"""
+        if link is None:
+            if len(ctx.message.attachments) == 0:
+                return await ctx.send("No link or attachment found")
+            link = ctx.message.attachments[0].url
         async with self.bot.session.get(link) as res:
             try:
                 await ctx.guild.create_custom_emoji(name=name, image=await res.read())
