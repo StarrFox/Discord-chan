@@ -112,7 +112,7 @@ class mod(commands.Cog):
         except:
             pass
 
-    @commands.command(aliases=["hackban"])
+    @commands.command()
     @commands.bot_has_permissions(ban_members=True)
     @checks.has_permissions(ban_members=True)
     async def ban(self, ctx, member: discord.Member, *, reason = None):
