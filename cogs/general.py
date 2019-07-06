@@ -56,7 +56,7 @@ class general(commands.Cog):
         await ctx.send(message)
 
     @commands.command(aliases=['msg'])
-    @checks.serverowner_or_permissions(administrator=True)
+    @checks.has_permissions(administrator=True)
     async def quote(self, ctx, user: discord.Member, *, message: commands.clean_content()):
         """Send a message as someone else"""
         hook = await ctx.channel.create_webhook(name=user.display_name)

@@ -125,4 +125,5 @@ class DiscordChan(bot_stuff.Bot):
 
 bot = DiscordChan()
 bot.load_extension("bot_stuff.jsk", **jsk_settings)
+bot.load_extension("bot_stuff.logger", channel=571132727902863376)
 bot.run()

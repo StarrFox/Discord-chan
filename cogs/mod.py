@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
+
 from extras import checks
+
 import asyncio
 import typing
 
@@ -27,7 +29,7 @@ class mod(commands.Cog):
             await ctx.send('exe!')
 
     @prefix.command()
-    @checks.serverowner_or_permissions(administrator=True)
+    @checks.has_permissions(administrator=True)
     async def add(self, ctx, prefix: str):
         """Add a prefix for this server"""
         guild = ctx.guild
@@ -45,7 +47,7 @@ class mod(commands.Cog):
             await ctx.send("Prefix added")
 
     @prefix.command(aliases=['rem'])
-    @checks.serverowner_or_permissions(administrator=True)
+    @checks.has_permissions(administrator=True)
     async def remove(self, ctx, prefix: str):
         """Remove a prefix for this server"""
         guild = ctx.guild
@@ -62,7 +64,8 @@ class mod(commands.Cog):
             await ctx.send("Don't know how you got here lol")
 
     @commands.command()
-    @checks.serverowner_or_permissions(manage_messages=True)
+    @commands.bot_has_permissions(manage_messages=True)
+    @checks.has_permissions(manage_messages=True)
     async def purge(self, ctx, number: int, user: typing.Optional[discord.Member] = None, *, text: str = None):
         """Purges messages from certain user or certain text"""
         channel = ctx.message.channel
@@ -109,50 +112,43 @@ class mod(commands.Cog):
         except:
             pass
 
-    @commands.command()
-    @checks.serverowner_or_permissions(ban_members=True)
+    @commands.command(aliases=["hackban"])
+    @commands.bot_has_permissions(ban_members=True)
+    @checks.has_permissions(ban_members=True)
     async def ban(self, ctx, member: discord.Member, *, reason = None):
         """
         Bans a member
         """
-        if not is_above(ctx.author, member):
-            return await ctx.send("You can't ban someone with a higher role")
-        try:
-            await member.ban(reason=reason)
-            await ctx.send(f"{member.name} was banned")
-        except:
-            await ctx.send("I couldn't ban them :c")
+        if not is_above(ctx.author, member) and not ctx.guild.owner == ctx.author:
+            return await ctx.send("You have to have a higher role to ban someone")
+        await member.ban(reason=reason)
+        await ctx.send(f"{member.name} was banned")
 
     @commands.command()
-    @checks.serverowner_or_permissions(ban_members=True)
+    @commands.bot_has_permissions(ban_members=True)
+    @checks.has_permissions(ban_members=True)
     async def hackban(self, ctx, id: int, *, reason = None):
         """
         Bans using an id
         """
-        if ctx.guild.get_member(id):
-            return await ctx.send(f"This id belongs to a member use {ctx.prefix}ban for this")
-        try:
-            await ctx.guild.ban(discord.Object(id=id), reason=reason)
-            await ctx.send(f"Banned {id}")
-        except:
-            await ctx.send("I couldn't ban them :c")
+        await ctx.guild.ban(discord.Object(id=id), reason=reason)
+        await ctx.send(f"Banned {id}")
+
 
     @commands.command()
-    @checks.serverowner_or_permissions(kick_members=True)
+    @commands.bot_has_permissions(kick_members=True)
+    @checks.has_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member, *, reason = None):
         """
         Kicks a member
         """
-        if not is_above(ctx.author, member):
-            return await ctx.send("You can't kick someone with a higher role")
-        try:
-            await member.kick(reason=reason)
-            await ctx.send(f"{member.name} has been kicked")
-        except:
-            await ctx.send("I was unable to kick them")
+        if not is_above(ctx.author, member) and not ctx.guild.owner == ctx.author:
+            return await ctx.send("You have to have a higher role to kick someone")
+        await member.kick(reason=reason)
+        await ctx.send(f"{member.name} has been kicked")
 
     @commands.command()
-    @checks.serverowner_or_permissions(manage_emojis=True)
+    @checks.has_permissions(manage_emojis=True)
     async def emoji(self, ctx, name, link = None):
         """Creates an emoji
         Can supply an attacment instead of a link also"""
