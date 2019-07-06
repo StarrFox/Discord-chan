@@ -78,5 +78,9 @@ class general(commands.Cog):
     async def ham(self, ctx):
         await ctx.send("https://youtu.be/yCei3RrNSmY")
 
+    @commands.command(hidden=True)
+    async def weeee(self, ctx):
+        await ctx.send("https://www.youtube.com/watch?v=2Y1iPavaOTE")
+
 def setup(bot):
     bot.add_cog(general(bot))
