@@ -1,69 +1,34 @@
 from discord.ext import commands
 import discord.utils
 
-def is_owner_check(ctx):
+def owner_check(ctx):
     id = ctx.message.author.id
     return id in ctx.bot.owners
 
 def is_owner():
-    return commands.check(is_owner_check)
-
-def check_permissions(ctx, perms):
-    if is_owner_check(ctx):
-        return True
-    elif not perms:
-        return False
-
-    ch = ctx.message.channel
-    author = ctx.message.author
-    resolved = ch.permissions_for(author)
-    return all(getattr(resolved, name, None) == value for name, value in perms.items())
-
-def has_permissions(ctx, perms):
-    if is_owner_check(ctx):
-        return True
-    elif not perms:
-        return False
-
-    ch = ctx.message.channel
-    author = ctx.message.author
-    resolved = ch.permissions_for(author)
-    return all(getattr(resolved, name, None) == value for name, value in perms.items())
-
-def role_or_permissions(ctx, check, **perms):
-    if check_permissions(ctx, perms):
-        return True
-
-    ch = ctx.message.channel
-    author = ctx.message.author
-    if ch.is_private:
-        return False
-
-    role = discord.utils.find(check, author.roles)
-    return role is not None
-
-def serverowner_or_permissions(**perms):
     def predicate(ctx):
-        if ctx.message.guild is None:
-            return False
-        server = ctx.message.guild
-        owner = server.owner
-
-        if ctx.message.author.id == owner.id:
+        if owner_check(ctx):
             return True
-
-        return check_permissions(ctx,perms)
+        raise commands.NotOwner()
     return commands.check(predicate)
 
-def serverowner():
+def has_permissions(**perms):
+    def predicate(ctx):
+        ch = ctx.channel
+        permissions = ch.permissions_for(ctx.author)
+        missing = [perm for perm, value in perms.items() if getattr(permissions, perm, None) != value]
+        if not missing or owner_check(ctx):
+            return True
+        raise commands.MissingPermissions(missing)
+    return commands.check(predicate)
+
+def guildowner():
     def predicate(ctx):
         if ctx.guild is None:
             return False
-        guild = ctx.guild
-        owner = guild.owner
-
-        if ctx.message.author.id == owner.id:
+        elif ctx.message.author == ctx.guild.owner:
             return True
-
-        return is_owner_check(ctx)
+        elif owner_check(ctx):
+            return True
+        raise commands.MissingPermissions("Server Owner")
     return commands.check(predicate)
