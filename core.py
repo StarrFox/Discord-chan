@@ -39,7 +39,6 @@ class DiscordChan(bot_stuff.Bot):
             case_insensitive=True,
             reconnect=True
         )
-        self.first_run = True
         with open('settings.json') as tf:
             self.settings = json.load(tf)
             tf.close()
@@ -118,7 +117,7 @@ bot = DiscordChan()
 
 bot.load_extension("bot_stuff.jsk", **jsk_settings)
 
-bot.add_ready_func(bot.load_extension, "bot_stuff.bot_logger", channel=571132727902863376)
+bot.add_ready_func(bot.load_extension, "bot_stuff.logger", channel=571132727902863376)
 bot.add_ready_func(bot.connect_db)
 bot.add_ready_func(bot.load_prefixes)
 
