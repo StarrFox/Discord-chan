@@ -34,7 +34,7 @@ class DiscordChan(bot_stuff.Bot):
     def __init__(self):
         super().__init__(
             prefix=self.get_prefix,
-            owners = [285148358815776768, 455289384187592704],
+            owners = [285148358815776768],
             extension_dir = "cogs",
             case_insensitive=True,
             reconnect=True
@@ -74,15 +74,6 @@ class DiscordChan(bot_stuff.Bot):
             return commands.when_mentioned_or(*self.prefixes[message.guild.id])(self, message)
         else:
             return "dc!"
-
-    async def on_ready(self):
-        if not self.first_run:
-            return
-        await self.connect_db()
-        await self.load_prefixes()
-        await self.load_mods()
-        self.logger.info("Bot ready")
-        self.first_run = False
 
     async def connect_db(self):
         self.db = await asyncpg.connect(
@@ -124,6 +115,11 @@ class DiscordChan(bot_stuff.Bot):
         await super().logout()
 
 bot = DiscordChan()
+
 bot.load_extension("bot_stuff.jsk", **jsk_settings)
-bot.load_extension("bot_stuff.logger", channel=571132727902863376)
+
+bot.add_ready_func(bot.load_extension, "bot_stuff.bot_logger", channel=571132727902863376)
+bot.add_ready_func(bot.connect_db)
+bot.add_ready_func(bot.load_prefixes)
+
 bot.run()

@@ -21,9 +21,7 @@ bool_dict = {
 class owner(commands.Cog):
     """Owner commands"""
 
-    def __init__(self, bot):
-        self.bot = bot
-        self.jsk_settings = {
+    jsk_settings = {
             "task": "<a:sonic:577005444191485952>",
             "done": "<a:dancin:582409853918511165>",
             "syntax": "<a:default:577017740016222229>",
@@ -32,8 +30,11 @@ class owner(commands.Cog):
             "tracebacks": "\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}",
             "scope_prefix": "",
             "retain": True,
-            "bot_level_cmds": True
+            "bot_level_cmds": False
         }
+
+    def __init__(self, bot):
+        self.bot = bot
 
     async def cog_check(self, ctx):
         if not await self.bot.is_owner(ctx.author):
