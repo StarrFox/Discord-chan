@@ -56,7 +56,7 @@ class wallemojis(commands.Cog):
         """
         Makes some emojis from an image
         """
-        if not 0 < size < 10:
+        if not 0 < size <= 10:
             return await ctx.send("plz only use sizes between 0 and 10")
         size = round(size)
         _bytes = await self.get_bytes(link)
