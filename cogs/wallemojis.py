@@ -46,7 +46,7 @@ class wallemojis(commands.Cog):
 
     async def get_bytes(self, link):
         async with self.bot.session.get(link) as res:
-            if res.content_type != "image/webp":
+            if not "image" in res.content_type:
                 return None
             return await res.read()
 
