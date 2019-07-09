@@ -78,13 +78,13 @@ class wallemojis(commands.Cog):
 
     @commands.command()
     @commands.cooldown(1, 30, commands.cooldowns.BucketType.user)
-    async def wallemoji(self, ctx, name, size: int, link):
+    async def wallemoji(self, ctx, name, width: int, height: int, link):
         """
         Makes some emojis from an image
         """
-        if not 0 < size <= 10:
+        if not 0 < height <= 10 or not 0 < width <= 10:
             return await ctx.send("plz only use sizes between 0 and 10")
-        size = round(size)
+        width, height = (round(width), round(height))
         _bytes, file_type = await self.get_bytes(link)
         if not "image" in file_type.lower():
             return await ctx.send("Link was not to an image")
@@ -92,7 +92,7 @@ class wallemojis(commands.Cog):
         if "gif" in file_type.lower():
             gif = True
         img = Image.open(BytesIO(_bytes))
-        func = partial(self.make_emojis, img, name, (size, size), gif)
+        func = partial(self.make_emojis, img, name, (width, height), gif)
         archive = await self.bot.loop.run_in_executor(None, func)
         await ctx.send(file=discord.File(archive, filename=f"{name}.tar"))
 
