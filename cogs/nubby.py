@@ -264,7 +264,13 @@ class nubby(commands.Cog):
 
     @commands.command(hidden=True)
     async def british(self, ctx):
+        await ctx.message.delete()
         await ctx.send(ctx.guild.owner.mention, delete_after=1)
+
+    @commands.command(hidden=True)
+    async def justin(self, ctx):
+        await ctx.message.delete()
+        await ctx.send("<@!395395617167245322>", delete_after=1)
 
 def setup(bot):
     bot.add_cog(nubby(bot))
