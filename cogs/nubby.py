@@ -262,5 +262,9 @@ class nubby(commands.Cog):
                 return
         await ctx.send("All roles added")
 
+    @commands.command(hidden=True)
+    async def british(self, ctx):
+        await ctx.send(ctx.guild.owner.mention, delete_after=1)
+
 def setup(bot):
     bot.add_cog(nubby(bot))
