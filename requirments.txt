@@ -1,4 +1,4 @@
 discord.py
 asyncpg
-Wavelink
 jishaku
+git+https://github.com/StarrFox/bot_stuff.git
