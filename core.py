@@ -26,7 +26,8 @@ jsk_settings = {
     "error": "<a:default:577017740016222229>",
     "tracebacks": "\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}",
     "scope_prefix": "",
-    "retain": True
+    "retain": True,
+    "channel_tracebacks": True
 }
 
 class DiscordChan(bot_stuff.Bot):
