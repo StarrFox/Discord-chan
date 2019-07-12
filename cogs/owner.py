@@ -30,7 +30,8 @@ class owner(commands.Cog):
             "tracebacks": "\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}",
             "scope_prefix": "",
             "retain": True,
-            "bot_level_cmds": False
+            "bot_level_cmds": False,
+            "channel_tracebacks": True
         }
 
     def __init__(self, bot):
