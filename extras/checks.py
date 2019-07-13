@@ -30,5 +30,5 @@ def guildowner():
             return True
         elif owner_check(ctx):
             return True
-        raise commands.MissingPermissions("Server Owner")
+        raise commands.MissingPermissions(["Server owner"])
     return commands.check(predicate)

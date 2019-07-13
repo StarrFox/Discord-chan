@@ -50,15 +50,12 @@ class DiscordChan(bot_stuff.Bot):
         self.presence_cycle.start()
         self.noprefix = False
 
-    @tasks.loop(minutes=5)
+    @tasks.loop(hours=1)
     async def presence_cycle(self):
-        toggle = True
-        if toggle:
-            prez = f"dc!help | {len(self.guilds)} servers"
-            toggle = False
-        else:
-            prez = f"dc!help | {len(self.users)} users"
-            toggle = True
+        """
+        Keeps the status message active
+        """
+        prez = f"dc!help | {len(self.guilds)} servers"
         await self.change_presence(activity=discord.Game(prez))
 
     @presence_cycle.before_loop
