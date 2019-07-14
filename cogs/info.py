@@ -45,8 +45,8 @@ class info(commands.Cog):
             member = ctx.author
         joined = humanize.naturaldate(member.joined_at)
         joined_dis = humanize.naturaldate(member.created_at)
-        top_role = member.top_role.name
-        top_role_pos = (ctx.message.guild.roles[::-1].index(member.top_role))+1
+        #top_role = member.top_role.name
+        #top_role_pos = (ctx.message.guild.roles[::-1].index(member.top_role))+1
         e = discord.Embed(color=member.color)
         e.add_field(name="Name:", value=str(member))
         e.add_field(name="ID:", value=member.id)
@@ -66,7 +66,7 @@ class info(commands.Cog):
             else:
                 humans += 1
         e = discord.Embed(color=discord.Color.blurple())
-        e.set_thumbnail(url=guild.icon_url)
+        e.set_thumbnail(url=str(guild.icon_url))
         e.add_field(name="ID:", value=guild.id)
         e.add_field(name="Owner:", value=str(guild.owner))
         e.add_field(name="Created:", value=humanize.naturaltime(guild.created_at))
