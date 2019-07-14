@@ -74,6 +74,17 @@ class general(commands.Cog):
         json_msg = json_msg.replace("`", "`\u200b")
         await ctx.send(f"```json\n{json_msg}```")
 
+    @commands.command(aliases=["avy", "pfp"])
+    async def avatar(self, ctx, member: discord.Member = None):
+        """
+        Check someone's avatar, defaults to author
+        """
+        if member is None:
+            member = ctx.author
+        e = discord.Embed(title=str(member), url=str(member.avatar_url_as(size=1024)))
+        e.set_image(url=str(member.avatar_url))
+        await ctx.send(embed=e)
+
     @commands.command(hidden=True)
     async def ham(self, ctx):
         await ctx.send("https://youtu.be/yCei3RrNSmY")
