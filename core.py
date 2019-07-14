@@ -64,7 +64,7 @@ class DiscordChan(bot_stuff.Bot):
 
     async def get_prefix(self, message):
         if not message.guild:
-            return ""
+            return ["dc!", ""]
         if self.noprefix and await self.is_owner(message.author):
             return ""
         elif message.guild.id in self.prefixes:
