@@ -29,7 +29,7 @@ class mod(commands.Cog):
             await ctx.send('exe!')
 
     @prefix.command()
-    @has_permissions(administrator=True)
+    @checks.has_permissions(administrator=True)
     async def add(self, ctx, *, prefix: str):
         """Add a prefix for this server"""
         guild = ctx.guild
@@ -48,7 +48,7 @@ class mod(commands.Cog):
             await ctx.send("Prefix added")
 
     @prefix.command(aliases=['rem'])
-    @has_permissions(administrator=True)
+    @checks.has_permissions(administrator=True)
     async def remove(self, ctx, *, prefix: str):
         """Remove a prefix for this server"""
         guild = ctx.guild
