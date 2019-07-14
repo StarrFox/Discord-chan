@@ -30,7 +30,7 @@ class mod(commands.Cog):
 
     @prefix.command()
     @checks.has_permissions(administrator=True)
-    async def add(self, ctx, prefix: str):
+    async def add(self, ctx, *, prefix: str):
         """Add a prefix for this server"""
         guild = ctx.guild
         if guild.id in self.bot.prefixes:
@@ -48,7 +48,7 @@ class mod(commands.Cog):
 
     @prefix.command(aliases=['rem'])
     @checks.has_permissions(administrator=True)
-    async def remove(self, ctx, prefix: str):
+    async def remove(self, ctx, *, prefix: str):
         """Remove a prefix for this server"""
         guild = ctx.guild
         if guild.id in self.bot.prefixes:
