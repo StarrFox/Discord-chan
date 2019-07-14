@@ -29,10 +29,11 @@ class mod(commands.Cog):
             await ctx.send('exe!')
 
     @prefix.command()
-    @checks.has_permissions(administrator=True)
+    @has_permissions(administrator=True)
     async def add(self, ctx, *, prefix: str):
         """Add a prefix for this server"""
         guild = ctx.guild
+        prefix = prefix.replace("\N{QUOTATION MARK}", "")
         if guild.id in self.bot.prefixes:
             if prefix in self.bot.prefixes[guild.id]:
                 return await ctx.send("Prefix already added")
@@ -47,10 +48,11 @@ class mod(commands.Cog):
             await ctx.send("Prefix added")
 
     @prefix.command(aliases=['rem'])
-    @checks.has_permissions(administrator=True)
+    @has_permissions(administrator=True)
     async def remove(self, ctx, *, prefix: str):
         """Remove a prefix for this server"""
         guild = ctx.guild
+        prefix = prefix.replace("\N{QUOTATION MARK}", "")
         if guild.id in self.bot.prefixes:
             if len(self.bot.prefixes[guild.id]) == 1:
                 return await ctx.send("Sorry I can't have no prefix")
