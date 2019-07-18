@@ -15,7 +15,7 @@ class mod(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group(invoke_without_command=True)
+    @commands.group(invoke_without_command=True, aliases=["prefixes"])
     async def prefix(self, ctx):
         """List and add/remove your prefixes"""
         guild = ctx.guild
