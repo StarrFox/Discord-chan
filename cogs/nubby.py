@@ -51,6 +51,7 @@ class nubby(commands.Cog):
         ]
         self.check_twoweeks.start()
         self.verify_dm_msgs = {} #member.id: message
+        guild = self.bot.get_guild(390607785437691916)
         self.guild_settings = {
             "guild": 390607785437691916,
             "strike_noperm": True,
