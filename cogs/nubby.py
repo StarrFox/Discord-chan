@@ -195,7 +195,7 @@ class nubby(commands.Cog):
             def thrower(target: dict):
                 result = ""
                 for k, i in target.items():
-                    if not isinstance(i, (bool, int):
+                    if not isinstance(i, (bool, int)):
                         result += f"{k}: {i.name} ({i.id})\n"
                     else:
                         result += f"{k}: {i}\n"
