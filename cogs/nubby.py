@@ -51,9 +51,8 @@ class nubby(commands.Cog):
         ]
         self.check_twoweeks.start()
         self.verify_dm_msgs = {} #member.id: message
-        guild = bot.get_guild(390607785437691916)
         self.guild_settings = {
-            "guild": guild,
+            "guild": 390607785437691916,
             "strike_noperm": True,
             "twoweeks_check": True,
             "commands_channel": bot.get_channel(442823830902145034),
@@ -72,7 +71,7 @@ class nubby(commands.Cog):
         }
 
     async def cog_check(self, ctx):
-        return ctx.guild == self.guild_settings["guild"]
+        return ctx.guild.id == self.guild_settings["guild"]
 
     def cog_unload(self):
         self.check_twoweeks.cancel()
@@ -95,7 +94,7 @@ class nubby(commands.Cog):
     async def on_message(self, message):
         if self.verify_settings["block_verify"]:
             return
-        nub_g = self.guild_settings["guild"].get_member(message.author.id)
+        nub_g = self.bot.get_guild(self.guild_settings["guild"]).get_member(message.author.id)
         if not nub_g or not self.verify_settings["role"] in nub_g.roles:
             return
         if message.channel == self.verify_settings["chat"] and message.content.lower() == "ready" and nub_g.id in self.verify_dm_msgs.keys():
@@ -123,7 +122,7 @@ class nubby(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        if member.guild != self.guild_settings["guild"]:
+        if member.guild.id != self.guild_settings["guild"]:
             return
         await self.verify(member)
 
@@ -136,9 +135,10 @@ class nubby(commands.Cog):
         await ctx.send(random.choice(self.laval_quotes))
 
     async def get_twoweeks(self):
-        target_roles = [self.guild_settings["guild"].get_role(i) for i in [501092781473792020, 439723470667120640]]
+        guild = self.bot.get_guild(self.guild_settings["guild"])
+        target_roles = [guild.get_role(i) for i in [501092781473792020, 439723470667120640]]
         processed = [] #Returned positive
-        for member in self.guild_settings["guild"].members:
+        for member in guild.members:
             checks = [
                 member.bot,
                 target_roles[0] in member.roles and target_roles[1] in member.roles,
@@ -189,6 +189,7 @@ class nubby(commands.Cog):
         """
         View and change settings for verify and guild
         """
+        guild = self.bot.get_guild(self.guild_settings["guild"])
         if item is None and value is None:
             def thrower(target: dict):
                 result = ""
@@ -209,7 +210,7 @@ class nubby(commands.Cog):
                 base[item] = test_none
                 return True
             elif isinstance(base[item], discord.Role):
-                test_none = self.guild_settings["guild"].get_role(int(value))
+                test_none = guild.get_role(int(value))
                 if test_none is None:
                     return False
                 base[item] = test_none
@@ -218,6 +219,12 @@ class nubby(commands.Cog):
                 if not value.lower() in bool_dict.keys():
                     return False
                 base[item] = bool_dict[value.lower()]
+                return True
+            elif isinstance(base[item], discord.Guild):
+                test_none = self.bot.get_guild(int(value))
+                if test_none is None:
+                    return False
+                base[item] = test_none
                 return True
         guild_test = try_dict(self.guild_settings)
         if guild_test:
@@ -230,7 +237,8 @@ class nubby(commands.Cog):
     @commands.command()
     @is_above_mod()
     async def twoweeks(self, ctx):
-        target_roles = [self.guild_settings["guild"].get_role(i) for i in [501092781473792020, 439723470667120640]]
+        guild = self.bot.get_guild(self.guild_settings["guild"])
+        target_roles = [guild.get_role(i) for i in [501092781473792020, 439723470667120640]]
         processed = await self.get_twoweeks()
         if not processed:
             return await ctx.send("Everything is balanced, as it should be.")
