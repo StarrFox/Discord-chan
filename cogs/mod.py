@@ -5,8 +5,6 @@ from extras import checks
 
 import asyncio
 import typing
-from wand.image import Image
-from io import BytesIO
 
 def is_above(invoker, user):
     return invoker.top_role > user.top_role
@@ -151,18 +149,6 @@ class mod(commands.Cog):
         await member.kick(reason=reason)
         await ctx.send(f"{member.name} has been kicked")
 
-    def resize_emoji(self, pic_bytes):
-        """
-        Uses wand to resize an image
-        so that it conforms to discord's size limit
-        """
-        img = Image(blob=pic_bytes)
-        img.resize(width=200, height=200)
-        buffer = BytesIO()
-        img.save(buffer)
-        buffer.seek(0)
-        return buffer
-
     @commands.command()
     @checks.has_permissions(manage_emojis=True)
     @commands.bot_has_permissions(manage_emojis=True)
@@ -181,10 +167,7 @@ class mod(commands.Cog):
                 if isinstance(e, discord.errors.Forbidden):
                     return await ctx.send("I dont have the perms to add emojis")
                 elif isinstance(e, discord.errors.HTTPException):
-                    resized = self.resize_emoji(await res.read())
-                    await ctx.guild.create_custom_emoji(name=name, image=resized.read())
-                    await ctx.message.add_reaction("\N{WHITE HEAVY CHECK MARK}")
-                    return
+                    return await ctx.send("File too large")
                 await ctx.send(e)
 
 def setup(bot):
