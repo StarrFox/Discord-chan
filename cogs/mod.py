@@ -183,6 +183,8 @@ class mod(commands.Cog):
                 elif isinstance(e, discord.errors.HTTPException):
                     resized = self.resize_emoji(await res.read())
                     await ctx.guild.create_custom_emoji(name=name, image=resized.read())
+                    await ctx.message.add_reaction("\N{WHITE HEAVY CHECK MARK}")
+                    return
                 await ctx.send(e)
 
 def setup(bot):
