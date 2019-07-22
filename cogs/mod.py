@@ -182,7 +182,7 @@ class mod(commands.Cog):
                     return await ctx.send("I dont have the perms to add emojis")
                 elif isinstance(e, discord.errors.HTTPException):
                     resized = self.resize_emoji(await res.read())
-                    await ctx.guild.create_custom_emoji(name=name, image=resized)
+                    await ctx.guild.create_custom_emoji(name=name, image=resized.read())
                 await ctx.send(e)
 
 def setup(bot):
