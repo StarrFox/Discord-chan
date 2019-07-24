@@ -170,5 +170,30 @@ class mod(commands.Cog):
                     return await ctx.send("File too large")
                 await ctx.send(e)
 
+    @commands.command(aliases=["cr"])
+    @checks.has_permissions(manage_roles=True)
+    @commands.bot_has_permissions(manage_roles=True)
+    async def createrole(self, ctx, name):
+        """
+        Creates a role with a given name
+        """
+        role = await ctx.guild.create_role(name=name)
+        await ctx.send(f"Created {role.name}")
+
+    @commands.command(aliases=["ar", "sr", "setrole"])
+    @checks.has_permissions(manage_roles=True)
+    @commands.bot_has_permissions(manage_roles=True)
+    async def addrole(self, ctx, member: discord.Member, role: discord.Role):
+        """
+        Gives someone a role
+        You can only add roles below your own
+        """
+        if ctx.author.top_role > role:
+            await ctx.author.add_roles(role)
+            await ctx.send(f"Added {role.name}")
+        else:
+            await ctx.send("You aren't above that role")
+        
+
 def setup(bot):
     bot.add_cog(mod(bot))
