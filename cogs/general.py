@@ -51,7 +51,7 @@ class general(commands.Cog):
     async def invite(self, ctx):
         """Invite the bot to your server"""
         invite0 = f"https://discordapp.com/api/oauth2/authorize?client_id={self.bot.user.id}&permissions=0&scope=bot"
-        invite8 = f"https://discordapp.com/api/oauth2/authorize?client_id={self.bot.user.id}&permissions=8&scope=bot"
+        invite8 = f"https://discordapp.com/api/oauth2/authorize?client_id={self.bot.user.id}&permissions=1949690966&scope=bot"
         message = f"**With perms:**\n<{invite8}>\n**Without perms (some things may not work):**\n<{invite0}>"
         await ctx.send(message)
 
