@@ -9,7 +9,7 @@ class events(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.copycat = self.bot.get_channel(573606808384438292)
+        self.copycat = self.bot.get_channel(605115140278452373)
 
     @commands.Cog.listener()
     async def on_message(self, message):
