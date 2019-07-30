@@ -50,7 +50,7 @@ class DiscordChan(bot_stuff.Bot):
         self.presence_cycle.start()
         self.noprefix = False
 
-    @tasks.loop(hours=1)
+    @tasks.loop(minutes=15)
     async def presence_cycle(self):
         """
         Keeps the status message active
