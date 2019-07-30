@@ -23,20 +23,12 @@ class info(commands.Cog):
         """Get the bot's source link"""
         await ctx.send("<https://github.com/StarrFox/Discord-chan>")
 
-    def time_diff(self, time: datetime):
-        return str(datetime.utcnow() - time).split(",")[0]
-
     @commands.command(aliases=['about'])
     async def info(self, ctx):
         """View bot info"""
-        msg = [
-            "Owner: StarrFox#6312",
-            f"Guilds: {len(self.bot.guilds)}",
-            f"Channels: {len([c for c in self.bot.get_all_channels()])}",
-            f"Top role: #{(ctx.guild.roles[::-1].index(ctx.guild.me.top_role))+1} {ctx.guild.me.top_role.name}",
-            f"Up for: {self.time_diff(self.bot.uptime)}"
-        ]
-        await ctx.send(utils.block("\n".join(msg)))
+        msg = f"A discord bot by StarrFox#6312, {ctx.prefix}help to see commands and " \
+        f"{ctx.prefix}support to join the support server"
+        await ctx.send(msg)
 
     @commands.command(aliases=['ui'])
     async def userinfo(self, ctx, member: discord.Member = None):
@@ -52,6 +44,7 @@ class info(commands.Cog):
         e.add_field(name="ID:", value=member.id)
         e.add_field(name="Joined guild:", value=joined)
         e.add_field(name="Joined discord:", value=joined_dis)
+        e.set_thumbnail(url=str(member.avatar_url))
         await ctx.send(embed=e)
 
     @commands.group(aliases=['si', 'gi', 'serverinfo'])
