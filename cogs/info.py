@@ -26,7 +26,7 @@ class info(commands.Cog):
     @commands.command(aliases=['about'])
     async def info(self, ctx):
         """View bot info"""
-        msg = f"A discord bot by StarrFox#6312, {ctx.prefix}help to see commands and " \
+        msg = f"A discord bot by StarrFox#6312; {ctx.prefix}help to see commands and " \
         f"{ctx.prefix}support to join the support server"
         await ctx.send(msg)
 
