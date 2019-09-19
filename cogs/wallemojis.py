@@ -88,9 +88,7 @@ class wallemojis(commands.Cog):
         _bytes, file_type = await self.get_bytes(link)
         if not "image" in file_type.lower():
             return await ctx.send("Link was not to an image")
-        gif = False
-        if "gif" in file_type.lower():
-            gif = True
+        gif = "gif" in file_type.lower()
         img = Image.open(BytesIO(_bytes))
         func = partial(self.make_emojis, img, name, (width, height), gif)
         archive = await self.bot.loop.run_in_executor(None, func)
