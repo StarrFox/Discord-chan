@@ -119,4 +119,6 @@ bot.add_ready_func(bot.load_extension, "bot_stuff.logger", channel=5711327279028
 bot.add_ready_func(bot.connect_db)
 bot.add_ready_func(bot.load_prefixes)
 
+bot.http.user_agent = r"Mozilla/5.0 (Linux; U; Android 2.2) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1"
+
 bot.run()
