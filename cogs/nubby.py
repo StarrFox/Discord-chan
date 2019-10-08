@@ -5,6 +5,7 @@ import datetime
 import random
 import humanize
 import typing
+import json
 
 from extras import utils
 
@@ -70,6 +71,9 @@ class nubby(commands.Cog):
             "chat": bot.get_channel(578771669288615936),
             "logs": bot.get_channel(578771629312704513)
         }
+        with open("nubby_filter.json") as fp:
+            # Word mapped to True
+            self.filter_list = json.load(fp)
 
     async def cog_check(self, ctx):
         return ctx.guild.id == self.guild_settings["guild"]
@@ -90,6 +94,58 @@ class nubby(commands.Cog):
         except:
             self.verify_dm_msgs[member.id] = await self.verify_settings["chat"].send(f"Hey {member.mention} can you turn on dms so I can verify you; send `ready` to start the process")
             await self.verify_settings["logs"].send(utils.block(f"{member} ({member.id}) had dms off so I sent them a message in #{self.verify_settings['chat'].name}"))
+
+    def save_filter(self):
+        """
+        This is blocking but isnt called much
+        so whatever
+        """
+        with open("nubby_filter.json", "w+") as fp:
+            json.dump(self.filter_list, fp, indent=4)
+
+    @commands.Cog.listener("on_message")
+    async def _filter(self, message):
+        if message.guild.id != self.guild_settings["guild"]:
+            return
+        if any([word in message.content.lower() for word in self.filter_list.keys()]):
+            try:
+                await message.delete()
+            except:
+                pass
+
+    @commands.group(name="filter", invoke_without_command=True)
+    @is_above_mod()
+    async def filter_command(self, ctx):
+        """
+        Base filter command
+        Sends filter to dms without subcommand
+        """
+        await self.bot.paginate(", ".join(self.filter_list.keys()), ctx.author)
+
+    @filter_command.command(name="add")
+    async def filter_add_command(self, ctx, *words):
+        """
+        Add a filtered word or words
+        seperated by space
+        """
+        for word in words:
+            self.filter_list[word] = True
+        self.save_filter()
+        await ctx.send("Added to filter")
+
+    @filter_command.command(name="remove", aliases=["rem"])
+    async def filter_rem_command(self, ctx, *words):
+        """
+        Remove a filter word or words
+        seperated by space
+        """
+        for word in words:
+            try:
+                self.filter_list.pop(word)
+            except:
+                pass
+        self.save_filter()
+        await ctx.send("Removed from filter, or was not in")
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -184,7 +240,7 @@ class nubby(commands.Cog):
         self.verify_settings["block_verify"] = value
         await ctx.send("changed")
 
-    @commands.group()
+    @commands.command()
     @is_above_mod()
     async def settings(self, ctx, item: typing.Optional[str] = None, value: str = None):
         """
