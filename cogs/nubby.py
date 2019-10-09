@@ -71,7 +71,7 @@ class nubby(commands.Cog):
             "chat": bot.get_channel(578771669288615936),
             "logs": bot.get_channel(578771629312704513)
         }
-        with open("nubby_filter.json", "w+") as fp:
+        with open("nubby_filter.json") as fp:
             # Word mapped to True
             if len(fp.read()) == 0:
                 self.filter_list = {}
@@ -109,7 +109,7 @@ class nubby(commands.Cog):
 
     @commands.Cog.listener("on_message")
     async def _filter(self, message):
-        if message.guild.id != self.guild_settings["guild"] or message.channel.id == 578328936472248340:
+        if message.guild.id != self.guild_settings["guild"] or message.channel.id == 578328936472248340 or message.channel.id == 578771629312704513:
             return
         if any([word in message.content.lower() for word in self.filter_list.keys()]):
             try:
