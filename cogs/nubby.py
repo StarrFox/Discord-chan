@@ -71,9 +71,13 @@ class nubby(commands.Cog):
             "chat": bot.get_channel(578771669288615936),
             "logs": bot.get_channel(578771629312704513)
         }
-        with open("nubby_filter.json") as fp:
+        with open("nubby_filter.json", "w+") as fp:
             # Word mapped to True
-            self.filter_list = json.load(fp)
+            if len(fp.read()) == 0:
+                self.filter_list = {}
+            else:
+                fp.seek(0)
+                self.filter_list = json.load(fp)
 
     async def cog_check(self, ctx):
         return ctx.guild.id == self.guild_settings["guild"]
@@ -100,7 +104,7 @@ class nubby(commands.Cog):
         This is blocking but isnt called much
         so whatever
         """
-        with open("nubby_filter.json", "w+") as fp:
+        with open("nubby_filter.json", "w") as fp:
             json.dump(self.filter_list, fp, indent=4)
 
     @commands.Cog.listener("on_message")
