@@ -109,11 +109,14 @@ class nubby(commands.Cog):
 
     @commands.Cog.listener("on_message")
     async def _filter(self, message):
-        if message.guild.id != self.guild_settings["guild"]:
+        if message.guild.id != self.guild_settings["guild"] or message.channel.id == 578328936472248340:
             return
         if any([word in message.content.lower() for word in self.filter_list.keys()]):
             try:
                 await message.delete()
+                await self.verify_settings["logs"].send(utils.block(
+                    f"Deleted filtered message from {message.author}({message.author.id}) with word {[word for word in self.filter_list.keys() if word in message.content.lower()][0]}"
+                ))
             except:
                 pass
 
