@@ -115,7 +115,8 @@ class nubby(commands.Cog):
             try:
                 await message.delete()
                 await self.verify_settings["logs"].send(utils.block(
-                    f"Deleted filtered message from {message.author}({message.author.id}) with word {[word for word in self.filter_list.keys() if word in message.content.lower()][0]}"
+                    f"Deleted filtered message from {message.author}({message.author.id}) with word {[word for word in self.filter_list.keys() if word in message.content.lower()][0]}",
+                    lang=''
                 ))
             except:
                 pass
