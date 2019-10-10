@@ -61,7 +61,8 @@ class nubby(commands.Cog):
             "member_role": guild.get_role(439723301238210560),
             "first_strike": guild.get_role(579370927389802499),
             "second_strike": guild.get_role(579370927943450626),
-            "third_strike": guild.get_role(579370928987963396)
+            "third_strike": guild.get_role(579370928987963396),
+            "mute_role": guild.get_role(396797327068626944)
         }
         self.verify_settings = {
             "on": False,
@@ -115,7 +116,8 @@ class nubby(commands.Cog):
             try:
                 await message.delete()
                 await self.verify_settings["logs"].send(utils.block(
-                    f"Deleted filtered message from {message.author}({message.author.id}) with word {[word for word in self.filter_list.keys() if word in message.content.lower()][0]}",
+                    f"Filtered message from {message.author}({message.author.id}) with word {[word for word in self.filter_list.keys() if word in message.content.lower()][0]}\n"
+                    f"Time:{message.created_at} channel: {message.channel.name}",
                     lang=''
                 ))
             except:
