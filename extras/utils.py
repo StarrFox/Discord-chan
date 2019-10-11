@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-def block(content, lang='py'):
+def block(content, lang=''):
     """Returns a codeblock"""
     return f"```{lang}\n{content}```"
 
