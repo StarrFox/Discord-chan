@@ -6,6 +6,7 @@ import random
 import humanize
 import typing
 import json
+import asyncio
 
 from extras import utils
 
@@ -72,8 +73,12 @@ class nubby(commands.Cog):
             "chat": bot.get_channel(578771669288615936),
             "logs": bot.get_channel(578771629312704513)
         }
-        with open("nubby_filter.json") as fp:
+        self.warned = [] # list of ids
+        self.muted = [] # ^
+        self.warned_tasks = {} # id: task
+        with open("nubby_filter.json", "a+") as fp:
             # Word mapped to True
+            fp.seek(0)
             if len(fp.read()) == 0:
                 self.filter_list = {}
             else:
@@ -112,16 +117,65 @@ class nubby(commands.Cog):
     async def _filter(self, message):
         if message.guild.id != self.guild_settings["guild"] or message.channel.id == 578328936472248340 or message.channel.id == 578771629312704513:
             return
-        if any([word in message.content.lower() for word in self.filter_list.keys()]):
+        words = [word for word in self.filter_list.keys() if word in message.content.lower()]
+        if words:
+            aId = message.author.id
             try:
                 await message.delete()
                 await self.verify_settings["logs"].send(utils.block(
-                    f"Filtered message from {message.author}({message.author.id}) with word {[word for word in self.filter_list.keys() if word in message.content.lower()][0]}\n"
-                    f"Time:{message.created_at} channel: {message.channel.name}",
-                    lang=''
+                    f"Filtered message from {message.author} ({aId}) with words {', '.join(words)}\n"
+                    f"Time:{message.created_at} channel: {message.channel.name}"
                 ))
+                if aId in self.warned:
+                    self.warned.remove(aId)
+                    self.muted.append(aId)
+                    self.warned_tasks[aId].cancel()
+                    await message.author.add_roles(
+                        self.guild_settings["mute_role"]
+                    )
+                    await self.verify_settings["logs"].send(utils.block(
+                        f"Muted {message.author} ({aId})\n"
+                        f"Time:{message.created_at}"
+                    ))
+                else:
+                    self.warned.append(aId)
+                    await message.author.send(
+                        f"Warning: {', '.join(words)} are filtered, you will be muted on next offence"
+                    )
+                    await self.verify_settings["logs"].send(utils.block(
+                        f"Warned{message.author} ({aId})\n"
+                        f"Time:{message.created_at}"
+                    ))
+                    self.warned_tasks[aId] = self.bot.loop.create_task(warning_remover(aId))
             except:
                 pass
+
+    @commands.Cog.listener("on_member_join")
+    async def mute_retainer(self, member):
+        if member.guild.id != self.guild_settings["guild"]:
+            return
+        if member.id in self.muted:
+            await member.add_roles(
+                self.guild_settings["mute_role"]
+            )
+
+    @commands.Cog.listener("on_member_update")
+    async def mute_remover(self, before, after):
+        if before.guild.id != self.guild_settings["guild"]:
+            return
+        if before.id in self.muted and not self.guild_settings["mute_role"] in after.roles:
+            self.muted.remove(before.id)
+
+    async def warning_remover(self, aId: int):
+        """
+        Removes a warning after 24 hours
+        """
+        try:
+            await asyncio.sleep(60*60*24)
+            self.warned.remove(aId)
+        except:
+            pass
+        self.warned_tasks.pop(aId)
 
     @commands.group(name="filter", invoke_without_command=True)
     @is_above_mod()
