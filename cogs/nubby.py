@@ -137,7 +137,8 @@ class nubby(commands.Cog):
                     await self.verify_settings["logs"].send(utils.block(
                         f"Muted {message.author} ({aId})\n"
                         f"Time:{message.created_at}"
-                    )) + self.guild_settings["mod_role"].mention
+                    ) + self.guild_settings["mod_role"].mention
+                    )
                 else:
                     self.warned.append(aId)
                     await message.author.send(
