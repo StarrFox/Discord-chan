@@ -141,11 +141,20 @@ class nubby(commands.Cog):
                         f"Time:{message.created_at}"
                     ) + self.guild_settings["mod_role"].mention
                     )
+                    try:
+                        await message.author.send(
+                            "u used a bad word u will be muted until a mod decides your mute time ~Nubby"
+                        )
+                    except:
+                        pass
                 else:
                     self.warned.append(aId)
-                    await message.author.send(
-                        f"Warning: word(s) {', '.join(words)} are/is filtered, don't do again haha yes"
-                    )
+                    try:
+                        await message.author.send(
+                            f"Warning: word(s) {', '.join(words)} are/is filtered, don't do again haha yes"
+                        )
+                    except:
+                        pass
                     await self.verify_settings["logs"].send(utils.block(
                         f"Warned {message.author} ({aId})\n"
                         f"Time:{message.created_at}"
