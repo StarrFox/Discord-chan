@@ -140,13 +140,13 @@ class nubby(commands.Cog):
                 else:
                     self.warned.append(aId)
                     await message.author.send(
-                        f"Warning: {', '.join(words)} are filtered, you will be muted on next offence"
+                        f"Warning: {', '.join(words)} are/is filtered, you will be muted on next offence"
                     )
                     await self.verify_settings["logs"].send(utils.block(
-                        f"Warned{message.author} ({aId})\n"
+                        f"Warned {message.author} ({aId})\n"
                         f"Time:{message.created_at}"
                     ))
-                    self.warned_tasks[aId] = self.bot.loop.create_task(warning_remover(aId))
+                    self.warned_tasks[aId] = self.bot.loop.create_task(self.warning_remover(aId))
             except:
                 pass
 
@@ -166,12 +166,12 @@ class nubby(commands.Cog):
         if before.id in self.muted and not self.guild_settings["mute_role"] in after.roles:
             self.muted.remove(before.id)
 
-    async def warning_remover(self, aId: int):
+    async def warning_remover(self, aId):
         """
         Removes a warning after 24 hours
         """
         try:
-            await asyncio.sleep(60*60*24)
+            await asyncio.sleep(86_400)
             self.warned.remove(aId)
         except:
             pass
