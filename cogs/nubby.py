@@ -118,6 +118,8 @@ class nubby(commands.Cog):
     async def _filter(self, message):
         if message.guild.id != self.guild_settings["guild"] or message.channel.id == 578328936472248340 or message.channel.id == 578771629312704513:
             return
+        if above_mod(message.author):
+            return
         words = [word for word in self.filter_list.keys() if word in message.content.lower()]
         if words:
             aId = message.author.id
