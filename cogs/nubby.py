@@ -140,7 +140,7 @@ class nubby(commands.Cog):
                 else:
                     self.warned.append(aId)
                     await message.author.send(
-                        f"Warning: {', '.join(words)} are/is filtered, you will be muted on next offence"
+                        f"Warning: word(s) {', '.join(words)} are/is filtered, you will be muted on next offence"
                     )
                     await self.verify_settings["logs"].send(utils.block(
                         f"Warned {message.author} ({aId})\n"
