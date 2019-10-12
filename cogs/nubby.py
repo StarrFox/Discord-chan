@@ -63,7 +63,8 @@ class nubby(commands.Cog):
             "first_strike": guild.get_role(579370927389802499),
             "second_strike": guild.get_role(579370927943450626),
             "third_strike": guild.get_role(579370928987963396),
-            "mute_role": guild.get_role(396797327068626944)
+            "mute_role": guild.get_role(396797327068626944),
+            "mod_role": guild.get_role(396797202779078657)
         }
         self.verify_settings = {
             "on": False,
@@ -136,7 +137,7 @@ class nubby(commands.Cog):
                     await self.verify_settings["logs"].send(utils.block(
                         f"Muted {message.author} ({aId})\n"
                         f"Time:{message.created_at}"
-                    ))
+                    )) + self.guild_settings["mod_role"].mention
                 else:
                     self.warned.append(aId)
                     await message.author.send(
