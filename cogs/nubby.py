@@ -176,7 +176,8 @@ class nubby(commands.Cog):
     async def mute_remover(self, before, after):
         if before.guild.id != self.guild_settings["guild"]:
             return
-        if before.id in self.muted and not self.guild_settings["mute_role"] in after.roles:
+        mute_role = self.guild_settings["mute_role"]
+        if before.id in self.muted and mute_role in before.roles and not mute_role in after.roles:
             self.muted.remove(before.id)
 
     async def warning_remover(self, aId):
