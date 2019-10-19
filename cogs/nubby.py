@@ -271,7 +271,7 @@ class nubby(commands.Cog):
 
     async def get_twoweeks(self):
         guild = self.bot.get_guild(self.guild_settings["guild"])
-        target_roles = [guild.get_role(i) for i in [501092781473792020, 439723470667120640]]
+        target_roles = [guild.get_role(i) for i in [501092781473792020, 439723470667120640, 631690756079353887]]
         processed = [] #Returned positive
         for member in guild.members:
             checks = [
@@ -373,7 +373,7 @@ class nubby(commands.Cog):
     @is_above_mod()
     async def twoweeks(self, ctx):
         guild = self.bot.get_guild(self.guild_settings["guild"])
-        target_roles = [guild.get_role(i) for i in [501092781473792020, 439723470667120640]]
+        target_roles = [guild.get_role(i) for i in [501092781473792020, 439723470667120640, 631690756079353887]]
         processed = await self.get_twoweeks()
         if not processed:
             return await ctx.send("Everything is balanced, as it should be.")
