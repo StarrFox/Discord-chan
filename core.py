@@ -1,22 +1,23 @@
-import discord
-from discord.ext import commands, tasks
-
-import asyncio
-import json
-import os
-from datetime import datetime
-import asyncpg
-import aiohttp
-import logging
-import traceback
 import io
+import os
+import json
+import aiohttp
+import asyncio
+import asyncpg
+import discord
+import logging
 import bot_stuff
+import traceback
 
 from extras import utils
+from datetime import datetime
+from discord.ext import commands, tasks
 
 logging.basicConfig(
     format="[%(asctime)s] [%(levelname)s:%(name)s] %(message)s", level=logging.INFO
 )
+
+logger = logging.getLogger(__name__)
 
 jsk_settings = {
     "task": "<a:sonic:577005444191485952>",
@@ -77,19 +78,19 @@ class DiscordChan(bot_stuff.Bot):
             self.settings['db'],
             password=self.settings['db_pass']
         )
-        self.logger.info("Connected to DB")
+        logger.info("Connected to DB")
 
     async def load_prefixes(self):
         count = 0
         for guild_id, prefix_list in await self.db.fetch("SELECT * FROM prefixes;"):
             count += 1
             self.prefixes[guild_id] = prefix_list
-        self.logger.info(f"loaded {count} prefixes")
+        logger.info(f"loaded {count} prefixes")
 
     async def unload_prefixes(self):
         await self.db.execute("DELETE FROM prefixes;")
         await self.db.executemany("INSERT INTO prefixes(guild_id, prefixes) VALUES ($1, $2)", self.prefixes.items())
-        self.logger.info("Unloaded prefixes")
+        logger.info("Unloaded prefixes")
 
     def run(self):
         super().run(self.settings['token'])
