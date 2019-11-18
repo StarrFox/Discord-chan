@@ -1,9 +1,13 @@
+import json
 import discord
 import asyncio
-import json
+import logging
 import traceback
-from discord.ext import commands
+
 from extras import utils
+from discord.ext import commands
+
+logger = logging.getLogger(__name__)
 
 class events(commands.Cog):
 
@@ -22,12 +26,12 @@ class events(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
         self.bot.prefixes[guild.id] = ['dc!']
-        self.bot.logger.info(f"Joined {guild.name}")
+        logger.info(f"Joined {guild.name}")
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
         self.bot.prefixes.pop(guild.id)
-        self.bot.logger.info(f"Left {guild.name}")
+        logger.info(f"Left {guild.name}")
 
 def setup(bot):
     bot.add_cog(events(bot))
