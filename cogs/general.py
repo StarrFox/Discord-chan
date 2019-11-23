@@ -63,16 +63,84 @@ class general(commands.Cog):
         await hook.send(message, avatar_url=user.avatar_url_as(format='png'))
         await hook.delete()
 
-    @commands.command(aliases=['msgsource', 'msgsrc'])
-    async def msgraw(self, ctx, id: int):
-        """Get the raw message data"""
+    @commands.group()
+    async def raw(self, ctx):
+        """
+        Base raw command
+        just sends help for raw
+        """
+        await ctx.send_help("raw")
+
+    async def send_raw(self, ctx, message):
+        to_send = json.dumps(message, indent=4)
+        to_send = discord.utils.escape_markdown(to_send)
+        await self.bot.paginate(to_send, ctx, lang='json')
+
+    @raw.command(aliases=['msg'])
+    async def message(self, ctx, channel: discord.TextChannel, messageid: int):
+        """
+        Raw message object
+        """
         try:
-            message = await self.bot.http.get_message(ctx.channel.id, id)
+            message = await self.bot.http.get_message(channel.id, messageid)
         except:
             return await ctx.send("Invalid message id")
-        json_msg = json.dumps(message, indent=4)
-        json_msg = json_msg.replace("`", "`\u200b")
-        await self.bot.paginate(json_msg, ctx, lang='json')
+        await self.send_raw(ctx, message)
+
+    @raw.command()
+    async def channel(self, ctx, channel: discord.TextChannel):
+        """
+        Raw channel object
+        """
+        try:
+            message = await self.bot.http.get_channel(channel.id)
+        except:
+            return await ctx.send("Invalid channel id")
+        await self.send_raw(ctx, message)
+
+    @raw.command()
+    async def member(self, ctx, member: discord.Member):
+        """
+        Raw member object
+        """
+        try:
+            message = await self.bot.http.get_member(member.guild.id, member.id)
+        except:
+            return await ctx.send("Invalid member id")
+        await self.send_raw(ctx, message)
+
+    @raw.command()
+    async def user(self, ctx, userid: int):
+        """
+        Raw user object
+        """
+        try:
+            message = await self.bot.http.get_user(userid)
+        except:
+            return await ctx.send("Invalid user id")
+        await self.send_raw(ctx, message)
+
+    @raw.command(aliases=['server'])
+    async def guild(self, ctx, guildid: int):
+        """
+        Raw guild object
+        """
+        try:
+            message = await self.bot.http.get_guild(guildid)
+        except:
+            return await ctx.send("Invalid guild id")
+        await self.send_raw(ctx, message)
+
+    @raw.command(name='invite')
+    async def raw_invite(self, ctx, invite: str):
+        """
+        Raw invite object
+        """
+        try:
+            message = await self.bot.http.get_invite(invite.split('/')[-1])
+        except:
+            return await ctx.send("Invalid invite")
+        await self.send_raw(ctx, message)
 
     @commands.command(aliases=["avy", "pfp"])
     async def avatar(self, ctx, member: discord.Member = None):
