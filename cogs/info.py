@@ -47,7 +47,7 @@ class info(commands.Cog):
         e.set_thumbnail(url=str(member.avatar_url))
         await ctx.send(embed=e)
 
-    @commands.group(aliases=['si', 'gi', 'serverinfo'])
+    @commands.command(aliases=['si', 'gi', 'serverinfo'])
     async def guildinfo(self, ctx):
         """Get info on a guild"""
         guild = ctx.guild
