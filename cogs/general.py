@@ -63,7 +63,7 @@ class general(commands.Cog):
         await hook.send(message, avatar_url=user.avatar_url_as(format='png'))
         await hook.delete()
 
-    @commands.group()
+    @commands.group(invoke_without_command=True)
     async def raw(self, ctx):
         """
         Base raw command
