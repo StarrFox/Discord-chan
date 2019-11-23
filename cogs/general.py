@@ -72,7 +72,7 @@ class general(commands.Cog):
             return await ctx.send("Invalid message id")
         json_msg = json.dumps(message, indent=4)
         json_msg = json_msg.replace("`", "`\u200b")
-        await ctx.send(f"```json\n{json_msg}```")
+        await self.bot.paginate(utils.block(json_msg, lang='json'), ctx)
 
     @commands.command(aliases=["avy", "pfp"])
     async def avatar(self, ctx, member: discord.Member = None):
