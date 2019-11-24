@@ -99,7 +99,7 @@ class owner(commands.Cog):
 
     async def convert_to_hash(self, url: str):
         file = BytesIO(
-            (await self.bot.session.get(url)).read()
+            await (await self.bot.session.get(url)).read()
         )
         img = Image.open(file)
         return phash(img)
