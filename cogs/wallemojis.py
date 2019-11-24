@@ -71,8 +71,8 @@ class wallemojis(commands.Cog):
         Returns a premade wall
         EX:
         ```
-        :kitty_0::kitty_2:
-        :kitty_3::kitty_4:
+        :kitty_0::kitty_1:
+        :kitty_2::kitty_3:
         ```
         """
         text = '```\n'
