@@ -130,7 +130,9 @@ class owner(commands.Cog):
             best_matches = await self.get_best_match(
                 message.embeds[0].image.url
             )
-            await message.channel.send(f"`p!catch {best_matches[0][0]}` or `p!catch {best_matches[0][0]}`")
+            await message.channel.send(
+                f"`p!catch {best_matches[0][0]}` dr: {best_matches[0][1]} or `p!catch {best_matches[1][0]}` dr: {best_matches[1][1]}"
+            )
 
     @commands.command()
     async def pokecord(self, ctx: commands.Context):
