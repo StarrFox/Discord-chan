@@ -127,7 +127,7 @@ class owner(commands.Cog):
                 ]
                 return all(checks)
             message = await self.bot.wait_for('message', check=check)
-            best_matches = self.get_best_match(
+            best_matches = await self.get_best_match(
                 message.embeds[0].image.url
             )
             await message.channel.send(f"`p!catch {best_matches[0][0]}` or `p!catch {best_matches[0][0]}`")
