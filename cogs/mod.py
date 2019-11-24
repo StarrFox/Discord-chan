@@ -71,30 +71,23 @@ class mod(commands.Cog):
     async def purge(self, ctx, number: int, user: typing.Optional[discord.Member] = None, *, text: str = None):
         """Purges messages from certain user or certain text"""
         channel = ctx.message.channel
-        try:
-            await ctx.message.delete()
-        except:
-            pass
+        await ctx.message.delete()
         if not user and not text:
-            try:
-                deleted = await channel.purge(limit=number)
-                await channel.send(f"Deleted {len(deleted)} messages (deleted invoke message also)", delete_after=5)
-            except:
-                await channel.send("Unable to delete messages", delete_after=5)
-            return
-        def msgcheck(msg):
-            if user and text:
-                if text in msg.content.lower() and msg.author == user:
-                    return True
-                else:
-                    return False
-            if user:
-                if msg.author == user:
-                    return True
-            if text:
-                if text in msg.content.lower():
-                    return True
-        deleted = await channel.purge(limit=number, check=msgcheck)
+            deleted = await channel.purge(limit=number)
+        else:
+            def msgcheck(msg):
+                if user and text:
+                    if text in msg.content.lower() and msg.author == user:
+                        return True
+                    else:
+                        return False
+                if user:
+                    if msg.author == user:
+                        return True
+                if text:
+                    if text in msg.content.lower():
+                        return True
+            deleted = await channel.purge(limit=number, check=msgcheck)
         await channel.send(f'Deleted {len(deleted)} message(s)', delete_after=5)
 
     @commands.command()
@@ -193,7 +186,6 @@ class mod(commands.Cog):
             await ctx.send(f"Added {role.name}")
         else:
             await ctx.send("You aren't above that role")
-        
 
 def setup(bot):
     bot.add_cog(mod(bot))

@@ -1,51 +1,103 @@
-from discord.ext import commands
 import discord
 
-from PIL import Image, ImageSequence
 from math import sqrt
-from io import BytesIO
-from tarfile import TarFile, TarInfo
 from functools import partial
+from discord.ext import commands
+from io import BytesIO, StringIO
+from PIL import Image, ImageSequence
+from tarfile import TarFile, TarInfo
+
 
 class wallemojis(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
 
-    def make_emojis(self, img, name: str, wall_size: tuple, gif: bool):
-        width, height = img.size
-        final = wall_size[0]*wall_size[1]
-        per_emoji = (width*height)//final
-        emoji_size = round(sqrt(per_emoji))
-        w_fac = emoji_size 
-        h_fac = emoji_size
-        new_w = (width//w_fac)*w_fac
-        new_h = (height//h_fac)*h_fac
-        emojis = []
-        if gif:
-            for row in range(int(new_h/h_fac)):
-                for collum in range(int(new_w/w_fac)):
-                    frames = []
-                    for page in ImageSequence.Iterator(img):
-                        page = page.resize((new_w, new_h))
-                        width_cord = 0+(w_fac*collum)
-                        height_cord = h_fac*row
-                        frames.append(page.crop((width_cord, height_cord, width_cord+w_fac, height_cord+h_fac)))
-                    emojis.append(frames)
-            return self.zip_gif_emojis(emojis, name, int(img.width/w_fac), int(img.height/h_fac))
-        else:
-            img = img.resize((new_w, new_h))
-            for row in range(int(img.height/h_fac)):
-                for collum in range(int(img.width/w_fac)):
-                    width_cord = 0+(w_fac*collum)
-                    height_cord = h_fac*row
-                    crop = img.crop((width_cord, height_cord, width_cord+w_fac, height_cord+h_fac))
-                    emojis.append(crop)
-            return self.zip_emojis(emojis, name, int(img.width/w_fac), int(img.height/h_fac))
+    def make_emojis(self, img, name: str, wall_width: int, wall_height: int, gif: bool):
+        img_width, img_height = img.size
 
-    def zip_emojis(self, emojis: list, name: str, c_size: int, r_size: int):
+        emoji_width = img_width // wall_width
+        emoji_height = img_height // wall_height
+
+        new_width = (img_width // emoji_width) * emoji_width
+        new_height = (img_height // emoji_height) * emoji_height
+
+        num_of_collums = new_width // emoji_width
+        num_of_rows = new_height // emoji_height
+
+        premade_wall = self.get_premade_wall(
+            name,
+            num_of_collums,
+            num_of_rows
+        )
+
+        emojis = []
+
+        if gif:
+            for row in range(num_of_rows):
+                for collum in range(num_of_collums):
+                    frames = []
+
+                    for page in ImageSequence.Iterator(img):
+                        page = page.resize((new_width, new_height))
+                        frames.append(page.crop((
+                            collum * emoji_width,
+                            row * emoji_height,
+                            (collum * emoji_width) + emoji_width,
+                            (row * emoji_height) + emoji_height
+                        )))
+
+                    emojis.append(frames)
+
+            return self.zip_gif_emojis(emojis, name, premade_wall)
+
+        else:
+
+            img = img.resize((new_width, new_height))
+
+            for row in range(num_of_rows):
+                for collum in range(num_of_collums):
+                    emojis.append(img.crop((
+                        collum * emoji_width,
+                        row * emoji_height,
+                        (collum * emoji_width) + emoji_width,
+                        (row * emoji_height) + emoji_height
+                    )))
+
+            return self.zip_emojis(emojis, name, premade_wall)
+
+    def get_premade_wall(self, name: str, collum_num: int, row_num: int):
+        """
+        Returns a premade wall
+        EX:
+        ```
+        :kitty_0::kitty_2:
+        :kitty_3::kitty_4:
+        ```
+        """
+        text = '```\n'
+        for row in range(row_num):
+            for collum in range(collum_num):
+                place = (collum_num * row) + collum
+                text += f':{name}_{place}:'
+            text += '\n'
+        text += '\n```'
+
+        file_bytes = bytes(text, 'utf-8')
+
+        file = BytesIO(file_bytes)
+
+        file_info = TarInfo("Premade_wall.txt")
+        file_info.size = len(file.getbuffer())
+
+        file.seek(0)
+
+        return (file_info, file)
+
+    def zip_emojis(self, emojis: list, name: str, premade_wall: tuple):
         fp = BytesIO()
         zip = TarFile(mode='w', fileobj=fp)
+
         for idx, emoji in enumerate(emojis):
             f = BytesIO()
             emoji.save(f, "png")
@@ -53,15 +105,19 @@ class wallemojis(commands.Cog):
             info = TarInfo(f"{name}_{idx}.png")
             info.size = len(f.getbuffer())
             zip.addfile(info, fileobj=f)
+
+        zip.addfile(premade_wall[0], fileobj=premade_wall[1])
+
         fp.seek(0)
         return fp
 
-    def zip_gif_emojis(self, emojis: list, name: str, c_size: int, r_size: int):
+    def zip_gif_emojis(self, emojis: list, name: str, premade_wall: tuple):
         """
         same as normal but emojis is a list of frame lists
         """
         fp = BytesIO()
         zip = TarFile(mode='w', fileobj=fp)
+
         for idx, emoji in enumerate(emojis):
             f = BytesIO()
             emoji[0].save(f, "gif", append_images=emoji[1:], save_all=True, loop=0)
@@ -69,6 +125,9 @@ class wallemojis(commands.Cog):
             info = TarInfo(f"{name}_{idx}.gif")
             info.size = len(f.getbuffer())
             zip.addfile(info, fileobj=f)
+
+        zip.addfile(premade_wall[0], fileobj=premade_wall[1])
+
         fp.seek(0)
         return fp
 
@@ -83,15 +142,29 @@ class wallemojis(commands.Cog):
         Makes some emojis from an image
         """
         if not 0 < height <= 10 or not 0 < width <= 10:
-            return await ctx.send("plz only use sizes between 0 and 10")
+            return await ctx.send("Only use sizes between 0 and 10")
+        
         width, height = (round(width), round(height))
         _bytes, file_type = await self.get_bytes(link)
+
         if not "image" in file_type.lower():
             return await ctx.send("Link was not to an image")
+
         gif = "gif" in file_type.lower()
         img = Image.open(BytesIO(_bytes))
-        func = partial(self.make_emojis, img, name, (width, height), gif)
-        archive = await self.bot.loop.run_in_executor(None, func)
+
+        func = partial(
+            self.make_emojis,
+            img,
+            name,
+            width,
+            height,
+            gif
+        )
+
+        with ctx.typing():
+            archive = await self.bot.loop.run_in_executor(None, func)
+
         await ctx.send(file=discord.File(archive, filename=f"{name}.tar"))
 
 def setup(bot):
