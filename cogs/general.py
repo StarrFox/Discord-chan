@@ -30,22 +30,10 @@ class general(commands.Cog):
 
     @commands.command()
     async def ping(self, ctx):
-        """Check bot ping and latency"""
-        process_time = round(((datetime.utcnow()-ctx.message.created_at).total_seconds())*1000)
-        e = discord.Embed(
-            color=discord.Color.blurple()
-        )
-        e.add_field(
-            name="**Latency:**",
-            value=f"{round(self.bot.latency*1000)}ms"
-        )
-        e.add_field(
-            name="**Process time:**",
-            value=f"{process_time}ms",
-            inline=False
-        )
-        e.set_thumbnail(url=ctx.me.avatar_url)
-        await ctx.send(embed=e)
+        """
+        Send's the bot's websocket latency
+        """
+        await ctx.send(f"\N{TABLE TENNIS PADDLE AND BALL} {round(ctx.bot.latency*1000)}ms")
 
     @commands.command()
     async def invite(self, ctx):
