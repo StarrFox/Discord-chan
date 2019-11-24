@@ -109,7 +109,7 @@ class owner(commands.Cog):
         diff_map = {}
         for name, hash_code in self.hashmap.items():
             diff_map[name] = looking_for_hash - hash_code
-        return sorted(diff_map.items(), key=lambda i: i[1])[:1]
+        return sorted(diff_map.items(), key=lambda i: i[1])[:2]
 
     def is_spawn(self, message: discord.Message):
         try:
