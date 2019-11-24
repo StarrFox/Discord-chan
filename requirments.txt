@@ -1,4 +1,5 @@
 discord.py
 asyncpg
 jishaku
+ImageHash
 git+https://github.com/StarrFox/bot_stuff.git
