@@ -110,7 +110,7 @@ class owner(commands.Cog):
         diff_map = {}
         for name, hash_code in self.hashmap.items():
             diff_map[name] = looking_for_hash - hash_code
-        return sorted(diff_map.items(), key=lambda i: i[1])[:2]
+        return sorted(diff_map.items(), key=lambda i: i[1])[0][0]
 
     def is_spawn(self, message: discord.Message):
         try:
@@ -128,11 +128,11 @@ class owner(commands.Cog):
                 ]
                 return all(checks)
             message = await self.bot.wait_for('message', check=check)
-            best_matches = await self.get_best_match(
+            best_match = await self.get_best_match(
                 message.embeds[0].image.url
             )
             await message.channel.send(
-                f"`p!catch {best_matches[0][0]}` dr: {best_matches[0][1]} or `p!catch {best_matches[1][0]}` dr: {best_matches[1][1]}"
+                f"`p!catch {best_match}`"
             )
 
     @commands.command()
