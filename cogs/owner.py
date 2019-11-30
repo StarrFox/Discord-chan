@@ -102,6 +102,7 @@ class owner(commands.Cog):
             await (await self.bot.session.get(url)).read()
         )
         img = Image.open(file)
+        img = img.resize((350, 350))
         return phash(img)
 
     async def get_best_match(self, url: str):
