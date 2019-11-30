@@ -114,6 +114,8 @@ class DiscordChan(bot_stuff.Bot):
 
 bot = DiscordChan()
 
+bot.help_command = bot_stuff.Minimal()
+
 bot.load_extension("bot_stuff.jsk", **jsk_settings)
 
 bot.add_ready_func(bot.load_extension, "bot_stuff.logger", channel=571132727902863376)
