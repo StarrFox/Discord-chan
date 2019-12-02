@@ -1,22 +1,21 @@
+import typing
+import asyncio
 import discord
-from discord.ext import commands
 
 from extras import checks
+from discord.ext import commands
 
-import asyncio
-import typing
-
-def is_above(invoker, user):
+def is_above(invoker: discord.Member, user: discord.Member):
     return invoker.top_role > user.top_role
 
 class mod(commands.Cog):
     """Moderation commands"""
 
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.group(invoke_without_command=True, aliases=["prefixes"])
-    async def prefix(self, ctx):
+    async def prefix(self, ctx: commands.Context):
         """List and add/remove your prefixes"""
         guild = ctx.guild
         if guild.id in self.bot.prefixes:
@@ -30,7 +29,7 @@ class mod(commands.Cog):
 
     @prefix.command()
     @checks.has_permissions(administrator=True)
-    async def add(self, ctx, *, prefix: str):
+    async def add(self, ctx: commands.Context, *, prefix: str):
         """Add a prefix for this server"""
         guild = ctx.guild
         prefix = prefix.replace("\N{QUOTATION MARK}", "")
@@ -49,7 +48,7 @@ class mod(commands.Cog):
 
     @prefix.command(aliases=['rem'])
     @checks.has_permissions(administrator=True)
-    async def remove(self, ctx, *, prefix: str):
+    async def remove(self, ctx: commands.Context, *, prefix: str):
         """Remove a prefix for this server"""
         guild = ctx.guild
         prefix = prefix.replace("\N{QUOTATION MARK}", "")
@@ -68,7 +67,7 @@ class mod(commands.Cog):
     @commands.command()
     @commands.bot_has_permissions(manage_messages=True)
     @checks.has_permissions(manage_messages=True)
-    async def purge(self, ctx, number: int, user: typing.Optional[discord.Member] = None, *, text: str = None):
+    async def purge(self, ctx: commands.Context, number: int, user: typing.Optional[discord.Member] = None, *, text: str = None):
         """Purges messages from certain user or certain text"""
         channel = ctx.message.channel
         await ctx.message.delete()
@@ -91,26 +90,9 @@ class mod(commands.Cog):
         await channel.send(f'Deleted {len(deleted)} message(s)', delete_after=5)
 
     @commands.command()
-    async def clean(self, ctx, num: int = 20):
-        """Clean's up the bot's messages"""
-        if num > 100:
-            return await ctx.send("Use purge for deleting more than 100 messages")
-        def check(msg):
-            return msg.author.id == msg.guild.me.id
-        await ctx.channel.purge(
-            limit = num,
-            check = check,
-            bulk = False
-        )
-        try:
-            await ctx.message.add_reaction("\u2705")
-        except:
-            pass
-
-    @commands.command()
     @commands.bot_has_permissions(ban_members=True)
     @checks.has_permissions(ban_members=True)
-    async def ban(self, ctx, member: discord.Member, *, reason = None):
+    async def ban(self, ctx: commands.Context, member: discord.Member, *, reason = None):
         """
         Bans a member
         """
@@ -122,7 +104,7 @@ class mod(commands.Cog):
     @commands.command()
     @commands.bot_has_permissions(ban_members=True)
     @checks.has_permissions(ban_members=True)
-    async def hackban(self, ctx, id: int, *, reason = None):
+    async def hackban(self, ctx: commands.Context, id: int, *, reason = None):
         """
         Bans using an id
         """
@@ -133,7 +115,7 @@ class mod(commands.Cog):
     @commands.command()
     @commands.bot_has_permissions(kick_members=True)
     @checks.has_permissions(kick_members=True)
-    async def kick(self, ctx, member: discord.Member, *, reason = None):
+    async def kick(self, ctx: commands.Context, member: discord.Member, *, reason = None):
         """
         Kicks a member
         """
@@ -142,31 +124,10 @@ class mod(commands.Cog):
         await member.kick(reason=reason)
         await ctx.send(f"{member.name} has been kicked")
 
-    @commands.command()
-    @checks.has_permissions(manage_emojis=True)
-    @commands.bot_has_permissions(manage_emojis=True)
-    async def emoji(self, ctx, name, link = None):
-        """Creates an emoji
-        Can supply an attacment instead of a link also"""
-        if link is None:
-            if len(ctx.message.attachments) == 0:
-                return await ctx.send("No link or attachment found")
-            link = ctx.message.attachments[0].url
-        async with self.bot.session.get(link) as res:
-            try:
-                await ctx.guild.create_custom_emoji(name=name, image=await res.read())
-                await ctx.message.add_reaction("\N{WHITE HEAVY CHECK MARK}")
-            except Exception as e:
-                if isinstance(e, discord.errors.Forbidden):
-                    return await ctx.send("I dont have the perms to add emojis")
-                elif isinstance(e, discord.errors.HTTPException):
-                    return await ctx.send("File too large")
-                await ctx.send(e)
-
     @commands.command(aliases=["cr"])
     @checks.has_permissions(manage_roles=True)
     @commands.bot_has_permissions(manage_roles=True)
-    async def createrole(self, ctx, name):
+    async def createrole(self, ctx: commands.Context, name: str):
         """
         Creates a role with a given name
         """
@@ -176,7 +137,7 @@ class mod(commands.Cog):
     @commands.command(aliases=["ar", "sr", "setrole"])
     @checks.has_permissions(manage_roles=True)
     @commands.bot_has_permissions(manage_roles=True)
-    async def addrole(self, ctx, member: discord.Member, role: discord.Role):
+    async def addrole(self, ctx: commands.Context, member: discord.Member, role: discord.Role):
         """
         Gives someone a role
         You can only add roles below your own

@@ -1,5 +1,0 @@
-{
-    "token": "Token",
-    "db_pass": "Db password",
-    "db": "Your asyncpg db, ex: postgresql://postgres@localhost/discordchan"
-}

@@ -37,7 +37,7 @@ class owner(commands.Cog):
             "channel_tracebacks": True
         }
 
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.hashmap = self.get_hashmap()
         self.pokecord_tasks = {}
@@ -50,23 +50,23 @@ class owner(commands.Cog):
             hashmap[name] = hex_to_hash(hex_code)
         return hashmap
 
-    async def cog_check(self, ctx):
+    async def cog_check(self, ctx: commands.Context):
         if not await self.bot.is_owner(ctx.author):
             raise commands.NotOwner('You do not own this bot.')
         return True
 
     @commands.command()
-    async def dm(self, ctx, user: discord.User, *, msg: str):
+    async def dm(self, ctx: commands.Context, user: discord.User, *, msg: str):
         await user.send(msg)
         await ctx.send("message sent")
 
     @commands.command()
-    async def restart(self, ctx):
-        await ctx.send("😡")
+    async def restart(self, ctx: commands.Context):
+        await ctx.send("Restarting.")
         await self.bot.logout()
 
     @commands.command()
-    async def noprefix(self, ctx, toggle: bool = None):
+    async def noprefix(self, ctx: commands.Context, toggle: bool = None):
         """Toogles having no prefix"""
         if toggle is None:
             if self.bot.noprefix:
@@ -83,12 +83,12 @@ class owner(commands.Cog):
         return await ctx.send("No prefix turned off.")
 
     @commands.command()
-    async def loadjsk(self, ctx):
+    async def loadjsk(self, ctx: commands.Context):
         self.bot.load_extension('bot_stuff.jsk', **self.jsk_settings)
         await ctx.send('Loaded jsk')
 
     @commands.command()
-    async def jskset(self, ctx, item: typing.Optional[str] = None, value: str = None):
+    async def jskset(self, ctx: commands.Context, item: typing.Optional[str] = None, value: str = None):
         if item is None or value is None:
             return await ctx.send(utils.block(json.dumps(self.jsk_settings, indent=4)))
         if isinstance(self.jsk_settings[item], bool):

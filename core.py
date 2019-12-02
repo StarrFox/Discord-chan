@@ -13,11 +13,19 @@ from extras import utils
 from datetime import datetime
 from discord.ext import commands, tasks
 
-logging.basicConfig(
-    format="[%(asctime)s] [%(levelname)s:%(name)s] %(message)s", level=logging.INFO
-)
+# to be sorted
+from bot_stuff import DiscordHandler
+import config
 
 logger = logging.getLogger(__name__)
+logger.propagate = False
+
+logger.addHandler(
+    DiscordHandler(
+        config.webhook_url,
+        logging.INFO,
+    )
+)
 
 jsk_settings = {
     "task": "<a:sonic:577005444191485952>",
@@ -41,76 +49,52 @@ class DiscordChan(bot_stuff.Bot):
             case_insensitive=True,
             reconnect=True
         )
-        with open('settings.json') as tf:
-            self.settings = json.load(tf)
-            tf.close()
         self.db = None
         self.prefixes = {}
         self.uptime = datetime.now()
         self.session = aiohttp.ClientSession(loop=self.loop)
-        self.presence_cycle.start()
+        self.presence_cycle.start() # pylint: disable=no-member
         self.noprefix = False
 
-    @tasks.loop(minutes=15)
+    @tasks.loop(hours=1)
     async def presence_cycle(self):
         """
         Keeps the status message active
         """
-        prez = f"dc!help | {len(self.guilds)} servers"
-        await self.change_presence(activity=discord.Game(prez))
+        prez = f"{len(self.guilds)} Guilds | {config.prefix}help"
+        await self.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=prez))
+        logger.info(f"Set presence to \"{prez}\".")
 
     @presence_cycle.before_loop
-    async def presence_cycle_befoe(self):
+    async def presence_cycle_before(self):
         await self.wait_until_ready()
 
-    async def get_prefix(self, message):
+    async def get_prefix(self, message: discord.Message):
         if not message.guild:
-            return ["dc!", ""]
+            return [config.prefix, ""]
         if self.noprefix and await self.is_owner(message.author):
             return ""
         elif message.guild.id in self.prefixes:
             return commands.when_mentioned_or(*self.prefixes[message.guild.id])(self, message)
         else:
-            return "dc!"
+            return commands.when_mentioned_or(config.prefix)(self, message)
 
     async def connect_db(self):
         self.db = await asyncpg.connect(
-            self.settings['db'],
-            password=self.settings['db_pass']
+            config.db_link,
+            password=config.db_pass
         )
-        logger.info("Connected to DB")
+        logger.info("Connected to DB.")
 
     async def load_prefixes(self):
-        count = 0
         for guild_id, prefix_list in await self.db.fetch("SELECT * FROM prefixes;"):
-            count += 1
             self.prefixes[guild_id] = prefix_list
-        logger.info(f"loaded {count} prefixes")
+        logger.info(f"loaded {len(self.prefixes)} prefixes.")
 
     async def unload_prefixes(self):
         await self.db.execute("DELETE FROM prefixes;")
         await self.db.executemany("INSERT INTO prefixes(guild_id, prefixes) VALUES ($1, $2)", self.prefixes.items())
-        logger.info("Unloaded prefixes")
-
-    def run(self):
-        super().run(self.settings['token'])
-
-    async def logout(self):
-        if self.prefixes:
-            await self.unload_prefixes()
-        for extension in tuple(self.extensions):
-            try:
-                self.unload_extension(extension)
-            except Exception:
-                pass
-        for cog in tuple(self.cogs):
-            try:
-                self.remove_cog(cog)
-            except Exception:
-                pass
-        await asyncio.sleep(5)
-        await self.db.close()
-        await super().logout()
+        logger.info(f"Unloaded {len(self.prefixes)} prefixes.")
 
 bot = DiscordChan()
 
@@ -118,8 +102,10 @@ bot.help_command = bot_stuff.Minimal()
 
 bot.load_extension("bot_stuff.jsk", **jsk_settings)
 
-bot.add_ready_func(bot.load_extension, "bot_stuff.logger", channel=571132727902863376)
-bot.add_ready_func(bot.connect_db)
-bot.add_ready_func(bot.load_prefixes)
+bot.add_ready_func(bot.load_extension, "bot_stuff.logging_cog", webhook_url=config.webhook_url)
 
-bot.run()
+if config.load_db:
+    bot.add_ready_func(bot.connect_db)
+    bot.add_ready_func(bot.load_prefixes)
+
+bot.run(config.token)
