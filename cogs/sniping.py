@@ -149,7 +149,7 @@ class sniping(commands.Cog):
         res = {}
 
         for snipe in snipes:
-            res[str(snipe)] = snipe.content
+            res[str(snipe)] = snipe.content[:1_024] # Field value limit
 
         return res
 
