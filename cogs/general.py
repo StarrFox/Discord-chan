@@ -1,11 +1,11 @@
-import discord
-from discord.ext import commands
-import typing
 import io
-from datetime import datetime
-from extras import checks
 import json
-from extras import utils
+import typing
+import discord
+
+from extras import utils, checks
+from datetime import datetime
+from discord.ext import commands
 
 class general(commands.Cog):
     """General use commands"""
@@ -20,7 +20,7 @@ class general(commands.Cog):
             return await ctx.send(message)
         auth = ctx.author
         checks = [
-            auth.id in self.bot.owners,
+            await self.bot.is_owner(ctx.author),
             auth.guild_permissions.administrator,
             auth.guild_permissions.manage_channels
         ]
@@ -44,102 +44,13 @@ class general(commands.Cog):
         await ctx.send(message)
 
     @commands.command(aliases=['msg'])
-    @checks.has_permissions(administrator=True)
+    @checks.has_permissions(manage_webhooks=True)
+    @commands.bot_has_permissions(manage_webhooks=True)
     async def quote(self, ctx, user: discord.Member, *, message: commands.clean_content()):
         """Send a message as someone else"""
         hook = await ctx.channel.create_webhook(name=user.display_name)
         await hook.send(message, avatar_url=user.avatar_url_as(format='png'))
         await hook.delete()
-
-    @commands.group(invoke_without_command=True)
-    async def raw(self, ctx):
-        """
-        Base raw command
-        just sends help for raw
-        """
-        await ctx.send_help("raw")
-
-    async def send_raw(self, ctx, message):
-        to_send = json.dumps(message, indent=4)
-        to_send = discord.utils.escape_markdown(to_send)
-        await self.bot.paginate(to_send, ctx, lang='json')
-
-    @raw.command(aliases=['msg'])
-    async def message(self, ctx, channel: discord.TextChannel, messageid: int):
-        """
-        Raw message object
-        """
-        try:
-            message = await self.bot.http.get_message(channel.id, messageid)
-        except:
-            return await ctx.send("Invalid message id")
-        await self.send_raw(ctx, message)
-
-    @raw.command()
-    async def channel(self, ctx, channel: discord.TextChannel):
-        """
-        Raw channel object
-        """
-        try:
-            message = await self.bot.http.get_channel(channel.id)
-        except:
-            return await ctx.send("Invalid channel id")
-        await self.send_raw(ctx, message)
-
-    @raw.command()
-    async def member(self, ctx, member: discord.Member):
-        """
-        Raw member object
-        """
-        try:
-            message = await self.bot.http.get_member(member.guild.id, member.id)
-        except:
-            return await ctx.send("Invalid member id")
-        await self.send_raw(ctx, message)
-
-    @raw.command()
-    async def user(self, ctx, userid: int):
-        """
-        Raw user object
-        """
-        try:
-            message = await self.bot.http.get_user(userid)
-        except:
-            return await ctx.send("Invalid user id")
-        await self.send_raw(ctx, message)
-
-    @raw.command(aliases=['server'])
-    async def guild(self, ctx, guildid: int):
-        """
-        Raw guild object
-        """
-        try:
-            message = await self.bot.http.get_guild(guildid)
-        except:
-            return await ctx.send("Invalid guild id")
-        await self.send_raw(ctx, message)
-
-    @raw.command(name='invite')
-    async def raw_invite(self, ctx, invite: str):
-        """
-        Raw invite object
-        """
-        try:
-            message = await self.bot.http.get_invite(invite.split('/')[-1])
-        except:
-            return await ctx.send("Invalid invite")
-        await self.send_raw(ctx, message)
-
-    @commands.command(aliases=["avy", "pfp"])
-    async def avatar(self, ctx, member: discord.Member = None):
-        """
-        Check someone's avatar, defaults to author
-        """
-        if member is None:
-            member = ctx.author
-        e = discord.Embed(title=str(member), url=str(member.avatar_url_as(size=1024)))
-        e.set_image(url=str(member.avatar_url))
-        await ctx.send(embed=e)
 
     @commands.command(hidden=True)
     async def ham(self, ctx):

@@ -103,9 +103,5 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-# additions
-settings.json
-misc_tokens.json
-
-#unfinished
-run.py
+# secrets
+config.py

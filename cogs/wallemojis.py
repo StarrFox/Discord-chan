@@ -10,10 +10,10 @@ from tarfile import TarFile, TarInfo
 
 class wallemojis(commands.Cog):
 
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    def make_emojis(self, img, name: str, wall_width: int, wall_height: int, gif: bool):
+    def make_emojis(self, img: Image, name: str, wall_width: int, wall_height: int, gif: bool):
         img_width, img_height = img.size
 
         emoji_width = img_width // wall_width
@@ -137,7 +137,7 @@ class wallemojis(commands.Cog):
 
     @commands.command()
     @commands.cooldown(1, 30, commands.cooldowns.BucketType.user)
-    async def wallemoji(self, ctx, name, width: int, height: int, link):
+    async def wallemoji(self, ctx: commands.Context, name: str, width: int, height: int, link: str):
         """
         Makes some emojis from an image
         """
