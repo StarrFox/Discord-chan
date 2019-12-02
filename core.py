@@ -1,6 +1,7 @@
 import io
 import os
 import json
+import config
 import aiohttp
 import asyncio
 import asyncpg
@@ -11,11 +12,8 @@ import traceback
 
 from extras import utils
 from datetime import datetime
-from discord.ext import commands, tasks
-
-# to be sorted
 from bot_stuff import DiscordHandler
-import config
+from discord.ext import commands, tasks
 
 logger = logging.getLogger(__name__)
 logger.propagate = False
@@ -63,7 +61,6 @@ class DiscordChan(bot_stuff.Bot):
         """
         prez = f"{len(self.guilds)} Guilds | {config.prefix}help"
         await self.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=prez))
-        logger.info(f"Set presence to \"{prez}\".")
 
     @presence_cycle.before_loop
     async def presence_cycle_before(self):
@@ -89,7 +86,7 @@ class DiscordChan(bot_stuff.Bot):
     async def load_prefixes(self):
         for guild_id, prefix_list in await self.db.fetch("SELECT * FROM prefixes;"):
             self.prefixes[guild_id] = prefix_list
-        logger.info(f"loaded {len(self.prefixes)} prefixes.")
+        logger.info(f"Loaded {len(self.prefixes)} prefixes.")
 
     async def unload_prefixes(self):
         await self.db.execute("DELETE FROM prefixes;")
@@ -102,7 +99,7 @@ bot.help_command = bot_stuff.Minimal()
 
 bot.load_extension("bot_stuff.jsk", **jsk_settings)
 
-bot.add_ready_func(bot.load_extension, "bot_stuff.logging_cog", webhook_url=config.webhook_url)
+bot.load_extension("bot_stuff.logging_cog", webhook_url=config.webhook_url)
 
 if config.load_db:
     bot.add_ready_func(bot.connect_db)
