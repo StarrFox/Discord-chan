@@ -13,12 +13,13 @@ from bot_stuff import DiscordHandler
 logger = logging.getLogger(__name__)
 logger.propagate = False
 
-logger.addHandler(
-    DiscordHandler(
-        config.webhook_url,
-        logging.INFO,
+if not logger.handlers:
+    logger.addHandler(
+        DiscordHandler(
+            config.webhook_url,
+            logging.INFO
+        )
     )
-)
 
 class events(commands.Cog):
 

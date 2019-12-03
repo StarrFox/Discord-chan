@@ -18,12 +18,13 @@ from discord.ext import commands, tasks
 logger = logging.getLogger(__name__)
 logger.propagate = False
 
-logger.addHandler(
-    DiscordHandler(
-        config.webhook_url,
-        logging.INFO,
+if not logger.handlers:
+    logger.addHandler(
+        DiscordHandler(
+            config.webhook_url,
+            logging.INFO
+        )
     )
-)
 
 jsk_settings = {
     "task": "<a:sonic:577005444191485952>",
