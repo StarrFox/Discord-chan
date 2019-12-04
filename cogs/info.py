@@ -104,7 +104,7 @@ class info(commands.Cog):
         paginator = WrappedPaginator(prefix='```json', max_size=1985)
 
         to_send = json.dumps(data, indent=4)
-        to_send = discord.utils.escape_markdown(to_send)
+        to_send = discord.utils.escape_mentions(to_send)
 
         paginator.add_line(to_send)
 
