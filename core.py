@@ -106,4 +106,6 @@ if config.load_db:
     bot.add_ready_func(bot.connect_db)
     bot.add_ready_func(bot.load_prefixes)
 
+    bot.add_logout_func(bot.unload_prefixes)
+
 bot.run(config.token)
