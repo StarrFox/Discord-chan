@@ -1,3 +1,18 @@
+#  Copyright © 2019 StarrFox
+#
+#  Discord Chan is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU Affero General Public License as published
+#  by the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  Discord Chan is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU Affero General Public License for more details.
+#
+#  You should have received a copy of the GNU Affero General Public License
+#  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
+
 import typing
 
 import discord
@@ -8,6 +23,7 @@ from extras import checks
 
 def is_above(invoker: discord.Member, user: discord.Member):
     return invoker.top_role > user.top_role
+
 
 class mod(commands.Cog):
     """Moderation commands"""
@@ -68,7 +84,10 @@ class mod(commands.Cog):
     @commands.command()
     @commands.bot_has_permissions(manage_messages=True)
     @checks.has_permissions(manage_messages=True)
-    async def purge(self, ctx: commands.Context, number: int, user: typing.Optional[discord.Member] = None, *, text: str = None):
+    async def purge(self,
+                    ctx: commands.Context,
+                    number: int, user: typing.Optional[discord.Member] = None,
+                    *, text: str = None):
         """Purges messages from certain user or certain text"""
         channel = ctx.message.channel
         await ctx.message.delete()
@@ -87,13 +106,14 @@ class mod(commands.Cog):
                 if text:
                     if text in msg.content.lower():
                         return True
+
             deleted = await channel.purge(limit=number, check=msgcheck)
         await channel.send(f'Deleted {len(deleted)} message(s)', delete_after=5)
 
     @commands.command()
     @commands.bot_has_permissions(ban_members=True)
     @checks.has_permissions(ban_members=True)
-    async def ban(self, ctx: commands.Context, member: discord.Member, *, reason = None):
+    async def ban(self, ctx: commands.Context, member: discord.Member, *, reason=None):
         """
         Bans a member
         """
@@ -105,18 +125,17 @@ class mod(commands.Cog):
     @commands.command()
     @commands.bot_has_permissions(ban_members=True)
     @checks.has_permissions(ban_members=True)
-    async def hackban(self, ctx: commands.Context, id: int, *, reason = None):
+    async def hackban(self, ctx: commands.Context, member_id: int, *, reason=None):
         """
         Bans using an id
         """
-        await ctx.guild.ban(discord.Object(id=id), reason=reason)
-        await ctx.send(f"Banned {id}")
-
+        await ctx.guild.ban(discord.Object(id=member_id), reason=reason)
+        await ctx.send(f"Banned {member_id}")
 
     @commands.command()
     @commands.bot_has_permissions(kick_members=True)
     @checks.has_permissions(kick_members=True)
-    async def kick(self, ctx: commands.Context, member: discord.Member, *, reason = None):
+    async def kick(self, ctx: commands.Context, member: discord.Member, *, reason=None):
         """
         Kicks a member
         """
@@ -134,20 +153,6 @@ class mod(commands.Cog):
         """
         role = await ctx.guild.create_role(name=name)
         await ctx.send(f"Created {role.name}")
-
-    @commands.command(aliases=["ar", "sr", "setrole"])
-    @checks.has_permissions(manage_roles=True)
-    @commands.bot_has_permissions(manage_roles=True)
-    async def addrole(self, ctx: commands.Context, member: discord.Member, role: discord.Role):
-        """
-        Gives someone a role
-        You can only add roles below your own
-        """
-        if ctx.author.top_role > role:
-            await ctx.author.add_roles(role)
-            await ctx.send(f"Added {role.name}")
-        else:
-            await ctx.send("You aren't above that role")
 
 def setup(bot):
     bot.add_cog(mod(bot))
