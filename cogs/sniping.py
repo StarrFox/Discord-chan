@@ -1,4 +1,20 @@
+#  Copyright © 2019 StarrFox
+#
+#  Discord Chan is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU Affero General Public License as published
+#  by the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  Discord Chan is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU Affero General Public License for more details.
+#
+#  You should have received a copy of the GNU Affero General Public License
+#  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
+
 import typing
+from collections import defaultdict
 from datetime import datetime
 
 import discord
@@ -26,20 +42,28 @@ class snipe_msg:
     def __str__(self):
         return f"{self.mode} by {self.author} ({self.readable_time})"
 
+
+def get_dict_from_snipes(snipes: list):
+    res = {}
+
+    for snipe in snipes:
+        res[str(snipe)] = snipe.content[:1_024]  # Field value limit
+
+    return res
+
+
 class sniping(commands.Cog):
     """Snipe and related events"""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.snipe_dict = {} #Channel_id: list of snipe_msg
+        self.snipe_dict = defaultdict(lambda: [])
 
     @commands.Cog.listener()
     async def on_message_delete(self, msg: discord.Message):
         """Saves deleted messages to snipe dict"""
         if not msg.content:
             return
-        if not msg.channel.id in self.snipe_dict:
-            self.snipe_dict[msg.channel.id] = []
         snipe_obj = snipe_msg(msg, 'Deleted')
         self.snipe_dict[msg.channel.id].insert(0, snipe_obj)
 
@@ -48,19 +72,17 @@ class sniping(commands.Cog):
         """Saves edited messages to snipe dict"""
         if not before.content != after.content or not before.content:
             return
-        if not before.channel.id in self.snipe_dict:
-            self.snipe_dict[before.channel.id] = []
         snipe_obj = snipe_msg(before, 'Edited')
         self.snipe_dict[before.channel.id].insert(0, snipe_obj)
 
     @commands.group(name='snipe', invoke_without_command=True)
     async def snipe_command(self,
-        ctx: commands.Context,
-        index: typing.Optional[int] = 0,
-        channel: typing.Optional[discord.TextChannel] = None,
-        member: typing.Optional[discord.Member] = None,
-        *, text: str = None
-    ):
+                            ctx: commands.Context,
+                            index: typing.Optional[int] = 0,
+                            channel: typing.Optional[discord.TextChannel] = None,
+                            member: typing.Optional[discord.Member] = None,
+                            *, text: str = None
+                            ):
         """Snipe messages deleted/edited in a channel
         You can also search for a specific channel or/and author or/and text
         Ex:
@@ -74,9 +96,6 @@ class sniping(commands.Cog):
 
         if not ctx.channel.is_nsfw() and channel.is_nsfw():
             return await ctx.send("You cannot snipe a nsfw channel from a non-nsfw channel.")
-
-        if not channel.id in self.snipe_dict:
-            return await ctx.send("No snipes found.")
 
         if member and text:
             channel_snipes = self.snipe_dict[channel.id]
@@ -97,15 +116,15 @@ class sniping(commands.Cog):
 
         e = discord.Embed(title=str(snipe), description=snipe.content)
 
-        return await ctx.send(embed = e)
+        return await ctx.send(embed=e)
 
     @snipe_command.command(name='list')
     async def snipe_list(self,
-        ctx: commands.Context,
-        channel: typing.Optional[discord.TextChannel] = None,
-        member: typing.Optional[discord.Member] = None,
-        *, text: str = None
-    ):
+                         ctx: commands.Context,
+                         channel: typing.Optional[discord.TextChannel] = None,
+                         member: typing.Optional[discord.Member] = None,
+                         *, text: str = None
+                         ):
         """list Sniped messages deleted/edited in a channel
         You can also search for a specific channel or/and author or/and text
         Ex:
@@ -119,9 +138,6 @@ class sniping(commands.Cog):
 
         if not ctx.channel.is_nsfw() and channel.is_nsfw():
             return await ctx.send("You cannot snipe a nsfw channel from a non-nsfw channel.")
-
-        if not channel.id in self.snipe_dict:
-            return await ctx.send("No snipes found.")
 
         if member and text:
             channel_snipes = self.snipe_dict[channel.id]
@@ -137,7 +153,7 @@ class sniping(commands.Cog):
 
         paginator = EmbedDictPaginator(max_fields=10)
 
-        data = self.get_dict_from_snipes(snipes)
+        data = get_dict_from_snipes(snipes)
 
         paginator.add_fields(data)
 
@@ -145,13 +161,6 @@ class sniping(commands.Cog):
 
         await interface.send_to(ctx)
 
-    def get_dict_from_snipes(self, snipes: list):
-        res = {}
-
-        for snipe in snipes:
-            res[str(snipe)] = snipe.content[:1_024] # Field value limit
-
-        return res
 
 def setup(bot):
     bot.add_cog(sniping(bot))
