@@ -1,5 +1,5 @@
-discord.py
-asyncpg
-jishaku
-ImageHash
-git+https://github.com/StarrFox/bot_stuff.git
+discord.py>=1.3.0
+ImageHash>=4.0
+jikanpy>=3.4.2
+Pillow>=6.2.1
+git+https://github.com/StarrFox/bot_stuff.git>=0.3.1

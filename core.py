@@ -1,19 +1,18 @@
-import io
-import os
-import json
-import config
-import aiohttp
-import asyncio
-import asyncpg
-import discord
 import logging
-import bot_stuff
-import traceback
-
-from extras import utils
 from datetime import datetime
+
+import aiohttp
+import bot_stuff
+import discord
 from bot_stuff import DiscordHandler
 from discord.ext import commands, tasks
+
+import config
+
+try:
+    import asyncpg
+except ImportError:
+    asyncpg = False
 
 logger = logging.getLogger(__name__)
 logger.propagate = False
@@ -102,7 +101,7 @@ bot.load_extension("bot_stuff.jsk", **jsk_settings)
 
 bot.load_extension("bot_stuff.logging_cog", webhook_url=config.webhook_url)
 
-if config.load_db:
+if config.load_db and asyncpg:
     bot.add_ready_func(bot.connect_db)
     bot.add_ready_func(bot.load_prefixes)
 

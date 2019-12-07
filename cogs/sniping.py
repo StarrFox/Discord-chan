@@ -1,11 +1,11 @@
 import typing
-import asyncio
+from datetime import datetime
+
 import discord
 import humanize
-
-from datetime import datetime
-from discord.ext import commands
 from bot_stuff.paginators import EmbedDictPaginator, EmbedDictInterface
+from discord.ext import commands
+
 
 class snipe_msg:
 

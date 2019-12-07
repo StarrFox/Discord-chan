@@ -1,11 +1,10 @@
-import discord
-
-from math import sqrt
 from functools import partial
-from discord.ext import commands
-from io import BytesIO, StringIO
-from PIL import Image, ImageSequence
+from io import BytesIO
 from tarfile import TarFile, TarInfo
+
+import discord
+from PIL import Image, ImageSequence
+from discord.ext import commands
 
 
 class wallemojis(commands.Cog):

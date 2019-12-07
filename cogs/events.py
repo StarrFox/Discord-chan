@@ -1,14 +1,12 @@
-import json
-import config
-import discord
-import asyncio
 import logging
-import traceback
-
-from extras import utils
 from collections import Counter
-from discord.ext import commands
+
+import discord
 from bot_stuff import DiscordHandler
+from discord.ext import commands
+
+import config
+from extras import utils
 
 logger = logging.getLogger(__name__)
 logger.propagate = False
