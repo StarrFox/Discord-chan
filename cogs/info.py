@@ -1,12 +1,11 @@
 import json
+
 import discord
 import humanize
-
-from extras import utils
-from datetime import datetime
-from discord.ext import commands
 from bot_stuff.utils import get_prolog_pager
+from discord.ext import commands
 from jishaku.paginators import WrappedPaginator, PaginatorInterface
+
 
 class info(commands.Cog):
     """Informational commands"""

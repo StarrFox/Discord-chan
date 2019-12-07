@@ -1,9 +1,10 @@
 import typing
-import asyncio
+
 import discord
+from discord.ext import commands
 
 from extras import checks
-from discord.ext import commands
+
 
 def is_above(invoker: discord.Member, user: discord.Member):
     return invoker.top_role > user.top_role

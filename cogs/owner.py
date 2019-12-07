@@ -1,14 +1,13 @@
 import json
 import typing
-import asyncio
-import discord
-
-from PIL import Image
-from os import system
 from io import BytesIO
-from extras import utils
+
+import discord
+from PIL import Image
 from discord.ext import commands
 from imagehash import phash, hex_to_hash
+
+from extras import utils
 
 bool_dict = {
     "true": True,

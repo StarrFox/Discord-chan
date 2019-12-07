@@ -1,4 +1,5 @@
 import discord
+
 from discord.ext import commands
 
 def block(content, lang=''):
@@ -18,12 +19,12 @@ async def paginate(log, destination):
         for page in paginator.pages:
             await destination.send(page)
 
-async def msg_resend(msg: discord.Message, destination):
-    if len(msg.content) == 0: content = None
-    else: content = msg.content
-    try: embed = msg.embeds[0]
-    except: pass
+async def msg_resend(msg: discord.Message, destination: discord.abc.Messageable):
+    try:
+        embed = msg.embeds[0]
+    except IndexError:
+        embed = None
     await destination.send(
-        content,
+        msg.content,
         embed=embed,
     )
