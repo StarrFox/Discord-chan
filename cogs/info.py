@@ -1,3 +1,18 @@
+#  Copyright © 2019 StarrFox
+#
+#  Discord Chan is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU Affero General Public License as published
+#  by the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  Discord Chan is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU Affero General Public License for more details.
+#
+#  You should have received a copy of the GNU Affero General Public License
+#  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
+
 import json
 
 import discord
@@ -23,25 +38,25 @@ class info(commands.Cog):
         """Get the bot's source link"""
         await ctx.send("<https://github.com/StarrFox/Discord-chan>")
 
-    @commands.command(aliases=['about'])
-    async def info(self, ctx: commands.Context):
+    @commands.command()
+    async def about(self, ctx: commands.Context):
         """View bot info"""
         bot = self.bot
 
-        info = {
+        data = {
             'id': bot.user.id,
             'owner': 'StarrFox#6312',
             'created': humanize.naturaldate(bot.user.created_at)
         }
-        
+
         events_cog = bot.get_cog('events')
 
         if events_cog:
-            info.update({
+            data.update({
                 'events seen': sum(events_cog.socket_events.values())
             })
 
-        interface = get_prolog_pager(self.bot, {bot.user.name: info}, ctx.author)
+        interface = get_prolog_pager(self.bot, {bot.user.name: data}, ctx.author)
 
         await interface.send_to(ctx)
 
@@ -50,14 +65,14 @@ class info(commands.Cog):
         """Get info on a guild member"""
         member = member or ctx.author
 
-        info = {
+        data = {
             'id': member.id,
             'top role': member.top_role.name,
             'joined guild': humanize.naturaldate(member.joined_at),
             'joined discord': humanize.naturaldate(member.created_at)
         }
 
-        interface = get_prolog_pager(self.bot, {member.name: info}, ctx.author)
+        interface = get_prolog_pager(self.bot, {member.name: data}, ctx.author)
 
         await interface.send_to(ctx)
 
@@ -68,7 +83,7 @@ class info(commands.Cog):
         bots = len([m for m in guild.members if m.bot])
         humans = guild.member_count - bots
 
-        info = {
+        data = {
             'id': guild.id,
             'owner': str(guild.owner),
             'created': humanize.naturaltime(guild.created_at),
@@ -86,7 +101,7 @@ class info(commands.Cog):
             }
         }
 
-        interface = get_prolog_pager(self.bot, {guild.name: info}, ctx.author)
+        interface = get_prolog_pager(self.bot, {guild.name: data}, ctx.author)
 
         await interface.send_to(ctx)
 
@@ -118,7 +133,7 @@ class info(commands.Cog):
         """
         try:
             data = await self.bot.http.get_message(channel.id, messageid)
-        except:
+        except discord.errors.NotFound:
             return await ctx.send("Invalid message id")
         await self.send_raw(ctx, data)
 
@@ -129,7 +144,7 @@ class info(commands.Cog):
         """
         try:
             data = await self.bot.http.get_channel(channel.id)
-        except:
+        except discord.errors.NotFound:
             return await ctx.send("Invalid channel id")
         await self.send_raw(ctx, data)
 
@@ -140,7 +155,7 @@ class info(commands.Cog):
         """
         try:
             data = await self.bot.http.get_member(member.guild.id, member.id)
-        except:
+        except discord.errors.NotFound:
             return await ctx.send("Invalid member id")
         await self.send_raw(ctx, data)
 
@@ -151,7 +166,7 @@ class info(commands.Cog):
         """
         try:
             data = await self.bot.http.get_user(userid)
-        except:
+        except discord.errors.NotFound:
             return await ctx.send("Invalid user id")
         await self.send_raw(ctx, data)
 
@@ -162,7 +177,7 @@ class info(commands.Cog):
         """
         try:
             data = await self.bot.http.get_guild(guildid)
-        except:
+        except discord.errors.NotFound:
             return await ctx.send("Invalid guild id")
         await self.send_raw(ctx, data)
 
@@ -173,7 +188,7 @@ class info(commands.Cog):
         """
         try:
             data = await self.bot.http.get_invite(invite.split('/')[-1])
-        except:
+        except discord.errors.NotFound:
             return await ctx.send("Invalid invite")
         await self.send_raw(ctx, data)
 
@@ -184,6 +199,7 @@ class info(commands.Cog):
         """
         member = member or ctx.author
         await ctx.send(str(member.avatar_url_as(size=1024)))
+
 
 def setup(bot):
     bot.add_cog(info(bot))

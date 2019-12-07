@@ -1,34 +1,50 @@
-from discord.ext import commands
+#  Copyright © 2019 StarrFox
+#
+#  Discord Chan is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU Affero General Public License as published
+#  by the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  Discord Chan is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU Affero General Public License for more details.
+#
+#  You should have received a copy of the GNU Affero General Public License
+#  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
+
 import discord
+from discord.ext import commands
 
 c4_diagonal_data = [
-    [(3,0),(2,1),(1,2),(0,3)],
-    [(4,0),(3,1),(2,2),(1,3)],
-    [(3,1),(2,2),(1,3),(0,4)],
-    [(5,0),(4,1),(3,2),(2,3)],
-    [(4,1),(3,2),(2,3),(1,4)],
-    [(3,2),(2,3),(1,4),(0,5)],
-    [(5,1),(4,2),(3,3),(2,4)],
-    [(4,2),(3,3),(2,4),(1,5)],
-    [(3,3),(2,4),(1,5),(0,6)],
-    [(5,2),(4,3),(3,4),(2,5)],
-    [(4,3),(3,4),(2,5),(1,6)],
-    [(5,3),(4,4),(3,5),(2,6)],
-    [(3,6),(2,5),(1,4),(0,3)],
-    [(4,6),(3,5),(2,4),(1,3)],
-    [(3,5),(2,4),(1,3),(0,2)],
-    [(5,6),(4,5),(3,4),(2,3)],
-    [(4,5),(3,4),(2,3),(1,2)],
-    [(3,4),(2,3),(1,2),(0,1)],
-    [(5,5),(4,4),(3,3),(2,2)],
-    [(4,4),(3,3),(2,2),(1,1)],
-    [(3,3),(2,2),(1,1),(0,0)],
-    [(5,4),(4,3),(3,2),(2,1)],
-    [(4,3),(3,2),(2,1),(1,0)],
-    [(5,3),(4,2),(3,1),(2,0)]
+    [(3, 0), (2, 1), (1, 2), (0, 3)],
+    [(4, 0), (3, 1), (2, 2), (1, 3)],
+    [(3, 1), (2, 2), (1, 3), (0, 4)],
+    [(5, 0), (4, 1), (3, 2), (2, 3)],
+    [(4, 1), (3, 2), (2, 3), (1, 4)],
+    [(3, 2), (2, 3), (1, 4), (0, 5)],
+    [(5, 1), (4, 2), (3, 3), (2, 4)],
+    [(4, 2), (3, 3), (2, 4), (1, 5)],
+    [(3, 3), (2, 4), (1, 5), (0, 6)],
+    [(5, 2), (4, 3), (3, 4), (2, 5)],
+    [(4, 3), (3, 4), (2, 5), (1, 6)],
+    [(5, 3), (4, 4), (3, 5), (2, 6)],
+    [(3, 6), (2, 5), (1, 4), (0, 3)],
+    [(4, 6), (3, 5), (2, 4), (1, 3)],
+    [(3, 5), (2, 4), (1, 3), (0, 2)],
+    [(5, 6), (4, 5), (3, 4), (2, 3)],
+    [(4, 5), (3, 4), (2, 3), (1, 2)],
+    [(3, 4), (2, 3), (1, 2), (0, 1)],
+    [(5, 5), (4, 4), (3, 3), (2, 2)],
+    [(4, 4), (3, 3), (2, 2), (1, 1)],
+    [(3, 3), (2, 2), (1, 1), (0, 0)],
+    [(5, 4), (4, 3), (3, 2), (2, 1)],
+    [(4, 3), (3, 2), (2, 1), (1, 0)],
+    [(5, 3), (4, 2), (3, 1), (2, 0)]
 ]
 
-class connect4():
+
+class connect4:
 
     def __init__(self, p1, p2, ctx):
         self.player_one = p1
@@ -37,7 +53,7 @@ class connect4():
         self.red = "\N{LARGE RED CIRCLE}"
         self.blue = "\N{LARGE BLUE CIRCLE}"
         self.filler = "\N{BLACK LARGE SQUARE}"
-        self.emojis = [str(i)+"\u20e3" for i in [1,2,3,4,5,6,7]]
+        self.emojis = [str(i) + "\u20e3" for i in [1, 2, 3, 4, 5, 6, 7]]
         self.board = self.create_board()
         self.is_running = True
         self.message = None
@@ -51,20 +67,22 @@ class connect4():
     def create_board(self):
         return [[self.filler] * 7 for _ in range(6)]
 
-    def make_embed(self, *, inverse = False):
+    def make_embed(self, *, inverse=False):
         embed = discord.Embed(
-            description = self.phrase_board()
+            description=self.phrase_board()
         )
-        embed.add_field(name="Players:", value=f"{self.red}: {self.player_one.mention}\n{self.blue}: {self.player_two.mention}")
+        embed.add_field(name="Players:",
+                        value=f"{self.red}: {self.player_one.mention}\n{self.blue}: {self.player_two.mention}")
         if not self.is_first_run:
             if not inverse:
-                embed.add_field(name="Last move:", value=f"{self.current_player.mention}: {self.last_play+1}", inline=False)
+                embed.add_field(name="Last move:", value=f"{self.current_player.mention}: {self.last_play + 1}",
+                                inline=False)
             else:
                 if self.current_player == self.player_two:
                     dex = self.player_one.mention
                 else:
                     dex = self.player_two.mention
-                embed.add_field(name="Last move:", value=f"{dex}: {self.last_play+1}", inline=False)
+                embed.add_field(name="Last move:", value=f"{dex}: {self.last_play + 1}", inline=False)
         if self.is_running:
             if self.is_first_run:
                 embed.add_field(name="Current turn:", value=self.player_one.mention, inline=False)
@@ -90,10 +108,10 @@ class connect4():
 
     async def phrase_reaction(self, reaction):
         num = self.emojis.index(reaction)
-        next = await self.find_free(num)
-        if next is None:
+        _next = await self.find_free(num)
+        if _next is None:
             return
-        self.board[next][num] = self.red if self.current_player == self.player_one else self.blue
+        self.board[_next][num] = self.red if self.current_player == self.player_one else self.blue
         await self.check_wins()
         self.is_first_run = False
         self.last_play = num
@@ -102,13 +120,14 @@ class connect4():
 
     async def check_wins(self):
         def check_slice(s):
-            if s[0]==s[1]==s[2]==s[3] and s[0] != self.filler:
+            if s[0] == s[1] == s[2] == s[3] and s[0] != self.filler:
                 return True
             else:
                 return False
+
         for row in self.board:
             for i in range(4):
-                if check_slice(row[i:i+4]):
+                if check_slice(row[i:i + 4]):
                     self.is_running = False
                     return
         collums = []
@@ -116,7 +135,7 @@ class connect4():
             collums.append([self.board[q][i] for q in range(6)])
         for c in collums:
             for i in range(3):
-                if check_slice(c[i:i+4]):
+                if check_slice(c[i:i + 4]):
                     self.is_running = False
                     return
         diagonals = []
@@ -134,7 +153,8 @@ class connect4():
             try:
                 reaction, user = await self.ctx.bot.wait_for(
                     "reaction_add",
-                    check=lambda r, u: r.message.id == self.message.id and u == self.current_player and str(r) in self.emojis + ["\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}"],
+                    check=lambda r, u: r.message.id == self.message.id and u == self.current_player and str(
+                        r) in self.emojis + ["\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}"],
                     timeout=300
                 )
             except:
@@ -155,6 +175,7 @@ class connect4():
         except:
             pass
 
+
 class games(commands.Cog):
 
     @commands.command()
@@ -166,6 +187,7 @@ class games(commands.Cog):
             return await ctx.send("You cannot play against yourself or a bot")
         board = connect4(ctx.author, member, ctx)
         await board.do_game()
+
 
 def setup(bot):
     bot.add_cog(games())

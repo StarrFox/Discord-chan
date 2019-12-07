@@ -1,3 +1,18 @@
+#  Copyright © 2019 StarrFox
+#
+#  Discord Chan is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU Affero General Public License as published
+#  by the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  Discord Chan is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU Affero General Public License for more details.
+#
+#  You should have received a copy of the GNU Affero General Public License
+#  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
+
 import logging
 from datetime import datetime
 
@@ -37,13 +52,14 @@ jsk_settings = {
     "channel_tracebacks": True
 }
 
+
 class DiscordChan(bot_stuff.Bot):
 
     def __init__(self):
         super().__init__(
             prefix=self.get_prefix,
-            owners = [285148358815776768],
-            extension_dir = "cogs",
+            owners=[285148358815776768],
+            extension_dir="cogs",
             case_insensitive=True,
             reconnect=True
         )
@@ -51,7 +67,7 @@ class DiscordChan(bot_stuff.Bot):
         self.prefixes = {}
         self.uptime = datetime.now()
         self.session = aiohttp.ClientSession(loop=self.loop)
-        self.presence_cycle.start() # pylint: disable=no-member
+        self.presence_cycle.start()  # pylint: disable=no-member
         self.noprefix = False
 
     @tasks.loop(hours=1)
@@ -92,6 +108,7 @@ class DiscordChan(bot_stuff.Bot):
         await self.db.execute("DELETE FROM prefixes;")
         await self.db.executemany("INSERT INTO prefixes(guild_id, prefixes) VALUES ($1, $2)", self.prefixes.items())
         logger.info(f"Unloaded {len(self.prefixes)} prefixes.")
+
 
 bot = DiscordChan()
 

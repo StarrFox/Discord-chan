@@ -1,3 +1,18 @@
+#  Copyright © 2019 StarrFox
+#
+#  Discord Chan is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU Affero General Public License as published
+#  by the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  Discord Chan is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU Affero General Public License for more details.
+#
+#  You should have received a copy of the GNU Affero General Public License
+#  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
+
 import json
 import typing
 from io import BytesIO
@@ -20,6 +35,23 @@ bool_dict = {
 
 POKECORD_ID = 365975655608745985
 
+
+def get_hashmap():
+    with open("hashmap.json") as fp:
+        unhashed = json.load(fp)
+    hashmap = {}
+    for name, hex_code in unhashed.items():
+        hashmap[name] = hex_to_hash(hex_code)
+    return hashmap
+
+
+def is_spawn(message: discord.Message):
+    try:
+        return message.embeds[0].image.url.endswith('PokecordSpawn.jpg')
+    except IndexError:
+        return False
+
+
 class owner(commands.Cog):
     """Owner commands"""
 
@@ -38,16 +70,8 @@ class owner(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.hashmap = self.get_hashmap()
+        self.hashmap = get_hashmap()
         self.pokecord_tasks = {}
-
-    def get_hashmap(self):
-        with open("hashmap.json") as fp:
-            unhashed = json.load(fp)
-        hashmap = {}
-        for name, hex_code in unhashed.items():
-            hashmap[name] = hex_to_hash(hex_code)
-        return hashmap
 
     async def cog_check(self, ctx: commands.Context):
         if not await self.bot.is_owner(ctx.author):
@@ -111,19 +135,13 @@ class owner(commands.Cog):
             diff_map[name] = looking_for_hash - hash_code
         return sorted(diff_map.items(), key=lambda i: i[1])[0][0]
 
-    def is_spawn(self, message: discord.Message):
-        try:
-            return message.embeds[0].image.url.endswith('PokecordSpawn.jpg')
-        except:
-            return False
-
     async def pokecord_task(self, channel_id: int):
         while True:
-            def check(message):
+            def check(msg):
                 checks = [
-                    message.channel.id == channel_id,
-                    message.author.id == POKECORD_ID,
-                    self.is_spawn(message)
+                    msg.channel.id == channel_id,
+                    msg.author.id == POKECORD_ID,
+                    is_spawn(msg)
                 ]
                 return all(checks)
             message = await self.bot.wait_for('message', check=check)
