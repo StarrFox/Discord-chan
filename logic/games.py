@@ -27,7 +27,7 @@ class Connect4:
     RED = '\N{LARGE RED CIRCLE}'
     BLUE = '\N{LARGE BLUE CIRCLE}'
     # Todo: add veriation selector when I have internet again
-    NUMBERS = [str(i) + "\u20e3" for i in range(1, 8)]
+    NUMBERS = [str(i) + "\N{VARIATION SELECTOR-16}\u20e3" for i in range(1, 8)]
     RESEND = "\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}"
 
     def __init__(self, ctx: commands.Context, player1: discord.Member, player2: discord.Member):
@@ -61,16 +61,7 @@ class Connect4:
         """
         The string representing the board for discord
         """
-        msg = str(self.board)
-
-        # This might be bad?
-        replacements = {
-            '[': '',
-            '.': '',
-            ' ': '',
-        }
-        msg = ''.join([msg.replace(k, v) for k, v in replacements.items()])
-
+        msg = '\n'.join([''.join([i for i in self.board])])
         msg += '\n'
         msg += ''.join(self.NUMBERS)
         return msg
