@@ -19,6 +19,8 @@ import discord
 from discord.ext import commands
 
 from extras import checks
+from core import DiscordChan
+from jishaku.paginators import WrappedPaginator, PaginatorEmbedInterface
 
 
 def is_above(invoker: discord.Member, user: discord.Member):
@@ -28,99 +30,87 @@ def is_above(invoker: discord.Member, user: discord.Member):
 class mod(commands.Cog):
     """Moderation commands"""
 
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: DiscordChan):
         self.bot = bot
 
+    # TODO: test these
     @commands.group(invoke_without_command=True, aliases=["prefixes"])
     async def prefix(self, ctx: commands.Context):
-        """List and add/remove your prefixes"""
-        guild = ctx.guild
-        if guild.id in self.bot.prefixes:
-            e = discord.Embed(
-                description="\n".join(self.bot.prefixes[guild.id]),
-                color=discord.Color.blurple()
-            )
-            await ctx.send(embed=e)
-        else:
-            await ctx.send('exe!')
+        """
+        Base prefix command
+        Lists prefixes
+        """
+        prefixes = '\n'.join(self.bot.prefixes[ctx.guild.id])
+
+        paginator = WrappedPaginator(max_size=500)
+
+        paginator.add_line(prefixes)
+
+        interface = PaginatorEmbedInterface(self.bot, paginator, owner=ctx.author)
+
+        await interface.send_to(ctx)
 
     @prefix.command()
     @checks.has_permissions(administrator=True)
-    async def add(self, ctx: commands.Context, *, prefix: str):
-        """Add a prefix for this server"""
-        guild = ctx.guild
-        prefix = prefix.replace("\N{QUOTATION MARK}", "")
-        if guild.id in self.bot.prefixes:
-            if prefix in self.bot.prefixes[guild.id]:
-                return await ctx.send("Prefix already added")
-            if len(self.bot.prefixes[guild.id]) >= 20:
-                return await ctx.send('Can only have 20 prefixes, remove one to add this one')
-            else:
-                self.bot.prefixes[guild.id].append(prefix)
-                await ctx.send("Prefix added")
-        else:
-            self.bot.prefixes[guild.id] = []
-            self.bot.prefixes[guild.id].append(prefix)
-            await ctx.send("Prefix added")
+    async def add(self, ctx: commands.Context, prefix: str):
+        """
+        Adds a prefix to the guild
+        """
+        # it should never be over 20 but just to be sure
+        if len(self.bot.prefixes[ctx.guild.id]) >= 20:
+            return await ctx.send('Guild at max prefixes of 20, remove one to add this one.')
+
+        # maybe I should tell them if it was already in there?
+        self.bot.prefixes[ctx.guild.id].add(prefix)
+        await ctx.send('Added.')
 
     @prefix.command(aliases=['rem'])
     @checks.has_permissions(administrator=True)
-    async def remove(self, ctx: commands.Context, *, prefix: str):
+    async def remove(self, ctx: commands.Context, prefix: str):
         """Remove a prefix for this server"""
-        guild = ctx.guild
-        prefix = prefix.replace("\N{QUOTATION MARK}", "")
-        if guild.id in self.bot.prefixes:
-            if len(self.bot.prefixes[guild.id]) == 1:
-                return await ctx.send("Sorry I can't have no prefix")
-            else:
-                if prefix in self.bot.prefixes[guild.id]:
-                    self.bot.prefixes[guild.id].remove(prefix)
-                    return await ctx.send("Prefix removed")
-                else:
-                    return await ctx.send("Prefix not found")
-        else:
-            await ctx.send("Don't know how you got here lol")
+        if prefix in self.bot.prefixes[ctx.guild.id]:
+            # It's the only one in the guild so just reset to default prefix
+            # rather than an empty set
+            if len(self.bot.prefixes[ctx.guild.id]) == 1:
+                del self.bot.prefixes[ctx.guild.id]
 
+            else:
+                self.bot.prefixes[ctx.guild.id].remove(prefix)
+
+            await ctx.send('Prefix removed')
+        else:
+            await ctx.send("Prefix not in this guild's prefixes")
+
+    # Todo: test this
     @commands.command()
     @commands.bot_has_permissions(manage_messages=True)
     @checks.has_permissions(manage_messages=True)
     async def purge(self,
                     ctx: commands.Context,
-                    number: int, user: typing.Optional[discord.Member] = None,
+                    number: int,
+                    user: typing.Optional[discord.Member] = None,
                     *, text: str = None):
-        """Purges messages from certain user or certain text"""
-        channel = ctx.message.channel
+        """
+        Purges messages from certain user or certain text
+        """
         await ctx.message.delete()
-        if not user and not text:
-            deleted = await channel.purge(limit=number)
-        else:
-            def msgcheck(msg):
-                if user and text:
-                    if text in msg.content.lower() and msg.author == user:
-                        return True
-                    else:
-                        return False
-                if user:
-                    if msg.author == user:
-                        return True
-                if text:
-                    if text in msg.content.lower():
-                        return True
 
-            deleted = await channel.purge(limit=number, check=msgcheck)
-        await channel.send(f'Deleted {len(deleted)} message(s)', delete_after=5)
+        def msgcheck(msg):
+            if user and text:
+                # Using lower might be inconsistent
+                return text in msg.content.lower() and user == msg.author
 
-    @commands.command()
-    @commands.bot_has_permissions(ban_members=True)
-    @checks.has_permissions(ban_members=True)
-    async def ban(self, ctx: commands.Context, member: discord.Member, *, reason=None):
-        """
-        Bans a member
-        """
-        if not is_above(ctx.author, member) and not ctx.guild.owner == ctx.author:
-            return await ctx.send("You have to have a higher role to ban someone")
-        await member.ban(reason=reason)
-        await ctx.send(f"{member.name} was banned")
+            elif user:
+                return user == msg.author
+
+            elif text:
+                return text in msg.content.lower()
+
+            else:
+                return True
+
+        deleted = await ctx.channel.purge(limit=number, check=msgcheck)
+        await ctx.send(f'Deleted {len(deleted)} message(s)', delete_after=5)
 
     @commands.command()
     @commands.bot_has_permissions(ban_members=True)
@@ -131,28 +121,6 @@ class mod(commands.Cog):
         """
         await ctx.guild.ban(discord.Object(id=member_id), reason=reason)
         await ctx.send(f"Banned {member_id}")
-
-    @commands.command()
-    @commands.bot_has_permissions(kick_members=True)
-    @checks.has_permissions(kick_members=True)
-    async def kick(self, ctx: commands.Context, member: discord.Member, *, reason=None):
-        """
-        Kicks a member
-        """
-        if not is_above(ctx.author, member) and not ctx.guild.owner == ctx.author:
-            return await ctx.send("You have to have a higher role to kick someone")
-        await member.kick(reason=reason)
-        await ctx.send(f"{member.name} has been kicked")
-
-    @commands.command(aliases=["cr"])
-    @checks.has_permissions(manage_roles=True)
-    @commands.bot_has_permissions(manage_roles=True)
-    async def createrole(self, ctx: commands.Context, name: str):
-        """
-        Creates a role with a given name
-        """
-        role = await ctx.guild.create_role(name=name)
-        await ctx.send(f"Created {role.name}")
 
 def setup(bot):
     bot.add_cog(mod(bot))

@@ -83,5 +83,7 @@ class general(commands.Cog):
     async def chika(self, ctx):
         await ctx.send("https://www.youtube.com/watch?v=iS2s9deFClY")
 
+    # TODO: add back clean command?
+
 def setup(bot):
     bot.add_cog(general(bot))
