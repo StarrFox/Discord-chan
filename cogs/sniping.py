@@ -125,7 +125,7 @@ class sniping(commands.Cog):
             return await ctx.send("You cannot snipe a nsfw channel from a non-nsfw channel.")
 
         # TODO: possible fix needs testing
-        if not channel.permissions_for(ctx.author).read_messages():
+        if not channel.permissions_for(ctx.author).read_messages:
             return await ctx.send("You need permission to view a channel to snipe from it.")
 
         snipes = await self.get_snipes(channel, member, text)
@@ -165,6 +165,10 @@ class sniping(commands.Cog):
 
         if not ctx.channel.is_nsfw() and channel.is_nsfw():
             return await ctx.send("You cannot snipe a nsfw channel from a non-nsfw channel.")
+
+        # TODO: possible fix needs testing
+        if not channel.permissions_for(ctx.author).read_messages:
+            return await ctx.send("You need permission to view a channel to snipe from it.")
 
         snipes = await self.get_snipes(channel, member, text)
 
