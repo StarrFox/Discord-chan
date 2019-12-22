@@ -19,7 +19,6 @@ import discord
 from discord.ext import commands
 
 from extras import checks
-from core import DiscordChan
 from jishaku.paginators import WrappedPaginator, PaginatorEmbedInterface
 
 
@@ -30,7 +29,7 @@ def is_above(invoker: discord.Member, user: discord.Member):
 class mod(commands.Cog):
     """Moderation commands"""
 
-    def __init__(self, bot: DiscordChan):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     # TODO: test these
