@@ -132,9 +132,9 @@ bot = DiscordChan()
 
 bot.help_command = bot_stuff.Minimal()
 
-bot.load_extension("bot_stuff.jsk", **jsk_settings)
+bot.load_extension("bot_stuff.cogs.jsk", **jsk_settings)
 
-bot.load_extension("bot_stuff.logging_cog", webhook_url=config.webhook_url)
+bot.load_extension("bot_stuff.cogs.logging_cog", webhook_url=config.webhook_url)
 
 if config.load_db and asyncpg:
     bot.add_ready_func(bot.connect_db)
