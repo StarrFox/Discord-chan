@@ -102,6 +102,7 @@ class Connect4:
 
     def check_wins(self):
         def check(array: list):
+            array = list(array)
             for i in range(len(array) - 3):
                 if array[i:i + 4].count(self.current_piece) == 4:
                     return True
