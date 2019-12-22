@@ -19,7 +19,7 @@ from datetime import datetime
 
 import discord
 import humanize
-from bot_stuff.paginators import EmbedDictPaginator, EmbedDictInterface
+from bot_stuff import EmbedDictPaginator, EmbedDictInterface
 from discord.ext import commands
 
 
@@ -36,11 +36,12 @@ class snipe_msg:
     def readable_time(self):
         return humanize.naturaltime(datetime.now() - self.time)
 
+    # TODO: replace this with equals f-string thing after switching to 3.8
     def __repr__(self):
         return f"<Snipe_msg author={self.author} channel={self.channel} time={self.time}>"
 
     def __str__(self):
-        return f"{self.mode} by {self.author} ({self.readable_time})"
+        return f"[{self.mode}] {self.author} ({self.readable_time})"
 
 
 def get_dict_from_snipes(snipes: list):
@@ -59,22 +60,48 @@ class sniping(commands.Cog):
         self.bot = bot
         self.snipe_dict = defaultdict(lambda: [])
 
+    def attempt_add_snipe(self, message: discord.Message, mode: str):
+        if message.content:
+            snipe = snipe_msg(message, mode)
+            self.snipe_dict[message.channel.id].insert(0, snipe)
+
     @commands.Cog.listener()
-    async def on_message_delete(self, msg: discord.Message):
+    async def on_message_delete(self, message: discord.Message):
         """Saves deleted messages to snipe dict"""
-        if not msg.content:
-            return
-        snipe_obj = snipe_msg(msg, 'Deleted')
-        self.snipe_dict[msg.channel.id].insert(0, snipe_obj)
+        self.attempt_add_snipe(message, 'Deleted')
+
+    @commands.Cog.listener()
+    async def on_bulk_message_delete(self, messages: [discord.Message]):
+        """Saves bulk deleted messages to snipe dict"""
+        for message in messages:
+            self.attempt_add_snipe(message, 'Purged')
 
     @commands.Cog.listener()
     async def on_message_edit(self, before: discord.Message, after: discord.Message):
         """Saves edited messages to snipe dict"""
-        if not before.content != after.content or not before.content:
-            return
-        snipe_obj = snipe_msg(before, 'Edited')
-        self.snipe_dict[before.channel.id].insert(0, snipe_obj)
+        if before.content != after.content:
+            self.attempt_add_snipe(before, 'Edited')
 
+    async def get_snipes(self,
+                         channel: discord.TextChannel,
+                         member: discord.Member = None,
+                         text: str = None
+                         ):
+
+        if member and text:
+            channel_snipes = self.snipe_dict[channel.id]
+            snipes = [s for s in channel_snipes if s.author == member and text in s.content]
+
+        elif member:
+            channel_snipes = self.snipe_dict[channel.id]
+            snipes = [s for s in channel_snipes if s.author == member]
+
+        else:
+            snipes = self.snipe_dict[channel.id]
+
+        return snipes
+
+    # TODO: only allow snipes for channels they can see
     @commands.group(name='snipe', invoke_without_command=True)
     async def snipe_command(self,
                             ctx: commands.Context,
@@ -97,14 +124,11 @@ class sniping(commands.Cog):
         if not ctx.channel.is_nsfw() and channel.is_nsfw():
             return await ctx.send("You cannot snipe a nsfw channel from a non-nsfw channel.")
 
-        if member and text:
-            channel_snipes = self.snipe_dict[channel.id]
-            snipes = [s for s in channel_snipes if s.author == member and text in s.content]
-        elif member:
-            channel_snipes = self.snipe_dict[channel.id]
-            snipes = [s for s in channel_snipes if s.author == member]
-        else:
-            snipes = self.snipe_dict[channel.id]
+        # TODO: possible fix needs testing
+        if not channel.permissions_for(ctx.author).read_messages():
+            return await ctx.send("You need permission to view a channel to snipe from it.")
+
+        snipes = await self.get_snipes(channel, member, text)
 
         if not snipes:
             return await ctx.send("No snipes found.")
@@ -115,6 +139,9 @@ class sniping(commands.Cog):
             return await ctx.send("Index out of bounds.")
 
         e = discord.Embed(title=str(snipe), description=snipe.content)
+
+        # Todo: this is kinda bad? 0/0
+        e.set_footer(text=f'{index}/{len(snipes) - 1}')
 
         return await ctx.send(embed=e)
 
@@ -139,14 +166,7 @@ class sniping(commands.Cog):
         if not ctx.channel.is_nsfw() and channel.is_nsfw():
             return await ctx.send("You cannot snipe a nsfw channel from a non-nsfw channel.")
 
-        if member and text:
-            channel_snipes = self.snipe_dict[channel.id]
-            snipes = [s for s in channel_snipes if s.author == member and text in s.content]
-        elif member:
-            channel_snipes = self.snipe_dict[channel.id]
-            snipes = [s for s in channel_snipes if s.author == member]
-        else:
-            snipes = self.snipe_dict[channel.id]
+        snipes = await self.get_snipes(channel, member, text)
 
         if not snipes:
             return await ctx.send("No snipes found.")

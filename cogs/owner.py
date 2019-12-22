@@ -83,11 +83,12 @@ class owner(commands.Cog):
         await user.send(msg)
         await ctx.send("message sent")
 
-    @commands.command()
+    @commands.command(aliases=['off'])
     async def restart(self, ctx: commands.Context):
-        await ctx.send("Restarting.")
+        await ctx.send("Shuting down.")
         await self.bot.logout()
 
+    # Todo: remove this
     @commands.command()
     async def noprefix(self, ctx: commands.Context, toggle: bool = None):
         """Toogles having no prefix"""
@@ -95,13 +96,17 @@ class owner(commands.Cog):
             if self.bot.noprefix:
                 return await ctx.send("No prefix is currently on.")
             return await ctx.send("No prefix is currently off.")
+
         if toggle:
             if self.bot.noprefix:
                 return await ctx.send("No prefix is already on.")
+
             self.bot.noprefix = True
             return await ctx.send("No prefix turned on.")
+
         if not self.bot.noprefix:
             return await ctx.send("No prefix is already off.")
+
         self.bot.noprefix = False
         return await ctx.send("No prefix turned off.")
 
@@ -152,6 +157,7 @@ class owner(commands.Cog):
                 f"`p!catch {best_match}`"
             )
 
+    # Todo: remove this when I get bored of it
     @commands.command()
     async def pokecord(self, ctx: commands.Context):
         channel_id = ctx.channel.id

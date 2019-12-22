@@ -14,13 +14,23 @@
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
 import json
+from typing import Optional
 
 import discord
 import humanize
-from bot_stuff.utils import get_prolog_pager
 from discord.ext import commands
 from jishaku.paginators import WrappedPaginator, PaginatorInterface
 
+from bot_stuff import PrologPaginator
+
+
+class PicConverter(commands.Converter):
+
+    async def convert(self, ctx, argument):
+        if argument in ('png', 'gif', 'jpeg', 'webp'):
+            return argument
+        else:
+            raise commands.BadArgument('{} is not a valid picture format.'.format(argument))
 
 class info(commands.Cog):
     """Informational commands"""
@@ -28,38 +38,86 @@ class info(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
+    # Todo: make this and source command better
     @commands.command()
     async def support(self, ctx: commands.Context):
-        """Links to the support server"""
+        """
+        Links to the support server
+        """
         await ctx.send("<https://discord.gg/WsgQfxC>")
 
     @commands.command()
     async def source(self, ctx: commands.Context):
-        """Get the bot's source link"""
+        """
+        Links to the bot's source
+        """
         await ctx.send("<https://github.com/StarrFox/Discord-chan>")
 
     @commands.command()
     async def about(self, ctx: commands.Context):
         """View bot info"""
-        bot = self.bot
-
         data = {
-            'id': bot.user.id,
+            'id': self.bot.user.id,
             'owner': 'StarrFox#6312',
-            'created': humanize.naturaldate(bot.user.created_at)
+            'created': humanize.naturaldate(self.bot.user.created_at),
+            'uptime': humanize.naturaltime(self.bot.uptime)
         }
 
-        events_cog = bot.get_cog('events')
+        events_cog = self.bot.get_cog('events')
 
         if events_cog:
             data.update({
                 'events seen': sum(events_cog.socket_events.values())
             })
 
-        interface = get_prolog_pager(self.bot, {bot.user.name: data}, ctx.author)
+        paginator = PrologPaginator()
+
+        paginator.recursively_add_dictonary({self.bot.user.name: data})
+
+        interface = PaginatorInterface(self.bot, paginator, owner=ctx.author)
 
         await interface.send_to(ctx)
 
+    # Todo: test this
+    # Command idea from R. Danny
+    @commands.command()
+    async def socketstats(self, ctx: commands.Context):
+        """
+        View soketstats of the bot
+        """
+        events_cog = self.bot.get_cog('events')
+
+        if not events_cog:
+            return await ctx.send('Events cog not loaded.')
+
+        socket_events = events_cog.socket_events
+
+        total = sum(socket_events.values())
+
+        paginator = PrologPaginator()
+
+        paginator.recursively_add_dictonary({f"{total} total": socket_events})
+
+        interface = PaginatorInterface(self.bot, paginator, owner=ctx.author)
+
+        await interface.send_to(ctx)
+
+    # TODO: test this
+    @commands.command(aliases=["avy", "pfp"])
+    async def avatar(self,
+                     ctx: commands.Context,
+                     member: Optional[discord.Member] = None,
+                     format: Optional[PicConverter] = 'png',
+                     size: Optional[int] = 1024):
+        """
+        Get a member's avatar
+        """
+        member = member or ctx.author
+        await ctx.send(
+            str(member.avatar_url_as(format=format, size=size))
+        )
+
+    # Todo: test these
     @commands.command(aliases=['ui'])
     async def userinfo(self, ctx: commands.Context, member: discord.Member = None):
         """Get info on a guild member"""
@@ -72,7 +130,11 @@ class info(commands.Cog):
             'joined discord': humanize.naturaldate(member.created_at)
         }
 
-        interface = get_prolog_pager(self.bot, {member.name: data}, ctx.author)
+        paginator = PrologPaginator()
+
+        paginator.recursively_add_dictonary({member.name: data})
+
+        interface = PaginatorInterface(self.bot, paginator, owner=ctx.author)
 
         await interface.send_to(ctx)
 
@@ -101,10 +163,15 @@ class info(commands.Cog):
             }
         }
 
-        interface = get_prolog_pager(self.bot, {guild.name: data}, ctx.author)
+        paginator = PrologPaginator()
+
+        paginator.recursively_add_dictonary({guild.name: data})
+
+        interface = PaginatorInterface(self.bot, paginator, owner=ctx.author)
 
         await interface.send_to(ctx)
 
+    # Todo: test this
     @commands.group(invoke_without_command=True)
     async def raw(self, ctx: commands.Context):
         """
@@ -134,8 +201,9 @@ class info(commands.Cog):
         try:
             data = await self.bot.http.get_message(channel.id, messageid)
         except discord.errors.NotFound:
-            return await ctx.send("Invalid message id")
-        await self.send_raw(ctx, data)
+            await ctx.send("Invalid message id")
+        else:
+            await self.send_raw(ctx, data)
 
     @raw.command()
     async def channel(self, ctx: commands.Context, channel: discord.TextChannel):
@@ -145,8 +213,9 @@ class info(commands.Cog):
         try:
             data = await self.bot.http.get_channel(channel.id)
         except discord.errors.NotFound:
-            return await ctx.send("Invalid channel id")
-        await self.send_raw(ctx, data)
+            await ctx.send("Invalid channel id")
+        else:
+            await self.send_raw(ctx, data)
 
     @raw.command()
     async def member(self, ctx: commands.Context, member: discord.Member):
@@ -156,8 +225,9 @@ class info(commands.Cog):
         try:
             data = await self.bot.http.get_member(member.guild.id, member.id)
         except discord.errors.NotFound:
-            return await ctx.send("Invalid member id")
-        await self.send_raw(ctx, data)
+            await ctx.send("Invalid member id")
+        else:
+            await self.send_raw(ctx, data)
 
     @raw.command()
     async def user(self, ctx: commands.Context, userid: int):
@@ -167,8 +237,9 @@ class info(commands.Cog):
         try:
             data = await self.bot.http.get_user(userid)
         except discord.errors.NotFound:
-            return await ctx.send("Invalid user id")
-        await self.send_raw(ctx, data)
+            await ctx.send("Invalid user id")
+        else:
+            await self.send_raw(ctx, data)
 
     @raw.command(aliases=['server'])
     async def guild(self, ctx: commands.Context, guildid: int):
@@ -178,8 +249,9 @@ class info(commands.Cog):
         try:
             data = await self.bot.http.get_guild(guildid)
         except discord.errors.NotFound:
-            return await ctx.send("Invalid guild id")
-        await self.send_raw(ctx, data)
+            await ctx.send("Invalid guild id")
+        else:
+            await self.send_raw(ctx, data)
 
     @raw.command(name='invite')
     async def raw_invite(self, ctx: commands.Context, invite: str):
@@ -189,17 +261,18 @@ class info(commands.Cog):
         try:
             data = await self.bot.http.get_invite(invite.split('/')[-1])
         except discord.errors.NotFound:
-            return await ctx.send("Invalid invite")
-        await self.send_raw(ctx, data)
+            await ctx.send("Invalid invite")
+        else:
+            await self.send_raw(ctx, data)
 
-    @commands.command(aliases=["avy", "pfp"])
-    async def avatar(self, ctx: commands.Context, member: discord.Member = None):
-        """
-        Get a member's avatar
-        """
-        member = member or ctx.author
-        await ctx.send(str(member.avatar_url_as(size=1024)))
-
+    @raw.command()
+    async def emoji(self, ctx: commands.Context, emoji: discord.Emoji):
+        try:
+            data = await self.bot.http.get_custom_emoji(emoji.guild.id, emoji.id)
+        except discord.NotFound:
+            await ctx.send('Invalid emoji.')  # this should never happen
+        else:
+            await self.send_raw(ctx, data)
 
 def setup(bot):
     bot.add_cog(info(bot))
