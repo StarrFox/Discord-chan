@@ -41,20 +41,6 @@ if not logger.handlers:
         )
     )
 
-# Todo: rewrite this to use env?
-jsk_settings = {
-    "task": "<a:sonic:577005444191485952>",
-    "done": "<a:dancin:582409853918511165>",
-    "syntax": "<a:default:577017740016222229>",
-    "timeout": "error:539157627385413633",
-    "error": "<a:default:577017740016222229>",
-    "tracebacks": "\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}",
-    "scope_prefix": "",
-    "retain": True,
-    "channel_tracebacks": True
-}
-
-
 class DiscordChan(bot_stuff.Bot):
 
     def __init__(self):
@@ -132,7 +118,7 @@ bot = DiscordChan()
 
 bot.help_command = bot_stuff.Minimal()
 
-bot.load_extension("bot_stuff.cogs.jsk", **jsk_settings)
+bot.load_extension("bot_stuff.cogs.jsk", scope_prefix='')
 
 bot.load_extension("bot_stuff.cogs.logging_cog", webhook_url=config.webhook_url)
 
