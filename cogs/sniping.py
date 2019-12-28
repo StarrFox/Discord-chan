@@ -13,9 +13,12 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
+import argparse
 import typing
+import shlex
 from collections import defaultdict
 from datetime import datetime
+
 
 import discord
 import humanize
@@ -31,6 +34,7 @@ class snipe_msg:
         self.time = datetime.now()
         self.channel = message.channel
         self.mode = mode
+        self.id = message.id
 
     @property
     def readable_time(self):
@@ -58,7 +62,7 @@ class sniping(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.snipe_dict = defaultdict(lambda: [])
+        self.snipe_dict: typing.Dict[int, list] = defaultdict(lambda: [])
 
     def attempt_add_snipe(self, message: discord.Message, mode: str):
         if message.content:
@@ -174,6 +178,74 @@ class sniping(commands.Cog):
 
         if not snipes:
             return await ctx.send("No snipes found.")
+
+        paginator = EmbedDictPaginator(max_fields=10)
+
+        data = get_dict_from_snipes(snipes)
+
+        paginator.add_fields(data)
+
+        interface = EmbedDictInterface(self.bot, paginator, owner=ctx.author)
+
+        await interface.send_to(ctx)
+
+    @commands.command()
+    async def snipe2(self, ctx, *, options: str):
+        """
+        A custom snipe with command line arg phrasing
+
+        --users: list of user ids that authored the snipe
+        --channel: channel id to snipe from
+        --after: message id that snipes must be after
+        --before: message id that snipes must be before
+        --contains: string that must be in the snipe
+        """
+        parser = argparse.ArgumentParser(add_help=False)
+
+        parser.add_argument('--users', nargs='+', type=int)
+        parser.add_argument('--channel', type=int, default=ctx.channel.id)
+        parser.add_argument('--after', type=int)
+        parser.add_argument('--before', type=int)
+        # parser.add_argument('--list', action='store_true')
+        parser.add_argument('--contains', nargs='...')
+
+        try:
+            args = parser.parse_args(shlex.split(options))
+        except Exception as e:
+            return await ctx.send(e)
+
+        channel = ctx.guild.get_channel(args.channel)
+
+        if channel is None:
+            return await ctx.send('Channel not found.')
+
+        if not ctx.channel.is_nsfw() and channel.is_nsfw():
+            return await ctx.send("You cannot snipe a nsfw channel from a non-nsfw channel.")
+
+        if not channel.permissions_for(ctx.author).read_messages:
+            return await ctx.send("You need permission to view a channel to snipe from it.")
+
+        snipes = self.snipe_dict[channel.id]
+
+        filters = []
+
+        if args.users:
+            filters.append(lambda snipe: snipe.author.id in args.users)
+
+        if args.after:
+            filters.append(lambda snipe: snipe.id > args.after)
+
+        if args.before:
+            filters.append(lambda snipe: snipe.id < args.before)
+
+        if args.contains:
+            filters.append(lambda snipe: ' '.join(args.contains) in snipe.content)
+
+        for _filter in filters:
+            snipes = list(filter(_filter, snipes))
+
+        if not snipes:
+            return await ctx.send("No snipes found for this search.")
 
         paginator = EmbedDictPaginator(max_fields=10)
 
