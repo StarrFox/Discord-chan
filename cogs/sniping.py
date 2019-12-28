@@ -190,9 +190,9 @@ class sniping(commands.Cog):
         await interface.send_to(ctx)
 
     @commands.command()
-    async def snipe2(self, ctx, *, options: str):
+    async def snipe2(self, ctx: commands.Context, *, options: str = None):
         """
-        A custom snipe with command line arg phrasing
+        A custom snipe with command line arg parsing
 
         --users: list of user ids that authored the snipe
         --channel: channel id to snipe from
@@ -210,9 +210,12 @@ class sniping(commands.Cog):
         parser.add_argument('--contains', nargs='...')
 
         try:
-            args = parser.parse_args(shlex.split(options))
+            if options:
+                args = parser.parse_args(shlex.split(options))
+            else:
+                args = None
         except Exception as e:
-            return await ctx.send(e)
+            return await ctx.send(str(e))
 
         channel = ctx.guild.get_channel(args.channel)
 
@@ -229,16 +232,16 @@ class sniping(commands.Cog):
 
         filters = []
 
-        if args.users:
+        if args and args.users:
             filters.append(lambda snipe: snipe.author.id in args.users)
 
-        if args.after:
+        if args and args.after:
             filters.append(lambda snipe: snipe.id > args.after)
 
-        if args.before:
+        if args and args.before:
             filters.append(lambda snipe: snipe.id < args.before)
 
-        if args.contains:
+        if args and args.contains:
             filters.append(lambda snipe: ' '.join(args.contains) in snipe.content)
 
         for _filter in filters:
