@@ -14,30 +14,36 @@
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
-import typing
 import shlex
-from collections import defaultdict
+import typing
+from collections import defaultdict, deque
 from datetime import datetime
-
 
 import discord
 import humanize
 from bot_stuff import EmbedDictPaginator, EmbedDictInterface
 from discord.ext import commands
+from enum import Enum
 
+class SnipeMode(Enum):
+    edited  = 0
+    deleted = 1
+    purged  = 2
 
-class snipe_msg:
+    def __str__(self):
+        return self.name
 
-    def __init__(self, message: discord.Message, mode: str):
-        self.content = message.content
-        self.author = message.author
-        self.time = datetime.now()
-        self.channel = message.channel
+class SnipeMsg:
+
+    def __init__(self, message: discord.Message, mode: SnipeMode):
         self.mode = mode
-        self.id = message.id
+        self.time = datetime.now()
+        self.author = message.author
+        self.content = message.content
+        self.channel = message.channel
 
     @property
-    def readable_time(self):
+    def readable_time(self) -> str:
         return humanize.naturaltime(datetime.now() - self.time)
 
     # TODO: replace this with equals f-string thing after switching to 3.8
@@ -48,7 +54,7 @@ class snipe_msg:
         return f"[{self.mode}] {self.author} ({self.readable_time})"
 
 
-def get_dict_from_snipes(snipes: list):
+def get_dict_from_snipes(snipes: typing.Iterable) -> dict:
     res = {}
 
     for snipe in snipes:
@@ -62,12 +68,16 @@ class sniping(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.snipe_dict: typing.Dict[int, list] = defaultdict(lambda: [])
+        self.snipe_dict: typing.Dict[int, deque] = defaultdict(lambda: deque())
 
     def attempt_add_snipe(self, message: discord.Message, mode: str):
+        try:
+            mode = SnipeMode[mode]
+        except KeyError:
+            raise ValueError(f'{mode} is not a valid snipe mode.')
         if message.content:
-            snipe = snipe_msg(message, mode)
-            self.snipe_dict[message.channel.id].insert(0, snipe)
+            snipe = SnipeMsg(message, mode)
+            self.snipe_dict[message.channel.id].appendleft(snipe)
 
     @commands.Cog.listener()
     async def on_message_delete(self, message: discord.Message):
@@ -189,31 +199,33 @@ class sniping(commands.Cog):
 
         await interface.send_to(ctx)
 
+    # Todo: add back indexing like behavior?
     @commands.command()
-    async def snipe2(self, ctx: commands.Context, *, options: str = None):
+    async def snipe2(self, ctx: commands.Context, *, options: str = ''):
         """
-        A custom snipe with command line arg parsing
+        Normal snipe but with command line arg parsing
 
         --users: list of user ids that authored the snipe
         --channel: channel id to snipe from
         --after: message id that snipes must be after
         --before: message id that snipes must be before
-        --contains: string that must be in the snipe
+        --mode: mode of the snipes (edited, deleted, purged)
+        --contains: string that must be in the snipes
         """
         parser = argparse.ArgumentParser(add_help=False)
 
         parser.add_argument('--users', nargs='+', type=int)
-        parser.add_argument('--channel', type=int, default=ctx.channel.id)
+        parser.add_argument('--channel', default=ctx.channel.id, type=int)
         parser.add_argument('--after', type=int)
         parser.add_argument('--before', type=int)
         # parser.add_argument('--list', action='store_true')
-        parser.add_argument('--contains', nargs='...')
+        # Todo: add server option to see all server snipes? make sure to check if they can view and nsfw
+        # Todo: add back indexing behavior to see full messages? or take entire page for larger messages?
+        parser.add_argument('--mode')
+        parser.add_argument('--contains', nargs='+')
 
         try:
-            if options:
-                args = parser.parse_args(shlex.split(options))
-            else:
-                args = None
+            args = parser.parse_args(shlex.split(options))
         except Exception as e:
             return await ctx.send(str(e))
 
@@ -223,26 +235,39 @@ class sniping(commands.Cog):
             return await ctx.send('Channel not found.')
 
         if not ctx.channel.is_nsfw() and channel.is_nsfw():
-            return await ctx.send("You cannot snipe a nsfw channel from a non-nsfw channel.")
+            return await ctx.send('You cannot snipe a nsfw channel from a non-nsfw channel.')
 
         if not channel.permissions_for(ctx.author).read_messages:
-            return await ctx.send("You need permission to view a channel to snipe from it.")
+            return await ctx.send('You need permission to view a channel to snipe from it.')
+
+        mode = None
+        if args.mode:
+            try:
+                mode = SnipeMode[args.mode]
+            except KeyError:
+                return await ctx.send('Invalid mode.')
 
         snipes = self.snipe_dict[channel.id]
 
         filters = []
 
-        if args and args.users:
+        if args.users:
             filters.append(lambda snipe: snipe.author.id in args.users)
 
-        if args and args.after:
-            filters.append(lambda snipe: snipe.id > args.after)
+        if args.after:
+            after = discord.utils.snowflake_time(args.after)
+            filters.append(lambda snipe: snipe.time > after)
 
-        if args and args.before:
-            filters.append(lambda snipe: snipe.id < args.before)
+        if args.before:
+            before = discord.utils.snowflake_time(args.before)
+            filters.append(lambda snipe: snipe.time < before)
 
-        if args and args.contains:
-            filters.append(lambda snipe: ' '.join(args.contains) in snipe.content)
+        if mode:
+            filters.append(lambda snipe: snipe.mode == mode)
+
+        if args.contains:
+            to_match = ' '.join(args.contains)
+            filters.append(lambda snipe: to_match in snipe.content)
 
         for _filter in filters:
             snipes = list(filter(_filter, snipes))
