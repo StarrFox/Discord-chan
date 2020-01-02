@@ -37,14 +37,14 @@ class SnipeMsg:
 
     def __init__(self, message: discord.Message, mode: SnipeMode):
         self.mode = mode
-        self.time = datetime.now()
+        self.time = datetime.utcnow()
         self.author = message.author
         self.content = message.content
         self.channel = message.channel
 
     @property
     def readable_time(self) -> str:
-        return humanize.naturaltime(datetime.now() - self.time)
+        return humanize.naturaltime(datetime.utcnow() - self.time)
 
     # TODO: replace this with equals f-string thing after switching to 3.8
     def __repr__(self):
