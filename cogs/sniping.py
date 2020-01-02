@@ -82,19 +82,19 @@ class sniping(commands.Cog):
     @commands.Cog.listener()
     async def on_message_delete(self, message: discord.Message):
         """Saves deleted messages to snipe dict"""
-        self.attempt_add_snipe(message, 'Deleted')
+        self.attempt_add_snipe(message, 'deleted')
 
     @commands.Cog.listener()
     async def on_bulk_message_delete(self, messages: [discord.Message]):
         """Saves bulk deleted messages to snipe dict"""
         for message in messages:
-            self.attempt_add_snipe(message, 'Purged')
+            self.attempt_add_snipe(message, 'purged')
 
     @commands.Cog.listener()
     async def on_message_edit(self, before: discord.Message, after: discord.Message):
         """Saves edited messages to snipe dict"""
         if before.content != after.content:
-            self.attempt_add_snipe(before, 'Edited')
+            self.attempt_add_snipe(before, 'edited')
 
     async def get_snipes(self,
                          channel: discord.TextChannel,
