@@ -39,6 +39,7 @@ token=
 [enviroment]
 # all options here will be loaded as enviroment variables
 # unless the disable option is true
+# note: all keys are uppered to deal with configParser
 disable=false
 
 # read more about these jishaku setting in the README
@@ -118,7 +119,7 @@ def load_environ(**kwargs):
     from os import environ
 
     for var, value in kwargs.items():
-        environ[var] = value
+        environ[var.upper()] = value
 
 def add_run_args(parser: argparse.ArgumentParser):
     parser.add_argument('-v',
