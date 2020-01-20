@@ -35,43 +35,44 @@ class PartitionPaginator(WrappedPaginator):
         super().__init__(*args, **kwargs)
         self.break_line_on_unwrapable = break_line_on_unwrapable
 
+    # Todo: remove debug prints before master push
     def add_line(self, line='', *, empty=False):
         true_max_size = self.max_size - self._prefix_len - self._suffix_len  # - self._max_size_factor
-        print(f'{true_max_size=}')
+        # print(f'{true_max_size=}')
 
         while len(line) > true_max_size:
-            print('')
-            print('top of while')
+            # print('')
+            # print('top of while')
             search_string = line[0:true_max_size]
             line = line[true_max_size:]
             wrapped = False
-            print(f'{search_string=}')
-            print(f'{line=}')
+            # print(f'{search_string=}')
+            # print(f'{line=}')
 
             for delimiter in self.wrap_on:
 
                 partition = search_string.rpartition(delimiter)
-                print(f'{partition=}')
+                # print(f'{partition=}')
 
                 if len(partition[0]) > 0:
                     wrapped = True
 
                     if self.include_wrapped:
-                        print('includewrap-adding %s' % partition[0] + partition[1])
+                        # print('includewrap-adding %s' % partition[0] + partition[1])
                         super(WrappedPaginator, self).add_line(partition[0] + partition[1], empty=empty)
                     else:
-                        print(f'!includewrap-adding {partition[0]}')
+                        # print(f'!includewrap-adding {partition[0]}')
                         super(WrappedPaginator, self).add_line(partition[0], empty=empty)
 
                     line = partition[2] + line
 
             if not wrapped:
-                print(f'adding unwrapped {search_string=}')
+                # print(f'adding unwrapped {search_string=}')
                 super(WrappedPaginator, self).add_line(search_string, empty=empty)
 
         if len(line) > 0:
-            print('at bottom add')
-            print(f'{line=}')
+            # print('at bottom add')
+            # print(f'{line=}')
             super(WrappedPaginator, self).add_line(line, empty=empty)
 
 

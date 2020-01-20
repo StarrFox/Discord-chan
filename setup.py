@@ -37,7 +37,7 @@ setup(
     python_requires='>=3.7',
     install_requires=[
         'jishaku>=1.17',
-        'discord.py>=1.3',
+        'discord.py',  # >=1.3', waiting for this to be pushed
         'numpy',
         'imagehash',
         'aiohttp',
