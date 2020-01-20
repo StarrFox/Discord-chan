@@ -83,7 +83,7 @@ class Mod(commands.Cog, name='mod'):
         if prefix not in self.bot.prefixes[ctx.guild.id]:
             return await ctx.send("Prefix not in this guild's prefixes.")
 
-        async with self.bot.db as conn:
+        async with db.get_database() as conn:
             async with conn.cursor() as cursor:
                 # It's the only one in the guild so just reset to default prefix
                 # rather than an empty set

@@ -107,7 +107,7 @@ class PrologPaginator(commands.Paginator):
         :param header: The new header to add
         """
         header = f" {header} ".center(self.align_places * 2, '=')
-        self.add_line(f"\n{capwords(header)}\n")
+        self.add_line(f"\n{capwords(str(header))}\n")
 
     def add_key_value_pair(self, key: str, value: str):
         """
@@ -115,8 +115,8 @@ class PrologPaginator(commands.Paginator):
         :param value: The value to add
         """
         self.add_line("{0:{align}{places}} :: {1}".format(
-            capwords(key),
-            capwords(value),
+            capwords(str(key)),
+            capwords(str(value)),
             align=self.align_option,
             places=self.align_places
         ))

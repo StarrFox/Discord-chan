@@ -33,7 +33,7 @@ class General(commands.Cog, name='general'):
 
     # Todo: test this
     @commands.command()
-    async def charinfo(self, ctx: commands.Context, *charactors):
+    async def charinfo(self, ctx: commands.Context, *, charactors):
         """
         Convert charactors to name syntax
         """
