@@ -109,7 +109,7 @@ class Meta(commands.Cog, name='meta'):
 
         total = sum(socket_events.values())
 
-        paginator = PrologPaginator()
+        paginator = discord_chan.PrologPaginator()
 
         paginator.recursively_add_dictonary({f"{total} total": socket_events})
 

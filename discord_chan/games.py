@@ -126,7 +126,7 @@ class Connect4:
             if check(diagonal):
                 return True
 
-    def phrase_reaction(self, reaction: discord.Reaction):
+    async def phrase_reaction(self, reaction: discord.Reaction):
         if str(reaction) == self.RESEND:
             self.resend_message = True
 
