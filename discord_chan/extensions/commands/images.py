@@ -1,0 +1,111 @@
+# -*- coding: utf-8 -*-
+#  Copyright © 2019 StarrFox
+#
+#  Discord Chan is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU Affero General Public License as published
+#  by the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  Discord Chan is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU Affero General Public License for more details.
+#
+#  You should have received a copy of the GNU Affero General Public License
+#  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
+
+import discord
+from discord.ext import commands
+
+import discord_chan
+
+from discord_chan import BetweenConverter
+
+# Todo: add more image commands
+# Todo: add imagur image getting?
+# Todo: add link converter than validates the url and accept attachments or prior images (channel history)
+class Images(commands.Cog, name='images'):
+
+    @commands.command()
+    @commands.cooldown(1, 30, commands.cooldowns.BucketType.user)
+    async def wallemoji(self,
+                        ctx: commands.Context,
+                        name: str,
+                        width: BetweenConverter(1, 10),
+                        height: BetweenConverter(1, 10),
+                        link: str):
+        """
+        Makes some emojis from an image
+        """
+        try:
+            image = await discord_chan.url_to_image(link)
+        except discord_chan.FileTooLarge:
+            return await ctx.send('File was too large.')
+        except discord_chan.InvalidImageType:
+            return await ctx.send('Unable to open file as image.')
+
+        gif = image.format == 'GIF'
+
+        with ctx.typing():
+            factors = discord_chan.get_wallify_factors(image.size(), (width, height))
+            if gif:
+                emojis = await discord_chan.wallify_gif_image(image, width, height)
+            else:
+                emojis = await discord_chan.wallify_image(image, width, height)
+
+            premade_wall = discord_chan.get_wallify_example_file(factors.wall_size, name)
+
+            archive = await discord_chan.tarball_images(emojis,
+                                                        name=name,
+                                                        animated=gif,
+                                                        extras=[(name, premade_wall)])
+
+        await ctx.send(ctx.author.mention, file=discord.File(archive, filename=f"{name}.tar"))
+
+    # todo: test these
+    @commands.command(aliases=['randomize'])
+    @commands.cooldown(1, 30, commands.cooldowns.BucketType.user)
+    async def shuffle(self, ctx: commands.Context, link: str, degree: BetweenConverter(1, 100_000)):
+        """
+        Shuffle's an image's pixels
+        Degree must be between 1 and 100,000
+        """
+        # Todo: use this for the image converter?
+        try:
+            image = await discord_chan.url_to_image(link)
+        except discord_chan.FileTooLarge:
+            return await ctx.send('File was too large.')
+        except discord_chan.InvalidImageType:
+            return await ctx.send('Unable to open file as image.')
+
+        with ctx.typing():
+            shuffled = await discord_chan.shuffle_image(image, degree=degree)
+
+            file = await discord_chan.image_to_file(shuffled, f'shuffled.{shuffled.format.lower()}')
+
+        await ctx.send(ctx.author.mention, file=file)
+
+    @commands.command(aliases=['diff'])
+    @commands.cooldown(1, 30, commands.cooldowns.BucketType.user)
+    async def difference(self, ctx: commands.Context, link1: str, link2: str):
+        """
+        Get a composite image of two image's differences
+        """
+        # I could tell them which link caused but eh
+        try:
+            image1 = await discord_chan.url_to_image(link1)
+            image2 = await discord_chan.url_to_image(link2)
+        except discord_chan.FileTooLarge:
+            return await ctx.send('File was too large.')
+        except discord_chan.InvalidImageType:
+            return await ctx.send('Unable to open file as image.')
+
+        with ctx.typing():
+            difference_image = await discord_chan.difference_image(image1, image2)
+
+            file = await discord_chan.image_to_file(difference_image, f'difference.{difference_image.format.lower()}')
+
+        await ctx.send(ctx.author.mention, file=file)
+
+def setup(bot):
+    bot.add_cog(Images())
