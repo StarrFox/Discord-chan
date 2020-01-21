@@ -16,8 +16,6 @@
 
 from discord.ext import commands
 
-from contextlib import suppress
-
 
 class BadFormatArgument(commands.BadArgument):
     pass
@@ -26,6 +24,8 @@ class BadFormatArgument(commands.BadArgument):
 class BadBetweenArgument(commands.BadArgument):
     pass
 
+class BadNumberArgument(commands.BadArgument):
+    pass
 
 class ImageFormatConverter(commands.Converter):
 
@@ -43,8 +43,11 @@ class BetweenConverter(commands.Converter):
         self.num2 = num2
 
     async def convert(self, ctx, argument):
-        with suppress(ValueError):
-            if self.num1 <= int(argument) <= self.num2:
-                return argument
+        try:
+            argument = int(argument)
+        except ValueError:
+            raise BadNumberArgument('{} is not a value number.'.format(argument))
+        if self.num1 <= argument <= self.num2:
+            return argument
 
         raise BadBetweenArgument('{} is not between {} and {}'.format(argument, self.num1, self.num2))

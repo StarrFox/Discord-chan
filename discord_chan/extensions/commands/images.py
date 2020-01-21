@@ -96,8 +96,8 @@ class Images(commands.Cog, name='images'):
         try:
             image1 = await discord_chan.url_to_image(link1)
             image2 = await discord_chan.url_to_image(link2)
-        except discord_chan.FileTooLarge:
-            return await ctx.send('File was too large.')
+        except discord_chan.FileTooLarge as error:
+            return await ctx.send(str(error))
         except discord_chan.InvalidImageType:
             return await ctx.send('Unable to open file as image.')
 
