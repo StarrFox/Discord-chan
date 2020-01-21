@@ -22,6 +22,7 @@ from jishaku.paginators import WrappedPaginator, PaginatorEmbedInterface
 
 from discord_chan import db
 
+
 def is_above(invoker: discord.Member, user: discord.Member):
     return invoker.top_role > user.top_role
 

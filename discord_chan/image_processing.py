@@ -135,16 +135,17 @@ def tarball_images(
 
 
 @executor_function
-def image_to_file(image: Image.Image, filename: str = None) -> File:
+def image_to_file(image: Image.Image, filename: str = None, format: str = 'png') -> File:
     """
     Saves an image into a :class:discord.File
     :param image: The image to save
     :param filename: The filename to use
+    :param format:
     :return: The File ready to send
     """
     buffer = BytesIO()
 
-    image.save(buffer)
+    image.save(buffer, format)
 
     return File(buffer, filename=filename)
 

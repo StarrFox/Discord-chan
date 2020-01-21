@@ -24,8 +24,10 @@ from textwrap import shorten
 
 import discord
 import humanize
-from discord_chan import EmbedDictPaginator, EmbedDictInterface
 from discord.ext import commands
+
+from discord_chan import EmbedDictPaginator, EmbedDictInterface
+
 
 # Todo: move this to general to deal with help snipe conflict
 
