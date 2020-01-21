@@ -14,8 +14,11 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
+import discord
 from discord.ext import commands
 
+
+# Todo: make cogs < command i.e anime and snipe
 class Minimal(commands.MinimalHelpCommand):
 
     def get_opening_note(self):
@@ -85,3 +88,37 @@ class Minimal(commands.MinimalHelpCommand):
                 self.paginator.add_line()
                 self.paginator.add_line(note)
         await self.send_pages()
+
+    # I overwrite this to have command > cog rather than the default
+    async def command_callback(self, ctx, *, command=None):
+        await self.prepare_help_command(ctx, command)
+        bot = ctx.bot
+
+        if command is None:
+            mapping = self.get_bot_mapping()
+            return await self.send_bot_help(mapping)
+
+        maybe_coro = discord.utils.maybe_coroutine
+
+        keys = command.split(' ')
+        cmd = bot.all_commands.get(keys[0])
+
+        if cmd is not None:
+            if isinstance(cmd, commands.Group):
+                for key in keys[1:]:
+                    found = cmd.all_commands.get(key)
+                    if found is None:
+                        string = await maybe_coro(self.subcommand_not_found, cmd, self.remove_mentions(key))
+                        return await self.send_error_message(string)
+                    cmd = found
+            if isinstance(cmd, commands.Group):
+                return await self.send_group_help(cmd)
+            else:
+                return await self.send_command_help(cmd)
+
+        cog = bot.get_cog(command)
+        if cog is not None:
+            return await self.send_cog_help(cog)
+        else:
+            string = await maybe_coro(self.command_not_found, self.remove_mentions(keys[0]))
+            return await self.send_error_message(string)

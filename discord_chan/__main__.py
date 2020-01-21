@@ -21,7 +21,6 @@ from configparser import ConfigParser
 
 from aiomonitor import start_monitor
 
-import discord_chan
 
 default_config = """
 [general]
@@ -72,6 +71,11 @@ def run(args: argparse.Namespace):
 
     if not config['enviroment'].getboolean('disable'):
         load_environ(**dict([var for var in config['enviroment'].items() if var[0] != 'disable']))
+
+    # This is here so environment vars are set before it's loaded
+    # We need them loaded encase we're using them to see to load something
+    # Or as options i.e. jishaku.flags
+    import discord_chan
 
     logging.basicConfig(
         format="[%(asctime)s] [%(levelname)s:%(name)s] %(message)s",
@@ -125,7 +129,7 @@ def add_run_args(parser: argparse.ArgumentParser):
     parser.add_argument('-v',
                         '--version',
                         action='version',
-                        version=discord_chan.__version__
+                        version='0.1'  # parser version is different from app version
                         )
 
     parser.add_argument('-d',
@@ -163,8 +167,10 @@ def install(args: argparse.Namespace):
         file.write(default_config.strip())
         print(f'{args.config} made.')
 
+    from discord_chan import db
+
     async def init_db():
-        async with discord_chan.db.get_database() as connection:
+        async with db.get_database() as connection:
             async with connection.cursor() as cursor:
                 await cursor.executescript(sql_init.strip())
                 # Todo: remove before pushing master

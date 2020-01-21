@@ -173,6 +173,7 @@ class Connect4:
         else:
             await self.message.edit(content=content, embed=self.embed)
 
+    # Todo: see if updating on any reaction is bad
     async def run(self):
         self.running = True
         await self.update()
