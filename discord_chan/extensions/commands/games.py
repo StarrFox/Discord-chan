@@ -24,7 +24,6 @@ from discord_chan import Connect4
 
 class Games(commands.Cog, name='games'):
 
-    # Todo: test this
     @commands.command(aliases=['c4'])
     @commands.bot_has_permissions(add_reactions=True)
     async def connect4(self, ctx, member: discord.Member):

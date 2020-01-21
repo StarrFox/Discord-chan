@@ -33,7 +33,6 @@ class Mod(commands.Cog, name='mod'):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # TODO: test these
     @commands.group(invoke_without_command=True, aliases=["prefixes"])
     async def prefix(self, ctx: commands.Context):
         """
@@ -50,7 +49,6 @@ class Mod(commands.Cog, name='mod'):
 
         await interface.send_to(ctx)
 
-    # Todo: test this
     @commands.has_permissions(administrator=True)
     @prefix.command()
     async def add(self, ctx: commands.Context, prefix: str):
@@ -93,7 +91,8 @@ class Mod(commands.Cog, name='mod'):
 
                 else:
                     self.bot.prefixes[ctx.guild.id].remove(prefix)
-                    await cursor.execute("UPDATE prefixes SET prefixes ? WHERE guild_id IS ?;",
+                    # Todo: fix this quarry "?" is wrong
+                    await cursor.execute("UPDATE prefixes SET prefixes=? WHERE guild_id IS ?;",
                                          (self.bot.prefixes[ctx.guild.id], ctx.guild.id))
             await conn.commit()
 

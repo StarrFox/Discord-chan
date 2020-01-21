@@ -31,7 +31,6 @@ class General(commands.Cog, name='general'):
     def __init__(self, bot):
         self.bot = bot
 
-    # Todo: test this
     @commands.command()
     async def charinfo(self, ctx: commands.Context, *, charactors):
         """
@@ -67,7 +66,7 @@ class General(commands.Cog, name='general'):
 
         can_mass_delete = ctx.channel.permissions_for(ctx.me).manage_messages
 
-        await ctx.channel.purge(ammount, check=check, bulk=can_mass_delete)
+        await ctx.channel.purge(limit=ammount, check=check, bulk=can_mass_delete)
 
     # TODO: test this
     @commands.command(aliases=["avy", "pfp"])
