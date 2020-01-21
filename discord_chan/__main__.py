@@ -21,6 +21,7 @@ from configparser import ConfigParser
 
 from aiomonitor import start_monitor, cli
 
+import discord_chan
 
 default_config = """
 [general]
@@ -72,11 +73,6 @@ def run(args: argparse.Namespace):
     if not config['enviroment'].getboolean('disable'):
         load_environ(**dict([var for var in config['enviroment'].items() if var[0] != 'disable']))
 
-    # This is here so environment vars are set before it's loaded
-    # We need them loaded encase we're using them to see to load something
-    # Or as options i.e. jishaku.flags
-    import discord_chan
-
     logging.basicConfig(
         format="[%(asctime)s] [%(levelname)s:%(name)s] %(message)s",
         level=logging.DEBUG if args.debug else logging.INFO
@@ -104,7 +100,14 @@ def run(args: argparse.Namespace):
     bot = discord_chan.DiscordChan(config)
 
     if args.load_jsk:
+        from importlib import reload
+        from jishaku import flags
+        from sys import modules
+
+        # Since we import jishaku in our project we need to do this so env vars are what we set them to
+        modules['jishaku.flags'] = reload(flags)
         bot.load_extension('jishaku')
+        del reload, flags, modules
 
     # # Todo: make sure to remove this debug call
     # bot.dispatch('ready')
@@ -129,7 +132,7 @@ def add_run_args(parser: argparse.ArgumentParser):
     parser.add_argument('-v',
                         '--version',
                         action='version',
-                        version='0.1'  # parser version is different from app version
+                        version='0.2.0'  # parser version is different from app version
                         )
 
     parser.add_argument('-d',
@@ -167,10 +170,8 @@ def install(args: argparse.Namespace):
         file.write(default_config.strip())
         print(f'{args.config} made.')
 
-    from discord_chan import db
-
     async def init_db():
-        async with db.get_database() as connection:
+        async with discord_chan.db.get_database() as connection:
             async with connection.cursor() as cursor:
                 await cursor.executescript(sql_init.strip())
                 # Todo: remove before pushing master

@@ -17,16 +17,15 @@
 import logging
 from logging import NullHandler
 
-from . import utils
+from . import utils, db
 from .bot import DiscordChan
+from .converters import *
 from .games import *
 from .help import *
 from .image_processing import *
-from .paginators import *
-from .converters import *
 from .monitor import DiscordChanMonitor
-from . import db
+from .paginators import *
 
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 
 logging.getLogger(__name__).addHandler(NullHandler())

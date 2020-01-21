@@ -18,8 +18,8 @@ import discord
 from discord.ext import commands
 
 import discord_chan
-
 from discord_chan import BetweenConverter
+
 
 # Todo: add more image commands
 # Todo: add imagur image getting?
@@ -96,15 +96,13 @@ class Images(commands.Cog, name='images'):
         try:
             image1 = await discord_chan.url_to_image(link1)
             image2 = await discord_chan.url_to_image(link2)
-        except discord_chan.FileTooLarge as error:
+        except (discord_chan.InvalidImageType, discord_chan.FileTooLarge) as error:
             return await ctx.send(str(error))
-        except discord_chan.InvalidImageType:
-            return await ctx.send('Unable to open file as image.')
 
         with ctx.typing():
             difference_image = await discord_chan.difference_image(image1, image2)
 
-            file = await discord_chan.image_to_file(difference_image, f'difference.{difference_image.format.lower()}')
+            file = await discord_chan.image_to_file(difference_image, f'difference.png')
 
         await ctx.send(ctx.author.mention, file=file)
 

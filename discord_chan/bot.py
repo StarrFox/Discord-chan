@@ -25,9 +25,9 @@ from typing import Optional
 import discord
 from discord.ext import commands, tasks
 
+from . import db
 from .context import SubContext
 from .help import Minimal
-from . import db
 
 logger = logging.getLogger(__name__)
 
