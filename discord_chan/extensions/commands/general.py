@@ -22,7 +22,7 @@ import humanize
 from discord.ext import commands
 from jishaku.paginators import PaginatorInterface, WrappedPaginator
 
-from discord_chan import PrologPaginator, ImageFormatConverter, PartitionPaginator
+from discord_chan import PrologPaginator, ImageFormatConverter, PartitionPaginator, BetweenConverter
 
 
 class General(commands.Cog, name='general'):
@@ -60,7 +60,11 @@ class General(commands.Cog, name='general'):
 
     # Todo: test this
     @commands.command()
-    async def clean(self, ctx: commands.Context, ammount: int):
+    async def clean(self, ctx: commands.Context, ammount: BetweenConverter(1, 100)):
+        """
+        Delete's the bot's last <ammount> message(s)
+        ammount must be between 1 and 100
+        """
         def check(message):
             return message.author == ctx.me
 

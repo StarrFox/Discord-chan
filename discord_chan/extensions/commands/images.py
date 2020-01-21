@@ -36,6 +36,7 @@ class Images(commands.Cog, name='images'):
                         link: str):
         """
         Makes some emojis from an image
+        Width and height must be between 1 and 10
         """
         try:
             image = await discord_chan.url_to_image(link)

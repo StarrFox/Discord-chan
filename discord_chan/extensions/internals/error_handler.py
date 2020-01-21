@@ -32,7 +32,7 @@ async def on_command_error(ctx: commands.Context, error):
         return await ctx.send(str(error))
 
     elif isinstance(error, commands.UserInputError):
-        return await ctx.send_help(ctx.command)
+        return await ctx.send(str(error))
 
     elif isinstance(error, commands.MissingPermissions):
         return await ctx.send(
