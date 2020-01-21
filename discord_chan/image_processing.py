@@ -146,6 +146,7 @@ def image_to_file(image: Image.Image, filename: str = None, format: str = 'png')
     buffer = BytesIO()
 
     image.save(buffer, format)
+    buffer.seek(0)
 
     return File(buffer, filename=filename)
 
@@ -293,7 +294,7 @@ def shuffle_image(image: Image.Image, *, degree=1000) -> Image.Image:
     array = image.load()
 
     def random_cord():
-        return randint(0, image.size[0]), randint(0, image.size[1])
+        return randint(0, image.size[0]-1), randint(0, image.size[1]-1)
 
     for i in range(degree):
         x1, y1 = random_cord()
@@ -312,4 +313,9 @@ def difference_image(image1: Image.Image, image2: Image.Image) -> Image.Image:
     :param image2: Image to compare to
     :return: Composite Image of differences
     """
+    # Todo: make another function for this match_size?
+    # images need to be the same size
+    new_size = min(image1.size[0], image2.size[0]), min(image1.size[1], image2.size[1])
+    image1 = image1.resize(new_size)
+    image2 = image2.resize(new_size)
     return ImageChops.difference(image1, image2)
