@@ -214,8 +214,6 @@ class Snipe(commands.Cog, name='snipe'):
         --channel: Channel id to snipe from
         --before: Message id that snipes must be before
         --after: Message id that snipes must be after
-        --start: The index to start at, defaults to 0
-        --end: The index to end at, defaults to infinity
         --mode: Mode of the snipes (edited, deleted, purged)
         --contains: String that must be in the snipes
         """
@@ -226,8 +224,6 @@ class Snipe(commands.Cog, name='snipe'):
         parser.add_argument('--channel', default=ctx.channel.id, type=int)
         parser.add_argument('--before', type=int)
         parser.add_argument('--after', type=int)
-        parser.add_argument('--start', default=0, type=int)
-        parser.add_argument('--end', default=None, type=int)
         # parser.add_argument('--list', action='store_true') this would prob be a hassle to add
         # Todo: add server option to see all server snipes? make sure to check if they can view and nsfw
         # Todo: add back indexing behavior to see full messages? or take entire page for larger messages?
@@ -252,10 +248,7 @@ class Snipe(commands.Cog, name='snipe'):
         if not channel.permissions_for(ctx.author).read_messages:
             return await ctx.send('You need permission to view a channel to snipe from it.')
 
-        try:
-            snipes = self.snipe_dict[channel.id][args.start:args.end]
-        except IndexError:
-            return await ctx.send('No snipes found for this search.')
+        snipes = self.snipe_dict[channel.id][args.start:args.end]
 
         # Todo: put this in a get_filters function or something (70 lined function atm)
         filters = []
