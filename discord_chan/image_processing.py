@@ -54,14 +54,14 @@ async def get_bytes(link: str, *, max_length: int = 100) -> TypedBytes:
     :raise FileTooLarge: If the file was beyond max_length
     """
     # Bytes *1000 -> kb *1000 -> MB
-    max_length = round((max_length / 1000) / 1000)
+    max_length = round((max_length * 1000) * 1000)
     async with aiohttp.ClientSession().get(link) as response:
 
         # Todo: handle these
         response.raise_for_status()
 
         if response.content_length > max_length:
-            raise FileTooLarge(f'{(response.content_length * 1000) * 1000} is over max size of {max_length}mb.')
+            raise FileTooLarge(f'{(response.content_length / 1000) / 1000}mb is over max size of {max_length}mb.')
 
         return TypedBytes(
             file_bytes=await response.read(),
