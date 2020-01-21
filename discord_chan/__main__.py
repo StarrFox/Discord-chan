@@ -19,7 +19,7 @@ import asyncio
 import logging
 from configparser import ConfigParser
 
-from aiomonitor import start_monitor
+from aiomonitor import start_monitor, cli
 
 
 default_config = """
@@ -192,6 +192,22 @@ def add_install_args(parser: argparse.ArgumentParser):
     parser.set_defaults(func=install)
 
 
+# Wraps aiomonitor.cli into our parser
+def monitor(args: argparse.Namespace):
+    cli.monitor_client(args.monitor_host, args.monitor_port)
+
+def add_monitor_args(parser: argparse.ArgumentParser):
+    parser.add_argument('-H', '--host', dest='monitor_host',
+                        default='127.0.0.1', type=str,
+                        help='monitor host ip')
+
+    parser.add_argument('-p', '--port', dest='monitor_port',
+                        default=50101, type=int,
+                        help='monitor port number')
+
+    parser.set_defaults(func=monitor)
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(prog='discord_chan', description='General purpose Discord bot.')
 
@@ -199,8 +215,10 @@ def parse_args() -> argparse.Namespace:
 
     subcommands = parser.add_subparsers()
     install_command = subcommands.add_parser('install', help='\"Install\" the bot; make config file and setup DB.')
+    monitor_command = subcommands.add_parser('monitor', help='Start the DiscordChanMonitor interface.')
 
     add_install_args(install_command)
+    add_monitor_args(monitor_command)
 
     return parser.parse_args()
 

@@ -138,17 +138,15 @@ class EmbedDictPaginator(commands.Paginator):
 
     def __init__(self, title: str = None, max_fields: int = 25):
         """
-        A paginator for for dicts of Embed fields
-        :param title: Title of Embeds defaults to Empty
+        A paginator for dicts of Embed fields
+        :param title: Title of Embeds, defaults to Empty
         :param max_fields: Max number of fields must be <= 25
         """
-        super().__init__()
         if not (0 <= max_fields <= 25):
             raise ValueError("max_fields must be between 0 and 25.")
-
         self.title = title or discord.Embed.Empty
         self.max_fields = max_fields
-        self.clear()
+        super().__init__()
 
     @property
     def default_embed(self):
