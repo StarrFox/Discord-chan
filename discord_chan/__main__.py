@@ -100,14 +100,18 @@ def run(args: argparse.Namespace):
     bot = discord_chan.DiscordChan(config)
 
     if args.load_jsk:
+        # Todo: find a better way to do this
         from importlib import reload
-        from jishaku import flags
         from sys import modules
+        from jishaku import flags, exception_handling, cog_base, cog
 
         # Since we import jishaku in our project we need to do this so env vars are what we set them to
         modules['jishaku.flags'] = reload(flags)
+        modules['exception_handling'] = reload(exception_handling)
+        modules['cog_base'] = reload(cog_base)
+        modules['cog'] = reload(cog)
         bot.load_extension('jishaku')
-        del reload, flags, modules
+        del reload, modules, flags, exception_handling, cog_base, cog
 
     # # Todo: make sure to remove this debug call
     # bot.dispatch('ready')
