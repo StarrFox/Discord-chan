@@ -46,7 +46,7 @@ class BetweenConverter(commands.Converter):
         try:
             argument = int(argument)
         except ValueError:
-            raise BadNumberArgument('{} is not a value number.'.format(argument))
+            raise BadNumberArgument('{} is not a valid number.'.format(argument))
         if self.num1 <= argument <= self.num2:
             return argument
 

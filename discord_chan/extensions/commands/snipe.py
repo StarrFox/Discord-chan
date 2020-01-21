@@ -248,7 +248,7 @@ class Snipe(commands.Cog, name='snipe'):
         if not channel.permissions_for(ctx.author).read_messages:
             return await ctx.send('You need permission to view a channel to snipe from it.')
 
-        snipes = self.snipe_dict[channel.id][args.start:args.end]
+        snipes = self.snipe_dict[channel.id]
 
         # Todo: put this in a get_filters function or something (70 lined function atm)
         filters = []
