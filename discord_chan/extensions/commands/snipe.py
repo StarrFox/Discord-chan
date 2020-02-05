@@ -236,7 +236,7 @@ class Snipe(commands.Cog, name='snipe'):
 
         try:
             args = parser.parse_args(shlex.split(options))
-        except Exception as e:
+        except (Exception, SystemExit) as e:
             return await ctx.send(str(e))
 
         channel = ctx.guild.get_channel(args.channel)
