@@ -48,7 +48,7 @@ class Images(commands.Cog, name='images'):
         gif = image.format == 'GIF'
 
         with ctx.typing():
-            factors = discord_chan.get_wallify_factors(image.size(), (width, height))
+            factors = discord_chan.get_wallify_factors(image.size, (width, height))
             if gif:
                 emojis = await discord_chan.wallify_gif_image(image, width, height)
             else:
