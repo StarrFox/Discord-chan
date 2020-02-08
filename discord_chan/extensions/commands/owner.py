@@ -112,7 +112,7 @@ class Owner(commands.Cog, name='owner'):
                                          (send_from.id, {c.id for c in self.bot.channel_links[send_from]})
                                          )
             else:
-                await connection.execute('DELETE FROM channel_links (send_from) WHERE send_from is ?;',
+                await connection.execute('DELETE FROM channel_links WHERE send_from = ?;',
                                          (send_from.id,))
                 del self.bot.channel_links[send_from]
 
