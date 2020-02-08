@@ -168,7 +168,7 @@ class DiscordChan(commands.AutoShardedBot):
             logger.error('Presence cycle somehow errored out, restarting.', exc_info=True)
             self.presence_cycle.restart()
 
-    async def get_command_prefix(self, message: discord.Message):
+    async def get_command_prefix(self, _, message: discord.Message):
         if message.guild:
             return commands.when_mentioned_or(*self.prefixes[message.guild.id])(self, message)
         else:  # DM
