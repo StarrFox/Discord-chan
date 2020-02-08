@@ -71,7 +71,6 @@ class Snipe(commands.Cog, name='snipe'):
             filters.append(lambda snipe: snipe.id > after)
 
         if mode:
-            mode = SnipeMode[mode]
             filters.append(lambda snipe: snipe.mode == mode)
 
         if contains:
@@ -239,12 +238,12 @@ class Snipe(commands.Cog, name='snipe'):
 
         snipes = self.get_snipes(
             ctx,
-            channel=args.channel,
+            channel=channel,
             guild=args.guild,
             authors=args.authors,
             before=args.before,
             after=args.after,
-            mode=args.mode,
+            mode=SnipeMode[args.mode] if args.mode else None,
             contains=args.contains
         )
 
