@@ -22,10 +22,10 @@ from discord.ext import menus
 
 
 class Connect4(menus.Menu):
-    FILLER = '\N{BLACK LARGE SQUARE}'
-    RED = '\N{LARGE RED CIRCLE}'
-    BLUE = '\N{LARGE BLUE CIRCLE}'
-    NUMBERS = [str(i) + "\N{VARIATION SELECTOR-16}\u20e3" for i in range(1, 8)]
+    filler = '\N{BLACK LARGE SQUARE}'
+    red = '\N{LARGE RED CIRCLE}'
+    blue = '\N{LARGE BLUE CIRCLE}'
+    numbers = [str(i) + "\N{VARIATION SELECTOR-16}\u20e3" for i in range(1, 8)]
 
     def __init__(self, player1: discord.Member, player2: discord.Member, **kwargs):
         super().__init__(**kwargs)
@@ -36,10 +36,10 @@ class Connect4(menus.Menu):
         # noinspection PyTypeChecker
         self.board = numpy.full(
             (6, 7),
-            self.FILLER
+            self.filler
         )
         # This is kinda hacky but /shrug
-        for button in [menus.Button(num, self.do_number_button) for num in self.NUMBERS]:
+        for button in [menus.Button(num, self.do_number_button) for num in self.numbers]:
             self.add_button(button)
 
     def reaction_check(self, payload):
@@ -55,7 +55,7 @@ class Connect4(menus.Menu):
         return await channel.send(embed=self.embed)
 
     async def do_number_button(self, payload):
-        move_column = self.NUMBERS.index(payload.emoji)
+        move_column = self.numbers.index(payload.emoji.name)
         move_row = self.free(move_column)
 
         # self.free returns None if the column was full
@@ -70,7 +70,7 @@ class Connect4(menus.Menu):
 
             await self.message.edit(embed=self.embed)
 
-    @menus.button("\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}")
+    @menus.button("\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}", position=menus.Last())
     async def do_resend(self, _):
         await self.message.delete()
         self.message = await self.send_initial_message(self.ctx, self.ctx.channel)
@@ -78,9 +78,9 @@ class Connect4(menus.Menu):
     @property
     def current_piece(self):
         if self.current_player == self.players[0]:
-            return self.RED
+            return self.red
         else:
-            return self.BLUE
+            return self.blue
 
     @property
     def board_message(self):
@@ -89,7 +89,7 @@ class Connect4(menus.Menu):
         """
         msg = '\n'.join([''.join(i) for i in self.board])
         msg += '\n'
-        msg += ''.join(self.NUMBERS)
+        msg += ''.join(self.numbers)
         return msg
 
     @property
@@ -111,7 +111,7 @@ class Connect4(menus.Menu):
 
     def free(self, num: int):
         for i in range(6)[::-1]:
-            if self.board[i][num] == self.FILLER:
+            if self.board[i][num] == self.filler:
                 return i
 
     def make_move(self, row: int, column: int):
