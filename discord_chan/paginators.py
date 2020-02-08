@@ -174,10 +174,10 @@ class PrologPaginator(FixedNonePaginator):
     def recursively_add_dictonary(self, dictonary: dict):
         for key, value in dictonary.items():
             if isinstance(value, dict):
-                self.add_header(key)
+                self.add_header(str(key))
                 self.recursively_add_dictonary(value)
             else:
-                self.add_key_value_pair(key, value)
+                self.add_key_value_pair(str(key), str(value))
 
     def add_header(self, header: str):
         """
