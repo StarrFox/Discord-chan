@@ -15,6 +15,7 @@
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
 from itertools import cycle
+from typing import Optional
 
 import discord
 import numpy
@@ -34,6 +35,7 @@ class Connect4(menus.Menu):
         self.player_cycle = cycle(self.players)
         self.current_player = next(self.player_cycle)
         self.last_move = None
+        self.winner = None
         # noinspection PyTypeChecker
         self.board = numpy.full(
             (6, 7),
@@ -63,13 +65,16 @@ class Connect4(menus.Menu):
         if move_row:
             self.make_move(move_row, move_column)
 
+            await self.message.edit(embed=self.embed)
+
             if self.check_wins():
+                self.winner = self.current_player
                 self._running = False
                 return
 
+            # timeouts count as wins
+            self.winner = self.current_player
             self.current_player = next(self.player_cycle)
-
-            await self.message.edit(embed=self.embed)
 
     @menus.button("\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}", position=menus.Last())
     async def do_resend(self, _):
@@ -113,7 +118,7 @@ class Connect4(menus.Menu):
         return board_embed
 
     def free(self, num: int):
-        for i in range(6)[::-1]:
+        for i in range(6, -1, -1):
             if self.board[i][num] == self.filler:
                 return i
 
@@ -146,7 +151,10 @@ class Connect4(menus.Menu):
             if check(diagonal):
                 return True
 
-    async def run(self, ctx):
-        """Run the game and return the winner"""
+    async def run(self, ctx) -> Optional[discord.Member]:
+        """
+        Run the game and return the winner
+        returns None if the first player never made a move
+        """
         await self.start(ctx, wait=True)
-        return self.current_player
+        return self.winner
