@@ -44,10 +44,12 @@ class Events(commands.Cog, name='events'):
         self.tasks = []
         self.tasks.append(asyncio.create_task(self.update_anime_db()))
         self.tasks.append(asyncio.create_task(self.get_copycat()))
+        self.tasks.append(asyncio.create_task(self.load_channel_links()))
 
     def cog_unload(self):
         for task in self.tasks:
-            task.cancel()
+            if not task.done():
+                task.cancel()
 
     # Misc
 
@@ -160,7 +162,7 @@ class Events(commands.Cog, name='events'):
                     else:
                         logger.info(f'{channel_id} is no longer accessable. (linked to {send_from_channel.name})')
 
-                self.bot.channel_links[send_from] = channels
+                self.bot.channel_links[send_from_channel] = channels
 
     @commands.Cog.listener('on_message')
     async def on_linked_message(self, message: discord.Message):
@@ -184,9 +186,15 @@ class Events(commands.Cog, name='events'):
                     if webhook is None:
                         webhook = await send_from.create_webhook(name='channel_link')
 
+                    if len(message.author.display_name) < 20:
+                        name = message.author.display_name + f' [{message.author.id}]'
+                    else:
+                        name = message.author.display_name
+
                     await webhook.send(
                         content=message.content,
                         embeds=message.embeds,
+                        username=name,
                         avatar_url=str(message.author.avatar_url_as(format='png'))
                     )
 
