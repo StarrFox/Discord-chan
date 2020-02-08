@@ -111,7 +111,7 @@ def run(args: argparse.Namespace):
         bot.load_extension('jishaku')
 
     # Todo: make sure to remove this debug call
-    bot.dispatch('ready')
+    # bot.dispatch('ready')
 
     loop = asyncio.get_event_loop()
     with start_monitor(loop,
