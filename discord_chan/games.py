@@ -30,6 +30,7 @@ class Connect4(menus.Menu):
     def __init__(self, player1: discord.Member, player2: discord.Member, **kwargs):
         super().__init__(**kwargs)
         self.players = (player1, player2)
+        self._player_ids = {p.id for p in self.players}
         self.player_cycle = cycle(self.players)
         self.current_player = next(self.player_cycle)
         self.last_move = None
@@ -46,7 +47,7 @@ class Connect4(menus.Menu):
         if payload.message_id != self.message.id:
             return False
 
-        if payload.user_id not in self.players:
+        if payload.user_id != self.current_player.id:
             return False
 
         return payload.emoji in self.buttons
@@ -73,7 +74,9 @@ class Connect4(menus.Menu):
     @menus.button("\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}", position=menus.Last())
     async def do_resend(self, _):
         await self.message.delete()
-        self.message = await self.send_initial_message(self.ctx, self.ctx.channel)
+        self.message = msg = await self.send_initial_message(self.ctx, self.ctx.channel)
+        for emoji in self.buttons:
+            await msg.add_reaction(emoji)
 
     @property
     def current_piece(self):
