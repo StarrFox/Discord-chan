@@ -62,7 +62,7 @@ class Connect4(menus.Menu):
         move_row = self.free(move_column)
 
         # self.free returns None if the column was full
-        if move_row:
+        if move_row is not None:
             self.make_move(move_row, move_column)
 
             await self.message.edit(embed=self.embed)
@@ -118,7 +118,7 @@ class Connect4(menus.Menu):
         return board_embed
 
     def free(self, num: int):
-        for i in range(6, -1, -1):
+        for i in range(5, -1, -1):
             if self.board[i][num] == self.filler:
                 return i
 
