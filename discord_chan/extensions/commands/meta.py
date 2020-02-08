@@ -17,9 +17,8 @@
 import discord
 import humanize
 from discord.ext import commands
-from jishaku.paginators import PaginatorInterface
 
-import discord_chan
+from discord_chan import __version__ as dc_version, DCMenuPages, PrologPaginator, NormalPageSource, checks
 
 
 class Meta(commands.Cog, name='meta'):
@@ -33,7 +32,7 @@ class Meta(commands.Cog, name='meta'):
         """
         Send's the bot's websocket latency
         """
-        await ctx.send(f"\N{TABLE TENNIS PADDLE AND BALL} {round(ctx.bot.latency*1000)}ms")
+        await ctx.send(f"\N{TABLE TENNIS PADDLE AND BALL} {round(ctx.bot.latency * 1000)}ms")
 
     @commands.command()
     async def invite(self, ctx: commands.Context, bot: discord.Member = None):
@@ -64,6 +63,13 @@ class Meta(commands.Cog, name='meta'):
         await ctx.send(self.bot.config['general']['source_url'])
 
     @commands.command()
+    async def vote(self, ctx: commands.Context):
+        """
+        Links to the vote url
+        """
+        await ctx.send(self.bot.config['general']['vote_url'])
+
+    @commands.command(aliases=['info'])
     async def about(self, ctx: commands.Context):
         """
         View info of the bot
@@ -72,8 +78,10 @@ class Meta(commands.Cog, name='meta'):
             'id': self.bot.user.id,
             'owner': 'StarrFox#6312',
             'created': humanize.naturaldate(self.bot.user.created_at),
-            'uptime': humanize.naturaltime(self.bot.uptime),
-            'dc version': discord_chan.__version__,
+            'up since': humanize.naturaltime(self.bot.uptime),
+            'guilds': len(self.bot.guilds),
+            'commands': len(set(self.bot.walk_commands())),
+            'dc version': dc_version,
             'd.py version': discord.__version__
         }
 
@@ -82,19 +90,21 @@ class Meta(commands.Cog, name='meta'):
         if events_cog:
             data.update(
                 {
-                    'events seen': sum(events_cog.socket_events.values())
+                    'events seen': '{:,}'.format(sum(events_cog.socket_events.values()))
                 }
             )
 
-        # Todo: see if 20 is enough
-        paginator = discord_chan.PrologPaginator(align_places=20)
+        paginator = PrologPaginator()
 
         paginator.recursively_add_dictonary({self.bot.user.name: data})
 
-        interface = PaginatorInterface(self.bot, paginator, owner=ctx.author)
+        source = NormalPageSource(paginator.pages)
 
-        await interface.send_to(ctx)
+        menu = DCMenuPages(source)
 
+        await menu.start(ctx)
+
+    @checks.cog_loaded('events')
     @commands.command()
     async def socketstats(self, ctx: commands.Context):
         """
@@ -102,20 +112,19 @@ class Meta(commands.Cog, name='meta'):
         """
         events_cog = self.bot.get_cog('events')
 
-        if not events_cog:
-            return await ctx.send('Events cog not loaded.')
-
         socket_events = events_cog.socket_events
 
         total = sum(socket_events.values())
 
-        paginator = discord_chan.PrologPaginator()
+        paginator = PrologPaginator(align_places=20)
 
-        paginator.recursively_add_dictonary({f"{total} total": socket_events})
+        paginator.recursively_add_dictonary({f"{total:,} total": socket_events})
 
-        interface = PaginatorInterface(self.bot, paginator, owner=ctx.author)
+        source = NormalPageSource(paginator.pages)
 
-        await interface.send_to(ctx)
+        menu = DCMenuPages(source)
+
+        await menu.start(ctx)
 
 
 def setup(bot):

@@ -17,21 +17,15 @@
 import discord
 from discord.ext import commands
 
-bool_dict = {
-    "true": True,
-    "on": True,
-    "1": True,
-    "false": False,
-    "off": False,
-    "0": False
-}
+from discord_chan import SubContext, DiscordChan, CrossGuildTextChannelConverter, db
+
 
 class Owner(commands.Cog, name='owner'):
     """
     Owner commands
     """
 
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: DiscordChan):
         self.bot = bot
 
     async def cog_check(self, ctx: commands.Context):
@@ -40,42 +34,92 @@ class Owner(commands.Cog, name='owner'):
         return True
 
     @commands.command()
-    async def dm(self, ctx: commands.Context, user: discord.User, *, msg: str):
+    async def dm(self, ctx: SubContext, user: discord.User, *, msg: str):
         await user.send(msg)
-        await ctx.send("Message sent.")
+        await ctx.confirm("Message sent.")
 
     @commands.command(aliases=['off', 'restart'])
-    async def shutdown(self, ctx: commands.Context):
-        await ctx.send("Shuting down.")
+    async def shutdown(self, ctx: SubContext):
+        await ctx.confirm('Logging out.')
         await self.bot.logout()
 
     @commands.command()
-    async def enable(self, ctx: commands.Context, cmd):
+    async def enable(self, ctx: SubContext, *, cmd):
         command = self.bot.get_command(cmd)
 
         if command is None:
             return await ctx.send('Command not found.')
 
         command.enabled = True
-        await ctx.send('Command enabled.')
+
+        await ctx.confirm('Command enabled.')
 
     @commands.command()
-    async def disable(self, ctx: commands.Context, cmd):
+    async def disable(self, ctx: SubContext, *, cmd):
         command = self.bot.get_command(cmd)
 
         if command is None:
             return await ctx.send('Command not found.')
 
         command.enabled = False
-        await ctx.send('Command disabled.')
+
+        await ctx.confirm('Command disabled.')
 
     @commands.command(hidden=True)
-    async def loadjsk(self, ctx: commands.Context):
+    async def loadjsk(self, ctx: SubContext):
         """
         Backup command to load jishaku
         """
         self.bot.load_extension('jishaku')
-        await ctx.send('Loaded jishaku.')
+        await ctx.confirm('Jishaku loaded.')
+
+    @commands.group(aliases=['link'], invoke_without_command=True)
+    async def channel_link(self, ctx: commands.Context):
+        """
+        Base link command, sends link help
+        """
+        await ctx.send_help('channel_link')
+
+    # noinspection PyTypeChecker
+    @channel_link.command(name='add')
+    async def channel_link_add(self,
+                               ctx: SubContext,
+                               send_from: CrossGuildTextChannelConverter,  # Type checking woes
+                               send_to: CrossGuildTextChannelConverter):
+        self.bot.channel_links[send_from].add(send_to)
+
+        async with db.get_database() as connection:
+            await connection.execute('INSERT INTO channel_links (send_from, send_to) VALUES (?, ?) '
+                                     'ON CONFLICT (send_from) DO UPDATE SET send_to = EXCLUDED.send_to;',
+                                     (send_from.id, {c.id for c in self.bot.channel_links[send_from]})
+                                     )
+            await connection.commit()
+
+        await ctx.confirm('Channels linked.')
+
+    # noinspection PyTypeChecker
+    @channel_link.command(name='remove', aliases=['rem'])
+    async def channel_link_remove(self,
+                                  ctx: SubContext,
+                                  send_from: CrossGuildTextChannelConverter,
+                                  send_to: CrossGuildTextChannelConverter):
+        self.bot.channel_links[send_from].discard(send_to)
+
+        async with db.get_database() as connection:
+            if self.bot.channel_links[send_from]:
+                await connection.execute('INSERT INTO channel_links (send_from, send_to) VALUES (?, ?) '
+                                         'ON CONFLICT (send_from) DO UPDATE SET send_to = EXCLUDED.send_to;',
+                                         (send_from.id, {c.id for c in self.bot.channel_links[send_from]})
+                                         )
+            else:
+                await connection.execute('DELETE FROM channel_links (send_from) WHERE send_from is ?;',
+                                         (send_from.id,))
+                del self.bot.channel_links[send_from]
+
+            await connection.commit()
+
+        await ctx.confirm('Channels unlinked.')
+
 
 def setup(bot):
     bot.add_cog(Owner(bot))

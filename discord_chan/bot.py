@@ -16,18 +16,19 @@
 
 import logging
 import pathlib
-import typing
-from collections import defaultdict
+from collections import defaultdict, deque
 from configparser import ConfigParser
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Dict, Union, List, Deque, Set
 
 import discord
 from discord.ext import commands, tasks
+from jikanpy import AioJikan
 
 from . import db
 from .context import SubContext
 from .help import Minimal
+from .snipe import Snipe
 
 logger = logging.getLogger(__name__)
 
@@ -35,8 +36,13 @@ logger = logging.getLogger(__name__)
 class DiscordChan(commands.AutoShardedBot):
 
     def __init__(self, config: ConfigParser, *, context: commands.Context = SubContext, **kwargs):
+        """
+        Todo: add description on config and context
+        :param config: Config parser object
+        :param context: Context factory to use
+        """
         super().__init__(
-            command_prefix=kwargs.pop('command_prefix', self.get_prefix),
+            command_prefix=kwargs.pop('command_prefix', self.get_command_prefix),
             case_insensitive=kwargs.pop('case_insensitive', True),
             max_messages=kwargs.pop('max_messages', 10_000),
             help_command=kwargs.pop('help_command', Minimal()),
@@ -44,14 +50,25 @@ class DiscordChan(commands.AutoShardedBot):
         )
         self.config = config
         self.context = context
-        self.uptime = datetime.utcnow()
-        self.prefixes = defaultdict(lambda: {config['general']['prefix']})
-        self.presence_cycle.start()  # pylint: disable=no-member
+        self.jikan = AioJikan()
         self.ready_once = False
+        self.presence_cycle.start()  # pylint: disable=no-member
+        self.uptime = datetime.now()
+        # Todo: make an anime entry object to replace the dicts in the lists
+        self.anime_db: Dict[str, list] = {}
+        # {bot_id: {prefixes}}
+        self.other_bot_prefixes: Dict[int, Set[str]] = defaultdict(lambda: set())
+        # {guild_id: {prefixes}}
+        self.prefixes: Dict[int, Set[str]] = defaultdict(lambda: {config['general']['prefix']})
+        # {send_from: {send_to}}
+        self.channel_links: Dict[discord.TextChannel, Set[discord.TextChannel]] = defaultdict(lambda: set())
+        # {guild_id: {channel_id: deque[Snipe]}}
+        self.snipes: Dict[int, Dict[int, Deque[Snipe]]] = defaultdict(lambda: defaultdict(lambda: deque(maxlen=5_000)))
 
     def get_message(self, message_id: int) -> Optional[discord.Message]:
         """
         Gets a message from cache
+        :param message_id: The message id to get
         """
         return discord.utils.get(
             self.cached_messages,
@@ -88,7 +105,7 @@ class DiscordChan(commands.AutoShardedBot):
     #     # Todo: uncomment to run
     #     # await super().start(*args, **kwargs)
     #
-    #     #  Temp replacement for self.connect
+    #     # Temp replacement for self.connect
     #     import asyncio
     #     while not self.is_closed():
     #         await asyncio.sleep(100)
@@ -96,7 +113,7 @@ class DiscordChan(commands.AutoShardedBot):
     def run(self, *args, **kwargs):
         return super().run(self.config['discord']['token'], *args, **kwargs)
 
-    def load_extensions_from_dir(self, path: typing.Union[str, pathlib.Path]) -> int:
+    def load_extensions_from_dir(self, path: Union[str, pathlib.Path]) -> int:
         """
         Loads any python files in a directory and it's children
         as extensions
@@ -151,7 +168,7 @@ class DiscordChan(commands.AutoShardedBot):
             logger.error('Presence cycle somehow errored out, restarting.', exc_info=True)
             self.presence_cycle.restart()
 
-    async def get_prefix(self, message: discord.Message):
+    async def get_command_prefix(self, message: discord.Message):
         if message.guild:
             return commands.when_mentioned_or(*self.prefixes[message.guild.id])(self, message)
         else:  # DM

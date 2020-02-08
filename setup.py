@@ -37,7 +37,7 @@ setup(
     python_requires='>=3.7',
     install_requires=[
         'jishaku>=1.17',
-        'discord.py',  # >=1.3', waiting for this to be pushed
+        'discord.py>=1.3',
         'numpy',
         'imagehash',
         'aiohttp',
@@ -47,6 +47,8 @@ setup(
         'terminaltables==3.1.0',
         'aiomonitor==0.4.5',
         'jikanpy',
-        'aiosqlite'
+        'aiosqlite',
+        'discord-flags',
+        'git+https://github.com/Rapptz/discord-ext-menus'  # Todo: remove when released
     ]
 )

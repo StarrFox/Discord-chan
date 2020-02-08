@@ -3,7 +3,9 @@ A general purpose discord bot made with [discord.py](https://github.com/Rapptz/d
 
 ## Installing
 ```shell script
-pip install git+https://github.com/StarrFox/discord-chan@master
+python3 -m venv .venv
+git clone https://github.com/StarrFox/discord-chan.git
+pip install .
 discord_chan install [--config path/to/config = config.ini] [--no-sql = True]
 ```
 
@@ -11,6 +13,21 @@ discord_chan install [--config path/to/config = config.ini] [--no-sql = True]
 ```shell script
 discord_chan [--config path/to/config = config.ini] [--debug = False]
 ```
+
+## Monitor
+Discord chan has an [aiomonitor](https://pypi.org/projects/aiomonitor) with some helpful commands
+
+you can start the monitor with
+```shell script
+discord_chan monitor [--host = localhost] [--port = 50101]
+```
+##### commands
+Command | Description
+--- | ---
+console | Starts an aioconsole with the bot object in locals
+cmds | Lists currently loaded commands
+extensions | Lists currently loaded extensions
+enable | Enable or disable a command
 
 ## Command highlights
 Command | Description

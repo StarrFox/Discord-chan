@@ -14,25 +14,21 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
-import aiosqlite
+from discord.ext import commands
 
 
-def get_database() -> aiosqlite.Connection:  # I had to rename this to properly type
-    """
-    Gets the discord_chan database
-    :return: The db context manager
-    """
+class Stats(commands.Cog, name='stats'):
 
-    def adapt_set(_set):
-        return ','.join(map(str, _set))
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
 
-    def convert_set(s):
-        return {i.decode() for i in s.split(b',')}
+    # Todo: message and activity stat graphs
+    # Todo: command_uses show times of day
 
-    import sqlite3
+    # @commands.command()
+    # async def uses(self, ctx: commands.Context):
+    #     """View top used commands"""
+    #     pass
 
-    sqlite3.register_adapter(set, adapt_set)
-
-    sqlite3.register_converter('pyset', convert_set)
-
-    return aiosqlite.connect('discord_chan.db', detect_types=1)  # sqlite3.PARSE_DECLTYPES
+def setup(bot: commands.Bot):
+    bot.add_cog(Stats(bot))

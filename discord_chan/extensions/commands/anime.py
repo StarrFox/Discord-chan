@@ -17,59 +17,21 @@
 import asyncio
 import datetime
 import logging
-from calendar import day_name, day_abbr
+from contextlib import suppress
 from textwrap import shorten
 
 import discord
 from discord.ext import commands
 
-try:
-    from jikanpy import AioJikan
-except ImportError:
-    AioJikan = False
-
-days = map(str.lower, list(day_name) + list(day_abbr))
+from discord_chan import WeekdayConverter, DiscordChan, checks
 
 logger = logging.getLogger(__name__)
 
-class Weekday(commands.Converter):
-
-    async def convert(self, ctx, argument):
-        # Todo: 3.8 switch to walrus
-        converted = str(argument).lower()
-        if converted in days:
-            return converted
-
-        raise commands.BadArgument(f"{argument} is not a valid weekday.")
 
 class Anime(commands.Cog, name='anime'):
 
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: DiscordChan):
         self.bot = bot
-        self.jikan = AioJikan()
-        self.anime_db = {}
-        self.db_update_task = bot.loop.create_task(self.get_anime_db())
-
-    def cog_unload(self):
-        self.db_update_task.cancel()
-
-    # Not using tasks ext because 7 days isn't always next monday
-    async def get_anime_db(self):
-        """
-        Updates self.anime_db with fresh info
-        """
-        try:
-            self.anime_db = await self.jikan.schedule()
-
-            now = datetime.datetime.utcnow()
-            next_monday = datetime.timedelta(
-                days=(7 - now.weekday())
-            )
-
-            await asyncio.sleep(next_monday.total_seconds())
-
-        except asyncio.CancelledError:
-            pass
 
     @commands.group(name='anime', invoke_without_command=True)
     async def anime_command(self, ctx: commands.Context):
@@ -78,8 +40,9 @@ class Anime(commands.Cog, name='anime'):
         """
         await ctx.send_help('anime')
 
+    @checks.cog_loaded('events')
     @anime_command.command()
-    async def airing(self, ctx: commands.Context, day: Weekday = None):
+    async def airing(self, ctx: commands.Context, day: WeekdayConverter = None):
         """
         View anime airing for a given weekday
         defaults to today
@@ -88,7 +51,7 @@ class Anime(commands.Cog, name='anime'):
             now = datetime.datetime.utcnow()
             day = now.strftime("%A").lower()
 
-        titles = [i['title'] for i in self.anime_db[day]]
+        titles = [i['title'] for i in self.bot.anime_db[day]]
 
         await ctx.send('\n'.join(titles))
 
@@ -97,7 +60,6 @@ class Anime(commands.Cog, name='anime'):
         """
         Makes an embed from anime info
         """
-        # Todo: should this be a paginator for long synopsises?
         embed = discord.Embed(
             title=data['title'],
             url=data['url'],
@@ -130,10 +92,10 @@ class Anime(commands.Cog, name='anime'):
         View info about an anime
         """
         # Todo: replace this with discord.ext.menus when released
-        search = await self.jikan.search('anime', anime_name)
+        search = await self.bot.jikan.search('anime', anime_name)
         results = search['results']
 
-        msg = '\n'.join([f"{idx+1}. {i['title']}" for idx, i in enumerate(results[:5])])
+        msg = '\n'.join([f"{idx + 1}. {i['title']}" for idx, i in enumerate(results[:5])])
 
         e = discord.Embed(
             description=msg
@@ -160,17 +122,13 @@ class Anime(commands.Cog, name='anime'):
 
         anime_id = results[reactions.index(str(reaction))]['mal_id']
 
-        result = await self.jikan.anime(anime_id)
+        result = await self.bot.jikan.anime(anime_id)
 
-        try:
+        with suppress(discord.Forbidden):
             await embed_message.clear_reactions()
-        except discord.Forbidden:
-            pass
 
         await embed_message.edit(embed=self.anime_embed(result))
 
+
 def setup(bot):
-    if AioJikan:
-        bot.add_cog(Anime(bot))
-    else:
-        logger.warning('Jikan is not installed, Anime cog will not be loaded.')
+    bot.add_cog(Anime(bot))

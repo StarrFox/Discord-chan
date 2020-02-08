@@ -19,27 +19,31 @@ from random import choice
 import discord
 from discord.ext import commands
 
-from discord_chan import Connect4
+from discord_chan import Connect4, SubContext
 
 
 class Games(commands.Cog, name='games'):
 
+    # Todo: add max concurrency
     @commands.command(aliases=['c4'])
     @commands.bot_has_permissions(add_reactions=True)
-    async def connect4(self, ctx, member: discord.Member):
+    @commands.max_concurrency(1, commands.BucketType.user)
+    async def connect4(self, ctx: SubContext, member: discord.Member):
         """
         Play connect4 with another member
         Who goes first is random
         """
         # this should probably be a converter
         if member == ctx.author or member.bot:
-            return await ctx.send("You cannot play against yourself or a bot")
+            return await ctx.send("You cannot play against yourself or a bot.")
 
         player1 = choice([ctx.author, member])
         player2 = member if player1 == ctx.author else ctx.author
 
-        game = Connect4(ctx, player1, player2)
-        await game.run()
+        game = Connect4(player1, player2)
+        winner = await game.run(ctx)
+        if winner:
+            await ctx.send(f"{winner.mention} has won.", escape_mentions=False)
 
 
 def setup(bot):

@@ -15,12 +15,12 @@
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
 from datetime import datetime
+from typing import Optional
 
-from discord import Message, utils
+from discord import Message, utils, HTTPException
 from discord.ext.commands import Context
-from jishaku.paginators import PaginatorInterface
 
-from .paginators import BreakPaginator
+from .paginators import PartitionPaginator, NormalPageSource, DCMenuPages
 
 
 class SubContext(Context):
@@ -38,12 +38,15 @@ class SubContext(Context):
         # but this should never really be used, so this is ok?
         if content and len(str(content)) > 2000:
 
-            paginator = BreakPaginator(max_size=1985)
+            paginator = PartitionPaginator(prefix=None, suffix=None, max_size=1985)
             paginator.add_line(content)
 
-            interface = PaginatorInterface(self.bot, paginator, owner=self.author)
+            source = NormalPageSource(paginator.pages)
 
-            return (await interface.send_to(self)).message
+            menu = DCMenuPages(source)
+
+            await menu.start(self, wait=True)
+            return menu.message
 
         else:
 
@@ -58,3 +61,13 @@ class SubContext(Context):
         :return: When ctx.message was created
         """
         return self.message.created_at
+
+    async def confirm(self, message: str = None) -> Optional[Message]:
+        """Adds a checkmark to ctx.message"""
+        try:
+            await self.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
+        except HTTPException:
+            message = message or '\N{WHITE HEAVY CHECK MARK}'
+            return await self.send(message)
+
+    # Todo: prompt
