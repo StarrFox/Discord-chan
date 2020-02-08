@@ -70,6 +70,7 @@ class DCMenuPages(menus.MenuPages):
                   skip_if=skip_only_one_page)
     async def stop_pages(self, payload):
         """stops the pagination session."""
+        await self.message.delete()
         self.stop()
 
 
