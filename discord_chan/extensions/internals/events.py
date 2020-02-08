@@ -20,6 +20,7 @@ import logging
 from collections import Counter
 from contextlib import suppress
 from typing import Dict, List
+from itertools import chain
 
 import discord
 from discord.ext import commands
@@ -175,7 +176,7 @@ class Events(commands.Cog, name='events'):
                 await channel.send(content=message.content)
 
         # send_to -> send_from
-        elif message.channel in self.bot.channel_links.values():
+        elif message.channel in [i for s in self.bot.channel_links.values() for i in s]:
             for send_from in self.bot.channel_links:
                 if message.channel in self.bot.channel_links[send_from]:
                     webhook = discord.utils.get(await send_from.webhooks(), name='channel_link')
