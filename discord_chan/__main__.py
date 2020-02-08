@@ -18,6 +18,7 @@ import argparse
 import asyncio
 import logging
 from configparser import ConfigParser
+from pathlib import Path
 
 from aiomonitor import start_monitor, cli
 
@@ -25,9 +26,10 @@ import discord_chan
 
 default_config = """
 [general]
-prefix=dc!
-support_invite=
-source_url=
+prefix=dc/
+support_url=
+source_url=https://github.com/StarrFox/Discord-chan
+vote_url=
 # true of false of if default extensions (discord_chan/extensions)
 # should be loaded
 load_extensions=true
@@ -64,7 +66,13 @@ CREATE TABLE IF NOT EXISTS socket_stats (
     name TEXT PRIMARY KEY,
     amount INTEGER
 );
+
+CREATE TABLE IF NOT EXISTS channel_links (
+    send_from INTEGER PRIMARY KEY,
+    send_to PYSET
+);
 """
+
 
 def run(args: argparse.Namespace):
     config = ConfigParser(allow_no_value=True, strict=False)
@@ -100,25 +108,17 @@ def run(args: argparse.Namespace):
     bot = discord_chan.DiscordChan(config)
 
     if args.load_jsk:
-        # Todo: find a better way to do this
-        from importlib import reload
-        from sys import modules
-        from jishaku import flags, exception_handling, cog_base, cog
-
-        # Since we import jishaku in our project we need to do this so env vars are what we set them to
-        modules['jishaku.flags'] = reload(flags)
-        modules['exception_handling'] = reload(exception_handling)
-        modules['cog_base'] = reload(cog_base)
-        modules['cog'] = reload(cog)
         bot.load_extension('jishaku')
-        del reload, modules, flags, exception_handling, cog_base, cog
 
-    # # Todo: make sure to remove this debug call
-    # bot.dispatch('ready')
+    # Todo: make sure to remove this debug call
+    bot.dispatch('ready')
 
     loop = asyncio.get_event_loop()
-    with start_monitor(loop, monitor=discord_chan.DiscordChanMonitor, locals={'bot': bot}):
+    with start_monitor(loop,
+                       monitor=discord_chan.DiscordChanMonitor,
+                       locals={'bot': bot}):
         bot.run()
+
 
 def load_environ(**kwargs):
     """
@@ -132,11 +132,12 @@ def load_environ(**kwargs):
     for var, value in kwargs.items():
         environ[var.upper()] = value
 
+
 def add_run_args(parser: argparse.ArgumentParser):
     parser.add_argument('-v',
                         '--version',
                         action='version',
-                        version='0.2.0'  # parser version is different from app version
+                        version=discord_chan.__version__
                         )
 
     parser.add_argument('-d',
@@ -169,22 +170,30 @@ def add_run_args(parser: argparse.ArgumentParser):
 
 
 def install(args: argparse.Namespace):
-    # todo: Use pathlib and touch here and prompt to reset if already exists
-    with open(args.config, 'w+') as file:
-        file.write(default_config.strip())
-        print(f'{args.config} made.')
+    # Todo: add interactive setup? >>prefix? ____
+    config_file = Path(args.config)
+    if config_file.exists():
+        if args.yes or input('Config file already exists, overwrite (y/n)? ') == 'y':
+            config_file.write_text(default_config.strip())
+            print('Config file overwriten.')
+    else:
+        try:
+            config_file.touch()
+            config_file.write_text(default_config.strip())
+            print('Config file made.')
+        except Exception as e:
+            print(str(e))
 
     async def init_db():
         async with discord_chan.db.get_database() as connection:
             async with connection.cursor() as cursor:
                 await cursor.executescript(sql_init.strip())
-                # Todo: remove before pushing master
-                # await cursor.execute('INSERT INTO prefixes VALUES (?, ?)', (1234, {'a', 'b'}))
             await connection.commit()
 
         print('Initalized DB.')
 
     asyncio.run(init_db())
+
 
 def add_install_args(parser: argparse.ArgumentParser):
     parser.add_argument('-c',
@@ -194,12 +203,18 @@ def add_install_args(parser: argparse.ArgumentParser):
                         help='Path to config file, defaults to config.ini.'
                         )
 
+    parser.add_argument('-y',
+                        '--yes',
+                        action='store_true',
+                        help='Answer yes to promt messages.')
+
     parser.set_defaults(func=install)
 
 
 # Wraps aiomonitor.cli into our parser
 def monitor(args: argparse.Namespace):
     cli.monitor_client(args.monitor_host, args.monitor_port)
+
 
 def add_monitor_args(parser: argparse.ArgumentParser):
     parser.add_argument('-H', '--host', dest='monitor_host',
@@ -221,6 +236,8 @@ def parse_args() -> argparse.Namespace:
     subcommands = parser.add_subparsers()
     install_command = subcommands.add_parser('install', help='\"Install\" the bot; make config file and setup DB.')
     monitor_command = subcommands.add_parser('monitor', help='Start the DiscordChanMonitor interface.')
+    # Todo: add update subparser? git pull, see if config or sql is different?
+    # Todo: add gui subparser? shows stats and has buttons to start/stop bot
 
     add_install_args(install_command)
     add_monitor_args(monitor_command)

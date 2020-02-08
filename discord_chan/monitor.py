@@ -14,11 +14,15 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
+import asyncio
+
 from aiomonitor import Monitor
 from aiomonitor.utils import alt_names
 from terminaltables import AsciiTable
 
-version_message = f"Discord Chan Monitor v1.0\n"
+from . import db
+
+version_message = f"Discord Chan Monitor v1.1\n"
 
 BOOL_DICT = {
     'true': True,
@@ -27,18 +31,20 @@ BOOL_DICT = {
     '0': False
 }
 
+
 def convert_bool(arg):
-    return BOOL_DICT[arg]
+    return BOOL_DICT[arg.lower()]
 
 
+# noinspection PyUnresolvedReferences,PyUnresolvedReferences
 class DiscordChanMonitor(Monitor):
     intro = version_message + "{tasknum} task{s} running. Use help (?) for commands.\n"
     prompt = "Discord Chan >>>"
 
     def do_status(self):
         """Status overview of the bot."""
-        from discord import __version__ as dpy_version
         from discord_chan import __version__ as dc_version
+        from discord import __version__ as dpy_version
 
         bot = self._locals['bot']
 
@@ -60,7 +66,6 @@ class DiscordChanMonitor(Monitor):
 
         self._sout.write('\n'.join(bot.extensions) + '\n')
 
-    @alt_names('disable')
     def do_enable(self, mode: convert_bool, command: str):
         """Enable or disable a command."""
         bot = self._locals['bot']
@@ -82,8 +87,7 @@ class DiscordChanMonitor(Monitor):
             ['Name', 'Cog', 'Enabled', 'Hidden']
         ]
 
-        for command in sorted(bot.walk_commands(), key=lambda cmd: cmd.cog_name or ''):
-
+        for command in sorted(set(bot.walk_commands()), key=lambda cmd: cmd.cog_name or ''):
             table_data.append([
                 command.full_parent_name + ' ' + command.name,
                 command.cog_name,
@@ -94,4 +98,33 @@ class DiscordChanMonitor(Monitor):
         table = AsciiTable(table_data)
         self._sout.write(table.table + '\n')
 
-    # Todo: add db quarry command
+    def do_db(self, *quarry: str):
+        """Execute a db quarry."""
+
+        async def execute_quarry():
+            async with db.get_database() as connection:
+                cursor = await connection.execute(' '.join(quarry))
+                await connection.commit()
+                quarry_result = await cursor.fetchall()
+                if quarry_result:
+                    collums = [coll[0] for coll in cursor.description]
+                    final = [collums]
+                    for data in quarry_result:
+                        final.append(list(data))
+                    return final
+
+        future = asyncio.run_coroutine_threadsafe(execute_quarry(), self._loop)
+
+        try:
+            result = future.result(20)
+        except asyncio.TimeoutError:
+            self._sout.write('Timed out.\n')
+            future.cancel()
+        except Exception as exc:
+            self._sout.write(str(exc) + '\n')
+        else:
+            if result:
+                table = AsciiTable(result)
+                self._sout.write(table.table + '\n')
+            else:
+                self._sout.write('No result.\n')

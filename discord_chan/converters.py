@@ -14,40 +14,84 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
+import re
+from calendar import day_name, day_abbr
+
+import discord
 from discord.ext import commands
 
-
-class BadFormatArgument(commands.BadArgument):
-    pass
+DAYS = map(str.lower, list(day_name) + list(day_abbr))
 
 
-class BadBetweenArgument(commands.BadArgument):
-    pass
+def _get_from_guilds(bot, getter, argument):
+    result = None
+    for guild in bot.guilds:
+        result = getattr(guild, getter)(argument)
+        if result:
+            return result
+    return result
 
-class BadNumberArgument(commands.BadArgument):
-    pass
 
 class ImageFormatConverter(commands.Converter):
 
-    async def convert(self, ctx, argument):
+    async def convert(self, ctx: commands.Context, argument: str) -> str:
         if argument in ('png', 'gif', 'jpeg', 'webp'):
             return argument
         else:
-            raise BadFormatArgument('{} is not a valid image format.'.format(argument))
+            raise commands.BadArgument('{} is not a valid image format.'.format(argument))
 
 
 class BetweenConverter(commands.Converter):
 
-    def __init__(self, num1, num2):
+    def __init__(self, num1: int, num2: int):
         self.num1 = num1
         self.num2 = num2
 
-    async def convert(self, ctx, argument):
+    async def convert(self, ctx: commands.Context, argument: str) -> int:
         try:
             argument = int(argument)
         except ValueError:
-            raise BadNumberArgument('{} is not a valid number.'.format(argument))
+            raise commands.BadArgument('{} is not a valid number.'.format(argument))
         if self.num1 <= argument <= self.num2:
             return argument
 
-        raise BadBetweenArgument('{} is not between {} and {}'.format(argument, self.num1, self.num2))
+        raise commands.BadArgument('{} is not between {} and {}'.format(argument, self.num1, self.num2))
+
+
+class WeekdayConverter(commands.Converter):
+
+    async def convert(self, ctx: commands.Context, argument: str) -> str:
+        # Todo: 3.8 switch to walrus
+        converted = str(argument).lower()
+        if converted in DAYS:
+            return converted
+
+        raise commands.BadArgument("{} is not a valid weekday.".format(argument))
+
+
+class CrossGuildTextChannelConverter(commands.TextChannelConverter):
+    """
+    Makes the DM behavior the default
+    """
+
+    async def convert(self, ctx, argument):
+        bot = ctx.bot
+
+        match = self._get_id_match(argument) or re.match(r'<#([0-9]+)>$', argument)
+
+        if match is None:
+            # not a mention
+            def check(c):
+                return isinstance(c, discord.TextChannel) and c.name == argument
+
+            result = discord.utils.find(check, bot.get_all_channels())
+
+        else:
+            channel_id = int(match.group(1))
+
+            result = _get_from_guilds(bot, 'get_channel', channel_id)
+
+        if not isinstance(result, discord.TextChannel):
+            raise commands.BadArgument('Channel "{}" not found.'.format(argument))
+
+        return result

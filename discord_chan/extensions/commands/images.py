@@ -22,7 +22,6 @@ from discord_chan import BetweenConverter
 
 
 # Todo: add more image commands
-# Todo: add imagur image getting?
 # Todo: add link converter than validates the url and accept attachments or prior images (channel history)
 class Images(commands.Cog, name='images'):
 
@@ -48,7 +47,7 @@ class Images(commands.Cog, name='images'):
         gif = image.format == 'GIF'
 
         with ctx.typing():
-            factors = discord_chan.get_wallify_factors(image.size(), (width, height))
+            factors = discord_chan.get_wallify_factors(image.size, (width, height))
             if gif:
                 emojis = await discord_chan.wallify_gif_image(image, width, height)
             else:
@@ -105,6 +104,7 @@ class Images(commands.Cog, name='images'):
             file = await discord_chan.image_to_file(difference_image, f'difference.png')
 
         await ctx.send(ctx.author.mention, file=file)
+
 
 def setup(bot):
     bot.add_cog(Images())

@@ -14,41 +14,66 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
-
-from asyncio import TimeoutError
 from itertools import cycle
 
 import discord
 import numpy
-from discord.ext import commands
+from discord.ext import menus
 
 
-class Connect4:
+class Connect4(menus.Menu):
     FILLER = '\N{BLACK LARGE SQUARE}'
     RED = '\N{LARGE RED CIRCLE}'
     BLUE = '\N{LARGE BLUE CIRCLE}'
     NUMBERS = [str(i) + "\N{VARIATION SELECTOR-16}\u20e3" for i in range(1, 8)]
-    RESEND = "\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}"
 
-    def __init__(self, ctx: commands.Context, player1: discord.Member, player2: discord.Member):
-        self.ctx = ctx
+    def __init__(self, player1: discord.Member, player2: discord.Member, **kwargs):
+        super().__init__(**kwargs)
         self.players = (player1, player2)
         self.player_cycle = cycle(self.players)
         self.current_player = next(self.player_cycle)
-        self.running = False
-        self.message = None
-        self.timed_out = False
-        self.resend_message = False
         self.last_move = None
         # noinspection PyTypeChecker
         self.board = numpy.full(
             (6, 7),
             self.FILLER
         )
+        # This is kinda hacky but /shrug
+        for button in [menus.Button(num, self.do_number_button) for num in self.NUMBERS]:
+            self.add_button(button)
 
-    @property
-    def reactions(self):
-        return self.NUMBERS + [self.RESEND]
+    def reaction_check(self, payload):
+        if payload.message_id != self.message.id:
+            return False
+
+        if payload.user_id not in self.players:
+            return False
+
+        return payload.emoji in self.buttons
+
+    async def send_initial_message(self, ctx, channel):
+        return await channel.send(embed=self.embed)
+
+    async def do_number_button(self, payload):
+        move_column = self.NUMBERS.index(payload.emoji)
+        move_row = self.free(move_column)
+
+        # self.free returns None if the column was full
+        if move_row:
+            self.make_move(move_row, move_column)
+
+            if self.check_wins():
+                self._running = False
+                return
+
+            self.current_player = next(self.player_cycle)
+
+            await self.message.edit(embed=self.embed)
+
+    @menus.button("\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}")
+    async def do_resend(self, _):
+        await self.message.delete()
+        self.message = await self.send_initial_message(self.ctx, self.ctx.channel)
 
     @property
     def current_piece(self):
@@ -79,7 +104,7 @@ class Connect4:
         if self.last_move is not None:
             board_embed.add_field(name='Last move', value=self.last_move, inline=False)
 
-        if self.running:
+        if self._running:
             board_embed.add_field(name='Current turn', value=self.current_player.mention)
 
         return board_embed
@@ -92,14 +117,6 @@ class Connect4:
     def make_move(self, row: int, column: int):
         self.board[row][column] = self.current_piece
         self.last_move = f"{self.current_player.mention}: {column + 1}"
-
-    def wait_for_check(self, reaction: discord.Reaction, member: discord.Member):
-        checks = [
-            reaction.message.id == self.message.id,  # messages still don't have an __eq__
-            str(reaction) in self.reactions,
-            member == self.current_player
-        ]
-        return all(checks)
 
     def check_wins(self):
         def check(array: list):
@@ -126,72 +143,7 @@ class Connect4:
             if check(diagonal):
                 return True
 
-    async def phrase_reaction(self, reaction: discord.Reaction):
-        if str(reaction) == self.RESEND:
-            self.resend_message = True
-
-        else:
-            move_column = self.NUMBERS.index(str(reaction))
-            move_row = self.free(move_column)
-
-            # self.free returns None if the column was full
-            if move_row:
-                self.make_move(move_row, move_column)
-
-                if self.check_wins():
-                    self.running = False
-                    return
-
-                self.current_player = next(self.player_cycle)
-
-    # This can fail, my command checks if we have the needed perm though
-    async def add_reactions(self):
-        for reaction in self.reactions:
-            await self.message.add_reaction(reaction)
-
-    async def remove_reactions(self):
-        try:
-            await self.message.clear_reactions()
-        except discord.Forbidden:
-            for reaction in self.reactions:
-                await self.message.remove_reaction(reaction, self.ctx.me)
-
-    async def update(self):
-        if self.timed_out:
-            content = 'Timed out due to inactivity'
-        else:
-            content = None
-
-        if self.message is None:
-            self.message = await self.ctx.send(content=content, embed=self.embed)
-
-        elif self.resend_message:
-            await self.message.delete()
-            self.message = await self.ctx.send(content=content, embed=self.embed)
-            self.resend_message = False
-
-        else:
-            await self.message.edit(content=content, embed=self.embed)
-
-    # Todo: see if updating on any reaction is bad
-    async def run(self):
-        self.running = True
-        await self.update()
-        await self.add_reactions()
-        while self.running:
-            try:
-                reaction, _ = await self.ctx.bot.wait_for(
-                    'reaction_add',
-                    check=self.wait_for_check,
-                    timeout=300
-                )
-            except TimeoutError:
-                self.timed_out = True
-                self.running = False
-            else:
-                await self.phrase_reaction(reaction)
-            finally:
-                await self.update()
-        await self.update()
-        await self.ctx.send(f'{self.current_player.mention} has won!')
-        await self.remove_reactions()
+    async def run(self, ctx):
+        """Run the game and return the winner"""
+        await self.start(ctx, wait=True)
+        return self.current_player

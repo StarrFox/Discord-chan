@@ -1,0 +1,13 @@
+aiosqlite
+jikanpy
+aiohttp
+discord.py>=1.3.0
+jishaku>=1.17
+humanize
+ImageHash>=4.0
+Pillow>=6.2.1
+numpy
+colorclass==2.2.0
+terminaltables==3.1.0
+aiomonitor==0.4.5
+discord-flags

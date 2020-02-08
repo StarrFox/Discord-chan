@@ -25,13 +25,18 @@ logger = logging.getLogger(__name__)
 async def on_command_error(ctx: commands.Context, error):
     error = getattr(error, 'original', error)
 
+    str_send = (
+        commands.CommandOnCooldown,
+        commands.UserInputError,
+        commands.MaxConcurrencyReached,
+        commands.DisabledCommand,
+        commands.CheckFailure
+    )
+
     if isinstance(error, commands.CommandNotFound):
         return
 
-    elif isinstance(error, commands.CommandOnCooldown):
-        return await ctx.send(str(error))
-
-    elif isinstance(error, commands.UserInputError):
+    elif isinstance(error, str_send):
         return await ctx.send(str(error))
 
     elif isinstance(error, commands.MissingPermissions):
@@ -44,19 +49,16 @@ async def on_command_error(ctx: commands.Context, error):
             f"I'm missing the {', '.join(error.missing_perms)} permission(s) needed to run this command."
         )
 
-    elif isinstance(error, commands.CheckFailure):
-        return await ctx.send("You don't have access to this command.")
-
-    elif isinstance(error, commands.DisabledCommand):
-        return await ctx.send('This command is disabled.')
-
     logger.error(
-        f"Unhandled error in command {ctx.command.name}",
+        f"Unhandled error in command {ctx.command.name}\n"
+        f"Invoke message: {ctx.message.content}",
         exc_info=(type(error), error, error.__traceback__)
-        )
+    )
+
 
 def setup(bot: commands.Bot):
     bot.add_listener(on_command_error)
+
 
 def teardown(bot: commands.Bot):
     bot.remove_listener(on_command_error)

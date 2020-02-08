@@ -14,20 +14,20 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
+import asyncio
+import functools
 from collections import namedtuple
+from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 from random import randint
 from tarfile import TarFile, TarInfo
-from typing import Tuple, List, Optional
+from typing import Tuple, List, Optional, Callable
 
 import aiohttp
 from PIL import Image, ImageSequence, ImageChops
 from discord import File
 from imagehash import phash, ImageHash
-from jishaku.functools import executor_function
 
-
-# Todo: better manage the executors? use an internal loop and queue to fire them?
 
 class ImageError(Exception):
     pass
@@ -41,7 +41,23 @@ class InvalidImageType(ImageError):
     pass
 
 
+# Modified from https://github.com/Gorialis/jishaku/blob/master/jishaku/functools.py#L19
+# (c) 2020 Devon (Gorialis) R
+def executor_function(sync_function: Callable):
+    @functools.wraps(sync_function)
+    async def sync_wrapper(*args, **kwargs):
+        loop = asyncio.get_event_loop()
+        internal_function = functools.partial(sync_function, *args, **kwargs)
+        with ThreadPoolExecutor() as pool:
+            return await loop.run_in_executor(pool,
+                                              internal_function
+                                              )
+
+    return sync_wrapper
+
+
 TypedBytes = namedtuple('TypedBytes', 'file_bytes content_type')
+
 
 # Getting images
 
@@ -56,7 +72,6 @@ async def get_bytes(link: str, *, max_length: int = 100) -> TypedBytes:
     # Bytes *1000 -> kb *1000 -> MB
     max_length = round((max_length * 1000) * 1000)
     async with aiohttp.ClientSession().get(link) as response:
-
         # Todo: handle these
         response.raise_for_status()
 
@@ -96,6 +111,7 @@ async def url_to_image(link: str) -> Image.Image:
         raise InvalidImageType(f"{content_type.lower()} is not a valid image type.")
 
     return image
+
 
 # Saving images
 
@@ -213,6 +229,7 @@ def get_wallify_example_file(wall_size: Tuple[int, int], name: str = None) -> By
 
     return file
 
+
 # Image manipulating
 
 @executor_function
@@ -294,7 +311,7 @@ def shuffle_image(image: Image.Image, *, degree=1000) -> Image.Image:
     array = image.load()
 
     def random_cord():
-        return randint(0, image.size[0]-1), randint(0, image.size[1]-1)
+        return randint(0, image.size[0] - 1), randint(0, image.size[1] - 1)
 
     for i in range(degree):
         x1, y1 = random_cord()

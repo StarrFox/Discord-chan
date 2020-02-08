@@ -14,25 +14,20 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
-import aiosqlite
+from discord.ext import commands
+
+class CogNotLoaded(commands.CheckFailure):
+
+    def __init__(self, cog_name):
+        super().__init__(f'{cog_name} is not loaded.')
 
 
-def get_database() -> aiosqlite.Connection:  # I had to rename this to properly type
-    """
-    Gets the discord_chan database
-    :return: The db context manager
-    """
+def cog_loaded(cog_name: str):
 
-    def adapt_set(_set):
-        return ','.join(map(str, _set))
+    def pred(ctx):
+        if ctx.bot.get_cog(cog_name):
+            return True
 
-    def convert_set(s):
-        return {i.decode() for i in s.split(b',')}
+        raise CogNotLoaded(cog_name)
 
-    import sqlite3
-
-    sqlite3.register_adapter(set, adapt_set)
-
-    sqlite3.register_converter('pyset', convert_set)
-
-    return aiosqlite.connect('discord_chan.db', detect_types=1)  # sqlite3.PARSE_DECLTYPES
+    return commands.check(pred)

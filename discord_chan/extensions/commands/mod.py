@@ -18,9 +18,8 @@ import typing
 
 import discord
 from discord.ext import commands
-from jishaku.paginators import WrappedPaginator, PaginatorEmbedInterface
 
-from discord_chan import db
+from discord_chan import db, PartitionPaginator, DCMenuPages, NormalPageSource, SubContext
 
 
 def is_above(invoker: discord.Member, user: discord.Member):
@@ -34,25 +33,30 @@ class Mod(commands.Cog, name='mod'):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
+    # Todo: test
     @commands.group(invoke_without_command=True, aliases=["prefixes"])
-    async def prefix(self, ctx: commands.Context):
+    async def prefix(self, ctx: SubContext):
         """
         Base prefix command
         Lists prefixes
         """
-        prefixes = '\n'.join(self.bot.prefixes[ctx.guild.id])
+        prefixes = '\n'.join(
+            [f"{idx}. `{prefix}`" for idx, prefix in enumerate(self.bot.prefixes[ctx.guild.id], 1)]
+        )
 
-        paginator = WrappedPaginator(max_size=500)
+        paginator = PartitionPaginator(max_size=100)
 
         paginator.add_line(prefixes)
 
-        interface = PaginatorEmbedInterface(self.bot, paginator, owner=ctx.author)
+        source = NormalPageSource(paginator.pages)
 
-        await interface.send_to(ctx)
+        menu = DCMenuPages(source)
+
+        await menu.start(ctx)
 
     @commands.has_permissions(administrator=True)
     @prefix.command()
-    async def add(self, ctx: commands.Context, prefix: str):
+    async def add(self, ctx: SubContext, prefix: str):
         """
         Adds a prefix to this guild
         """
@@ -71,11 +75,11 @@ class Mod(commands.Cog, name='mod'):
                                      )
             await conn.commit()
 
-        await ctx.send('Prefix Added.')
+        await ctx.confirm()
 
     @commands.has_permissions(administrator=True)
     @prefix.command(aliases=['rem'])
-    async def remove(self, ctx: commands.Context, prefix: str):
+    async def remove(self, ctx: SubContext, prefix: str):
         """
         Remove a prefix from this guild
         """
@@ -92,18 +96,17 @@ class Mod(commands.Cog, name='mod'):
 
                 else:
                     self.bot.prefixes[ctx.guild.id].remove(prefix)
-                    # Todo: fix this quarry "?" is wrong
                     await cursor.execute("UPDATE prefixes SET prefixes=? WHERE guild_id IS ?;",
                                          (self.bot.prefixes[ctx.guild.id], ctx.guild.id))
             await conn.commit()
 
-        await ctx.send('Prefix removed.')
+        await ctx.confirm()
 
     @commands.bot_has_permissions(manage_messages=True)
     @commands.has_permissions(manage_messages=True)
     @commands.command()
     async def purge(self,
-                    ctx: commands.Context,
+                    ctx: SubContext,
                     number: int,
                     user: typing.Optional[discord.Member] = None,
                     *, text: str = None):
@@ -132,12 +135,12 @@ class Mod(commands.Cog, name='mod'):
     @commands.bot_has_permissions(ban_members=True)
     @commands.has_permissions(ban_members=True)
     @commands.command()
-    async def hackban(self, ctx: commands.Context, member_id: int, *, reason=None):
+    async def hackban(self, ctx: SubContext, member_id: int, *, reason=None):
         """
         Bans using an id
         """
         await ctx.guild.ban(discord.Object(id=member_id), reason=reason)
-        await ctx.send(f"Banned {member_id}")
+        await ctx.confirm()
 
 
 def setup(bot):

@@ -16,16 +16,20 @@
 
 import logging
 from logging import NullHandler
+from pathlib import Path
 
-from . import utils, db
+from . import utils, db, checks
 from .bot import DiscordChan
+from .monitor import DiscordChanMonitor
 from .converters import *
 from .games import *
 from .help import *
 from .image_processing import *
-from .monitor import DiscordChanMonitor
 from .paginators import *
+from .snipe import *
+from .context import SubContext
 
-__version__ = '1.0.1'
+__version__ = '1.1'
 
 logging.getLogger(__name__).addHandler(NullHandler())
+ROOT = Path(__file__).parent
