@@ -220,7 +220,9 @@ class Snipe(commands.Cog, name='snipe'):
 
         try:
             args = parser.parse_args(shlex.split(options))
-        except (Exception, SystemExit) as e:
+        except SystemExit:
+            return await ctx.send('Invalid flag passed.')
+        except Exception as e:
             return await ctx.send(str(e))
 
         channel = ctx.guild.get_channel(args.channel)
@@ -242,7 +244,7 @@ class Snipe(commands.Cog, name='snipe'):
             authors=args.authors,
             before=args.before,
             after=args.after,
-            mode=SnipeMode[args.mode],
+            mode=args.mode,
             contains=args.contains
         )
 
