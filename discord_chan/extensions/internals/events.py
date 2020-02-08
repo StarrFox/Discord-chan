@@ -154,7 +154,7 @@ class Events(commands.Cog, name='events'):
                     continue
                 channels = set()
                 for channel_id in send_to:
-                    channel = self.bot.get_channel(channel_id)
+                    channel = self.bot.get_channel(int(channel_id))
                     if channel:
                         channels.add(channel)
                     else:
@@ -176,7 +176,8 @@ class Events(commands.Cog, name='events'):
                 await channel.send(content=message.content)
 
         # send_to -> send_from
-        elif message.channel in [i for s in self.bot.channel_links.values() for i in s]:
+        elif message.channel in [i for s in self.bot.channel_links.values() for i in s] \
+                and message.author != self.bot.user:
             for send_from in self.bot.channel_links:
                 if message.channel in self.bot.channel_links[send_from]:
                     webhook = discord.utils.get(await send_from.webhooks(), name='channel_link')
