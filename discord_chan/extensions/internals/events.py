@@ -171,7 +171,7 @@ class Events(commands.Cog, name='events'):
             return
 
         # send_from -> send_to
-        if message.channel in self.bot.channel_links:
+        if message.channel in self.bot.channel_links and await self.bot.is_owner(message.author):
             for channel in self.bot.channel_links[message.channel]:
                 await channel.send(content=message.content)
 
