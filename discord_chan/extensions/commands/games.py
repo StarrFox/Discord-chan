@@ -24,7 +24,6 @@ from discord_chan import Connect4, SubContext
 
 class Games(commands.Cog, name='games'):
 
-    # Todo: add max concurrency
     @commands.command(aliases=['c4'])
     @commands.bot_has_permissions(add_reactions=True)
     @commands.max_concurrency(1, commands.BucketType.user)
@@ -44,6 +43,8 @@ class Games(commands.Cog, name='games'):
         winner = await game.run(ctx)
         if winner:
             await ctx.send(f"{winner.mention} has won.", escape_mentions=False)
+        else:
+            await ctx.send('No one made a move.')
 
 
 def setup(bot):
