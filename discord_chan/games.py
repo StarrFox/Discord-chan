@@ -65,16 +65,15 @@ class Connect4(menus.Menu):
         if move_row is not None:
             self.make_move(move_row, move_column)
 
+            # timeouts count as wins
+            self.winner = self.current_player
+            self.current_player = next(self.player_cycle)
             await self.message.edit(embed=self.embed)
 
             if self.check_wins():
                 self.winner = self.current_player
                 self._running = False
                 return
-
-            # timeouts count as wins
-            self.winner = self.current_player
-            self.current_player = next(self.player_cycle)
 
     @menus.button("\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}", position=menus.Last())
     async def do_resend(self, _):
