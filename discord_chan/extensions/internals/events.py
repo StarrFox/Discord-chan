@@ -192,7 +192,7 @@ class Events(commands.Cog, name='events'):
                         name = message.author.display_name
 
                     await webhook.send(
-                        content=message.content,
+                        content=message.clean_content if message.content else None,
                         embeds=message.embeds,
                         username=name,
                         avatar_url=str(message.author.avatar_url_as(format='png'))

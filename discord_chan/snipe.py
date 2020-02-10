@@ -47,7 +47,7 @@ class Snipe:
 
     # TODO: replace this with equals f-string thing after switching to 3.8
     def __repr__(self):
-        return f"<Snipe_msg author={self.author} channel={self.channel} time={self.time}>"
+        return f"<Snipe author={self.author} channel={self.channel} time={self.time}>"
 
     def __str__(self):
         return f"[{self.mode}] {self.author} ({self.readable_time})"
