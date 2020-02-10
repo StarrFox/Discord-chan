@@ -147,6 +147,8 @@ class PartitionPaginator(FixedNonePaginator):
 
                     line = partition[2] + line
 
+                    break
+
             if not wrapped:
                 super().add_line(search_string, empty=empty)
 
