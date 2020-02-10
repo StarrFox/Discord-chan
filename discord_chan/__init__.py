@@ -24,7 +24,7 @@ from .monitor import DiscordChanMonitor
 from .converters import *
 from .games import *
 from .help import *
-from .image_processing import *
+from .image import *
 from .paginators import *
 from .snipe import *
 from .context import SubContext
