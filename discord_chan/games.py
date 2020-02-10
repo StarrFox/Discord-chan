@@ -72,7 +72,7 @@ class Connect4(menus.Menu):
 
             if self.check_wins():
                 self.winner = self.current_player
-                self._running = False
+                self.stop()
                 return
 
     @menus.button("\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}", position=menus.Last())
