@@ -67,13 +67,13 @@ class Connect4(menus.Menu):
 
             # timeouts count as wins
             self.winner = self.current_player
-            self.current_player = next(self.player_cycle)
-            await self.message.edit(embed=self.embed)
 
             if self.check_wins():
                 self.winner = self.current_player
                 self.stop()
-                return
+
+            self.current_player = next(self.player_cycle)
+            await self.message.edit(embed=self.embed)
 
     @menus.button("\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}", position=menus.Last())
     async def do_resend(self, _):
@@ -81,6 +81,10 @@ class Connect4(menus.Menu):
         self.message = msg = await self.send_initial_message(self.ctx, self.ctx.channel)
         for emoji in self.buttons:
             await msg.add_reaction(emoji)
+
+    @menus.button('\N{CROSS MARK}', position=menus.Last(1))
+    async def do_cancel(self, _):
+        self.stop()
 
     @property
     def current_piece(self):
