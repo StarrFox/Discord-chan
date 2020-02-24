@@ -53,6 +53,8 @@ class Snipe(commands.Cog, name='snipe'):
 
         if options['channel'] is None:
             channel = ctx.channel
+        else:
+            channel = options['channel']
 
         # These are filtered out by get_snipes anyway
         if not ctx.channel.is_nsfw() and channel.is_nsfw():
@@ -154,7 +156,7 @@ class Snipe(commands.Cog, name='snipe'):
                 snipes.extend(filtered)
 
             # need to be reorded by time, would be by channel otherwise
-            snipes = sorted(snipes, key=lambda s: s.time)
+            snipes = list(reversed(sorted(snipes, key=lambda s: s.time)))
         else:
             snipes = self.bot.snipes[channel.guild.id][channel.id]
             for _filter in filters:
