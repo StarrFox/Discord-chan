@@ -20,7 +20,7 @@ from typing import Optional
 from discord import Message, utils, HTTPException
 from discord.ext.commands import Context
 
-from .paginators import PartitionPaginator, NormalPageSource, DCMenuPages
+from .menus import PartitionPaginator, NormalPageSource, DCMenuPages
 
 
 class SubContext(Context):
