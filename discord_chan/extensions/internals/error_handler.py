@@ -21,33 +21,18 @@ from discord.ext import commands
 logger = logging.getLogger(__name__)
 
 
-# Todo: add the image errors if I do them (should be above commands.UserInputError)
 async def on_command_error(ctx: commands.Context, error):
     error = getattr(error, 'original', error)
-
-    str_send = (
-        commands.CommandOnCooldown,
-        commands.UserInputError,
-        commands.MaxConcurrencyReached,
-        commands.DisabledCommand,
-        commands.CheckFailure
-    )
 
     if isinstance(error, commands.CommandNotFound):
         return
 
-    elif isinstance(error, str_send):
+    elif isinstance(error, commands.CommandError) and not isinstance(error, commands.CommandOnCooldown):
+        ctx.command.reset_cooldown(ctx)
         return await ctx.send(str(error))
 
-    elif isinstance(error, commands.MissingPermissions):
-        return await ctx.send(
-            f"You're missing the {', '.join(error.missing_perms)} permission(s) needed to run this command."
-        )
-
-    elif isinstance(error, commands.BotMissingPermissions):
-        return await ctx.send(
-            f"I'm missing the {', '.join(error.missing_perms)} permission(s) needed to run this command."
-        )
+    elif isinstance(error, commands.CommandOnCooldown):
+        return await ctx.send(str(error))
 
     logger.error(
         f"Unhandled error in command {ctx.command.name}\n"
