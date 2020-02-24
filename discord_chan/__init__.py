@@ -25,11 +25,11 @@ from .converters import *
 from .games import *
 from .help import *
 from .image import *
-from .paginators import *
+from .menus import *
 from .snipe import *
 from .context import SubContext
 
-__version__ = '1.1.1'
+__version__ = '1.2.1'
 
 logging.getLogger(__name__).addHandler(NullHandler())
 ROOT = Path(__file__).parent

@@ -15,11 +15,39 @@
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
 from string import capwords
-from textwrap import wrap
+from collections import namedtuple
+from typing import Optional, Sequence
 
 import discord
 from discord.ext import commands, menus
 
+
+EmbedFieldProxy = namedtuple('EmbedFieldProxy', 'name value')
+
+
+class ConfirmationMenu(menus.Menu):
+
+    def __init__(self, to_confirm: str, **kwargs):
+        super().__init__(**kwargs)
+        self.to_confirm = to_confirm
+        self.response = None
+
+    async def send_initial_message(self, ctx: commands.Context, channel: discord.TextChannel):
+        return await ctx.send(self.to_confirm)
+
+    @menus.button('\N{WHITE HEAVY CHECK MARK}')
+    async def do_yes(self, _):
+        self.response = True
+        self.stop()
+
+    @menus.button('\N{CROSS MARK}')
+    async def do_no(self, _):
+        self.response = False
+        self.stop()
+
+    async def get_response(self, ctx: commands.Context):
+        await self.start(ctx, wait=True)
+        return self.response
 
 class DCMenuPages(menus.MenuPages):
 
@@ -76,11 +104,48 @@ class DCMenuPages(menus.MenuPages):
 
 class NormalPageSource(menus.ListPageSource):
 
-    def __init__(self, entries):
-        super().__init__(entries, per_page=1)
+    def __init__(self, entries: Sequence[str], *, per_page: int = 1):
+        super().__init__(entries, per_page=per_page)
 
     async def format_page(self, menu, page):
-        return page
+        if isinstance(page, str):
+            return page
+        else:
+            return '\n'.join(page)
+
+
+class CodeblockPageSource(menus.ListPageSource):
+
+    def __init__(self, entries: Sequence[str], *, per_page: int = 1, language: Optional[str] = None):
+        super().__init__(entries, per_page=per_page)
+        self.language = language or ''
+
+    async def format_page(self, menu, page):
+        base = '```' + self.language + '\n'
+
+        base += '\n'.join(page)
+
+        base += '\n```'
+
+        return base
+
+
+class EmbedFieldsPageSource(menus.ListPageSource):
+
+    def __init__(self, entries: Sequence[EmbedFieldProxy], *, per_page: int = 1, title: Optional[str] = None):
+        super().__init__(entries, per_page=per_page)
+        self.title = title
+
+    async def format_page(self, menu, page):
+        base = discord.Embed(title=self.title)
+
+        if isinstance(page, EmbedFieldProxy):
+            return base.add_field(name=page.name, value=page.value)
+
+        else:
+            for proxy in page:
+                base.add_field(name=proxy.name, value=proxy.value)
+            return base
 
 
 # I should probably pr these changes but idk if this property thing
@@ -156,6 +221,7 @@ class PartitionPaginator(FixedNonePaginator):
             super().add_line(line, empty=empty)
 
 
+# Todo: replace this with a group-by subclass
 class PrologPaginator(FixedNonePaginator):
 
     def __init__(self,
@@ -196,89 +262,3 @@ class PrologPaginator(FixedNonePaginator):
         """
         self.add_line(f"{capwords(key):{self.align_option}{self.align_places}.{self.align_places}} :: "
                       f"{capwords(value)}")
-
-
-class BreakPaginator(FixedNonePaginator):
-    """
-    Breaks lines up to fit in the paginator
-    """
-
-    def add_line(self, line='', *, empty=False):
-        max_page_size = self.max_size - self._prefix_len - self._suffix_len - - self._max_size_factor
-
-        for wrapped in wrap(line, max_page_size):
-            super().add_line(wrapped, empty=empty)
-
-
-class EmbedDictPaginator(FixedNonePaginator):
-
-    def __init__(self, title: str = None, max_fields: int = 25):
-        """
-        A paginator for dicts of Embed fields
-        :param title: Title of Embeds, defaults to Empty
-        :param max_fields: Max number of fields must be <= 25
-        """
-        if not (0 <= max_fields <= 25):
-            raise ValueError("max_fields must be between 0 and 25.")
-        self.title = title or discord.Embed.Empty
-        self.max_fields = max_fields
-        super().__init__()
-
-    @property
-    def default_embed(self):
-        return discord.Embed(title=self.title)
-
-    @property
-    def _prefix_len(self):
-        return len(self.title)
-
-    # noinspection PyAttributeOutsideInit
-    def clear(self):
-        """Clears the paginator to have no pages."""
-        self._current_page = self.default_embed
-        self._count = 0
-        self._pages = []
-
-    def add_line(self, line='', *, empty=False):
-        raise NotImplementedError(self.add_line)
-
-    def add_fields(self, data: dict):
-        for name, value in data.items():
-            self.add_field(name, value)
-
-    def add_field(self, name: str, value: str):
-        max_page_size = 6_000
-
-        if len(name) > 256:
-            raise RuntimeError('Name exceeds maximum field name size 256')
-        elif len(value) > 1_024:
-            raise RuntimeError('Value exceeds maximum field value size 1,024')
-
-        if len(self._current_page) + len(name + value) > max_page_size:
-            self.close_page()
-        elif self._count >= self.max_fields:
-            self.close_page()
-        else:
-            self._current_page.add_field(name=name, value=value, inline=False)
-            self._count += 1
-
-    # noinspection PyAttributeOutsideInit
-    def close_page(self):
-        """Prematurely terminate a page."""
-        self._pages.append(self._current_page)
-        self._current_page = self.default_embed
-        self._count = 0
-
-    def __len__(self):
-        total = sum(len(p) for p in self._pages)
-        return total
-
-    @property
-    def pages(self) -> list:
-        """Returns the rendered list of pages."""
-        if self._count > 0:
-            self.close_page()
-        return self._pages
-
-    def __repr__(self):
-        return f'<Paginator pages: {len(self._pages)} length: {len(self)} count: {self._count}>'
