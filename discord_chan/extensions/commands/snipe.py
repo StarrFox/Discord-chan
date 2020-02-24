@@ -129,7 +129,7 @@ class Snipe(commands.Cog, name='snipe'):
             filters.append(lambda snipe: not snipe.channel.is_nsfw())
 
         if authors:
-            filters.append(lambda snipe: snipe.author.id in authors)
+            filters.append(lambda snipe: snipe.author in authors)
 
         if before:
             filters.append(lambda snipe: snipe.id < before)
