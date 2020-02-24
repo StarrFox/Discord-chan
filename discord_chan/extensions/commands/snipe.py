@@ -20,7 +20,7 @@ import typing
 from textwrap import shorten
 
 import discord
-from discord.ext import commands
+from discord.ext import commands, flags
 
 from discord_chan import (SnipeMode, DiscordChan, DCMenuPages, snipe_parser,
                           NormalPageSource, EmbedFieldProxy, EmbedFieldsPageSource)
