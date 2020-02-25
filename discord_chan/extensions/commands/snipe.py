@@ -80,7 +80,8 @@ class Snipe(commands.Cog, name='snipe'):
         if options['list']:
             proxies = self.get_proxy_fields(snipes)
 
-            source = EmbedFieldsPageSource(proxies, per_page=10)
+            # 5 * 1,024 = 5,120‬ + 500 (names) = 5,620 < 6000 (max embed size)
+            source = EmbedFieldsPageSource(proxies, per_page=5)
 
             menu = DCMenuPages(source)
 
