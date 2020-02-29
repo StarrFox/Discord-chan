@@ -259,8 +259,8 @@ class General(commands.Cog, name='general'):
         Raw role object
         """
         data = await self.bot.http.get_roles(role.guild.id)
-        role = discord.utils.get(data, id=role.id)
-        await self.send_raw(ctx, data)
+        role_data = discord.utils.get(data, id=role.id)
+        await self.send_raw(ctx, role_data)
 
     @commands.command(hidden=True)
     async def ham(self, ctx: commands.Context):
