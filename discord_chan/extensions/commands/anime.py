@@ -63,7 +63,8 @@ class Anime(commands.Cog, name='anime'):
         embed = discord.Embed(
             title=data['title'],
             url=data['url'],
-            description=shorten(data['synopsis'], 2_048, placeholder='...')  # description limit
+            # 2,048 is the description limit
+            description=shorten(data['synopsis'], 2_048, placeholder='...') if data['synopsis'] else 'No synopsis.'
         )
 
         embed.set_image(url=data['image_url'])

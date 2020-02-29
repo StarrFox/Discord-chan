@@ -29,7 +29,7 @@ from .menus import *
 from .snipe import *
 from .context import SubContext
 
-__version__ = '1.2.1'
+__version__ = '1.2.2'
 
 logging.getLogger(__name__).addHandler(NullHandler())
 ROOT = Path(__file__).parent
