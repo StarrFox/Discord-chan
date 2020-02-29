@@ -20,7 +20,6 @@ import logging
 from collections import Counter
 from contextlib import suppress
 from typing import Dict, List
-from itertools import chain
 
 import discord
 from discord.ext import commands
@@ -89,7 +88,7 @@ class Events(commands.Cog, name='events'):
     async def on_guild_remove(self, guild: discord.Guild):
         self.bot.prefixes.pop(guild.id)
         async with db.get_database() as connection:
-            await connection.execute('DELETE FROM prefixes WHERE guild_id IS ?;', guild.id)
+            await connection.execute('DELETE FROM prefixes WHERE guild_id is ?;', (guild.id,))
             await connection.commit()
 
     @commands.Cog.listener()

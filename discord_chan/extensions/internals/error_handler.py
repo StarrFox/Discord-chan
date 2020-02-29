@@ -27,6 +27,12 @@ async def on_command_error(ctx: commands.Context, error):
     if isinstance(error, commands.CommandNotFound):
         return
 
+    # Bypass checks for owner
+    elif isinstance(error, commands.CheckFailure) and await ctx.bot.is_owner(ctx.author):
+        await ctx.reinvoke()
+        return
+
+    # Reset cooldown when command doesn't finish
     elif isinstance(error, commands.CommandError) and not isinstance(error, commands.CommandOnCooldown):
         ctx.command.reset_cooldown(ctx)
         return await ctx.send(str(error))

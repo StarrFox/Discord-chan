@@ -19,13 +19,13 @@ import pathlib
 from collections import defaultdict, deque
 from configparser import ConfigParser
 from datetime import datetime
-from typing import Optional, Dict, Union, List, Deque, Set
+from typing import Optional, Dict, Union, Deque, Set
 
 import discord
 from discord.ext import commands, tasks
 from jikanpy import AioJikan
 
-from . import db
+from . import db, ROOT
 from .context import SubContext
 from .help import Minimal
 from .snipe import Snipe
@@ -96,7 +96,7 @@ class DiscordChan(commands.AutoShardedBot):
         await self.load_prefixes()
 
         if self.config['general'].getboolean('load_extensions'):
-            self.load_extensions_from_dir('discord_chan/extensions')
+            self.load_extensions_from_dir(ROOT / 'extensions')
 
         logger.info(f'Bot ready with {len(self.extensions.keys())} extensions.')
 
@@ -170,7 +170,14 @@ class DiscordChan(commands.AutoShardedBot):
 
     async def get_command_prefix(self, _, message: discord.Message):
         if message.guild:
-            return commands.when_mentioned_or(*self.prefixes[message.guild.id])(self, message)
+            # sorting fixes cases where part of another prefix is a prefix for example
+            # if the prefix d was before dc/, c/ would be interpreted as a command
+            prefixes = sorted(self.prefixes[message.guild.id],
+                              key=lambda s: len(s),
+                              reverse=True
+                              )
+
+            return commands.when_mentioned_or(*prefixes)(self, message)
         else:  # DM
             return commands.when_mentioned_or(self.config['general']['prefix'], '')(self, message)
 
