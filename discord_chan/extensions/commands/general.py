@@ -34,12 +34,12 @@ class General(commands.Cog, name='general'):
         self.bot = bot
 
     @commands.command()
-    async def charinfo(self, ctx: SubContext, *, charactors):
+    async def charinfo(self, ctx: commands.Context, *, charactors):
         """
         Convert charactors to name syntax
         """
-        paginator = PartitionPaginator(prefix='',
-                                       suffix='',
+        paginator = PartitionPaginator(prefix=None,
+                                       suffix=None,
                                        max_size=300,
                                        wrap_on=('}',)
                                        )
@@ -60,24 +60,24 @@ class General(commands.Cog, name='general'):
     # Todo: finish this
     @checks.cog_loaded('events')
     @commands.group(aliases=['pf'], invoke_without_command=True)
-    async def prefixfinder(self, ctx: SubContext, bot: discord.Member):
+    async def prefixfinder(self, ctx: commands.Context, bot: discord.Member):
         await ctx.send('wip tm')
 
     @checks.cog_loaded('events')
     @prefixfinder.command(name='list')
-    async def prefixfinder_list(self, ctx: SubContext):
+    async def prefixfinder_list(self, ctx: commands.Context):
         return
 
     @commands.command()
-    async def say(self, ctx: SubContext, *, message: commands.clean_content()):
+    async def say(self, ctx: commands.Context, *, message: commands.clean_content()):
         """Have the bot say something"""
         await ctx.send(message)
 
     @commands.command()
-    async def clean(self, ctx: SubContext, ammount: BetweenConverter(1, 100)):
+    async def clean(self, ctx: SubContext, ammount: BetweenConverter(1, 100) = 10):
         """
         Delete's the bot's last <ammount> message(s)
-        ammount must be between 1 and 100
+        ammount must be between 1 and 100, defaults to 10
         """
 
         def check(message):
@@ -90,7 +90,7 @@ class General(commands.Cog, name='general'):
 
     @commands.command(aliases=["avy", "pfp"])
     async def avatar(self,
-                     ctx: SubContext,
+                     ctx: commands.Context,
                      member: Optional[discord.Member] = None,
                      format: Optional[ImageFormatConverter] = 'png'):
         """
@@ -102,7 +102,7 @@ class General(commands.Cog, name='general'):
         )
 
     @commands.command(aliases=['mi', 'userinfo', 'ui'])
-    async def memberinfo(self, ctx: SubContext, member: discord.Member = None):
+    async def memberinfo(self, ctx: commands.Context, member: discord.Member = None):
         """
         Get info on a guild member
         """
@@ -126,7 +126,7 @@ class General(commands.Cog, name='general'):
         await menu.start(ctx)
 
     @commands.command(aliases=['si', 'gi', 'serverinfo'])
-    async def guildinfo(self, ctx: SubContext):
+    async def guildinfo(self, ctx: commands.Context):
         """
         Get info on a guild
         """
@@ -163,7 +163,7 @@ class General(commands.Cog, name='general'):
         await menu.start(ctx)
 
     @commands.group(invoke_without_command=True)
-    async def raw(self, ctx: SubContext):
+    async def raw(self, ctx: commands.Context):
         """
         Base raw command
         just sends help for raw
@@ -171,7 +171,7 @@ class General(commands.Cog, name='general'):
         await ctx.send_help("raw")
 
     @staticmethod
-    async def send_raw(ctx: SubContext, data: dict):
+    async def send_raw(ctx: commands.Context, data: dict):
 
         paginator = PartitionPaginator(prefix='```json', max_size=1985)
 
@@ -187,7 +187,7 @@ class General(commands.Cog, name='general'):
         await menu.start(ctx)
 
     @raw.command(aliases=['msg'])
-    async def message(self, ctx: SubContext, message: discord.Message):
+    async def message(self, ctx: commands.Context, message: discord.Message):
         """
         Raw message object,
         can provide channel with channel_id-message-id
@@ -197,7 +197,7 @@ class General(commands.Cog, name='general'):
         await self.send_raw(ctx, data)
 
     @raw.command()
-    async def channel(self, ctx: SubContext, channel: discord.TextChannel):
+    async def channel(self, ctx: commands.Context, channel: discord.TextChannel):
         """
         Raw channel object
         """
@@ -205,7 +205,7 @@ class General(commands.Cog, name='general'):
         await self.send_raw(ctx, data)
 
     @raw.command()
-    async def member(self, ctx: SubContext, member: discord.Member):
+    async def member(self, ctx: commands.Context, member: discord.Member):
         """
         Raw member object
         """
@@ -213,7 +213,7 @@ class General(commands.Cog, name='general'):
         await self.send_raw(ctx, data)
 
     @raw.command()
-    async def user(self, ctx: SubContext, userid: int):
+    async def user(self, ctx: commands.Context, userid: int):
         """
         Raw user object
         """
@@ -225,7 +225,7 @@ class General(commands.Cog, name='general'):
             await self.send_raw(ctx, data)
 
     @raw.command(aliases=['server'])
-    async def guild(self, ctx: SubContext):
+    async def guild(self, ctx: commands.Context):
         """
         Raw guild object
         """
@@ -233,7 +233,7 @@ class General(commands.Cog, name='general'):
         await self.send_raw(ctx, data)
 
     @raw.command()
-    async def invite(self, ctx: SubContext, invite: str):
+    async def invite(self, ctx: commands.Context, invite: str):
         """
         Raw invite object
         """
@@ -246,27 +246,36 @@ class General(commands.Cog, name='general'):
             await self.send_raw(ctx, data)
 
     @raw.command()
-    async def emoji(self, ctx: SubContext, emoji: discord.Emoji):
+    async def emoji(self, ctx: commands.Context, emoji: discord.Emoji):
         """
         Raw emoji object
         """
         data = await self.bot.http.get_custom_emoji(emoji.guild.id, emoji.id)
         await self.send_raw(ctx, data)
+        
+    @raw.command()
+    async def role(self, ctx: commands.Context, role: discord.Role):
+        """
+        Raw role object
+        """
+        data = await self.bot.http.get_roles(role.guild.id)
+        role = discord.utils.get(data, id=role.id)
+        await self.send_raw(ctx, data)
 
     @commands.command(hidden=True)
-    async def ham(self, ctx: SubContext):
+    async def ham(self, ctx: commands.Context):
         await ctx.send("https://youtu.be/yCei3RrNSmY")
 
     @commands.command(hidden=True)
-    async def weeee(self, ctx: SubContext):
+    async def weeee(self, ctx: commands.Context):
         await ctx.send("https://www.youtube.com/watch?v=2Y1iPavaOTE")
 
     @commands.command(hidden=True)
-    async def chika(self, ctx: SubContext):
+    async def chika(self, ctx: commands.Context):
         await ctx.send("https://www.youtube.com/watch?v=iS2s9deFClY")
 
     @commands.command(hidden=True)
-    async def otter(self, ctx: SubContext):
+    async def otter(self, ctx: commands.Context):
         await ctx.send('<:otter:596576722154029072>')
 
 
