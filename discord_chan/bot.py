@@ -33,7 +33,6 @@ from .snipe import Snipe
 logger = logging.getLogger(__name__)
 ROOT = pathlib.Path(__file__).parent
 
-
 class DiscordChan(commands.AutoShardedBot):
 
     def __init__(self, config: ConfigParser, *, context: commands.Context = SubContext, **kwargs):
@@ -97,7 +96,7 @@ class DiscordChan(commands.AutoShardedBot):
         await self.load_prefixes()
 
         if self.config['general'].getboolean('load_extensions'):
-            self.load_extensions_from_dir(ROOT / 'extensions')
+            self.load_extensions_from_dir(ROOT / 'discord_chan' / 'extensions')
 
         logger.info(f'Bot ready with {len(self.extensions.keys())} extensions.')
 
