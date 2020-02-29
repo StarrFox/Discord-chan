@@ -25,12 +25,13 @@ import discord
 from discord.ext import commands, tasks
 from jikanpy import AioJikan
 
-from . import db, ROOT
+from . import db
 from .context import SubContext
 from .help import Minimal
 from .snipe import Snipe
 
 logger = logging.getLogger(__name__)
+ROOT = pathlib.Path(__file__).parent
 
 
 class DiscordChan(commands.AutoShardedBot):
