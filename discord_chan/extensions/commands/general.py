@@ -259,7 +259,7 @@ class General(commands.Cog, name='general'):
         Raw role object
         """
         data = await self.bot.http.get_roles(role.guild.id)
-        role_data = discord.utils.get(data, id=role.id)
+        role_data = discord.utils.find(lambda d: d['id'] == role.id, data)
         await self.send_raw(ctx, role_data)
 
     @commands.command(hidden=True)
