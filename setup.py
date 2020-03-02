@@ -49,6 +49,6 @@ setup(
         'jikanpy',
         'aiosqlite',
         'discord-flags',
-        'git+https://github.com/Rapptz/discord-ext-menus'  # Todo: remove when released
+        'discord-ext-menus'  # Todo: remove when released
     ]
 )
