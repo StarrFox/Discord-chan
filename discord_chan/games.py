@@ -17,8 +17,8 @@
 from itertools import cycle
 from typing import Optional
 
-import discord
 import numpy
+import discord
 from discord.ext import menus
 
 
@@ -150,7 +150,7 @@ class Connect4(menus.Menu):
                 dias.append(list(matrix.diagonal(offset)))
             return dias
 
-        for diagonal in [get_diagonals(self.board), get_diagonals(self.board.T)]:
+        for diagonal in [*get_diagonals(self.board), *get_diagonals(numpy.fliplr(self.board))]:
             if check(diagonal):
                 return True
 
