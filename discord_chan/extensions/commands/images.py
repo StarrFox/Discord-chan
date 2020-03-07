@@ -18,7 +18,7 @@ import discord
 from discord.ext import commands
 
 import discord_chan
-from discord_chan import BetweenConverter
+from discord_chan import BetweenConverter, SubContext
 
 
 # Todo: add more image commands
@@ -28,7 +28,7 @@ class Images(commands.Cog, name='images'):
     @commands.command()
     @commands.cooldown(1, 30, commands.cooldowns.BucketType.user)
     async def wallemoji(self,
-                        ctx: commands.Context,
+                        ctx: SubContext,
                         name: str,
                         width: BetweenConverter(1, 10),
                         height: BetweenConverter(1, 10),
@@ -60,9 +60,13 @@ class Images(commands.Cog, name='images'):
                                                         name=name,
                                                         animated=gif,
                                                         format=format,
-                                                        extras=[(name, premade_wall)])
+                                                        extras=[(name + '.txt', premade_wall)])
 
-        await ctx.send(ctx.author.mention, file=discord.File(archive, filename=f"{name}.tar"))
+        await ctx.send(
+            ctx.author.mention,
+            file=discord.File(archive, filename=f"{name}.tar"),
+            escape_mentions=False
+        )
 
     # @commands.command(aliases=['randomize'])
     # @commands.cooldown(1, 30, commands.cooldowns.BucketType.user)
