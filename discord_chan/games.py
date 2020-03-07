@@ -15,6 +15,7 @@
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
 from itertools import cycle
+from random import shuffle
 from typing import Optional
 
 import numpy
@@ -161,3 +162,133 @@ class Connect4(menus.Menu):
         """
         await self.start(ctx, wait=True)
         return self.winner
+
+
+class MasterMindMenu(menus.Menu):
+
+    VARIATION_SELECTOR = '\N{VARIATION SELECTOR-16}'
+
+    EMOJI_LIST = [
+        '<:weebagree:665491422295752705>',
+        '<a:thonk:536720018545573928>',
+        '<:GodOtter:68565446598964361>',
+        '<a:dancin:582409853918511165>',
+        '<:teehee:597962329031704587>',
+    ]
+
+    LEFT_ARROW = '\N{BLACK LEFT-POINTING TRIANGLE}' + VARIATION_SELECTOR
+    RETURN_ARROW = '\N{LEFTWARDS ARROW WITH HOOK}' + VARIATION_SELECTOR
+    # these two don't work with names on lower python versions
+    YELLOW_CIRCLE = '\U0001f7e1'
+    GREEN_CIRCLE = '\U0001f7e2'
+    CROSS_MARK = '\N{CROSS MARK}'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.tries = 10
+        self.value = None
+        self.position = 0
+        self.entry = ['X'] * 5
+        self.previous_tries = []
+        self.code = self.get_code()
+
+        for button in [menus.Button(e, self.do_entry_button) for e in self.EMOJI_LIST]:
+            self.add_button(button)
+
+    async def send_initial_message(self, ctx, channel):
+        return await ctx.send(
+            f'\n{self.YELLOW_CIRCLE} means the emoji is used in the code but in a different position.'
+            f'\n{self.GREEN_CIRCLE} means the emoji is correct and in the correct position.'
+            f'\nCode is 5 emojis.'
+            f'\n\nControls:'
+            f'\n<emoji> enter that emoji in the entry box.'
+            f'\n{self.LEFT_ARROW} backspace last emoji in entry box.'
+            f'\n{self.RETURN_ARROW} enters guess.'
+        )
+
+    @property
+    def console(self) -> str:
+        res = [
+            f'Tries left: {self.tries}',
+            *self.previous_tries,
+            ' '.join(self.entry)
+        ]
+        return '\n'.join(res)
+
+    async def do_entry_button(self, payload):
+        if self.position == 5:
+            return await self.ctx.send(
+                f'{self.ctx.author.mention}, Max entry reached.',
+                delete_after=5,
+                escape_mentions=False
+            )
+
+        self.entry[self.position] = str(payload.emoji)
+        self.position += 1
+        await self.message.edit(content=self.console)
+
+    @menus.button(LEFT_ARROW, position=menus.Last())
+    async def do_backspace(self, _):
+        if self.position == 0:
+            return
+
+        self.position -= 1
+        self.entry[self.position] = 'X'
+        await self.message.edit(content=self.console)
+
+    @menus.button(RETURN_ARROW, position=menus.Last(1))
+    async def do_enter(self, _):
+        if self.position != 5:
+            return await self.ctx.send(
+                f'{self.ctx.author.mention}, Entry not full.',
+                delete_after=5,
+                escape_mentions=False)
+
+        if ''.join(self.entry) == self.code:
+            self.value = 100 * self.tries
+            self.stop()
+            return
+
+        dots = self.get_dots()
+        self.previous_tries.append(
+            f"{' '.join(self.entry)} => {dots}"
+        )
+
+        self.entry = ['X'] * 5
+        self.position = 0
+        self.tries -= 1
+
+        await self.message.edit(content=self.console)
+
+        if self.tries == 0:
+            self.value = 0
+
+            await self.ctx.send(
+                f'Sorry {self.ctx.author.mention}, out of tries. The code was {self.code}.',
+                escape_mentions=False
+            )
+
+            self.stop()
+
+    async def run(self, ctx) -> Optional[int]:
+        await self.start(ctx, wait=True)
+        return self.value
+
+    def get_code(self):
+        copy_emojis = self.EMOJI_LIST.copy()
+        shuffle(copy_emojis)
+        return ''.join(copy_emojis)
+
+    def get_dots(self):
+        res = []
+        for guess, correct in zip(self.entry, self.code):
+            if guess == correct:
+                res.append(self.GREEN_CIRCLE)
+
+            elif guess in self.code:
+                res.append(self.YELLOW_CIRCLE)
+
+        if not res:
+            return self.CROSS_MARK
+
+        return ''.join(sorted(res))
