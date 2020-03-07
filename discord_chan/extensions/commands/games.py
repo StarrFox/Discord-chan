@@ -57,13 +57,13 @@ class Games(commands.Cog, name='games'):
         value = await game.run(ctx)
 
         if value:
-            await ctx.send('You won.')
+            await ctx.send(f'{ctx.author.mention}, You won.', escape_mentions=False)
 
         elif value == 0:
             return
 
         else:
-            await ctx.send(f'{ctx.author.mention}, MasterMind timed out.')
+            await ctx.send(f'{ctx.author.mention}, MasterMind timed out.', escape_mentions=False)
 
 
 def setup(bot):

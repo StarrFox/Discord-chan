@@ -277,7 +277,7 @@ class MasterMindMenu(menus.Menu):
     def get_code(self):
         copy_emojis = self.EMOJI_LIST.copy()
         shuffle(copy_emojis)
-        return ''.join(copy_emojis)
+        return copy_emojis
 
     def get_dots(self):
         res = []
