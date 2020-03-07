@@ -199,6 +199,7 @@ class MasterMindMenu(menus.Menu):
         return await ctx.send(
             f'\n{self.YELLOW_CIRCLE} means the emoji is used in the code but in a different position.'
             f'\n{self.GREEN_CIRCLE} means the emoji is correct and in the correct position.'
+            f'\n**Circles are not ordered.**'
             f'\nCode is 5 emojis.'
             f'\n\nControls:'
             f'\n<emoji> enter that emoji in the entry box.'
@@ -210,6 +211,7 @@ class MasterMindMenu(menus.Menu):
     def console(self) -> str:
         res = [
             f'Tries left: {self.tries}',
+            '**Note: Circles are not ordered.**',
             *self.previous_tries,
             ' '.join(self.entry)
         ]
@@ -227,7 +229,14 @@ class MasterMindMenu(menus.Menu):
         self.position += 1
         await self.message.edit(content=self.console)
 
-    @menus.button(LEFT_ARROW, position=menus.Last())
+    @menus.button("\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}", position=menus.Last())
+    async def do_resend(self, _):
+        await self.message.delete()
+        self.message = msg = await self.ctx.send(self.console)
+        for emoji in self.buttons:
+            await msg.add_reaction(emoji)
+
+    @menus.button(LEFT_ARROW, position=menus.Last(1))
     async def do_backspace(self, _):
         if self.position == 0:
             return
@@ -236,7 +245,7 @@ class MasterMindMenu(menus.Menu):
         self.entry[self.position] = 'X'
         await self.message.edit(content=self.console)
 
-    @menus.button(RETURN_ARROW, position=menus.Last(1))
+    @menus.button(RETURN_ARROW, position=menus.Last(2))
     async def do_enter(self, _):
         if self.position != 5:
             return await self.ctx.send(
@@ -264,7 +273,7 @@ class MasterMindMenu(menus.Menu):
             self.value = 0
 
             await self.ctx.send(
-                f'Sorry {self.ctx.author.mention}, out of tries. The code was {self.code}.',
+                f'Sorry {self.ctx.author.mention}, out of tries. The code was\n{" ".join(self.code)}.',
                 escape_mentions=False
             )
 
