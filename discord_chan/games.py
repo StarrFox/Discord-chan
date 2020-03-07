@@ -244,7 +244,7 @@ class MasterMindMenu(menus.Menu):
                 delete_after=5,
                 escape_mentions=False)
 
-        if ''.join(self.entry) == self.code:
+        if self.entry == self.code:
             self.value = 100 * self.tries
             self.stop()
             return
