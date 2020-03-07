@@ -15,7 +15,9 @@
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
+from datetime import timedelta
 
+from humanize import naturaldelta
 from discord.ext import commands
 
 logger = logging.getLogger(__name__)
@@ -38,7 +40,9 @@ async def on_command_error(ctx: commands.Context, error):
         return await ctx.send(str(error))
 
     elif isinstance(error, commands.CommandOnCooldown):
-        return await ctx.send(str(error))
+        delta = timedelta(seconds=error.retry_after)
+        natural = naturaldelta(delta)
+        return await ctx.send(f'Command on cooldown, retry in {natural}.')
 
     logger.error(
         f"Unhandled error in command {ctx.command.name}\n"

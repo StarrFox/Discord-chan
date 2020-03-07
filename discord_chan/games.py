@@ -225,6 +225,13 @@ class MasterMindMenu(menus.Menu):
                 escape_mentions=False
             )
 
+        if str(payload.emoji) in self.entry:
+            return await self.ctx.send(
+                f'{self.ctx.author.mention}, No duplicate emojis.',
+                delete_after=5,
+                escape_mentions=False
+            )
+
         self.entry[self.position] = str(payload.emoji)
         self.position += 1
         await self.message.edit(content=self.console)

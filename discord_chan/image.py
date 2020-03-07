@@ -233,7 +233,7 @@ def get_wallify_example_file(wall_size: Tuple[int, int], name: str = None) -> By
 # Image manipulating
 
 @executor_function
-def wallify_image(image: Image.Image, width: int, height: int, *, name: str = None) -> Tuple[list, BytesIO]:
+def wallify_image(image: Image.Image, width: int, height: int, *, name: str = None) -> list:
     """
     Wallify an image
     :param image: The base Image
@@ -259,9 +259,7 @@ def wallify_image(image: Image.Image, width: int, height: int, *, name: str = No
                 (row * image_height) + image_height
             )))
 
-    wallify_example = get_wallify_example_file((num_of_rows, num_of_columns), name)
-
-    return images, wallify_example
+    return images
 
 
 @executor_function
