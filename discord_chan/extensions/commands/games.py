@@ -19,7 +19,7 @@ from random import choice
 import discord
 from discord.ext import commands
 
-from discord_chan import Connect4, SubContext
+from discord_chan import Connect4, SubContext, MasterMindMenu
 
 
 class Games(commands.Cog, name='games'):
@@ -45,6 +45,25 @@ class Games(commands.Cog, name='games'):
             await ctx.send(f"{winner.mention} has won.", escape_mentions=False)
         else:
             await ctx.send('No one made a move.')
+
+    @commands.command(aliases=['mm'])
+    @commands.bot_has_permissions(add_reactions=True)
+    @commands.max_concurrency(1, commands.BucketType.user)
+    async def mastermind(self, ctx: SubContext):
+        """
+        Play mastermind.
+        """
+        game = MasterMindMenu()
+        value = await game.run(ctx)
+
+        if value:
+            await ctx.send('You won.')
+
+        elif value == 0:
+            return
+
+        else:
+            await ctx.send(f'{ctx.author.mention}, MasterMind timed out.')
 
 
 def setup(bot):
