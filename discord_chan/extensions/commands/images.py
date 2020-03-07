@@ -45,6 +45,7 @@ class Images(commands.Cog, name='images'):
             return await ctx.send('Unable to open file as image.')
 
         gif = image.format == 'GIF'
+        format = image.format
 
         with ctx.typing():
             factors = discord_chan.get_wallify_factors(image.size, (width, height))
@@ -58,32 +59,32 @@ class Images(commands.Cog, name='images'):
             archive = await discord_chan.tarball_images(emojis,
                                                         name=name,
                                                         animated=gif,
+                                                        format=format,
                                                         extras=[(name, premade_wall)])
 
         await ctx.send(ctx.author.mention, file=discord.File(archive, filename=f"{name}.tar"))
 
-    # todo: test these
-    @commands.command(aliases=['randomize'])
-    @commands.cooldown(1, 30, commands.cooldowns.BucketType.user)
-    async def shuffle(self, ctx: commands.Context, link: str, degree: BetweenConverter(1, 100_000)):
-        """
-        Shuffle's an image's pixels
-        Degree must be between 1 and 100,000
-        """
-        # Todo: use this for the image converter?
-        try:
-            image = await discord_chan.url_to_image(link)
-        except discord_chan.FileTooLarge:
-            return await ctx.send('File was too large.')
-        except discord_chan.InvalidImageType:
-            return await ctx.send('Unable to open file as image.')
-
-        with ctx.typing():
-            shuffled = await discord_chan.shuffle_image(image, degree=degree)
-
-            file = await discord_chan.image_to_file(shuffled, f'shuffled.{shuffled.format.lower()}')
-
-        await ctx.send(ctx.author.mention, file=file)
+    # @commands.command(aliases=['randomize'])
+    # @commands.cooldown(1, 30, commands.cooldowns.BucketType.user)
+    # async def shuffle(self, ctx: commands.Context, link: str, degree: BetweenConverter(1, 100_000)):
+    #     """
+    #     Shuffle's an image's pixels
+    #     Degree must be between 1 and 100,000
+    #     """
+    #     # Todo: use this for the image converter?
+    #     try:
+    #         image = await discord_chan.url_to_image(link)
+    #     except discord_chan.FileTooLarge:
+    #         return await ctx.send('File was too large.')
+    #     except discord_chan.InvalidImageType:
+    #         return await ctx.send('Unable to open file as image.')
+    #
+    #     with ctx.typing():
+    #         shuffled = await discord_chan.shuffle_image(image, degree=degree)
+    #
+    #         file = await discord_chan.image_to_file(shuffled, f'shuffled.{shuffled.format.lower()}')
+    #
+    #     await ctx.send(ctx.author.mention, file=file)
 
     @commands.command(aliases=['diff'])
     @commands.cooldown(1, 30, commands.cooldowns.BucketType.user)
@@ -104,6 +105,14 @@ class Images(commands.Cog, name='images'):
             file = await discord_chan.image_to_file(difference_image, f'difference.png')
 
         await ctx.send(ctx.author.mention, file=file)
+
+    @commands.command(aliases=['sim'])
+    @commands.cooldown(1, 30, commands.cooldowns.BucketType.user)
+    async def simularity(self, ctx: commands.Context):
+        """
+        Get the simularity rating of two images
+        """
+        pass
 
 
 def setup(bot):
