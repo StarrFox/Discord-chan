@@ -24,7 +24,7 @@ from discord_chan import (BetweenConverter, MaxLengthConverter, BotConverter,
                           EmbedFieldsPageSource, DCMenuPages)
 
 
-STAR = '\N{WHILE MEDIUM STAR}'
+STAR = '\N{WHITE MEDIUM STAR}'
 ZERO = '0\N{VARIATION SELECTOR-16}\N{COMBINING ENCLOSING KEYCAP}'
 
 
