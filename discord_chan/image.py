@@ -233,13 +233,12 @@ def get_wallify_example_file(wall_size: Tuple[int, int], name: str = None) -> By
 # Image manipulating
 
 @executor_function
-def wallify_image(image: Image.Image, width: int, height: int, *, name: str = None) -> list:
+def wallify_image(image: Image.Image, width: int, height: int) -> list:
     """
     Wallify an image
     :param image: The base Image
     :param width: Width of the wall (Number of images)
     :param height: Height of the Wall (Number of images)
-    :param name: Name to use in example file, defaults to None (uses '_')
     :return: Tuple of a list of Image and the example file
     """
     images = []

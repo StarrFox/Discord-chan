@@ -20,7 +20,7 @@ from typing import Optional
 from discord import Message, utils, HTTPException
 from discord.ext.commands import Context
 
-from .menus import PartitionPaginator, NormalPageSource, DCMenuPages
+from .menus import PartitionPaginator, NormalPageSource, DCMenuPages, ConfirmationMenu
 
 
 class SubContext(Context):
@@ -63,11 +63,20 @@ class SubContext(Context):
         return self.message.created_at
 
     async def confirm(self, message: str = None) -> Optional[Message]:
-        """Adds a checkmark to ctx.message"""
+        """
+        Adds a checkmark to ctx.message.
+        If unable to sends <message>
+        """
         try:
             await self.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
         except HTTPException:
             message = message or '\N{WHITE HEAVY CHECK MARK}'
             return await self.send(message)
 
-    # Todo: prompt
+    # Todo: test
+    async def prompt(self, message: str = ' ') -> bool:
+        """
+        Prompt for <message> and return True or False
+        """
+        menu = ConfirmationMenu(message)
+        return await menu.get_response(self)

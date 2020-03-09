@@ -46,8 +46,11 @@ class General(commands.Cog, name='general'):
 
         final = ''
         for char in charactors:
-            name = unicodedata.name(char)
-            final += '\\' + 'N{' + name + '}'
+            try:
+                name = unicodedata.name(char)
+                final += '\\' + 'N{' + name + '}'
+            except ValueError:
+                final += '[UNKNOWN UNICODE CHAR]'
 
         paginator.add_line(final)
 
@@ -69,7 +72,7 @@ class General(commands.Cog, name='general'):
         return
 
     @commands.command()
-    async def say(self, ctx: commands.Context, *, message: commands.clean_content()):
+    async def say(self, ctx: commands.Context, *, message: str):
         """Have the bot say something"""
         await ctx.send(message)
 

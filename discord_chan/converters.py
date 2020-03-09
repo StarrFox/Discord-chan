@@ -58,6 +58,18 @@ class BetweenConverter(commands.Converter):
         raise commands.BadArgument('{} is not between {} and {}'.format(argument, self.num1, self.num2))
 
 
+class MaxLengthConverter(commands.Converter):
+
+    def __init__(self, max_size: int = 2000):
+        self.max_size = max_size
+
+    async def convert(self, ctx: commands.Context, argument: str) -> str:
+        if len(argument) <= self.max_size:
+            return argument
+
+        raise commands.BadArgument('Argument over max size of {}'.format(self.max_size))
+
+
 class WeekdayConverter(commands.Converter):
 
     async def convert(self, ctx: commands.Context, argument: str) -> str:
@@ -95,3 +107,14 @@ class CrossGuildTextChannelConverter(commands.TextChannelConverter):
             raise commands.BadArgument('Channel "{}" not found.'.format(argument))
 
         return result
+
+
+class BotConverter(commands.Converter):
+
+    async def convert(self, ctx: commands.Context, argument: str) -> discord.Member:
+        member = await commands.MemberConverter().convert(ctx, argument)
+
+        if member.bot:
+            return member
+
+        raise commands.BadArgument('{} is not a bot.'.format(argument))

@@ -171,11 +171,12 @@ class MasterMindMenu(menus.Menu):
     EMOJI_LIST = [
         '<:weebagree:665491422295752705>',
         '<:flushvibe:685656132336746506>',
-        '<:GodOtter:685654465398964361>',
+        '<:GodOtter:686115091581894907>',
         '<:otter:685654717212393478>',
         '<:teehee:597962329031704587>',
     ]
 
+    RESEND_ARROW = '\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}'
     LEFT_ARROW = '\N{BLACK LEFT-POINTING TRIANGLE}' + VARIATION_SELECTOR
     RETURN_ARROW = '\N{LEFTWARDS ARROW WITH HOOK}' + VARIATION_SELECTOR
     # these two don't work with names on lower python versions
@@ -203,6 +204,7 @@ class MasterMindMenu(menus.Menu):
             f'\nCode is 5 emojis.'
             f'\n\nControls:'
             f'\n<emoji> enter that emoji in the entry box.'
+            f'\n{self.RESEND_ARROW} resend message interface.'
             f'\n{self.LEFT_ARROW} backspace last emoji in entry box.'
             f'\n{self.RETURN_ARROW} enters guess.'
         )
@@ -236,7 +238,7 @@ class MasterMindMenu(menus.Menu):
         self.position += 1
         await self.message.edit(content=self.console)
 
-    @menus.button("\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}", position=menus.Last())
+    @menus.button(RESEND_ARROW, position=menus.Last())
     async def do_resend(self, _):
         await self.message.delete()
         self.message = msg = await self.ctx.send(self.console)
