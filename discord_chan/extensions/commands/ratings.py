@@ -125,8 +125,8 @@ class Ratings(commands.Cog, name='ratings'):
 
         await ctx.confirm('Rating cleared.')
 
-    @commands.command()
-    async def show(self, ctx, bot: BotConverter()):
+    @commands.command(aliases=['view'])
+    async def show(self, ctx, *, bot: BotConverter()):
         """
         Show the ratings of a bot.
         """
