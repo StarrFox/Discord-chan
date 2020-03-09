@@ -131,7 +131,7 @@ class Ratings(commands.Cog, name='ratings'):
         entries = []
 
         for user_id, rating, review in ratings:
-            user = await ctx.bot.get_user(user_id)
+            user = ctx.bot.get_user(user_id)
             if not user:
                 await self.clear_bot_rating(bot.id, user_id)
                 continue
