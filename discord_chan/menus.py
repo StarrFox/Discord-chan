@@ -27,13 +27,13 @@ EmbedFieldProxy = namedtuple('EmbedFieldProxy', 'name value')
 
 class ConfirmationMenu(menus.Menu):
 
-    def __init__(self, to_confirm: str, **kwargs):
+    def __init__(self, to_confirm: str = None, **kwargs):
         super().__init__(**kwargs)
         self.to_confirm = to_confirm
         self.response = None
 
     async def send_initial_message(self, ctx: commands.Context, channel: discord.TextChannel):
-        return await ctx.send(self.to_confirm)
+        return await ctx.send(self.to_confirm or '\u200b')
 
     @menus.button('\N{WHITE HEAVY CHECK MARK}')
     async def do_yes(self, _):
@@ -132,12 +132,21 @@ class CodeblockPageSource(menus.ListPageSource):
 
 class EmbedFieldsPageSource(menus.ListPageSource):
 
-    def __init__(self, entries: Sequence[EmbedFieldProxy], *, per_page: int = 1, title: Optional[str] = None):
+    def __init__(self,
+                 entries: Sequence[EmbedFieldProxy],
+                 *, per_page: int = 1,
+                 title: Optional[str] = None,
+                 description: Optional[str] = None
+                 ):
         super().__init__(entries, per_page=per_page)
         self.title = title
+        self.description = description
 
     async def format_page(self, menu, page):
-        base = discord.Embed(title=self.title)
+        base = discord.Embed(
+            title=self.title,
+            description=self.description
+        )
 
         if isinstance(page, EmbedFieldProxy):
             return base.add_field(name=page.name, value=page.value)

@@ -71,6 +71,13 @@ CREATE TABLE IF NOT EXISTS channel_links (
     send_from INTEGER PRIMARY KEY,
     send_to PYSET
 );
+
+CREATE TABLE IF NOT EXISTS ratings (
+    bot_id INTEGER,
+    user_id INTEGER,
+    rating TEXT,
+    review TEXT
+);
 """
 
 
