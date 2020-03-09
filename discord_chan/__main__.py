@@ -75,8 +75,9 @@ CREATE TABLE IF NOT EXISTS channel_links (
 CREATE TABLE IF NOT EXISTS ratings (
     bot_id INTEGER,
     user_id INTEGER,
-    rating TEXT,
-    review TEXT
+    rating INTEGER,
+    review TEXT,
+    PRIMARY KEY(bot_id, user_id)
 );
 """
 
@@ -113,9 +114,6 @@ def run(args: argparse.Namespace):
         dpy_log.propagate = False
 
     bot = discord_chan.DiscordChan(config)
-
-    if args.load_jsk:
-        bot.load_extension('jishaku')
 
     # Todo: make sure to remove this debug call
     # bot.dispatch('ready')
@@ -166,12 +164,6 @@ def add_run_args(parser: argparse.ArgumentParser):
                         default=None,
                         help='Path to logging file, defaults to stdout.'
                         )
-
-    parser.add_argument('-lj',
-                        '--load-jsk',
-                        action='store_true',
-                        default=True,
-                        help='If the Jishaku debug cog should be loaded, defaults to true')
 
     parser.set_defaults(func=run)
 
