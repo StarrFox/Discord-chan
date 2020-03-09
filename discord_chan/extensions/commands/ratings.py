@@ -143,9 +143,9 @@ class Ratings(commands.Cog, name='ratings'):
 
         description = f'Average: {average}'
 
-        source = EmbedFieldsPageSource(entries, title=title, description=description)
+        source = EmbedFieldsPageSource(entries, per_page=3,  title=title, description=description)
 
-        menu = DCMenuPages(source, per_page=3)
+        menu = DCMenuPages(source)
 
         await menu.start(ctx)
 
