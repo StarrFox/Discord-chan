@@ -65,7 +65,8 @@ class Images(commands.Cog, name='images'):
         await ctx.send(
             ctx.author.mention,
             file=discord.File(archive, filename=f"{name}.tar"),
-            escape_mentions=False
+            escape_mentions=False,
+            no_edit=True
         )
 
     # @commands.command(aliases=['randomize'])
@@ -92,7 +93,7 @@ class Images(commands.Cog, name='images'):
 
     @commands.command(aliases=['diff'])
     @commands.cooldown(1, 30, commands.cooldowns.BucketType.user)
-    async def difference(self, ctx: commands.Context, link1: str, link2: str):
+    async def difference(self, ctx: SubContext, link1: str, link2: str):
         """
         Get a composite image of two image's differences
         """
@@ -108,7 +109,7 @@ class Images(commands.Cog, name='images'):
 
             file = await discord_chan.image_to_file(difference_image, f'difference.png')
 
-        await ctx.send(ctx.author.mention, file=file)
+        await ctx.send(ctx.author.mention, file=file, escape_mentions=False, no_edit=True)
 
     @commands.command(aliases=['sim'])
     @commands.cooldown(1, 30, commands.cooldowns.BucketType.user)

@@ -30,14 +30,16 @@ class SubContext(Context):
         The paginator should never be used there as a just in case
         Also escapes_mentions, can be turned off by passing
         escape_mentions=False
+        no_edit can be passed to not edit past invokes.
         """
         if kwargs.pop('escape_mentions', True) and content:
             content = utils.escape_mentions(content)
 
+        menu = None
+
         # If there was more than just content ex: embeds they don't get sent
         # but this should never really be used, so this is ok?
         if content and len(str(content)) > 2000:
-
             paginator = PartitionPaginator(prefix=None, suffix=None, max_size=1985)
             paginator.add_line(content)
 
@@ -45,15 +47,27 @@ class SubContext(Context):
 
             menu = DCMenuPages(source)
 
-            await menu.start(self, wait=True)
-            return menu.message
+        if not kwargs.pop('no_edit', False) and self.message.id in self.bot.past_invokes:
+            prev_msg = self.bot.past_invokes[self.message.id]
+
+            if menu:
+                menu.message = prev_msg
+                await menu.start(self, wait=True)
+                return menu.message
+
+            else:
+                await prev_msg.edit(content=content, **kwargs)
+                return prev_msg
 
         else:
 
-            return await super().send(
+            new_msg = await super().send(
                 content=content,
                 **kwargs
             )
+
+            self.bot.past_invokes[self.message.id] = new_msg
+            return new_msg
 
     @property
     def created_at(self) -> datetime:

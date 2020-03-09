@@ -25,7 +25,7 @@ import discord
 from discord.ext import commands, tasks
 from jikanpy import AioJikan
 
-from . import db
+from . import db, utils
 from .context import SubContext
 from .help import Minimal
 from .snipe import Snipe
@@ -56,6 +56,7 @@ class DiscordChan(commands.AutoShardedBot):
         self.uptime = datetime.now()
         # Todo: make an anime entry object to replace the dicts in the lists
         self.anime_db: Dict[str, list] = {}
+        self.past_invokes = utils.LRU(maxsize=1000)
         # {bot_id: {prefixes}}
         self.other_bot_prefixes: Dict[int, Set[str]] = defaultdict(lambda: set())
         # {guild_id: {prefixes}}
