@@ -17,7 +17,7 @@
 from datetime import datetime
 from typing import Optional
 
-from discord import Message, utils, HTTPException
+from discord import Message, utils, HTTPException, NotFound
 from discord.ext.commands import Context
 
 from .menus import PartitionPaginator, NormalPageSource, DCMenuPages, ConfirmationMenu
@@ -56,18 +56,20 @@ class SubContext(Context):
                 return menu.message
 
             else:
-                await prev_msg.edit(content=content, **kwargs)
-                return prev_msg
+                try:
+                    await prev_msg.edit(content=content, **kwargs)
+                    return prev_msg
 
-        else:
+                except NotFound:
+                    pass
 
-            new_msg = await super().send(
-                content=content,
-                **kwargs
-            )
+        new_msg = await super().send(
+            content=content,
+            **kwargs
+        )
 
-            self.bot.past_invokes[self.message.id] = new_msg
-            return new_msg
+        self.bot.past_invokes[self.message.id] = new_msg
+        return new_msg
 
     @property
     def created_at(self) -> datetime:
