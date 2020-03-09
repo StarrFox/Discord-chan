@@ -117,4 +117,4 @@ class BotConverter(commands.Converter):
         if member.bot:
             return member
 
-        raise commands.BadArgument('{} is not a bot.'.format(argument))
+        raise commands.BadArgument('That is not a bot.'.format(argument))

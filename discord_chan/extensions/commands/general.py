@@ -41,16 +41,16 @@ class General(commands.Cog, name='general'):
         paginator = PartitionPaginator(prefix=None,
                                        suffix=None,
                                        max_size=300,
-                                       wrap_on=('}',)
+                                       wrap_on=('}', '\n')
                                        )
 
         final = ''
         for char in charactors:
             try:
                 name = unicodedata.name(char)
-                final += '\\' + 'N{' + name + '}'
+                final += f'\\N{name}\n'
             except ValueError:
-                final += '[UNKNOWN UNICODE CHAR]'
+                final += f'\\U{ord(char):0>8x}\n'
 
         paginator.add_line(final)
 
