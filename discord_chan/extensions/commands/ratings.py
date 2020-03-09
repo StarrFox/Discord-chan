@@ -104,7 +104,8 @@ class Ratings(commands.Cog, name='ratings'):
                    ctx: SubContext,
                    bot: BotConverter(),
                    rating: BetweenConverter(0, 5),
-                   *, review: MaxLengthConverter(300) = None):
+                   *, review: MaxLengthConverter(300)
+                   ):
         """
         Give a bot a rating 0-5 and an optional review.
         Reviews must be no more than 300 characters.
@@ -114,6 +115,15 @@ class Ratings(commands.Cog, name='ratings'):
         await self.set_bot_rating(bot.id, ctx.author.id, rating, review)
 
         await ctx.confirm('Bot rated.')
+
+    @commands.command(name='clear-rating')
+    async def clear_rating(self, ctx: SubContext, bot: BotConverter()):
+        """
+        Remove your rating for a bot.
+        """
+        await self.clear_bot_rating(bot.id, ctx.author.id)
+
+        await ctx.confirm('Rating cleared.')
 
     @commands.command()
     async def show(self, ctx, bot: BotConverter()):
