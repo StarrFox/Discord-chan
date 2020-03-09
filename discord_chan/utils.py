@@ -14,7 +14,10 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
+from collections import OrderedDict
+
 import discord
+
 
 bool_dict = {
     "true": True,
@@ -24,6 +27,7 @@ bool_dict = {
     "off": False,
     "0": False
 }
+
 
 async def msg_resend(destination: discord.abc.Messageable, msg: discord.Message) -> discord.Message:
     """
@@ -70,3 +74,15 @@ def msg_jsonify(message: discord.Message) -> dict:
         "flags": message.flags
     }
     return data
+
+
+class LRU(OrderedDict):
+
+    def __init__(self, maxsize=100, *args, **kwargs):
+        self.maxsize = maxsize
+        super().__init__(*args, **kwargs)
+
+    def __setitem__(self, key, value):
+        super().__setitem__(key, value)
+        if len(self) > self.maxsize:
+            self.popitem(last=False)
