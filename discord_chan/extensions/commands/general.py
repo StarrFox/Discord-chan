@@ -34,9 +34,9 @@ class General(commands.Cog, name='general'):
         self.bot = bot
 
     @commands.command()
-    async def charinfo(self, ctx: commands.Context, *, charactors):
+    async def charinfo(self, ctx: commands.Context, *, characters):
         """
-        Convert charactors to name syntax
+        Convert characters to name syntax, or unicode if name isnt found.
         """
         paginator = PartitionPaginator(prefix=None,
                                        suffix=None,
@@ -45,10 +45,10 @@ class General(commands.Cog, name='general'):
                                        )
 
         final = ''
-        for char in charactors:
+        for char in characters:
             try:
                 name = unicodedata.name(char)
-                final += f'\\N{name}\n'
+                final += f'\\N{{{name}}}\n'
             except ValueError:
                 final += f'\\U{ord(char):0>8x}\n'
 
