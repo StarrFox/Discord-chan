@@ -149,7 +149,7 @@ class Ratings(commands.Cog, name='ratings'):
             entries.append(self.format_rating(user, rating, review))
             average_holder.append(rating)
 
-        average = sum(average_holder) / len(average_holder)
+        average = round(sum(average_holder) / len(average_holder), 2)
 
         description = f'Average: {average}'
 

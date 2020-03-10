@@ -66,7 +66,9 @@ class Events(commands.Cog, name='events'):
 
     @commands.Cog.listener('on_message')
     async def on_bot_message(self, message: discord.Message):
-        """Listens for prefixes"""
+        """
+        Listens for prefixes
+        """
         if not message.author.bot:
             return
 
@@ -96,7 +98,7 @@ class Events(commands.Cog, name='events'):
         self.socket_events[message.get('t')] += 1
 
     @commands.Cog.listener()
-    async def on_command_complete(self, ctx: commands.Context):
+    async def on_command_completion(self, ctx: commands.Context):
         self.command_uses[ctx.command] += 1
 
     # Snipe
