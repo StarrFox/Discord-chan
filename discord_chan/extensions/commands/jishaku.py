@@ -25,6 +25,7 @@ from jishaku.metacog import GroupCogMeta
 from jishaku.paginators import PaginatorInterface
 from jishaku.repl import get_var_dict_from_ctx, AsyncCodeExecutor, AsyncSender
 from terminaltables import AsciiTable
+from aiosqlite import OperationalError
 
 from discord_chan import DCMenuPages, NormalPageSource, PartitionPaginator, SubContext, db
 
@@ -100,9 +101,14 @@ class Jishaku(JishakuBase, metaclass=GroupCogMeta, command_parent=jsk):
         Execute a db quarry
         """
         async with db.get_database() as connection:
-            cursor = await connection.execute(' '.join(quarry))
+            try:
+                cursor = await connection.execute(quarry)
+            except OperationalError as e:
+                return await ctx.send(str(e))
+
             await connection.commit()
             quarry_result = await cursor.fetchall()
+
             if quarry_result:
                 collums = [coll[0] for coll in cursor.description]
                 final = [collums]
