@@ -24,8 +24,9 @@ from jishaku.flags import SCOPE_PREFIX
 from jishaku.metacog import GroupCogMeta
 from jishaku.paginators import PaginatorInterface
 from jishaku.repl import get_var_dict_from_ctx, AsyncCodeExecutor, AsyncSender
+from terminaltables import AsciiTable
 
-from discord_chan import DCMenuPages, NormalPageSource, PartitionPaginator, SubContext
+from discord_chan import DCMenuPages, NormalPageSource, PartitionPaginator, SubContext, db
 
 try:
     import psutil
@@ -93,6 +94,36 @@ class Jishaku(JishakuBase, metaclass=GroupCogMeta, command_parent=jsk):
         """
         return await ctx.invoke(self.jsk_shell, argument=Codeblock(argument.language, 'pip ' + argument.content))
 
+    @commands.command(name='db', aliases=['sql'])
+    async def jsk_db(self, ctx: commands.Context, *, quarry: str):
+        """
+        Execute a db quarry
+        """
+        async with db.get_database() as connection:
+            cursor = await connection.execute(' '.join(quarry))
+            await connection.commit()
+            quarry_result = await cursor.fetchall()
+            if quarry_result:
+                collums = [coll[0] for coll in cursor.description]
+                final = [collums]
+
+                for data in quarry_result:
+                    final.append(list(data))
+
+                table = AsciiTable(final)
+
+                paginator = PartitionPaginator(prefix='```sql', max_size=1000, wrap_on=('|', '\n'))
+
+                paginator.add_line(table.table)
+
+                source = NormalPageSource(paginator.pages)
+
+                menu = DCMenuPages(source)
+
+                await menu.start(ctx)
+
+            else:
+                await ctx.send('[no result]')
 
 def setup(bot: commands.Bot):
     bot.add_cog(Jishaku(bot=bot))
