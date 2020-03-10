@@ -52,16 +52,21 @@ class SubContext(Context):
 
             if menu:
                 menu.message = prev_msg
+                await prev_msg.edit(embed=None)
                 await menu.start(self, wait=True)
                 return menu.message
 
             else:
                 try:
-                    await prev_msg.edit(content=content, **kwargs)
+                    await prev_msg.edit(content=content, embed=kwargs.pop('embed', None), **kwargs)
                     return prev_msg
 
                 except NotFound:
                     pass
+
+        if menu:
+            await menu.start(self, wait=True)
+            return menu.message
 
         new_msg = await super().send(
             content=content,

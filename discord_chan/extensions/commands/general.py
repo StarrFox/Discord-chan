@@ -20,6 +20,7 @@ from typing import Optional
 
 import discord
 import humanize
+from uwuify import uwu_text
 from discord.ext import commands
 
 from discord_chan import (PrologPaginator, ImageFormatConverter, PartitionPaginator,
@@ -73,8 +74,17 @@ class General(commands.Cog, name='general'):
 
     @commands.command()
     async def say(self, ctx: commands.Context, *, message: str):
-        """Have the bot say something"""
+        """
+        Have the bot say something
+        """
         await ctx.send(message)
+
+    @commands.command(aliases=['owoify', 'owo'])
+    async def uwuify(self, ctx: commands.Context, *, message: str):
+        """
+        Uwuify text
+        """
+        await ctx.send(uwu_text(message))
 
     @commands.command()
     async def clean(self, ctx: SubContext, ammount: BetweenConverter(1, 100) = 10):
@@ -89,7 +99,7 @@ class General(commands.Cog, name='general'):
         can_mass_delete = ctx.channel.permissions_for(ctx.me).manage_messages
 
         await ctx.channel.purge(limit=ammount, check=check, bulk=can_mass_delete)
-        await ctx.confirm()
+        await ctx.confirm('Messages cleaned.')
 
     @commands.command(aliases=["avy", "pfp"])
     async def avatar(self,
