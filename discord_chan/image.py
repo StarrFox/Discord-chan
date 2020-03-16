@@ -42,7 +42,28 @@ class InvalidImageType(ImageError):
 
 
 # Modified from https://github.com/Gorialis/jishaku/blob/master/jishaku/functools.py#L19
-# (c) 2020 Devon (Gorialis) R
+# This license covers the below function
+# MIT License
+#
+# Copyright (c) 2020 Devon (Gorialis) R
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 def executor_function(sync_function: Callable):
     @functools.wraps(sync_function)
     async def sync_wrapper(*args, **kwargs):
@@ -297,6 +318,26 @@ def wallify_gif_image(image: Image.Image, width: int, height: int, *, name: str 
     return images, wallify_example
 
 
+def equalize_images(*images) -> List[Image.Image]:
+    sorted_by_area = sorted(((i, i.size[0] * i.size[1]) for i in images), key=lambda t: t[1])
+
+    base = next(sorted_by_area)[0]
+    equalized = [base]
+    resize = base.size
+
+    for area_tuple in sorted_by_area:
+        image = area_tuple[0]
+
+        if image.size == resize:
+            equalized.append(image)
+
+        else:
+            image.resize(resize)
+            equalized.append(image)
+
+    return equalized
+
+
 @executor_function
 def shuffle_image(image: Image.Image, *, degree=1000) -> Image.Image:
     """
@@ -334,4 +375,6 @@ def difference_image(image1: Image.Image, image2: Image.Image) -> Image.Image:
         else:
             images.append(image.convert('RGB'))
 
-    return ImageChops.difference(*images)
+    equalized = equalize_images(*images)
+
+    return ImageChops.difference(*equalized)
