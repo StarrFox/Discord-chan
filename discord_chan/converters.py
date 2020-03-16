@@ -147,10 +147,10 @@ class ImageUrlConverter(commands.Converter):
                 return str(member.avatar_url_as(static_format='png'))
 
             else:
-                return str(member.avatar_url_as(format(self.force_format)))
+                return str(member.avatar_url_as(format=self.force_format))
 
         try:
-            emoji = await commands.EmojiConverter().convert(ctx, argument)
+            emoji = await commands.PartialEmojiConverter().convert(ctx, argument)
 
         except commands.BadArgument:
             emoji = None
