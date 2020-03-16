@@ -35,7 +35,7 @@ class Images(commands.Cog, name='images'):
                         height: BetweenConverter(1, 10),
                         image: ImageConverter = ImageDefault):
         """
-        Makes some emojis from an image
+        Make some emojis from an image,
         Width and height must be between 1 and 10
         """
         image: Image

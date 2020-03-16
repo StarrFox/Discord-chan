@@ -40,7 +40,7 @@ class Owner(commands.Cog, name='owner'):
 
     @commands.command(aliases=['off', 'restart'])
     async def shutdown(self, ctx: SubContext):
-        await ctx.confirm('Logging out.')
+        await ctx.confirm('Logging out....')
         await self.bot.logout()
 
     @commands.command()
@@ -80,12 +80,14 @@ class Owner(commands.Cog, name='owner'):
         """
         await ctx.send_help('channel_link')
 
-    # noinspection PyTypeChecker
     @channel_link.command(name='add')
     async def channel_link_add(self,
                                ctx: SubContext,
-                               send_from: CrossGuildTextChannelConverter,  # Type checking woes
+                               send_from: CrossGuildTextChannelConverter,
                                send_to: CrossGuildTextChannelConverter):
+        send_from: discord.TextChannel
+        send_to: discord.TextChannel
+
         self.bot.channel_links[send_from].add(send_to)
 
         async with db.get_database() as connection:
@@ -97,12 +99,14 @@ class Owner(commands.Cog, name='owner'):
 
         await ctx.confirm('Channels linked.')
 
-    # noinspection PyTypeChecker
     @channel_link.command(name='remove', aliases=['rem'])
     async def channel_link_remove(self,
                                   ctx: SubContext,
                                   send_from: CrossGuildTextChannelConverter,
                                   send_to: CrossGuildTextChannelConverter):
+        send_from: discord.TextChannel
+        send_to: discord.TextChannel
+
         self.bot.channel_links[send_from].discard(send_to)
 
         async with db.get_database() as connection:
