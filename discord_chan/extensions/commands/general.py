@@ -22,6 +22,8 @@ import discord
 import humanize
 from uwuify import uwu_text
 from discord.ext import commands
+from discord.ext.commands.default import Author, Call
+from enchant.checker import SpellChecker
 
 from discord_chan import (PrologPaginator, ImageFormatConverter, PartitionPaginator,
                           BetweenConverter, DCMenuPages, NormalPageSource, checks,
@@ -86,11 +88,23 @@ class General(commands.Cog, name='general'):
         """
         await ctx.send(uwu_text(message))
 
-    @commands.command()
-    async def clean(self, ctx: SubContext, ammount: BetweenConverter(1, 100) = 10):
+    @commands.command(aliases=['spell'])
+    async def spellcheck(self, ctx: commands.Context, *, text: str):
         """
-        Delete's the bot's last <ammount> message(s)
-        ammount must be between 1 and 100, defaults to 10
+        Spellcheck text
+        """
+        checker = SpellChecker('en_US', text)
+
+        for error in checker:
+            error.replace(str(error.suggest()))
+
+        await ctx.send(checker.get_text())
+
+    @commands.command()
+    async def clean(self, ctx: SubContext, amount: BetweenConverter(1, 100) = 10):
+        """
+        Delete's the bot's last <amount> message(s)
+        amount must be between 1 and 100, defaults to 10
         """
 
         def check(message):
@@ -98,29 +112,26 @@ class General(commands.Cog, name='general'):
 
         can_mass_delete = ctx.channel.permissions_for(ctx.me).manage_messages
 
-        await ctx.channel.purge(limit=ammount, check=check, bulk=can_mass_delete)
+        await ctx.channel.purge(limit=amount, check=check, bulk=can_mass_delete)
         await ctx.confirm('Messages cleaned.')
 
     @commands.command(aliases=["avy", "pfp"])
     async def avatar(self,
                      ctx: commands.Context,
-                     member: Optional[discord.Member] = None,
+                     member: Optional[discord.Member] = Author,
                      format: Optional[ImageFormatConverter] = 'png'):
         """
         Get a member's avatar
         """
-        member = member or ctx.author
         await ctx.send(
             str(member.avatar_url_as(format=format))
         )
 
     @commands.command(aliases=['mi', 'userinfo', 'ui'])
-    async def memberinfo(self, ctx: commands.Context, member: discord.Member = None):
+    async def memberinfo(self, ctx: commands.Context, member: discord.Member = Author):
         """
         Get info on a guild member
         """
-        member = member or ctx.author
-
         data = {
             'id': member.id,
             'top role': member.top_role.name,
@@ -200,7 +211,7 @@ class General(commands.Cog, name='general'):
         await menu.start(ctx)
 
     @raw.command(aliases=['msg'])
-    async def message(self, ctx: commands.Context, message: discord.Message):
+    async def message(self, ctx: commands.Context, message: discord.Message = Call(lambda c, p: c.message)):
         """
         Raw message object,
         can provide channel with channel_id-message-id
@@ -210,7 +221,7 @@ class General(commands.Cog, name='general'):
         await self.send_raw(ctx, data)
 
     @raw.command()
-    async def channel(self, ctx: commands.Context, channel: discord.TextChannel):
+    async def channel(self, ctx: commands.Context, channel: discord.TextChannel = Call(lambda c, p: c.channel)):
         """
         Raw channel object
         """
@@ -218,7 +229,7 @@ class General(commands.Cog, name='general'):
         await self.send_raw(ctx, data)
 
     @raw.command()
-    async def member(self, ctx: commands.Context, member: discord.Member):
+    async def member(self, ctx: commands.Context, member: discord.Member = Call(lambda c, p: c.author)):
         """
         Raw member object
         """
@@ -226,7 +237,7 @@ class General(commands.Cog, name='general'):
         await self.send_raw(ctx, data)
 
     @raw.command()
-    async def user(self, ctx: commands.Context, userid: int):
+    async def user(self, ctx: commands.Context, userid: int = Call(lambda c, p: c.author.id)):
         """
         Raw user object
         """

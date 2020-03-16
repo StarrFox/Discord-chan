@@ -19,6 +19,10 @@ from calendar import day_name, day_abbr
 
 import discord
 from discord.ext import commands
+from PIL.Image import Image
+
+from . import utils
+from .image import url_to_image, FileTooLarge, InvalidImageType
 
 DAYS = map(str.lower, list(day_name) + list(day_abbr))
 
@@ -86,7 +90,7 @@ class CrossGuildTextChannelConverter(commands.TextChannelConverter):
     Makes the DM behavior the default
     """
 
-    async def convert(self, ctx, argument):
+    async def convert(self, ctx: commands.Context, argument: str) -> discord.TextChannel:
         bot = ctx.bot
 
         match = self._get_id_match(argument) or re.match(r'<#([0-9]+)>$', argument)
@@ -117,4 +121,90 @@ class BotConverter(commands.Converter):
         if member.bot:
             return member
 
-        raise commands.BadArgument('That is not a bot.'.format(argument))
+        raise commands.BadArgument('That is not a bot.')
+
+
+class ImageUrlConverter(commands.Converter):
+    """
+    Attempts to convert an argument to an image url in the following order
+    1. Member -> str(.avatar_url_as(static_format=png))
+    2. Emoji -> str(.url)
+    3. Url regex
+    """
+
+    def __init__(self, force_format: str = None):
+        self.force_format = force_format
+
+    async def convert(self, ctx: commands.Context, argument: str) -> str:
+        try:
+            member = await commands.MemberConverter().convert(ctx, argument)
+
+        except commands.BadArgument:
+            member = None
+
+        if member:
+            if not self.force_format:
+                return str(member.avatar_url_as(static_format='png'))
+
+            else:
+                return str(member.avatar_url_as(format(self.force_format)))
+
+        try:
+            emoji = await commands.EmojiConverter().convert(ctx, argument)
+
+        except commands.BadArgument:
+            emoji = None
+
+        if emoji:
+            if not self.force_format:
+                return str(emoji.url)
+
+            else:
+                return f'https://cdn.discordapp.com/emojis/{emoji.id}.{self.force_format}'
+
+        url_regex = re.fullmatch(utils.link_regex, argument)
+
+        if url_regex:
+            return url_regex.string
+
+        raise commands.BadArgument('"{}" is not a member, custom emoji, or url.'.format(argument))
+
+
+class ImageUrlDefault(commands.CustomDefault, display='LastImage'):
+
+    async def default(self, ctx: commands.Context, param: str) -> str:
+        if ctx.message.attachments:
+            return ctx.message.attachments[0].url
+
+        async for message in await ctx.history():
+            if message.attachments:
+                return message.attachments[0].url
+
+        raise commands.MissingRequiredArgument(param)
+
+
+class ImageConverter(ImageUrlConverter):
+
+    async def convert(self, ctx: commands.Context, argument: str) -> Image:
+        url = await super().convert(ctx, argument)
+
+        try:
+            return await url_to_image(url)
+
+        except FileTooLarge as e:
+            raise commands.BadArgument(str(e))
+
+        except InvalidImageType as e:
+            raise commands.BadArgument(str(e))
+
+
+class ImageDefault(ImageUrlDefault):
+
+    async def default(self, ctx: commands.Context, param: str) -> Image:
+        url = await super().default(ctx, param)
+
+        try:
+            return await url_to_image(url)
+
+        except (FileTooLarge, InvalidImageType):
+            raise commands.MissingRequiredArgument(param)
