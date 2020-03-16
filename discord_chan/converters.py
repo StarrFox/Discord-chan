@@ -176,7 +176,7 @@ class ImageUrlDefault(commands.CustomDefault, display='LastImage'):
         if ctx.message.attachments:
             return ctx.message.attachments[0].url
 
-        async for message in await ctx.history():
+        async for message in ctx.history():
             if message.attachments:
                 return message.attachments[0].url
 
