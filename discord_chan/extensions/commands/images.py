@@ -96,14 +96,13 @@ class Images(commands.Cog, name='images'):
         """
         Get a composite image of two image's differences
         """
-        # I could tell them which link caused but eh
         image1: Image
         image2: Image
 
         with ctx.typing():
             difference_image = await discord_chan.difference_image(image1, image2)
 
-            file = await discord_chan.image_to_file(difference_image, f'difference.png')
+            file = await discord_chan.image_to_file(difference_image, 'difference.png')
 
         await ctx.send(ctx.author.mention, file=file, escape_mentions=False, no_edit=True)
 
