@@ -28,6 +28,9 @@ bool_dict = {
     "0": False
 }
 
+# from: https://urlregex.com/
+link_regex = r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
+
 
 async def msg_resend(destination: discord.abc.Messageable, msg: discord.Message) -> discord.Message:
     """

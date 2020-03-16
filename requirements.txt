@@ -11,3 +11,6 @@ colorclass==2.2.0
 terminaltables==3.1.0
 aiomonitor==0.4.5
 discord-flags
+pyenchant
+git+https://github.com/Rapptz/discord.py@refs/pull/1849/merge#egg=discord.py
+git+https://github.com/Rapptz/discord-ext-menus

@@ -49,6 +49,11 @@ setup(
         'jikanpy',
         'aiosqlite',
         'discord-flags',
-        'discord-ext-menus'  # Todo: remove when released
+        'uwuify>=0.0.2',
+        'pyenchant'
+    ],
+    dependency_links=[
+        'git+https://github.com/Rapptz/discord.py@refs/pull/1849/merge#egg=discord.py',
+        'git+https://github.com/Rapptz/discord-ext-menus'  # Todo: remove when released, remember requirements.txt
     ]
 )
