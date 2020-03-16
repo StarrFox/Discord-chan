@@ -332,8 +332,7 @@ def equalize_images(*images) -> List[Image.Image]:
             equalized.append(image)
 
         else:
-            image.resize(resize)
-            equalized.append(image)
+            equalized.append(image.resize(resize))
 
     return equalized
 
