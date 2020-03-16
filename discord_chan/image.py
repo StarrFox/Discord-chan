@@ -97,7 +97,9 @@ async def get_bytes(link: str, *, max_length: int = 100) -> TypedBytes:
         response.raise_for_status()
 
         if response.content_length > max_length:
-            raise FileTooLarge(f'{(response.content_length / 1000) / 1000}mb is over max size of {max_length}mb.')
+            raise FileTooLarge(
+                f'{(response.content_length / 1000) / 1000}mb is over max size of {(max_length / 1000 / 1000)}mb.'
+            )
 
         return TypedBytes(
             file_bytes=await response.read(),
@@ -112,7 +114,7 @@ async def url_to_image(link: str) -> Image.Image:
     :return: Image representing the image
     :raises InvalidImage, FileTooLarge: PIL could not open the file
     """
-    image_bytes, content_type = await get_bytes(link, max_length=20)
+    image_bytes, content_type = await get_bytes(link, max_length=5)
 
     # Todo: get the exact formats the running PIL supports
     # Check before to try and save some memory
@@ -371,6 +373,7 @@ def difference_image(image1: Image.Image, image2: Image.Image) -> Image.Image:
     for image in (image1, image2):
         if image.mode == 'RGB':
             images.append(image)
+
         else:
             images.append(image.convert('RGB'))
 
