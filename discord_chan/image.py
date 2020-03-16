@@ -321,11 +321,11 @@ def wallify_gif_image(image: Image.Image, width: int, height: int, *, name: str 
 def equalize_images(*images) -> List[Image.Image]:
     sorted_by_area = sorted(((i, i.size[0] * i.size[1]) for i in images), key=lambda t: t[1])
 
-    base = next(sorted_by_area)[0]
+    base = sorted_by_area[0][0]
     equalized = [base]
     resize = base.size
 
-    for area_tuple in sorted_by_area:
+    for area_tuple in sorted_by_area[1:]:
         image = area_tuple[0]
 
         if image.size == resize:
