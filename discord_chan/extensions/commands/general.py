@@ -39,7 +39,7 @@ class General(commands.Cog, name='general'):
     @commands.command()
     async def charinfo(self, ctx: commands.Context, *, characters):
         """
-        Convert characters to name syntax, or unicode if name isnt found.
+        Convert characters to name syntax, or unicode if name isn't found.
         """
         paginator = PartitionPaginator(prefix=None,
                                        suffix=None,
@@ -63,16 +63,16 @@ class General(commands.Cog, name='general'):
 
         await menu.start(ctx)
 
-    # Todo: finish this
-    @checks.cog_loaded('events')
-    @commands.group(aliases=['pf'], invoke_without_command=True)
-    async def prefixfinder(self, ctx: commands.Context, bot: discord.Member):
-        await ctx.send('wip tm')
-
-    @checks.cog_loaded('events')
-    @prefixfinder.command(name='list')
-    async def prefixfinder_list(self, ctx: commands.Context):
-        return
+    # # Todo: finish this
+    # @checks.cog_loaded('events')
+    # @commands.group(aliases=['pf'], invoke_without_command=True)
+    # async def prefixfinder(self, ctx: commands.Context, bot: discord.Member):
+    #     await ctx.send('wip tm')
+    #
+    # @checks.cog_loaded('events')
+    # @prefixfinder.command(name='list')
+    # async def prefixfinder_list(self, ctx: commands.Context):
+    #     return
 
     @commands.command()
     async def say(self, ctx: commands.Context, *, message: str):
@@ -104,7 +104,7 @@ class General(commands.Cog, name='general'):
     async def clean(self, ctx: SubContext, amount: BetweenConverter(1, 100) = 10):
         """
         Delete's the bot's last <amount> message(s)
-        amount must be between 1 and 100, defaults to 10
+        amount must be between 1 and 100, defaulting to 10
         """
 
         def check(message):

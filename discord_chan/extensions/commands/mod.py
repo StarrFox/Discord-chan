@@ -19,7 +19,7 @@ import typing
 import discord
 from discord.ext import commands
 
-from discord_chan import db, PartitionPaginator, DCMenuPages, NormalPageSource, SubContext
+from discord_chan import db, DCMenuPages, SubContext, CodeblockPageSource
 
 
 def is_above(invoker: discord.Member, user: discord.Member):
@@ -35,26 +35,23 @@ class Mod(commands.Cog, name='mod'):
 
     # Todo: test
     @commands.group(invoke_without_command=True, aliases=["prefixes"])
-    async def prefix(self, ctx: SubContext):
+    async def prefix(self, ctx: commands.Context):
         """
-        Base prefix command
+        Base prefix command,
         Lists prefixes
         """
-        prefixes = '\n'.join(
-            [f"{idx}. `{prefix}`" for idx, prefix in enumerate(self.bot.prefixes[ctx.guild.id], 1)]
-        )
+        prefixes = [f"{idx}. `{prefix}`" for idx, prefix in enumerate(self.bot.prefixes[ctx.guild.id], 1)]
 
-        paginator = PartitionPaginator(max_size=100)
-
-        paginator.add_line(prefixes)
-
-        source = NormalPageSource(paginator.pages)
+        source = CodeblockPageSource(prefixes, per_page=5)
 
         menu = DCMenuPages(source)
 
         await menu.start(ctx)
 
-    @commands.has_permissions(administrator=True)
+    @commands.check_any(
+        commands.has_permissions(administrator=True),
+        commands.has_permissions(manage_messages=True)
+    )
     @prefix.command()
     async def add(self, ctx: SubContext, prefix: str):
         """
@@ -77,7 +74,10 @@ class Mod(commands.Cog, name='mod'):
 
         await ctx.confirm()
 
-    @commands.has_permissions(administrator=True)
+    @commands.check_any(
+        commands.has_permissions(administrator=True),
+        commands.has_permissions(manage_messages=True)
+    )
     @prefix.command(aliases=['rem'])
     async def remove(self, ctx: SubContext, prefix: str):
         """
@@ -111,7 +111,7 @@ class Mod(commands.Cog, name='mod'):
                     user: typing.Optional[discord.Member] = None,
                     *, text: str = None):
         """
-        Purges messages from certain user or certain text
+        Purges messages from certain user and/or (with) certain text
         """
         await ctx.message.delete()
 
@@ -137,10 +137,13 @@ class Mod(commands.Cog, name='mod'):
     @commands.command()
     async def hackban(self, ctx: SubContext, member_id: int, *, reason=None):
         """
-        Bans using an id
+        Bans using an id, must not be a current member
         """
+        if ctx.guild.get_member(member_id):
+            return await ctx.send('Member is currently in this guild.')
+
         await ctx.guild.ban(discord.Object(id=member_id), reason=reason)
-        await ctx.confirm()
+        await ctx.confirm('Id hackbanned.')
 
 
 def setup(bot):

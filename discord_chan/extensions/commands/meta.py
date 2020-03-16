@@ -17,8 +17,10 @@
 import discord
 import humanize
 from discord.ext import commands
+from discord.ext.commands.default import Call
 
-from discord_chan import __version__ as dc_version, DCMenuPages, PrologPaginator, NormalPageSource, checks
+from discord_chan import (__version__ as dc_version, DCMenuPages, PrologPaginator,
+                          NormalPageSource, checks, BotConverter)
 
 
 class Meta(commands.Cog, name='meta'):
@@ -30,20 +32,17 @@ class Meta(commands.Cog, name='meta'):
     @commands.command()
     async def ping(self, ctx: commands.Context):
         """
-        Send's the bot's websocket latency
+        Sends the bot's websocket latency
         """
         await ctx.send(f"\N{TABLE TENNIS PADDLE AND BALL} {round(ctx.bot.latency * 1000)}ms")
 
     @commands.command()
-    async def invite(self, ctx: commands.Context, bot: discord.Member = None):
+    async def invite(self, ctx: commands.Context, bot: BotConverter = Call(lambda c, p: c.me)):
         """
         Get the invite link for a bot,
         defaults to myself
         """
-        bot = bot or ctx.me
-
-        if not bot.bot:
-            return await ctx.send('That member is not a bot.')
+        bot: discord.Member
 
         url = discord.utils.oauth_url(bot.id)
         await ctx.send(url)
@@ -58,7 +57,7 @@ class Meta(commands.Cog, name='meta'):
     @commands.command()
     async def source(self, ctx: commands.Context):
         """
-        Links to the bot source
+        Links to the bot's source url
         """
         await ctx.send(self.bot.config['general']['source_url'])
 
@@ -128,4 +127,9 @@ class Meta(commands.Cog, name='meta'):
 
 
 def setup(bot):
-    bot.add_cog(Meta(bot))
+    cog = Meta(bot)
+    bot.add_cog(cog)
+    bot.help_command.cog = cog
+
+def teardown(bot):
+    bot.help_command.cog = None
