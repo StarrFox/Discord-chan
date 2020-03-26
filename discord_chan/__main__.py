@@ -24,6 +24,13 @@ from aiomonitor import start_monitor, cli
 
 import discord_chan
 
+try:
+    import uvloop
+    uvloop.install()
+except ImportError:
+    uvloop = None
+
+
 default_config = """
 [general]
 prefix=dc/
@@ -100,6 +107,8 @@ def run(args: argparse.Namespace):
 
     dc_log = logging.getLogger('discord_chan')
     dpy_log = logging.getLogger('discord')
+
+    dpy_log.setLevel(logging.DEBUG if args.debug else logging.WARNING)
 
     if args.logfile:
         handler = logging.FileHandler(args.logfile)
