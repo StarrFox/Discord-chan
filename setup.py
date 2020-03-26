@@ -52,6 +52,7 @@ setup(
         'aiosqlite',
         'discord-flags',
         'uwuify>=0.0.2',
-        'pyenchant'
+        'pyenchant',
+        'aiofiles'
     ]
 )

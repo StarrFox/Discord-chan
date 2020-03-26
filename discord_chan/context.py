@@ -32,6 +32,9 @@ class SubContext(Context):
         escape_mentions=False
         no_edit can be passed to not edit past invokes.
         """
+        if content:
+            content = str(content)
+
         if kwargs.pop('escape_mentions', True) and content:
             content = utils.escape_mentions(content)
 
@@ -94,8 +97,7 @@ class SubContext(Context):
             message = message or '\N{WHITE HEAVY CHECK MARK}'
             return await self.send(message)
 
-    # Todo: test
-    async def prompt(self, message: str = ' ') -> bool:
+    async def prompt(self, message: str = None) -> bool:
         """
         Prompt for <message> and return True or False
         """

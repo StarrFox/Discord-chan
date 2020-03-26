@@ -15,14 +15,16 @@
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
 import asyncio
+import sys
 
+import aioconsole
 from aiomonitor import Monitor
-from aiomonitor.utils import alt_names
+from aiomonitor.utils import alt_names, close_server, console_proxy
 from terminaltables import AsciiTable
 
 from . import db
 
-version_message = f"Discord Chan Monitor v1.1\n"
+version_message = f"Discord Chan Monitor, ? or help for command list.\n"
 
 BOOL_DICT = {
     'true': True,
@@ -36,10 +38,76 @@ def convert_bool(arg):
     return BOOL_DICT[arg.lower()]
 
 
+def init_console_server(host: str, port: int, _locals, loop):
+    def _factory(streams=None) -> aioconsole.AsynchronousConsole:
+        return NoBannerConsole(locals=_locals, streams=streams, loop=loop)
+
+    coro = aioconsole.start_interactive_server(
+        host=host, port=port, factory=_factory, loop=loop)
+    console_future = asyncio.run_coroutine_threadsafe(coro, loop=loop)
+    return console_future
+
+
+class NoBannerConsole(aioconsole.AsynchronousConsole):
+
+    @asyncio.coroutine
+    def _interact(self, banner=None):
+        # Get ps1 and ps2
+        try:
+            sys.ps1
+        except AttributeError:
+            sys.ps1 = ">>> "
+        try:
+            sys.ps2
+        except AttributeError:
+            sys.ps2 = "... "
+        # Run loop
+        more = 0
+        while 1:
+            try:
+                if more:
+                    prompt = sys.ps2
+                else:
+                    prompt = sys.ps1
+                try:
+                    line = yield from self.raw_input(prompt)
+                except EOFError:
+                    self.write("\n")
+                    yield from self.flush()
+                    break
+                else:
+                    more = yield from self.push(line)
+            except asyncio.CancelledError:
+                self.write("\nKeyboardInterrupt\n")
+                yield from self.flush()
+                self.resetbuffer()
+                more = 0
+
+
 # noinspection PyUnresolvedReferences,PyUnresolvedReferences
 class DiscordChanMonitor(Monitor):
     intro = version_message + "{tasknum} task{s} running. Use help (?) for commands.\n"
-    prompt = "Discord Chan >>>"
+    prompt = "DC > "
+
+    def do_console(self) -> None:
+        """Switch to async Python REPL"""
+        if not self._console_enabled:
+            self._sout.write('Python console disabled for this sessiong\n')
+            self._sout.flush()
+            return
+
+        h, p = self._host, self._console_port
+        # log.info('Starting console at %s:%d', h, p)
+        fut = init_console_server(
+            self._host, self._console_port, self._locals, self._loop)
+        server = fut.result(timeout=3)
+        try:
+            console_proxy(
+                self._sin, self._sout, self._host, self._console_port)
+        finally:
+            coro = close_server(server)
+            close_fut = asyncio.run_coroutine_threadsafe(coro, loop=self._loop)
+            close_fut.result(timeout=15)
 
     def do_status(self):
         """Status overview of the bot."""
@@ -51,20 +119,25 @@ class DiscordChanMonitor(Monitor):
         table_data = [
             ['Stat', 'Value'],
             ['Extensions', len(bot.extensions)],
-            ['Commands', len(bot.commands)],
-            ['Latency', f'{bot.latency * 1000}ms'],
+            ['Commands', len(set(bot.walk_commands()))],
+            ['Past Invokes', len(bot.past_invokes)],
+            ['Latency', f'{round(bot.latency * 1000)}ms'],
             ['Discord Chan', f'v{dc_version}'],
             ['Discord.py', f'v{dpy_version}']
         ]
 
-        table = AsciiTable(table_data, 'AutoSharded')
+        table = AsciiTable(table_data)
         self._sout.write(table.table + '\n')
+
+        self._sout.flush()
 
     def do_extensions(self):
         """List current extensions."""
         bot = self._locals['bot']
 
         self._sout.write('\n'.join(bot.extensions) + '\n')
+
+        self._sout.flush()
 
     def do_enable(self, mode: convert_bool, command: str):
         """Enable or disable a command."""
@@ -77,6 +150,8 @@ class DiscordChanMonitor(Monitor):
 
         attempt.enabled = mode
         self._sout.write(f'Command "{command}".enabled set to {mode}.\n')
+
+        self._sout.flush()
 
     @alt_names('cmds')
     def do_commands(self):
@@ -98,9 +173,10 @@ class DiscordChanMonitor(Monitor):
         table = AsciiTable(table_data)
         self._sout.write(table.table + '\n')
 
+        self._sout.flush()
+
     def do_db(self, *quarry: str):
         """Execute a db quarry."""
-
         async def execute_quarry():
             async with db.get_database() as connection:
                 cursor = await connection.execute(' '.join(quarry))
@@ -128,3 +204,12 @@ class DiscordChanMonitor(Monitor):
                 self._sout.write(table.table + '\n')
             else:
                 self._sout.write('No result.\n')
+        finally:
+            self._sout.flush()
+
+    @alt_names('off')
+    def do_shutdown(self):
+        """Shuts down the bot and this monitor"""
+        bot = self._locals['bot']
+
+        bot.logout()
