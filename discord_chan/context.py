@@ -97,9 +97,9 @@ class SubContext(Context):
             message = message or '\N{WHITE HEAVY CHECK MARK}'
             return await self.send(message)
 
-    async def prompt(self, message: str = None) -> bool:
+    async def prompt(self, message: str = None, *, owner_id: int = None, **send_kwargs) -> bool:
         """
         Prompt for <message> and return True or False
         """
-        menu = ConfirmationMenu(message)
+        menu = ConfirmationMenu(message, owner_id=owner_id, send_kwargs=send_kwargs)
         return await menu.get_response(self)

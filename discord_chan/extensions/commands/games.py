@@ -36,6 +36,10 @@ class Games(commands.Cog, name='games'):
         if member == ctx.author or member.bot:
             return await ctx.send("You cannot play against yourself or a bot.")
 
+        # Command already requires add_reactions so don't need to check for it
+        if not await ctx.prompt(f'{member.mention} agree to play?', owner_id=member.id, escape_mentions=False):
+            return await ctx.send('Game canceled.')
+
         player1 = choice([ctx.author, member])
         player2 = member if player1 == ctx.author else ctx.author
 
