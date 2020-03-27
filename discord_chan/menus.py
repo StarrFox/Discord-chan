@@ -21,19 +21,38 @@ from typing import Optional, Sequence
 import discord
 from discord.ext import commands, menus
 
-
 EmbedFieldProxy = namedtuple('EmbedFieldProxy', 'name value')
 
 
 class ConfirmationMenu(menus.Menu):
 
-    def __init__(self, to_confirm: str = None, **kwargs):
+    def __init__(self, to_confirm: str = None, *, owner_id: int = None, send_kwargs=None, **kwargs):
         super().__init__(**kwargs)
+
+        if send_kwargs is None:
+            send_kwargs = {}
+
+        self.owner_id = owner_id
+        self.send_kwargs = send_kwargs
         self.to_confirm = to_confirm
         self.response = None
 
     async def send_initial_message(self, ctx: commands.Context, channel: discord.TextChannel):
-        return await ctx.send(self.to_confirm or '\u200b')
+        return await ctx.send(self.to_confirm or '\u200b', **self.send_kwargs)
+
+    def reaction_check(self, payload):
+        if payload.message_id != self.message.id:
+            return False
+
+        if self.owner_id is not None:
+            if not payload.user_id == self.owner_id:
+                return False
+
+        else:
+            if payload.user_id not in (self.bot.owner_id, self._author_id):
+                return False
+
+        return payload.emoji in self.buttons
 
     @menus.button('\N{WHITE HEAVY CHECK MARK}')
     async def do_yes(self, _):
@@ -48,6 +67,7 @@ class ConfirmationMenu(menus.Menu):
     async def get_response(self, ctx: commands.Context):
         await self.start(ctx, wait=True)
         return self.response
+
 
 class DCMenuPages(menus.MenuPages):
 
