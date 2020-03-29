@@ -65,8 +65,8 @@ def snipe_parser(func: flags.FlagCommand):
     flags.add_flag('--guild', '--server', action='store_true')(func)
     flags.add_flag('--before', type=int)(func)
     flags.add_flag('--after', type=int)(func)
-    flags.add_flag('--index', default=0, type=int)(func)
     flags.add_flag('--list', action='store_true')(func)
-    flags.add_flag('--mode', choices=['deleted', 'purged', 'edited'])(func)
+    flags.add_flag('--mode', choices=('deleted', 'purged', 'edited'))(func)
     flags.add_flag('--contains', nargs='+')(func)
+    flags.add_flag('index', nargs='?', default=0, type=int)(func)
     return func

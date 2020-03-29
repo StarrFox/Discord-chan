@@ -36,17 +36,20 @@ class Snipe(commands.Cog, name='snipe'):
     @commands.command(cls=flags.FlagCommand, name='snipe')
     async def snipe_command(self, ctx: commands.Context, **options: dict):
         """
-        Normal snipe but with command line arg parsing
+        Snipe delete/edited messages from your server.
 
+        Optional:
         --authors: List of user ids that authored the snipe
         --channel: Channel id to snipe from
         --server: Snipe from the entrie server instead of just a channel
         --before: Message id that snipes must be before
         --after: Message id that snipes must be after
-        --index: Index to show from returned snipes, defaults to 0
         --list: Show all snipes found instead of one
         --mode: Mode of the snipes (edited, deleted, purged)
         --contains: String that must be in the snipes
+
+        Positional:
+        index: Index to show from returned snipes, defaults to 0
 
         Nsfw (if not used from one) and channels you can't view are auto filtered out.
         """
@@ -104,8 +107,12 @@ class Snipe(commands.Cog, name='snipe'):
         res = []
 
         for snipe in snipes:
+            # (6000 - (1,024 * 5)) / 5 = 176 max size my titles can be
             # 1,024 is the field value limit
-            res.append(EmbedFieldProxy(str(snipe), shorten(snipe.content, 1_024, placeholder='...')))
+            res.append(EmbedFieldProxy(
+                shorten(str(snipe), 176, placeholder='...'),
+                shorten(snipe.content, 1_024, placeholder='...')
+            ))
 
         return res
 

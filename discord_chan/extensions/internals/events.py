@@ -64,27 +64,27 @@ class Events(commands.Cog, name='events'):
         if message.channel.id in [381979045090426881, 381965829857738772]:
             await utils.msg_resend(self.copycat, message)
 
-    @commands.Cog.listener('on_message')
-    async def on_bot_message(self, message: discord.Message):
-        """
-        Listens for prefixes
-        """
-        if not message.author.bot:
-            return
+    # @commands.Cog.listener('on_message')
+    # async def on_bot_message(self, message: discord.Message):
+    #     """
+    #     Listens for prefixes
+    #     """
+    #     if not message.author.bot:
+    #         return
+    #
+    #     def get_message_before(m):
+    #         return m.channel == message.channel and m.id < message.id
+    #
+    #     message_before = discord.utils.find(get_message_before, self.bot.cached_messages)
 
-        def get_message_before(m):
-            return m.channel == message.channel and m.id < message.id
-
-        message_before = discord.utils.find(get_message_before, self.bot.cached_messages)
-
-    def get_prefix(self, bot_message: discord.Message, message_before: discord.Message):
-        """
-        Returns the prefix used to invoke this command
-        :param bot_message:
-        :param message_before:
-        :return:
-        """
-        pass
+    # def get_prefix(self, bot_message: discord.Message, message_before: discord.Message):
+    #     """
+    #     Returns the prefix used to invoke this command
+    #     :param bot_message:
+    #     :param message_before:
+    #     :return:
+    #     """
+    #     pass
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: discord.Guild):
@@ -155,6 +155,7 @@ class Events(commands.Cog, name='events'):
                 if not send_from_channel:
                     logger.info(f'{send_from} is no longer accessable.')
                     continue
+
                 channels = set()
                 for channel_id in send_to:
                     channel = self.bot.get_channel(int(channel_id))
@@ -170,11 +171,12 @@ class Events(commands.Cog, name='events'):
         """
         Handles the actual "linking" of channels
         """
+        # Don't send messages with only files
         if not message.content and not message.embeds:
             return
 
         # send_from -> send_to
-        if message.channel in self.bot.channel_links and await self.bot.is_owner(message.author):
+        if message.channel in self.bot.channel_links and not message.author.bot:
             for channel in self.bot.channel_links[message.channel]:
                 await channel.send(content=message.content)
 
