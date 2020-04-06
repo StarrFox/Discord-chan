@@ -28,8 +28,6 @@ class SubContext(Context):
     async def send(self, content=None, **kwargs) -> Message:
         """
         The paginator should never be used there as a just in case
-        Also escapes_mentions, can be turned off by passing
-        escape_mentions=False
         no_edit can be passed to not edit past invokes.
         """
         if content:

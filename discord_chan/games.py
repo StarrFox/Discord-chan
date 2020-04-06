@@ -225,7 +225,6 @@ class MasterMindMenu(menus.Menu):
             return await self.ctx.send(
                 f'{self.ctx.author.mention}, Max entry reached.',
                 delete_after=5,
-                escape_mentions=False,
                 no_edit=True
             )
 
@@ -233,7 +232,6 @@ class MasterMindMenu(menus.Menu):
             return await self.ctx.send(
                 f'{self.ctx.author.mention}, No duplicate emojis.',
                 delete_after=5,
-                escape_mentions=False,
                 no_edit=True
             )
 
@@ -263,7 +261,6 @@ class MasterMindMenu(menus.Menu):
             return await self.ctx.send(
                 f'{self.ctx.author.mention}, Entry not full.',
                 delete_after=5,
-                escape_mentions=False,
                 no_edit=True
             )
 
@@ -288,7 +285,6 @@ class MasterMindMenu(menus.Menu):
 
             await self.ctx.send(
                 f'Sorry {self.ctx.author.mention}, out of tries. The code was\n{" ".join(self.code)}.',
-                escape_mentions=False,
                 no_edit=True
             )
 
