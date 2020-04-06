@@ -6,12 +6,12 @@ A general purpose discord bot made with [discord.py](https://github.com/Rapptz/d
 python3 -m venv .venv
 git clone https://github.com/StarrFox/discord-chan.git
 pip install .
-discord_chan install [--config path/to/config = config.ini] [--no-sql = True]
+discord_chan install [--config path/to/config = config.ini] [--interactive]
 ```
 
 ## Running
 ```shell script
-discord_chan [--config path/to/config = config.ini] [--debug = False]
+discord_chan run [--config path/to/config = config.ini] [--debug = False]
 ```
 
 ## Monitor

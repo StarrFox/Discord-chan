@@ -14,12 +14,13 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
-import argparse
 import asyncio
 import logging
 from configparser import ConfigParser
 from pathlib import Path
+from string import Template
 
+import click
 from aiomonitor import start_monitor, cli
 
 import discord_chan
@@ -58,6 +59,33 @@ JISHAKU_NO_UNDERSCORE=true
 JISHAKU_RETAIN=true
 """
 
+interactive_config = Template("""
+[general]
+prefix=$prefix
+support_url=
+source_url=https://github.com/StarrFox/Discord-chan
+vote_url=
+# true of false of if default extensions (discord_chan/extensions)
+# should be loaded
+load_extensions=$load_extensions
+
+[discord]
+# Discord Bot token
+token=$token
+
+[enviroment]
+# all options here will be loaded as enviroment variables
+# unless the disable option is true
+# note: all keys are uppered to deal with configParser
+disable=$disable
+
+# read more about these jishaku setting in the README
+JISHAKU_HIDE=true
+JISHAKU_NO_DM_TRACEBACK=true
+JISHAKU_NO_UNDERSCORE=true
+JISHAKU_RETAIN=true
+""")
+
 sql_init = """
 CREATE TABLE IF NOT EXISTS prefixes (
     guild_id INTEGER PRIMARY KEY,
@@ -89,38 +117,40 @@ CREATE TABLE IF NOT EXISTS ratings (
 """
 
 
-def run(args: argparse.Namespace):
+# Todo: add update subparser? git pull, see if config or sql is different?
+# Todo: add gui subparser? shows stats and has buttons to start/stop bot
+@click.group(help='General purpose Discord bot.')
+def main():
+    pass
+
+@main.command(help='Run the bot')
+@click.option('--config',
+              default='config.ini',
+              type=click.Path(exists=True),
+              show_default=True,
+              help='Path to config file.')
+@click.option('--debug', is_flag=True, help='Run in debug mode.')
+def run(config, debug):
+    # didn't feel like renaming
+    config_file = config
     config = ConfigParser(allow_no_value=True, strict=False)
-    config.read(args.config)
+    config.read(config_file)
 
     if not config['enviroment'].getboolean('disable'):
         load_environ(**dict([var for var in config['enviroment'].items() if var[0] != 'disable']))
 
     logging.basicConfig(
         format="[%(asctime)s] [%(levelname)s:%(name)s] %(message)s",
-        level=logging.DEBUG if args.debug else logging.INFO
+        level=logging.DEBUG if debug else logging.INFO
     )
 
-    if args.debug:
+    if debug:
         asyncio.get_event_loop().set_debug(True)
         logging.getLogger('asyncio').setLevel(logging.DEBUG)
 
-    dc_log = logging.getLogger('discord_chan')
     dpy_log = logging.getLogger('discord')
 
-    dpy_log.setLevel(logging.DEBUG if args.debug else logging.WARNING)
-
-    if args.logfile:
-        handler = logging.FileHandler(args.logfile)
-        formatter = logging.Formatter("[%(asctime)s] [%(levelname)s:%(name)s] %(message)s")
-        handler.setFormatter(formatter)
-        handler.setLevel(logging.DEBUG if args.debug else logging.INFO)
-
-        dc_log.addHandler(handler)
-        dpy_log.addHandler(handler)
-
-        dc_log.propagate = False
-        dpy_log.propagate = False
+    dpy_log.setLevel(logging.DEBUG if debug else logging.WARNING)
 
     bot = discord_chan.DiscordChan(config)
 
@@ -132,7 +162,6 @@ def run(args: argparse.Namespace):
                        monitor=discord_chan.DiscordChanMonitor,
                        locals={'bot': bot}):
         bot.run()
-
 
 def load_environ(**kwargs):
     """
@@ -147,50 +176,38 @@ def load_environ(**kwargs):
         environ[var.upper()] = value
 
 
-def add_run_args(parser: argparse.ArgumentParser):
-    parser.add_argument('-v',
-                        '--version',
-                        action='version',
-                        version=discord_chan.__version__
-                        )
+@main.command(help='\"Install\" the bot; general setup before running.')
+@click.option('--config',
+              default='config.ini',
+              type=click.Path(),
+              show_default=True,
+              help='Path to config file.'
+              )
+@click.option('--interactive', is_flag=True, help='Interactive config file setup.')
+def install(config, interactive):
+    config_file = Path(config)
 
-    parser.add_argument('-d',
-                        '--debug',
-                        action='store_true',
-                        help='Run in debug mode.'
-                        )
-
-    parser.add_argument('-c',
-                        '--config',
-                        action='store',
-                        default='config.ini',
-                        help='Path to config file, defaults to config.ini.'
-                        )
-
-    parser.add_argument('-lf',
-                        '--logfile',
-                        action='store',
-                        default=None,
-                        help='Path to logging file, defaults to stdout.'
-                        )
-
-    parser.set_defaults(func=run)
-
-
-def install(args: argparse.Namespace):
-    # Todo: add interactive setup? >>prefix? ____
-    config_file = Path(args.config)
     if config_file.exists():
-        if args.yes or input('Config file already exists, overwrite (y/n)? ') == 'y':
-            config_file.write_text(default_config.strip())
-            print('Config file overwriten.')
+        overwrite = click.confirm('Config file already exists, overwrite?')
+
     else:
+        overwrite = True
+
         try:
             config_file.touch()
-            config_file.write_text(default_config.strip())
-            print('Config file made.')
+
         except Exception as e:
-            print(str(e))
+            exit(str(e))
+
+    if overwrite:
+        if not interactive:
+            config_file.write_text(default_config.strip())
+
+        else:
+            res = interactive_install()
+            config_file.write_text(res)
+
+        click.echo('Config file made/overwriten.')
 
     async def init_db():
         async with discord_chan.db.get_database() as connection:
@@ -202,61 +219,34 @@ def install(args: argparse.Namespace):
 
     asyncio.run(init_db())
 
+def interactive_install() -> str:
+    click.echo('Starting interactive config...')
+    click.echo('--general section--')
 
-def add_install_args(parser: argparse.ArgumentParser):
-    parser.add_argument('-c',
-                        '--config',
-                        action='store',
-                        default='config.ini',
-                        help='Path to config file, defaults to config.ini.'
-                        )
+    prefix = click.prompt('Command prefix?')
+    load_extensions = click.prompt('Load base extensions?', type=bool)
 
-    parser.add_argument('-y',
-                        '--yes',
-                        action='store_true',
-                        help='Answer yes to promt messages.')
+    click.echo('--discord section--')
 
-    parser.set_defaults(func=install)
+    token = click.prompt('Discord bot token?')
 
+    click.echo('enviroment section:')
 
-# Wraps aiomonitor.cli into our parser
-def monitor(args: argparse.Namespace):
-    cli.monitor_client(args.monitor_host, args.monitor_port)
+    disable = click.prompt('Disable enviroment var config?', type=bool)
 
-
-def add_monitor_args(parser: argparse.ArgumentParser):
-    parser.add_argument('-H', '--host', dest='monitor_host',
-                        default='127.0.0.1', type=str,
-                        help='monitor host ip')
-
-    parser.add_argument('-p', '--port', dest='monitor_port',
-                        default=50101, type=int,
-                        help='monitor port number')
-
-    parser.set_defaults(func=monitor)
+    return interactive_config.substitute(
+        prefix=prefix,
+        load_extensions=load_extensions,
+        token=token,
+        disable=disable
+    )
 
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(prog='discord_chan', description='General purpose Discord bot.')
-
-    add_run_args(parser)
-
-    subcommands = parser.add_subparsers()
-    install_command = subcommands.add_parser('install', help='\"Install\" the bot; make config file and setup DB.')
-    monitor_command = subcommands.add_parser('monitor', help='Start the DiscordChanMonitor interface.')
-    # Todo: add update subparser? git pull, see if config or sql is different?
-    # Todo: add gui subparser? shows stats and has buttons to start/stop bot
-
-    add_install_args(install_command)
-    add_monitor_args(monitor_command)
-
-    return parser.parse_args()
-
-
-def main():
-    args = parse_args()
-
-    args.func(args)
+@main.command(help='Start the DiscordChanMonitor interface.')
+@click.option('-H', '--host', default='127.0.0.1', type=str, help='Monitor host ip.')
+@click.option('-P', '--port', default=50101, type=int, help='Monitor port number.')
+def monitor(host, port):
+    cli.monitor_client(host, port)
 
 
 if __name__ == '__main__':

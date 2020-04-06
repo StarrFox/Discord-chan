@@ -53,6 +53,6 @@ setup(
         'discord-flags',
         'uwuify>=0.0.2',
         'pyenchant',
-        'aiofiles'
+        'click'
     ]
 )
