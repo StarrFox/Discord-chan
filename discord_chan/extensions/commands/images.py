@@ -23,7 +23,6 @@ from discord_chan import BetweenConverter, SubContext, ImageConverter, ImageDefa
 
 
 # Todo: add more image commands
-# Todo: add link converter than validates the url and accept attachments or prior images (channel history)
 class Images(commands.Cog, name='images'):
 
     @commands.command()
@@ -61,7 +60,6 @@ class Images(commands.Cog, name='images'):
         await ctx.send(
             ctx.author.mention,
             file=discord.File(archive, filename=f"{name}.tar"),
-            escape_mentions=False,
             no_edit=True
         )
 
@@ -104,7 +102,7 @@ class Images(commands.Cog, name='images'):
 
             file = await discord_chan.image_to_file(difference_image, 'difference.png')
 
-        await ctx.send(ctx.author.mention, file=file, escape_mentions=False, no_edit=True)
+        await ctx.send(ctx.author.mention, file=file, no_edit=True)
 
     # @commands.command(aliases=['sim'])
     # @commands.cooldown(1, 30, commands.cooldowns.BucketType.user)

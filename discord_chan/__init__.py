@@ -30,7 +30,7 @@ from .snipe import *
 from .context import SubContext
 
 
-__version__ = '1.4.0'
+__version__ = '1.4.1'
 
 logging.getLogger(__name__).addHandler(NullHandler())
 ROOT = Path(__file__).parent

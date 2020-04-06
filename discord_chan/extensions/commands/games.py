@@ -37,7 +37,7 @@ class Games(commands.Cog, name='games'):
             return await ctx.send("You cannot play against yourself or a bot.")
 
         # Command already requires add_reactions so don't need to check for it
-        if not await ctx.prompt(f'{member.mention} agree to play?', owner_id=member.id, escape_mentions=False):
+        if not await ctx.prompt(f'{member.mention} agree to play?', owner_id=member.id):
             return await ctx.send('Game canceled.')
 
         player1 = choice([ctx.author, member])
@@ -46,7 +46,7 @@ class Games(commands.Cog, name='games'):
         game = Connect4(player1, player2)
         winner = await game.run(ctx)
         if winner:
-            await ctx.send(f"{winner.mention} has won.", escape_mentions=False, no_edit=True)
+            await ctx.send(f"{winner.mention} has won.", no_edit=True)
         else:
             await ctx.send('No one made a move.', no_edit=True)
 
@@ -61,13 +61,13 @@ class Games(commands.Cog, name='games'):
         value = await game.run(ctx)
 
         if value:
-            await ctx.send(f'{ctx.author.mention}, You won.', escape_mentions=False, no_edit=True)
+            await ctx.send(f'{ctx.author.mention}, You won.', no_edit=True)
 
         elif value == 0:
             return
 
         else:
-            await ctx.send(f'{ctx.author.mention}, MasterMind timed out.', escape_mentions=False, no_edit=True)
+            await ctx.send(f'{ctx.author.mention}, MasterMind timed out.', no_edit=True)
 
 
 def setup(bot):
