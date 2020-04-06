@@ -37,7 +37,6 @@ class DiscordChan(commands.AutoShardedBot):
 
     def __init__(self, config: ConfigParser, *, context: commands.Context = SubContext, **kwargs):
         """
-        Todo: add description on config and context
         :param config: Config parser object
         :param context: Context factory to use
         """
@@ -46,6 +45,7 @@ class DiscordChan(commands.AutoShardedBot):
             case_insensitive=kwargs.pop('case_insensitive', True),
             max_messages=kwargs.pop('max_messages', 10_000),
             help_command=kwargs.pop('help_command', Minimal()),
+            allowed_mentions=kwargs.pop('allowed_mentions', discord.AllowedMentions(everyone=False, roles=False)),
             **kwargs
         )
         self.config = config
@@ -103,9 +103,6 @@ class DiscordChan(commands.AutoShardedBot):
 
     # # Todo: remove before going into prod
     # async def start(self, *args, **kwargs):
-    #     # Todo: uncomment to run
-    #     # await super().start(*args, **kwargs)
-    #
     #     # Temp replacement for self.connect
     #     import asyncio
     #     while not self.is_closed():

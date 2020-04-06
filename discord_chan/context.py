@@ -17,7 +17,7 @@
 from datetime import datetime
 from typing import Optional
 
-from discord import Message, utils, HTTPException, NotFound
+from discord import Message, HTTPException, NotFound
 from discord.ext.commands import Context
 
 from .menus import PartitionPaginator, NormalPageSource, DCMenuPages, ConfirmationMenu
@@ -34,9 +34,6 @@ class SubContext(Context):
         """
         if content:
             content = str(content)
-
-        if kwargs.pop('escape_mentions', True) and content:
-            content = utils.escape_mentions(content)
 
         menu = None
 
@@ -61,7 +58,12 @@ class SubContext(Context):
 
             else:
                 try:
-                    await prev_msg.edit(content=content, embed=kwargs.pop('embed', None), **kwargs)
+                    await prev_msg.edit(
+                        content=content,
+                        embed=kwargs.pop('embed', None),
+                        suppress=kwargs.pop('suppress', None),
+                        delete_after=kwargs.pop('delete_after', None)
+                    )
                     return prev_msg
 
                 except NotFound:
