@@ -20,17 +20,16 @@ from pathlib import Path
 
 from . import utils, db, checks
 from .bot import DiscordChan
-from .monitor import DiscordChanMonitor
+from .context import SubContext
 from .converters import *
 from .games import *
 from .help import *
 from .image import *
 from .menus import *
+from .monitor import DiscordChanMonitor
 from .snipe import *
-from .context import SubContext
 
-
-__version__ = '1.4.1'
+__version__ = '1.5.0'
 
 logging.getLogger(__name__).addHandler(NullHandler())
 ROOT = Path(__file__).parent
