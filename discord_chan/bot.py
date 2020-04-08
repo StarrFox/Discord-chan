@@ -22,6 +22,7 @@ from datetime import datetime
 from typing import Optional, Dict, Union, Deque, Set
 
 import discord
+from aioec import Client as EcClient
 from discord.ext import commands, tasks
 from jikanpy import AioJikan
 
@@ -66,6 +67,12 @@ class DiscordChan(commands.AutoShardedBot):
         # {guild_id: {channel_id: deque[Snipe]}}
         self.snipes: Dict[int, Dict[int, Deque[Snipe]]] = defaultdict(lambda: defaultdict(lambda: deque(maxlen=5_000)))
 
+        if config['extra_tokens']['emote_collector']:
+            self.ec = EcClient(token=config['extra_tokens']['emote_collector'])
+
+        else:
+            self.ec = None
+
     def get_message(self, message_id: int) -> Optional[discord.Message]:
         """
         Gets a message from cache
@@ -100,13 +107,6 @@ class DiscordChan(commands.AutoShardedBot):
             self.load_extensions_from_dir('discord_chan/extensions')
 
         logger.info(f'Bot ready with {len(self.extensions.keys())} extensions.')
-
-    # # Todo: remove before going into prod
-    # async def start(self, *args, **kwargs):
-    #     # Temp replacement for self.connect
-    #     import asyncio
-    #     while not self.is_closed():
-    #         await asyncio.sleep(100)
 
     def run(self, *args, **kwargs):
         return super().run(self.config['discord']['token'], *args, **kwargs)

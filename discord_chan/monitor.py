@@ -24,7 +24,7 @@ from terminaltables import AsciiTable
 
 from . import db
 
-version_message = f"Discord Chan Monitor, ? or help for command list.\n"
+version_message = f"Discord Chan Monitor\n"
 
 BOOL_DICT = {
     'true': True,

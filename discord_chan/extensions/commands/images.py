@@ -15,8 +15,8 @@
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
 import discord
-from discord.ext import commands
 from PIL.Image import Image
+from discord.ext import commands
 
 import discord_chan
 from discord_chan import BetweenConverter, SubContext, ImageConverter, ImageDefault
@@ -62,28 +62,6 @@ class Images(commands.Cog, name='images'):
             file=discord.File(archive, filename=f"{name}.tar"),
             no_edit=True
         )
-
-    # @commands.command(aliases=['randomize'])
-    # @commands.cooldown(1, 30, commands.cooldowns.BucketType.user)
-    # async def shuffle(self, ctx: commands.Context, link: str, degree: BetweenConverter(1, 100_000)):
-    #     """
-    #     Shuffle's an image's pixels
-    #     Degree must be between 1 and 100,000
-    #     """
-    #     # Todo: use this for the image converter?
-    #     try:
-    #         image = await discord_chan.url_to_image(link)
-    #     except discord_chan.FileTooLarge:
-    #         return await ctx.send('File was too large.')
-    #     except discord_chan.InvalidImageType:
-    #         return await ctx.send('Unable to open file as image.')
-    #
-    #     with ctx.typing():
-    #         shuffled = await discord_chan.shuffle_image(image, degree=degree)
-    #
-    #         file = await discord_chan.image_to_file(shuffled, f'shuffled.{shuffled.format.lower()}')
-    #
-    #     await ctx.send(ctx.author.mention, file=file)
 
     @commands.command(aliases=['diff'])
     @commands.cooldown(1, 30, commands.cooldowns.BucketType.user)

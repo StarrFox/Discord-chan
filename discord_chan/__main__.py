@@ -38,7 +38,7 @@ prefix=dc/
 support_url=
 source_url=https://github.com/StarrFox/Discord-chan
 vote_url=
-# true of false of if default extensions (discord_chan/extensions)
+# true or false on if default extensions (discord_chan/extensions)
 # should be loaded
 load_extensions=true
 
@@ -46,8 +46,11 @@ load_extensions=true
 # Discord Bot token
 token=
 
+[extra_tokens]
+emote_collector=
+
 [enviroment]
-# all options here will be loaded as enviroment variables
+# all options here will be loaded as environment variables
 # unless the disable option is true
 # note: all keys are uppered to deal with configParser
 disable=false
@@ -65,7 +68,7 @@ prefix=$prefix
 support_url=
 source_url=https://github.com/StarrFox/Discord-chan
 vote_url=
-# true of false of if default extensions (discord_chan/extensions)
+# true or false on if default extensions (discord_chan/extensions)
 # should be loaded
 load_extensions=$load_extensions
 
@@ -73,8 +76,11 @@ load_extensions=$load_extensions
 # Discord Bot token
 token=$token
 
+[extra_tokens]
+emote_collector=
+
 [enviroment]
-# all options here will be loaded as enviroment variables
+# all options here will be loaded as environment variables
 # unless the disable option is true
 # note: all keys are uppered to deal with configParser
 disable=$disable

@@ -18,8 +18,8 @@ import re
 from calendar import day_name, day_abbr
 
 import discord
-from discord.ext import commands
 from PIL.Image import Image
+from discord.ext import commands
 
 from . import utils
 from .image import url_to_image, FileTooLarge, InvalidImageType
@@ -77,7 +77,6 @@ class MaxLengthConverter(commands.Converter):
 class WeekdayConverter(commands.Converter):
 
     async def convert(self, ctx: commands.Context, argument: str) -> str:
-        # Todo: 3.8 switch to walrus
         converted = str(argument).lower()
         if converted in DAYS:
             return converted
@@ -128,8 +127,9 @@ class ImageUrlConverter(commands.Converter):
     """
     Attempts to convert an argument to an image url in the following order
     1. Member -> str(.avatar_url_as(static_format=png))
-    2. Emoji -> str(.url)
-    3. Url regex
+    2. Message -> str(message.attachments[0].url)/message.embeds[0].url
+    3. Emoji -> str(.url)
+    4. Url regex
     """
 
     def __init__(self, force_format: str = None):
@@ -148,6 +148,21 @@ class ImageUrlConverter(commands.Converter):
 
             else:
                 return str(member.avatar_url_as(format=self.force_format))
+
+        try:
+            message = await commands.MessageConverter().convert(ctx, argument)
+
+        except commands.BadArgument:
+            message = None
+
+        if message:
+            if not message.attachments and (not message.embeds or not message.embeds[0].image):
+                raise commands.BadArgument('Message has no attachments/embed images.')
+
+            if message.attachments:
+                return str(message.attachments[0].url)
+
+            return message.embeds[0].image.url
 
         try:
             emoji = await commands.PartialEmojiConverter().convert(ctx, argument)
@@ -180,6 +195,9 @@ class ImageUrlDefault(commands.CustomDefault, display='LastImage'):
             if message.attachments:
                 return message.attachments[0].url
 
+            if message.embeds and message.embeds[0].image:
+                return message.embeds[0].image.url
+
         raise commands.MissingRequiredArgument(param)
 
 
@@ -191,14 +209,11 @@ class ImageConverter(ImageUrlConverter):
         try:
             return await url_to_image(url)
 
-        except FileTooLarge as e:
-            raise commands.BadArgument(str(e))
-
-        except InvalidImageType as e:
+        except (FileTooLarge, InvalidImageType) as e:
             raise commands.BadArgument(str(e))
 
 
-class ImageDefault(ImageUrlDefault):
+class ImageDefault(ImageUrlDefault, display='LastImage'):
 
     async def default(self, ctx: commands.Context, param: str) -> Image:
         url = await super().default(ctx, param)
@@ -208,3 +223,27 @@ class ImageDefault(ImageUrlDefault):
 
         except (FileTooLarge, InvalidImageType):
             raise commands.MissingRequiredArgument(param)
+
+
+class EmbedConverter(commands.MessageConverter):
+
+    async def convert(self, ctx: commands.Context, argument: str):
+        message = await super().convert(ctx, argument)
+
+        if not message.embeds:
+            raise commands.BadArgument('Message had no embed.')
+
+        return message.embeds[0]
+
+class EmbedDefault(commands.CustomDefault, display='LastEmbed'):
+
+    async def default(self, ctx: commands.Context, param: str) -> discord.Embed:
+        # No idea when this would apply
+        if ctx.message.embeds:
+            return ctx.message.embeds[0]
+
+        async for message in ctx.history():
+            if message.embeds:
+                return message.embeds[0]
+
+        raise commands.MissingRequiredArgument(param)

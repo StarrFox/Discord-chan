@@ -38,7 +38,7 @@ setup(
     install_requires=[
         'jishaku>=1.17',
         'discord.py @ git+https://github.com/Rapptz/discord.py@refs/pull/1849/merge',
-        # Todo: remove when released, remember requirements.txt
+        # Todo: remove when released
         'discord-ext-menus @ git+https://github.com/Rapptz/discord-ext-menus',
         'numpy',
         'imagehash',
@@ -53,6 +53,7 @@ setup(
         'discord-flags',
         'uwuify>=0.0.2',
         'pyenchant',
-        'click'
+        'click',
+        'aioec'
     ]
 )

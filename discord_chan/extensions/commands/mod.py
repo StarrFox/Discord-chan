@@ -26,14 +26,13 @@ def is_above(invoker: discord.Member, user: discord.Member):
     return invoker.top_role > user.top_role
 
 
-# Todo: merge this into general?
+# Todo: add back mod stuff
 class Mod(commands.Cog, name='mod'):
     """Moderation commands"""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    # Todo: test
     @commands.group(invoke_without_command=True, aliases=["prefixes"])
     async def prefix(self, ctx: commands.Context):
         """
