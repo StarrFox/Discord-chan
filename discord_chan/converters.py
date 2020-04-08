@@ -156,13 +156,20 @@ class ImageUrlConverter(commands.Converter):
             message = None
 
         if message:
-            if not message.attachments and (not message.embeds or not message.embeds[0].image):
-                raise commands.BadArgument('Message has no attachments/embed images.')
-
             if message.attachments:
                 return str(message.attachments[0].url)
 
-            return message.embeds[0].image.url
+            elif message.embeds:
+                embed = message.embeds[0]
+
+                if embed.type == 'image':
+                    if embed.url:
+                        return embed.url
+
+                elif embed.image:
+                    return embed.image.url
+
+            raise commands.BadArgument('Message has no attachments/embed images.')
 
         try:
             emoji = await commands.PartialEmojiConverter().convert(ctx, argument)
@@ -195,8 +202,15 @@ class ImageUrlDefault(commands.CustomDefault, display='LastImage'):
             if message.attachments:
                 return message.attachments[0].url
 
-            if message.embeds and message.embeds[0].image:
-                return message.embeds[0].image.url
+            if message.embeds:
+                embed = message.embeds[0]
+
+                if embed.type == 'image':
+                    if embed.url:
+                        return embed.url
+
+                elif embed.image:
+                    return embed.image.url
 
         raise commands.MissingRequiredArgument(param)
 
