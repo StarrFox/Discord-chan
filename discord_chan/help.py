@@ -18,7 +18,6 @@ import discord
 from discord.ext import commands
 
 
-# Todo: make cogs < command i.e anime and snipe
 class Minimal(commands.MinimalHelpCommand):
 
     def get_destination(self):
@@ -115,6 +114,7 @@ class Minimal(commands.MinimalHelpCommand):
 
         await self.send_pages()
 
+    # Todo: find better answer
     # I overwrite this to have command > cog rather than the default
     # also to ignore cogs with no commands (see #L142)
     async def command_callback(self, ctx, *, command=None):

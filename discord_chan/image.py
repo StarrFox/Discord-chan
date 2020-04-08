@@ -69,10 +69,9 @@ def executor_function(sync_function: Callable):
     async def sync_wrapper(*args, **kwargs):
         loop = asyncio.get_event_loop()
         internal_function = functools.partial(sync_function, *args, **kwargs)
+
         with ThreadPoolExecutor() as pool:
-            return await loop.run_in_executor(pool,
-                                              internal_function
-                                              )
+            return await loop.run_in_executor(pool, internal_function)
 
     return sync_wrapper
 
@@ -230,7 +229,6 @@ def get_wallify_factors(image_size: Tuple[int, int], wall_size: Tuple[int, int])
     )
 
 
-# Todo: test how long this takes to run (need to be under a second with up to 10, 10)
 def get_wallify_example_file(wall_size: Tuple[int, int], name: str = None) -> BytesIO:
     num_of_rows, num_of_columns = wall_size
 
