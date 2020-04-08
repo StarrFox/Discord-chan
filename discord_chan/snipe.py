@@ -45,7 +45,6 @@ class Snipe:
     def readable_time(self) -> str:
         return humanize.naturaltime(datetime.utcnow() - self.time)
 
-    # TODO: replace this with equals f-string thing after switching to 3.8
     def __repr__(self):
         return f"<Snipe author={self.author} channel={self.channel} time={self.time}>"
 
@@ -53,7 +52,6 @@ class Snipe:
         return f"[{self.mode}] {self.author} ({self.readable_time})"
 
 
-# Todo: make this work, defaults taking functions (channel)
 def snipe_parser(func: flags.FlagCommand):
     """
     Decorator to add the snipe parser
