@@ -16,17 +16,15 @@
 
 import asyncio
 import datetime
-import logging
 from collections import Counter
 from contextlib import suppress
 from typing import Dict, List
 
 import discord
 from discord.ext import commands
+from loguru import logger
 
 from discord_chan import utils, db, SnipeMode, Snipe, DiscordChan
-
-logger = logging.getLogger(__name__)
 
 
 # Todo: add github cog using github api (replace copycat stuff)

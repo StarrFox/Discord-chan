@@ -14,9 +14,7 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
-import logging
-from logging import NullHandler
-from pathlib import Path
+from loguru import logger
 
 from . import utils, db, checks
 from .bot import DiscordChan
@@ -31,5 +29,4 @@ from .snipe import *
 
 __version__ = '1.5.0'
 
-logging.getLogger(__name__).addHandler(NullHandler())
-ROOT = Path(__file__).parent
+logger.disable('discord_chan')

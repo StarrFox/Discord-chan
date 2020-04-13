@@ -16,14 +16,17 @@
 
 import asyncio
 import logging
+import sys
 from configparser import ConfigParser
 from pathlib import Path
 from string import Template
 
 import click
 from aiomonitor import start_monitor, cli
+from loguru import logger
 
 import discord_chan
+from discord_chan.utils import InterceptHandler
 
 try:
     import uvloop
@@ -31,96 +34,7 @@ try:
 except ImportError:
     uvloop = None
 
-
-default_config = """
-[general]
-prefix=dc/
-support_url=
-source_url=https://github.com/StarrFox/Discord-chan
-vote_url=
-# true or false on if default extensions (discord_chan/extensions)
-# should be loaded
-load_extensions=true
-
-[discord]
-# Discord Bot token
-token=
-
-[extra_tokens]
-emote_collector=
-
-[enviroment]
-# all options here will be loaded as environment variables
-# unless the disable option is true
-# note: all keys are uppered to deal with configParser
-disable=false
-
-# read more about these jishaku setting in the README
-JISHAKU_HIDE=true
-JISHAKU_NO_DM_TRACEBACK=true
-JISHAKU_NO_UNDERSCORE=true
-JISHAKU_RETAIN=true
-"""
-
-interactive_config = Template("""
-[general]
-prefix=$prefix
-support_url=
-source_url=https://github.com/StarrFox/Discord-chan
-vote_url=
-# true or false on if default extensions (discord_chan/extensions)
-# should be loaded
-load_extensions=$load_extensions
-
-[discord]
-# Discord Bot token
-token=$token
-
-[extra_tokens]
-emote_collector=
-
-[enviroment]
-# all options here will be loaded as environment variables
-# unless the disable option is true
-# note: all keys are uppered to deal with configParser
-disable=$disable
-
-# read more about these jishaku setting in the README
-JISHAKU_HIDE=true
-JISHAKU_NO_DM_TRACEBACK=true
-JISHAKU_NO_UNDERSCORE=true
-JISHAKU_RETAIN=true
-""")
-
-sql_init = """
-CREATE TABLE IF NOT EXISTS prefixes (
-    guild_id INTEGER PRIMARY KEY,
-    prefixes PYSET
-);
-
-CREATE TABLE IF NOT EXISTS command_uses (
-    name TEXT PRIMARY KEY,
-    uses INTEGER
-);
-
-CREATE TABLE IF NOT EXISTS socket_stats (
-    name TEXT PRIMARY KEY,
-    amount INTEGER
-);
-
-CREATE TABLE IF NOT EXISTS channel_links (
-    send_from INTEGER PRIMARY KEY,
-    send_to PYSET
-);
-
-CREATE TABLE IF NOT EXISTS ratings (
-    bot_id INTEGER,
-    user_id INTEGER,
-    rating INTEGER,
-    review TEXT,
-    PRIMARY KEY(bot_id, user_id)
-);
-"""
+ROOT_DIR = Path(__file__).parent
 
 
 # Todo: add update subparser? git pull, see if config or sql is different?
@@ -137,6 +51,13 @@ def main():
               help='Path to config file.')
 @click.option('--debug', is_flag=True, help='Run in debug mode.')
 def run(config, debug):
+    logging.basicConfig(handlers=[InterceptHandler()], level=0)
+
+    logger.remove()
+    logger.enable('discord_chan')
+    logger.add(sys.stderr, level='INFO', filter='discord_chan')
+    logger.add(sys.stderr, level='ERROR', filter='discord')
+
     # didn't feel like renaming
     config_file = config
     config = ConfigParser(allow_no_value=True, strict=False)
@@ -145,18 +66,9 @@ def run(config, debug):
     if not config['enviroment'].getboolean('disable'):
         load_environ(**dict([var for var in config['enviroment'].items() if var[0] != 'disable']))
 
-    logging.basicConfig(
-        format="[%(asctime)s] [%(levelname)s:%(name)s] %(message)s",
-        level=logging.DEBUG if debug else logging.INFO
-    )
-
     if debug:
         asyncio.get_event_loop().set_debug(True)
         logging.getLogger('asyncio').setLevel(logging.DEBUG)
-
-    dpy_log = logging.getLogger('discord')
-
-    dpy_log.setLevel(logging.DEBUG if debug else logging.WARNING)
 
     bot = discord_chan.DiscordChan(config)
 
@@ -180,6 +92,7 @@ def load_environ(**kwargs):
 
     for var, value in kwargs.items():
         environ[var.upper()] = value
+        logger.debug(f'Set ENV var {var.upper()} = {value}')
 
 
 @main.command(help='\"Install\" the bot; general setup before running.')
@@ -207,6 +120,9 @@ def install(config, interactive):
 
     if overwrite:
         if not interactive:
+            with open(ROOT_DIR / 'data' / 'default_config.txt') as fp:
+                default_config = fp.read()
+
             config_file.write_text(default_config.strip())
 
         else:
@@ -214,6 +130,9 @@ def install(config, interactive):
             config_file.write_text(res)
 
         click.echo('Config file made/overwriten.')
+
+    with open(ROOT_DIR / 'data' / 'default.sql') as fp:
+        sql_init = fp.read()
 
     async def init_db():
         async with discord_chan.db.get_database() as connection:
@@ -226,6 +145,9 @@ def install(config, interactive):
     asyncio.run(init_db())
 
 def interactive_install() -> str:
+    with open(ROOT_DIR / 'data' / 'interactive_config.txt') as fp:
+        interactive_config = Template(fp.read())
+
     click.echo('Starting interactive config...')
     click.echo('--general section--')
 
