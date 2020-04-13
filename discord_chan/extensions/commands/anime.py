@@ -16,7 +16,6 @@
 
 import asyncio
 import datetime
-import logging
 from contextlib import suppress
 from textwrap import shorten
 
@@ -24,8 +23,6 @@ import discord
 from discord.ext import commands
 
 from discord_chan import WeekdayConverter, DiscordChan, checks
-
-logger = logging.getLogger(__name__)
 
 
 class Anime(commands.Cog, name='anime'):

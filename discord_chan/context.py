@@ -59,7 +59,7 @@ class SubContext(Context):
                     await prev_msg.edit(
                         content=content,
                         embed=kwargs.pop('embed', None),
-                        suppress=kwargs.pop('suppress', None),
+                        # suppress is annoying to deal with and I don't use it so /shrug
                         delete_after=kwargs.pop('delete_after', None)
                     )
                     return prev_msg

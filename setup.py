@@ -54,6 +54,7 @@ setup(
         'uwuify>=0.0.2',
         'pyenchant',
         'click',
-        'aioec'
+        'aioec',
+        'loguru'
     ]
 )

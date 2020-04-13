@@ -14,7 +14,6 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
-import logging
 import pathlib
 from collections import defaultdict, deque
 from configparser import ConfigParser
@@ -25,13 +24,12 @@ import discord
 from aioec import Client as EcClient
 from discord.ext import commands, tasks
 from jikanpy import AioJikan
+from loguru import logger
 
 from . import db, utils
 from .context import SubContext
 from .help import Minimal
 from .snipe import Snipe
-
-logger = logging.getLogger(__name__)
 
 
 class DiscordChan(commands.AutoShardedBot):
@@ -141,7 +139,7 @@ class DiscordChan(commands.AutoShardedBot):
             try:
                 self.load_extension(ext)
             except (commands.errors.ExtensionError, commands.errors.ExtensionFailed):
-                logger.error('Failed loading ' + ext, exc_info=True)
+                logger.exception('Failed loading ' + ext)
 
         return len(self.extensions.keys()) - before
 
@@ -163,7 +161,7 @@ class DiscordChan(commands.AutoShardedBot):
     async def presence_cycle_after(self):
         if self.presence_cycle.failed():
             # Only here because it somehow had an error once
-            logger.error('Presence cycle somehow errored out, restarting.', exc_info=True)
+            logger.exception('Presence cycle somehow errored out, restarting.')
             self.presence_cycle.restart()
 
     async def get_command_prefix(self, _, message: discord.Message):

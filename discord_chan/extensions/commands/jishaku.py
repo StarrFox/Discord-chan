@@ -15,6 +15,7 @@
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
 import discord
+from aiosqlite import OperationalError
 from discord.ext import commands
 from jishaku.codeblocks import codeblock_converter, Codeblock
 from jishaku.cog import jsk
@@ -25,7 +26,6 @@ from jishaku.metacog import GroupCogMeta
 from jishaku.paginators import PaginatorInterface
 from jishaku.repl import get_var_dict_from_ctx, AsyncCodeExecutor, AsyncSender
 from terminaltables import AsciiTable
-from aiosqlite import OperationalError
 
 from discord_chan import DCMenuPages, NormalPageSource, PartitionPaginator, SubContext, db
 
@@ -152,6 +152,13 @@ class Jishaku(JishakuBase, metaclass=GroupCogMeta, command_parent=jsk):
 
             else:
                 await ctx.send('[no result]')
+
+    @commands.group(name='scope')
+    async def jsk_scope(self, ctx: commands.Context):
+        """
+        x
+        """
+        pass
 
 
 def setup(bot: commands.Bot):

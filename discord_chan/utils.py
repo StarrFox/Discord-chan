@@ -14,10 +14,11 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
+import logging
 from collections import OrderedDict
 
 import discord
-
+from loguru import logger
 
 bool_dict = {
     "true": True,
@@ -89,3 +90,19 @@ class LRU(OrderedDict):
         super().__setitem__(key, value)
         if len(self) > self.maxsize:
             self.popitem(last=False)
+
+class InterceptHandler(logging.Handler):
+    def emit(self, record):
+        # Get corresponding Loguru level if it exists
+        try:
+            level = logger.level(record.levelname).name
+        except ValueError:
+            level = record.levelno
+
+        # Find caller from where originated the logged message
+        frame, depth = logging.currentframe(), 2
+        while frame.f_code.co_filename == logging.__file__:
+            frame = frame.f_back
+            depth += 1
+
+        logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())

@@ -1,0 +1,29 @@
+[general]
+prefix=dc/
+support_url=
+source_url=https://github.com/StarrFox/Discord-chan
+vote_url=
+# true or false on if default extensions (discord_chan/extensions)
+# should be loaded
+load_extensions=true
+
+[discord]
+# Discord Bot token
+token=
+# needs manage_webhooks to log
+logging_channel=
+
+[extra_tokens]
+emote_collector=
+
+[enviroment]
+# all options here will be loaded as environment variables
+# unless the disable option is true
+# note: all keys are uppered to deal with configParser
+disable=false
+
+# read more about these jishaku setting in the README
+JISHAKU_HIDE=true
+JISHAKU_NO_DM_TRACEBACK=true
+JISHAKU_NO_UNDERSCORE=true
+JISHAKU_RETAIN=true

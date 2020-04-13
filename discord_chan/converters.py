@@ -24,7 +24,7 @@ from discord.ext import commands
 from . import utils
 from .image import url_to_image, FileTooLarge, InvalidImageType
 
-DAYS = map(str.lower, list(day_name) + list(day_abbr))
+DAYS = set(map(str.lower, list(day_name) + list(day_abbr)))
 
 
 def _get_from_guilds(bot, getter, argument):
