@@ -103,4 +103,5 @@ class Logging(commands.Cog, name='logging'):
         )
 
 def setup(bot: commands.Bot):
-    bot.add_cog(Logging(bot))
+    if bot.config['discord']['logging_channel']:
+        bot.add_cog(Logging(bot))
