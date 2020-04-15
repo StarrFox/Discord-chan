@@ -18,8 +18,8 @@ from itertools import cycle
 from random import shuffle
 from typing import Optional
 
-import numpy
 import discord
+import numpy
 from discord.ext import menus
 
 
@@ -165,15 +165,14 @@ class Connect4(menus.Menu):
 
 
 class MasterMindMenu(menus.Menu):
-
     VARIATION_SELECTOR = '\N{VARIATION SELECTOR-16}'
 
     EMOJI_LIST = [
-        '<:weebagree:665491422295752705>',
-        '<:flushvibe:685656132336746506>',
-        '<:GodOtter:686115091581894907>',
-        '<:otter:685654717212393478>',
-        '<:teehee:597962329031704587>',
+        'wut:595570319490809857',
+        'weebagree:665491422295752705',
+        'teeth:586043416110956574',
+        'teehee:597962329031704587',
+        'senpai:582035624899379201',
     ]
 
     RESEND_ARROW = '\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}'
