@@ -91,7 +91,7 @@ class Logging(commands.Cog, name='logging'):
     async def on_message(self, message: discord.Message):
         if not message.guild and message.author != self.bot.user:
             logger.info(
-                f'DM author={message.author} ({message.author.id}) id={message.id} content={message.content}'
+                f'DM author={message.author} ({message.author.id}) id={message.id} content={message.content}.'
             )
 
     @commands.Cog.listener()
@@ -99,8 +99,8 @@ class Logging(commands.Cog, name='logging'):
         percent_bots = round((sum(1 for i in guild.members if i.bot) / guild.member_count) * 100)
 
         logger.info(
-            f'Joined_guild name={guild.name} id={guild.id} owner={guild.owner} ({guild.owner.id})'
-            f' percent_bots={percent_bots}'
+            f'Joined_guild name={guild} id={guild.id} owner={guild.owner} ({guild.owner.id})'
+            f' percent_bots={percent_bots}.'
         )
 
     @commands.Cog.listener()
@@ -109,7 +109,14 @@ class Logging(commands.Cog, name='logging'):
 
         logger.info(
             f'left_guild name={guild.name} id={guild.id} owner={guild.owner} ({guild.owner.id})'
-            f' percent_bots={percent_bots}'
+            f' percent_bots={percent_bots}.'
+        )
+
+    @commands.Cog.listener()
+    async def on_command_completion(self, ctx: commands.Context):
+        logger.info(
+            f'Ran command {ctx.command} guild={ctx.guild} ({ctx.guild.id})'
+            f' author={ctx.author} ({ctx.author.id}).'
         )
 
 def setup(bot: commands.Bot):
