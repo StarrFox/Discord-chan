@@ -31,7 +31,8 @@ class Logging(commands.Cog, name='logging'):
             self.send_to_webhook,
             format='{level.icon} [{level}] ({time:YYYY-MM-DD HH:mm:ss.SSS}) -'
                    '` {name}:{function}:{line}` - {message}',
-            level='INFO'
+            level='INFO',
+            filter='discord_chan'
         )
 
     async def send_to_webhook(self, message):
@@ -99,6 +100,15 @@ class Logging(commands.Cog, name='logging'):
 
         logger.info(
             f'Joined_guild name={guild.name} id={guild.id} owner={guild.owner} ({guild.owner.id})'
+            f' percent_bots={percent_bots}'
+        )
+
+    @commands.Cog.listener()
+    async def on_guild_remove(self, guild: discord.Guild):
+        percent_bots = round((sum(1 for i in guild.members if i.bot) / guild.member_count) * 100)
+
+        logger.info(
+            f'left_guild name={guild.name} id={guild.id} owner={guild.owner} ({guild.owner.id})'
             f' percent_bots={percent_bots}'
         )
 
