@@ -46,6 +46,10 @@ async def on_command_error(ctx: commands.Context, error):
         f"Unhandled error in command {ctx.command.name}\nInvoke message: {ctx.message.content}"
     )
 
+    await ctx.send(
+        f'Unknown error while executing {ctx.command}, you can join the support server (`support` command) for updates'
+    )
+
 
 def setup(bot: commands.Bot):
     bot.add_listener(on_command_error)
