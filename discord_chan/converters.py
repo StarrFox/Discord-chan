@@ -15,7 +15,6 @@
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
 import re
-from calendar import day_name, day_abbr
 
 import discord
 from PIL.Image import Image
@@ -24,7 +23,17 @@ from discord.ext import commands
 from . import utils
 from .image import url_to_image, FileTooLarge, InvalidImageType
 
-DAYS = set(map(str.lower, list(day_name) + list(day_abbr)))
+WEEKDAYS = [
+    'monday',
+    'tuesday',
+    'wendsday',
+    'thursday',
+    'friday',
+    'saturday',
+    'sunday'
+]
+
+WEEKDAY_ABBRS = {d.replace('day', ''): d for d in WEEKDAYS}
 
 
 def _get_from_guilds(bot, getter, argument):
@@ -78,8 +87,12 @@ class WeekdayConverter(commands.Converter):
 
     async def convert(self, ctx: commands.Context, argument: str) -> str:
         converted = str(argument).lower()
-        if converted in DAYS:
+
+        if converted in WEEKDAYS:
             return converted
+
+        if converted in WEEKDAY_ABBRS:
+            return WEEKDAY_ABBRS[converted]
 
         raise commands.BadArgument("{} is not a valid weekday.".format(argument))
 
