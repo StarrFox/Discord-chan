@@ -48,6 +48,9 @@ class Anime(commands.Cog, name='anime'):
             now = datetime.datetime.utcnow()
             day = now.strftime("%A").lower()
 
+        if not day.endswith('day'):
+            day += 'day'
+
         titles = [i['title'] for i in self.bot.anime_db[day]]
 
         await ctx.send('\n'.join(titles))
