@@ -17,10 +17,10 @@
 import discord
 import humanize
 from discord.ext import commands
-from discord.ext.commands.default import Call
 
 from discord_chan import (__version__ as dc_version, DCMenuPages, PrologPaginator,
-                          NormalPageSource, checks, BotConverter)
+                          NormalPageSource, checks, BotConverter,
+                          NamedCall)
 
 
 class Meta(commands.Cog, name='meta'):
@@ -37,7 +37,9 @@ class Meta(commands.Cog, name='meta'):
         await ctx.send(f"\N{TABLE TENNIS PADDLE AND BALL} {round(ctx.bot.latency * 1000)}ms")
 
     @commands.command()
-    async def invite(self, ctx: commands.Context, bot: BotConverter = Call(lambda c, p: c.me)):
+    async def invite(self,
+                     ctx: commands.Context,
+                     bot: BotConverter = NamedCall(lambda c, p: c.me, display='DiscordChan')):
         """
         Get the invite link for a bot,
         defaults to myself

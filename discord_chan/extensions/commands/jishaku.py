@@ -153,12 +153,38 @@ class Jishaku(JishakuBase, metaclass=GroupCogMeta, command_parent=jsk):
             else:
                 await ctx.send('[no result]')
 
-    @commands.group(name='scope')
-    async def jsk_scope(self, ctx: commands.Context):
-        """
-        x
-        """
-        pass
+    # @commands.group(name='scope')
+    # async def jsk_scope(self, ctx: commands.Context, converter: Optional[str] = None, argument: str = None):
+    #     """
+    #     Set/view scope vars
+    #     """
+    #     if converter is None and argument is None:
+    #         paginator = PartitionPaginator(prefix='```json', max_size=1000)
+    #
+    #         import json
+    #
+    #         repred = json.dumps(
+    #             {
+    #                 k: repr(v) for k, v in self.scope if k != '__builtins__'
+    #             }
+    #         )
+    #
+    #         paginator.add_line(repred)
+    #
+    #         source = NormalPageSource(paginator.pages)
+    #
+    #         menu = DCMenuPages(source)
+    #
+    #         await menu.start(ctx)
+    #
+    #     if converter is not None and argument is None:
+    #         return await ctx.send('Need to provide an argument to convert.')
+    #
+    #     from discord.ext.commands import converter as converters
+    #
+    #     converter = getattr(converters, converter + 'Converter', None)
+    #     if converter is None:
+    #         return await ctx.send('Converter not found.')
 
 
 def setup(bot: commands.Bot):

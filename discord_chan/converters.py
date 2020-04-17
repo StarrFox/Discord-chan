@@ -262,6 +262,7 @@ class EmbedConverter(commands.MessageConverter):
 
         return message.embeds[0]
 
+
 class EmbedDefault(commands.CustomDefault, display='LastEmbed'):
 
     async def default(self, ctx: commands.Context, param: str) -> discord.Embed:
@@ -274,3 +275,11 @@ class EmbedDefault(commands.CustomDefault, display='LastEmbed'):
                 return message.embeds[0]
 
         raise commands.MissingRequiredArgument(param)
+
+
+class NamedCall(commands.default.Call):
+
+    def __init__(self, callback, *, display=None):
+        super().__init__(callback)
+        if display:
+            self.display = display

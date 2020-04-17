@@ -20,14 +20,14 @@ from typing import Optional
 
 import discord
 import humanize
-from uwuify import uwu_text
 from discord.ext import commands
-from discord.ext.commands.default import Author, Call
+from discord.ext.commands.default import Author, CurrentChannel
 from enchant.checker import SpellChecker
+from uwuify import uwu_text
 
 from discord_chan import (PrologPaginator, ImageFormatConverter, PartitionPaginator,
-                          BetweenConverter, DCMenuPages, NormalPageSource, checks,
-                          DiscordChan, SubContext)
+                          BetweenConverter, DCMenuPages, NormalPageSource,
+                          DiscordChan, SubContext, NamedCall)
 
 
 class General(commands.Cog, name='general'):
@@ -210,7 +210,9 @@ class General(commands.Cog, name='general'):
         await menu.start(ctx)
 
     @raw.command(aliases=['msg'])
-    async def message(self, ctx: commands.Context, message: discord.Message = Call(lambda c, p: c.message)):
+    async def message(self,
+                      ctx: commands.Context,
+                      message: discord.Message = NamedCall(lambda c, p: c.message, display='CurrentMessage')):
         """
         Raw message object,
         can provide channel with channel_id-message-id
@@ -220,7 +222,7 @@ class General(commands.Cog, name='general'):
         await self.send_raw(ctx, data)
 
     @raw.command()
-    async def channel(self, ctx: commands.Context, channel: discord.TextChannel = Call(lambda c, p: c.channel)):
+    async def channel(self, ctx: commands.Context, channel: discord.TextChannel = CurrentChannel):
         """
         Raw channel object
         """
@@ -228,7 +230,7 @@ class General(commands.Cog, name='general'):
         await self.send_raw(ctx, data)
 
     @raw.command()
-    async def member(self, ctx: commands.Context, member: discord.Member = Call(lambda c, p: c.author)):
+    async def member(self, ctx: commands.Context, member: discord.Member = Author):
         """
         Raw member object
         """
@@ -236,7 +238,9 @@ class General(commands.Cog, name='general'):
         await self.send_raw(ctx, data)
 
     @raw.command()
-    async def user(self, ctx: commands.Context, userid: int = Call(lambda c, p: c.author.id)):
+    async def user(self,
+                   ctx: commands.Context,
+                   userid: int = NamedCall(lambda c, p: c.author.id, display='AuthorID')):
         """
         Raw user object
         """
@@ -255,12 +259,12 @@ class General(commands.Cog, name='general'):
         data = await self.bot.http.get_guild(ctx.guild.id)
         await self.send_raw(ctx, data)
 
+    # I don't use the invite converter to save api calls
     @raw.command()
     async def invite(self, ctx: commands.Context, invite: str):
         """
         Raw invite object
         """
-        # I don't use the invite converter to save api calls
         try:
             data = await self.bot.http.get_invite(invite.split('/')[-1])
         except discord.errors.NotFound:
