@@ -104,4 +104,7 @@ venv.bak/
 .mypy_cache/
 
 # secrets
-config.py
+*.ini
+
+# storage
+*.db
