@@ -102,7 +102,7 @@ class Accessibility(commands.Cog, name='accessibility'):
                         url=str(emoji.url)
                     )
 
-                    await ctx.send(f'Added emoji {emoji.name} added to EmoteCollector.', no_edit=True)
+                    await ctx.send(f'Emote {emoji.name} added to EmoteCollector.', no_edit=True)
 
                 except EmoteExists:
                     await ctx.send(f'Emote named {emoji.name} already exists in EmoteCollector.', no_edit=True)
