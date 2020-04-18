@@ -33,6 +33,7 @@ class Mod(commands.Cog, name='mod'):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
+    @commands.guild_only()
     @commands.group(invoke_without_command=True, aliases=["prefixes"])
     async def prefix(self, ctx: commands.Context):
         """
