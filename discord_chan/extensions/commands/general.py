@@ -81,7 +81,7 @@ class General(commands.Cog, name='general'):
         """
         await ctx.send(message)
 
-    @commands.command(aliases=['owoify', 'owo'])
+    @commands.command(aliases=['owoify', 'owo', 'uwu'])
     async def uwuify(self, ctx: commands.Context, *, message: str):
         """
         Uwuify text
