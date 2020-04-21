@@ -66,7 +66,7 @@ class Anime(commands.Cog, name='anime'):
         """
         thickify text
         """
-        await ctx.send(message.translate(THICK_TABLE))
+        await ctx.send(message.lower().translate(THICK_TABLE))
 
     @commands.group(name='anime', invoke_without_command=True)
     async def anime_command(self, ctx: commands.Context):
