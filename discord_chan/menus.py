@@ -173,7 +173,7 @@ class EmbedFieldsPageSource(menus.ListPageSource):
 
         else:
             for proxy in page:
-                base.add_field(name=proxy.name, value=proxy.value, inline=page.inline)
+                base.add_field(name=proxy.name, value=proxy.value, inline=proxy.inline)
             return base
 
 
