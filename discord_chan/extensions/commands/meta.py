@@ -20,7 +20,7 @@ from discord.ext import commands
 
 from discord_chan import (__version__ as dc_version, DCMenuPages, PrologPaginator,
                           NormalPageSource, checks, BotConverter,
-                          NamedCall)
+                          NamedCall, SubContext)
 
 
 class Meta(commands.Cog, name='meta'):
@@ -35,6 +35,14 @@ class Meta(commands.Cog, name='meta'):
         Sends the bot's websocket latency
         """
         await ctx.send(f"\N{TABLE TENNIS PADDLE AND BALL} {round(ctx.bot.latency * 1000)}ms")
+
+    @commands.command()
+    async def suggest(self, ctx: SubContext, *, suggestion: str):
+        """
+        Suggest an idea for the bot
+        """
+        # lmao
+        await ctx.confirm('Your suggestion has been submitted')
 
     @commands.command()
     async def invite(self,
