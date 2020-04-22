@@ -14,8 +14,6 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
-import argparse
-import shlex
 import typing
 from textwrap import shorten
 
@@ -23,7 +21,7 @@ import discord
 from discord.ext import commands, flags
 
 from discord_chan import (SnipeMode, DiscordChan, DCMenuPages, snipe_parser,
-                          NormalPageSource, EmbedFieldProxy, EmbedFieldsPageSource)
+                          EmbedFieldProxy, EmbedFieldsPageSource)
 
 
 class Snipe(commands.Cog, name='snipe'):
@@ -111,7 +109,8 @@ class Snipe(commands.Cog, name='snipe'):
             # 1,024 is the field value limit
             res.append(EmbedFieldProxy(
                 shorten(str(snipe), 176, placeholder='...'),
-                shorten(snipe.content, 1_024, placeholder='...')
+                shorten(snipe.content, 1_024, placeholder='...'),
+                False
             ))
 
         return res
