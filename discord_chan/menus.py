@@ -14,14 +14,14 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
-from string import capwords
 from collections import namedtuple
+from string import capwords
 from typing import Optional, Sequence
 
 import discord
 from discord.ext import commands, menus
 
-EmbedFieldProxy = namedtuple('EmbedFieldProxy', 'name value')
+EmbedFieldProxy = namedtuple('EmbedFieldProxy', 'name value inline')
 
 
 class ConfirmationMenu(menus.Menu):
@@ -169,7 +169,7 @@ class EmbedFieldsPageSource(menus.ListPageSource):
         )
 
         if isinstance(page, EmbedFieldProxy):
-            return base.add_field(name=page.name, value=page.value)
+            return base.add_field(name=page.name, value=page.value, inline=page.inline)
 
         else:
             for proxy in page:
