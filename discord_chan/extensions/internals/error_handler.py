@@ -20,11 +20,13 @@ from discord.ext import commands
 from humanize import naturaldelta
 from loguru import logger
 
+from discord_chan import AuthorBlacklisted
+
 
 async def on_command_error(ctx: commands.Context, error):
     error = getattr(error, 'original', error)
 
-    if isinstance(error, commands.CommandNotFound):
+    if isinstance(error, (commands.CommandNotFound, AuthorBlacklisted)):
         return
 
     # Bypass checks for owner

@@ -158,7 +158,7 @@ def interactive_install() -> str:
 
     token = click.prompt('Discord bot token?')
 
-    click.echo('enviroment section:')
+    click.echo('--enviroment section--')
 
     disable = click.prompt('Disable enviroment var config?', type=bool)
 
@@ -178,4 +178,5 @@ def monitor(host, port):
 
 
 if __name__ == '__main__':
+    # Todo: test
     main()

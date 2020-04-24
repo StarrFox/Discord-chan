@@ -28,6 +28,7 @@ from loguru import logger
 
 from . import db, utils
 from .context import SubContext
+from .errors import AuthorBlacklisted
 from .help import Minimal
 from .snipe import Snipe
 
@@ -55,6 +56,8 @@ class DiscordChan(commands.AutoShardedBot):
         self.uptime = datetime.now()
         # Todo: make an anime entry object to replace the dicts in the lists
         self.anime_db: Dict[str, list] = {}
+        # {user_id: reason}
+        self.blacklist: Dict[int, Optional[str]] = {}
         self.past_invokes = utils.LRU(maxsize=1000)
         # {bot_id: {prefixes}}
         self.other_bot_prefixes: Dict[int, Set[str]] = defaultdict(lambda: set())
@@ -70,6 +73,8 @@ class DiscordChan(commands.AutoShardedBot):
 
         else:
             self.ec = None
+
+        self.add_check(self.blacklist_check)
 
     def get_message(self, message_id: int) -> Optional[discord.Message]:
         """
@@ -177,6 +182,13 @@ class DiscordChan(commands.AutoShardedBot):
         else:  # DM
             return commands.when_mentioned_or(self.config['general']['prefix'], '')(self, message)
 
+    def blacklist_check(self, ctx: commands.Context):
+        if ctx.author.id in self.blacklist:
+            reason = self.blacklist[ctx.author.id]
+            raise AuthorBlacklisted(f'{ctx.author} is blacklisted for {reason}.')
+
+        return True
+
     async def load_prefixes(self):
         async with db.get_database() as connection:
             async with connection.cursor() as cursor:
@@ -186,6 +198,7 @@ class DiscordChan(commands.AutoShardedBot):
 
         logger.info(f"Loaded prefixes for {len(self.prefixes)} guilds.")
 
+    # This doesnt actually get called anymore
     async def unload_prefixes(self):
         async with db.get_database() as connection:
             async with connection.cursor() as cursor:
@@ -197,3 +210,11 @@ class DiscordChan(commands.AutoShardedBot):
             await connection.commit()
 
         logger.info(f"Unloaded prefixes for {len(self.prefixes)} guilds.")
+
+    async def load_blacklist(self):
+        async with db.get_database() as connection:
+            cursor = await connection.execute('SELECT * FROM blacklist;')
+            for user_id, reason in await cursor.fetchall():
+                self.blacklist[user_id] = reason
+
+        logger.info(f'Loaded {len(self.blacklist)} blacklisted users.')

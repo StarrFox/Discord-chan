@@ -20,6 +20,7 @@ from . import utils, db, checks
 from .bot import DiscordChan
 from .context import SubContext
 from .converters import *
+from .errors import *
 from .games import *
 from .help import *
 from .image import *
