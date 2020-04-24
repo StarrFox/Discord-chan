@@ -37,9 +37,9 @@ class Snipe(commands.Cog, name='snipe'):
         Snipe delete/edited messages from your server.
 
         Optional:
-        --authors: List of user ids that authored the snipe
+        --authors: List of members that authored the snipe
         --channel: Channel id to snipe from
-        --server: Snipe from the entrie server instead of just a channel
+        --server: Snipe from the entire server instead of just a channel
         --before: Message id that snipes must be before
         --after: Message id that snipes must be after
         --list: Show all snipes found instead of one

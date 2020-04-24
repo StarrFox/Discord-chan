@@ -21,3 +21,7 @@ CREATE TABLE IF NOT EXISTS ratings (
     review TEXT,
     PRIMARY KEY(bot_id, user_id)
 );
+CREATE TABLE IF NOT EXISTS blacklist (
+    user_id INTEGER PRIMARY KEY,
+    reason TEXT
+);

@@ -13,6 +13,7 @@
 #
 #  You should have received a copy of the GNU Affero General Public License
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
+from typing import Union
 
 import discord
 from discord.ext import commands
@@ -123,6 +124,36 @@ class Owner(commands.Cog, name='owner'):
             await connection.commit()
 
         await ctx.confirm('Channels unlinked.')
+
+    @commands.group(aliases=['bl'], invoke_without_command=True)
+    async def blacklist(self, ctx: commands.Context):
+        await ctx.send('\n'.join(f'{user_id}: {reason}' for user_id, reason in self.bot.blacklist.items()))
+
+    @blacklist.command(name='add')
+    async def blacklist_add(self, ctx: SubContext, user: Union[discord.User, int], *, reason: str = None):
+        if isinstance(user, discord.User):
+            user = user.id
+
+        # No need to conflict check bc owner command
+        self.bot.blacklist[user] = reason
+
+        async with db.get_database() as connection:
+            await connection.execute('INSERT INTO blacklist (user_id, reason) VALUES (?, ?)', (user, reason))
+
+        await ctx.confirm('Added to blacklist.')
+
+    @blacklist.command(name='remove', aliases=['rem'])
+    async def blacklist_remove(self, ctx: SubContext, user: Union[discord.User, int]):
+        if isinstance(user, discord.User):
+            user = user.id
+
+        # No need to conflict check bc owner command
+        del self.bot.blacklist[user]
+
+        async with db.get_database() as connection:
+            await connection.execute('DELETE FROM blacklist WHERE user_id = (?)', (user,))
+
+        await ctx.confirm('Removed from blacklist.')
 
 
 def setup(bot):
