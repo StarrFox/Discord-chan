@@ -17,7 +17,6 @@
 import asyncio
 import logging
 import sys
-from configparser import ConfigParser
 from pathlib import Path
 from string import Template
 
@@ -26,7 +25,7 @@ from aiomonitor import start_monitor, cli
 from loguru import logger
 
 import discord_chan
-from discord_chan.utils import InterceptHandler
+from discord_chan.utils import InterceptHandler, CaseSensitiveConfigParser
 
 try:
     import uvloop
@@ -60,7 +59,7 @@ def run(config, debug):
 
     # didn't feel like renaming
     config_file = config
-    config = ConfigParser(allow_no_value=True, strict=False)
+    config = CaseSensitiveConfigParser(allow_no_value=True, strict=False)
     config.read(config_file)
 
     if not config['enviroment'].getboolean('disable'):
@@ -91,7 +90,7 @@ def load_environ(**kwargs):
     from os import environ
 
     for var, value in kwargs.items():
-        environ[var.upper()] = value
+        environ[var] = value
         logger.debug(f'Set ENV var {var.upper()} = {value}')
 
 

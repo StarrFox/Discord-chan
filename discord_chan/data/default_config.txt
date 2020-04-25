@@ -19,7 +19,6 @@ emote_collector=
 [enviroment]
 # all options here will be loaded as environment variables
 # unless the disable option is true
-# note: all keys are uppered to deal with configParser
 disable=false
 
 # read more about these jishaku setting in the README

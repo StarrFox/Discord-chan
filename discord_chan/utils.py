@@ -16,6 +16,7 @@
 
 import logging
 from collections import OrderedDict
+from configparser import ConfigParser
 
 import discord
 from loguru import logger
@@ -91,6 +92,7 @@ class LRU(OrderedDict):
         if len(self) > self.maxsize:
             self.popitem(last=False)
 
+
 class InterceptHandler(logging.Handler):
     def emit(self, record):
         # Get corresponding Loguru level if it exists
@@ -106,3 +108,7 @@ class InterceptHandler(logging.Handler):
             depth += 1
 
         logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
+
+
+class CaseSensitiveConfigParser(ConfigParser):
+    optionxform = staticmethod(str)
