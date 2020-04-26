@@ -96,7 +96,7 @@ class DiscordChanMonitor(Monitor):
             self._sout.flush()
             return
 
-        h, p = self._host, self._console_port
+        # h, p = self._host, self._console_port
         # log.info('Starting console at %s:%d', h, p)
         fut = init_console_server(
             self._host, self._console_port, self._locals, self._loop)

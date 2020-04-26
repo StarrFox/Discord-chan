@@ -49,7 +49,9 @@ def main():
               show_default=True,
               help='Path to config file.')
 @click.option('--debug', is_flag=True, help='Run in debug mode.')
-def run(config, debug):
+@click.option('--no-cache', is_flag=True, help='Run without member cache')
+def run(config, debug, no_cache):
+    # noinspection PyArgumentList
     logging.basicConfig(handlers=[InterceptHandler()], level=0)
 
     logger.remove()
@@ -69,7 +71,12 @@ def run(config, debug):
         asyncio.get_event_loop().set_debug(True)
         logging.getLogger('asyncio').setLevel(logging.DEBUG)
 
-    bot = discord_chan.DiscordChan(config)
+    kwargs = {}
+    if no_cache:
+        kwargs['guild_subscriptions'] = False
+        kwargs['fetch_offline_members'] = False
+
+    bot = discord_chan.DiscordChan(config, **kwargs)
 
     # Todo: make sure to remove this debug call
     # bot.dispatch('ready')

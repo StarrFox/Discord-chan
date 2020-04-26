@@ -71,7 +71,7 @@ class Accessibility(commands.Cog, name='accessibility'):
 
     @flags.add_flag('--to-ec', action='store_true', default=False)
     @flags.command(name='steal-these')
-    async def steal_these(self, ctx: commands.Context, message: discord.Message, **options):
+    async def steal_these(self, ctx: SubContext, message: discord.Message, **options):
         """
         "Steal" the custom emojis from a message
         pass --to-ec to upload to Emote Collector

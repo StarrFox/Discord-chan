@@ -64,6 +64,7 @@ class Snipe(commands.Cog, name='snipe'):
         if not channel.permissions_for(ctx.author).read_messages:
             return await ctx.send("You need permission to view a channel to snipe from it.")
 
+        # noinspection PyTypeChecker
         snipes = self.get_snipes(
             ctx,
             channel=channel,
@@ -90,6 +91,7 @@ class Snipe(commands.Cog, name='snipe'):
 
         else:
             try:
+                # noinspection PyTypeChecker
                 snipe = snipes[options['index']]
             except IndexError:
                 return await ctx.send("Index out of bounds.")
@@ -162,7 +164,7 @@ class Snipe(commands.Cog, name='snipe'):
                     filtered = list(filter(_filter, filtered))
                 snipes.extend(filtered)
 
-            # need to be reorded by time, would be by channel otherwise
+            # need to be reordered by time, would be by channel otherwise
             snipes = list(reversed(sorted(snipes, key=lambda s: s.time)))
         else:
             snipes = self.bot.snipes[channel.guild.id][channel.id]

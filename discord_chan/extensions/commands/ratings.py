@@ -14,15 +14,12 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
-from collections import namedtuple
-
 import discord
 from discord.ext import commands
 
 from discord_chan import (BetweenConverter, MaxLengthConverter, BotConverter,
                           db, SubContext, EmbedFieldProxy,
                           EmbedFieldsPageSource, DCMenuPages)
-
 
 STAR = '\N{WHITE MEDIUM STAR}'
 ZERO = '0\N{VARIATION SELECTOR-16}\N{COMBINING ENCLOSING KEYCAP}'

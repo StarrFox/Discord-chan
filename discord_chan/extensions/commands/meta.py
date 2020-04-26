@@ -36,6 +36,7 @@ class Meta(commands.Cog, name='meta'):
         """
         await ctx.send(f"\N{TABLE TENNIS PADDLE AND BALL} {round(ctx.bot.latency * 1000)}ms")
 
+    # noinspection PyUnusedLocal
     @commands.command()
     async def suggest(self, ctx: SubContext, *, suggestion: str):
         """
