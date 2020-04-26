@@ -30,6 +30,7 @@ from terminaltables import AsciiTable
 from discord_chan import DCMenuPages, NormalPageSource, PartitionPaginator, SubContext, db
 
 try:
+    # noinspection PyPackageRequirements
     import psutil
 except ImportError:
     psutil = None

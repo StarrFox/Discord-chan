@@ -55,6 +55,6 @@ setup(
         'pyenchant',
         'click',
         'aioec',
-        'loguru'
+        'loguru', 'aioconsole'
     ]
 )
