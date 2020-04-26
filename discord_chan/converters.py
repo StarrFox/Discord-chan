@@ -202,7 +202,7 @@ class ImageUrlConverter(commands.Converter):
         if url_regex:
             return url_regex.string
 
-        raise commands.BadArgument('"{}" is not a member, custom emoji, or url.'.format(argument))
+        raise commands.BadArgument('"{}" is not a member, message, custom emoji, or url.'.format(argument))
 
 
 class ImageUrlDefault(commands.CustomDefault, display='LastImage'):
