@@ -24,9 +24,9 @@ from discord.ext import menus
 
 
 class Connect4(menus.Menu):
-    filler = '\N{BLACK LARGE SQUARE}'
-    red = '\N{LARGE RED CIRCLE}'
-    blue = '\N{LARGE BLUE CIRCLE}'
+    filler = "\N{BLACK LARGE SQUARE}"
+    red = "\N{LARGE RED CIRCLE}"
+    blue = "\N{LARGE BLUE CIRCLE}"
     numbers = [str(i) + "\N{VARIATION SELECTOR-16}\u20e3" for i in range(1, 8)]
 
     def __init__(self, player1: discord.Member, player2: discord.Member, **kwargs):
@@ -38,12 +38,11 @@ class Connect4(menus.Menu):
         self.last_move = None
         self.winner = None
         # noinspection PyTypeChecker
-        self.board = numpy.full(
-            (6, 7),
-            self.filler
-        )
+        self.board = numpy.full((6, 7), self.filler)
         # This is kinda hacky but /shrug
-        for button in [menus.Button(num, self.do_number_button) for num in self.numbers]:
+        for button in [
+            menus.Button(num, self.do_number_button) for num in self.numbers
+        ]:
             self.add_button(button)
 
     def reaction_check(self, payload):
@@ -83,7 +82,7 @@ class Connect4(menus.Menu):
         for emoji in self.buttons:
             await msg.add_reaction(emoji)
 
-    @menus.button('\N{CROSS MARK}', position=menus.Last(1))
+    @menus.button("\N{CROSS MARK}", position=menus.Last(1))
     async def do_cancel(self, _):
         self.stop()
 
@@ -99,9 +98,9 @@ class Connect4(menus.Menu):
         """
         The string representing the board for discord
         """
-        msg = '\n'.join([''.join(i) for i in self.board])
-        msg += '\n'
-        msg += ''.join(self.numbers)
+        msg = "\n".join(["".join(i) for i in self.board])
+        msg += "\n"
+        msg += "".join(self.numbers)
         return msg
 
     @property
@@ -109,15 +108,15 @@ class Connect4(menus.Menu):
         """
         The embed to send to discord
         """
-        board_embed = discord.Embed(
-            description=self.board_message
-        )
+        board_embed = discord.Embed(description=self.board_message)
 
         if self.last_move is not None:
-            board_embed.add_field(name='Last move', value=self.last_move, inline=False)
+            board_embed.add_field(name="Last move", value=self.last_move, inline=False)
 
         if self._running:
-            board_embed.add_field(name='Current turn', value=self.current_player.mention)
+            board_embed.add_field(
+                name="Current turn", value=self.current_player.mention
+            )
 
         return board_embed
 
@@ -134,7 +133,7 @@ class Connect4(menus.Menu):
         def check(array: list):
             array = list(array)
             for i in range(len(array) - 3):
-                if array[i:i + 4].count(self.current_piece) == 4:
+                if array[i : i + 4].count(self.current_piece) == 4:
                     return True
 
         for row in self.board:
@@ -151,7 +150,10 @@ class Connect4(menus.Menu):
                 dias.append(list(matrix.diagonal(offset)))
             return dias
 
-        for diagonal in [*get_diagonals(self.board), *get_diagonals(numpy.fliplr(self.board))]:
+        for diagonal in [
+            *get_diagonals(self.board),
+            *get_diagonals(numpy.fliplr(self.board)),
+        ]:
             if check(diagonal):
                 return True
 
@@ -165,30 +167,30 @@ class Connect4(menus.Menu):
 
 
 class MasterMindMenu(menus.Menu):
-    VARIATION_SELECTOR = '\N{VARIATION SELECTOR-16}'
+    VARIATION_SELECTOR = "\N{VARIATION SELECTOR-16}"
 
     EMOJI_LIST = [
-        'wut:595570319490809857',
-        'weebagree:665491422295752705',
-        'teeth:586043416110956574',
-        'teehee:597962329031704587',
-        'senpai:582035624899379201',
+        "wut:595570319490809857",
+        "weebagree:665491422295752705",
+        "teeth:586043416110956574",
+        "teehee:597962329031704587",
+        "senpai:582035624899379201",
     ]
 
-    RESEND_ARROW = '\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}'
-    LEFT_ARROW = '\N{BLACK LEFT-POINTING TRIANGLE}' + VARIATION_SELECTOR
-    RETURN_ARROW = '\N{LEFTWARDS ARROW WITH HOOK}' + VARIATION_SELECTOR
+    RESEND_ARROW = "\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}"
+    LEFT_ARROW = "\N{BLACK LEFT-POINTING TRIANGLE}" + VARIATION_SELECTOR
+    RETURN_ARROW = "\N{LEFTWARDS ARROW WITH HOOK}" + VARIATION_SELECTOR
     # these two don't work with names on lower python versions
-    YELLOW_CIRCLE = '\U0001f7e1'
-    GREEN_CIRCLE = '\U0001f7e2'
-    CROSS_MARK = '\N{CROSS MARK}'
+    YELLOW_CIRCLE = "\U0001f7e1"
+    GREEN_CIRCLE = "\U0001f7e2"
+    CROSS_MARK = "\N{CROSS MARK}"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.tries = 10
         self.value = None
         self.position = 0
-        self.entry = ['X'] * 5
+        self.entry = ["X"] * 5
         self.previous_tries = []
         self.code = self.get_code()
 
@@ -197,41 +199,41 @@ class MasterMindMenu(menus.Menu):
 
     async def send_initial_message(self, ctx, channel):
         return await ctx.send(
-            f'\n{self.YELLOW_CIRCLE} means the emoji is used in the code but in a different position.'
-            f'\n{self.GREEN_CIRCLE} means the emoji is correct and in the correct position.'
-            f'\n**Circles are not ordered.**'
-            f'\nCode is 5 emojis.'
-            f'\n\nControls:'
-            f'\n<emoji> enter that emoji in the entry box.'
-            f'\n{self.RESEND_ARROW} resend message interface.'
-            f'\n{self.LEFT_ARROW} backspace last emoji in entry box.'
-            f'\n{self.RETURN_ARROW} enters guess.',
-            no_edit=True
+            f"\n{self.YELLOW_CIRCLE} means the emoji is used in the code but in a different position."
+            f"\n{self.GREEN_CIRCLE} means the emoji is correct and in the correct position."
+            f"\n**Circles are not ordered.**"
+            f"\nCode is 5 emojis."
+            f"\n\nControls:"
+            f"\n<emoji> enter that emoji in the entry box."
+            f"\n{self.RESEND_ARROW} resend message interface."
+            f"\n{self.LEFT_ARROW} backspace last emoji in entry box."
+            f"\n{self.RETURN_ARROW} enters guess.",
+            no_edit=True,
         )
 
     @property
     def console(self) -> str:
         res = [
-            f'Tries left: {self.tries}',
-            '**Note: Circles are not ordered.**',
+            f"Tries left: {self.tries}",
+            "**Note: Circles are not ordered.**",
             *self.previous_tries,
-            ' '.join(self.entry)
+            " ".join(self.entry),
         ]
-        return '\n'.join(res)
+        return "\n".join(res)
 
     async def do_entry_button(self, payload):
         if self.position == 5:
             return await self.ctx.send(
-                f'{self.ctx.author.mention}, Max entry reached.',
+                f"{self.ctx.author.mention}, Max entry reached.",
                 delete_after=5,
-                no_edit=True
+                no_edit=True,
             )
 
         if str(payload.emoji) in self.entry:
             return await self.ctx.send(
-                f'{self.ctx.author.mention}, No duplicate emojis.',
+                f"{self.ctx.author.mention}, No duplicate emojis.",
                 delete_after=5,
-                no_edit=True
+                no_edit=True,
             )
 
         self.entry[self.position] = str(payload.emoji)
@@ -251,16 +253,16 @@ class MasterMindMenu(menus.Menu):
             return
 
         self.position -= 1
-        self.entry[self.position] = 'X'
+        self.entry[self.position] = "X"
         await self.message.edit(content=self.console)
 
     @menus.button(RETURN_ARROW, position=menus.Last(2))
     async def do_enter(self, _):
         if self.position != 5:
             return await self.ctx.send(
-                f'{self.ctx.author.mention}, Entry not full.',
+                f"{self.ctx.author.mention}, Entry not full.",
                 delete_after=5,
-                no_edit=True
+                no_edit=True,
             )
 
         if self.entry == self.code:
@@ -269,11 +271,9 @@ class MasterMindMenu(menus.Menu):
             return
 
         dots = self.get_dots()
-        self.previous_tries.append(
-            f"{' '.join(self.entry)} => {dots}"
-        )
+        self.previous_tries.append(f"{' '.join(self.entry)} => {dots}")
 
-        self.entry = ['X'] * 5
+        self.entry = ["X"] * 5
         self.position = 0
         self.tries -= 1
 
@@ -284,7 +284,7 @@ class MasterMindMenu(menus.Menu):
 
             await self.ctx.send(
                 f'Sorry {self.ctx.author.mention}, out of tries. The code was\n{" ".join(self.code)}.',
-                no_edit=True
+                no_edit=True,
             )
 
             self.stop()
@@ -310,4 +310,4 @@ class MasterMindMenu(menus.Menu):
         if not res:
             return self.CROSS_MARK
 
-        return ''.join(sorted(res))
+        return "".join(sorted(res))

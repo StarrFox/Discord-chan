@@ -76,10 +76,11 @@ def executor_function(sync_function: Callable):
     return sync_wrapper
 
 
-TypedBytes = namedtuple('TypedBytes', 'file_bytes content_type')
+TypedBytes = namedtuple("TypedBytes", "file_bytes content_type")
 
 
 # Getting images
+
 
 async def get_bytes(link: str, *, max_length: int = 100) -> TypedBytes:
     """
@@ -97,12 +98,11 @@ async def get_bytes(link: str, *, max_length: int = 100) -> TypedBytes:
 
         if response.content_length > max_length:
             raise FileTooLarge(
-                f'{(response.content_length / 1000) / 1000}mb is over max size of {(max_length / 1000 / 1000)}mb.'
+                f"{(response.content_length / 1000) / 1000}mb is over max size of {(max_length / 1000 / 1000)}mb."
             )
 
         return TypedBytes(
-            file_bytes=await response.read(),
-            content_type=response.content_type
+            file_bytes=await response.read(), content_type=response.content_type
         )
 
 
@@ -117,7 +117,7 @@ async def url_to_image(link: str) -> Image.Image:
 
     # Todo: get the exact formats the running PIL supports
     # Check before to try and save some memory
-    if 'image' not in content_type.lower():
+    if "image" not in content_type.lower():
         raise InvalidImageType(f"{content_type.lower()} is not a valid image type.")
 
     file_obj = BytesIO(image_bytes)
@@ -137,16 +137,18 @@ async def url_to_image(link: str) -> Image.Image:
 
 # Saving images
 
+
 @executor_function
 def tarball_images(
-        images: List[Image.Image],
-        *,
-        name: str = None,
-        animated: bool = False,
-        format: str = 'png',
-        extras: List[Tuple[str, BytesIO]]) -> BytesIO:
+    images: List[Image.Image],
+    *,
+    name: str = None,
+    animated: bool = False,
+    format: str = "png",
+    extras: List[Tuple[str, BytesIO]],
+) -> BytesIO:
     fp = BytesIO()
-    tar = TarFile(mode='w', fileobj=fp)
+    tar = TarFile(mode="w", fileobj=fp)
 
     for idx, image in enumerate(images):
         f = BytesIO()
@@ -164,7 +166,7 @@ def tarball_images(
         tar.addfile(info, fileobj=f)
 
     for extra in extras:
-        info = TarInfo(extra[0] or '_.txt')
+        info = TarInfo(extra[0] or "_.txt")
         info.size = len(extra[1].getbuffer())
         tar.addfile(info, fileobj=extra[1])
 
@@ -173,7 +175,9 @@ def tarball_images(
 
 
 @executor_function
-def image_to_file(image: Image.Image, filename: str = None, format: str = 'png') -> File:
+def image_to_file(
+    image: Image.Image, filename: str = None, format: str = "png"
+) -> File:
     """
     Saves an image into a :class:discord.File
     :param image: The image to save
@@ -188,10 +192,14 @@ def image_to_file(image: Image.Image, filename: str = None, format: str = 'png')
 
     return File(buffer, filename=filename)
 
+
 # Image helpers
 
+
 @executor_function
-def get_image_hash(image: Image.Image, *, resize: Optional[Tuple[int, int]] = None) -> ImageHash:
+def get_image_hash(
+    image: Image.Image, *, resize: Optional[Tuple[int, int]] = None
+) -> ImageHash:
     """
     Get an ImageHash from the image
     Resize is included because of how offten it's used with Hashing
@@ -206,10 +214,12 @@ def get_image_hash(image: Image.Image, *, resize: Optional[Tuple[int, int]] = No
     return phash(image)
 
 
-WallifyFactors = namedtuple('WallifyFactors', 'image_size wall_size emoji_size')
+WallifyFactors = namedtuple("WallifyFactors", "image_size wall_size emoji_size")
 
 
-def get_wallify_factors(image_size: Tuple[int, int], wall_size: Tuple[int, int]) -> WallifyFactors:
+def get_wallify_factors(
+    image_size: Tuple[int, int], wall_size: Tuple[int, int]
+) -> WallifyFactors:
     img_width, img_height = image_size
     wall_width, wall_height = wall_size
 
@@ -225,26 +235,26 @@ def get_wallify_factors(image_size: Tuple[int, int], wall_size: Tuple[int, int])
     return WallifyFactors(
         image_size=(new_width, new_height),
         wall_size=(num_of_rows, num_of_columns),
-        emoji_size=(emoji_width, emoji_height)
+        emoji_size=(emoji_width, emoji_height),
     )
 
 
 def get_wallify_example_file(wall_size: Tuple[int, int], name: str = None) -> BytesIO:
     num_of_rows, num_of_columns = wall_size
 
-    text = '```\n'
+    text = "```\n"
     for row in range(num_of_rows):
         for column in range(num_of_columns):
             place = (num_of_columns * row) + column
             if name:
-                text += f':{name}_{place}:'
+                text += f":{name}_{place}:"
             else:
-                text += f':{place}:'
+                text += f":{place}:"
 
-        text += '\n'
-    text += '\n```'
+        text += "\n"
+    text += "\n```"
 
-    file_bytes = bytes(text, 'utf-8')
+    file_bytes = bytes(text, "utf-8")
 
     file = BytesIO(file_bytes)
 
@@ -252,6 +262,7 @@ def get_wallify_example_file(wall_size: Tuple[int, int], name: str = None) -> By
 
 
 # Image manipulating
+
 
 @executor_function
 def wallify_image(image: Image.Image, width: int, height: int) -> list:
@@ -266,24 +277,34 @@ def wallify_image(image: Image.Image, width: int, height: int) -> list:
 
     factors = get_wallify_factors(image.size, (width, height))
 
-    (new_width, new_height), (num_of_rows, num_of_columns), (image_width, image_height) = factors
+    (
+        (new_width, new_height),
+        (num_of_rows, num_of_columns),
+        (image_width, image_height),
+    ) = factors
 
     image = image.resize((new_width, new_height))
 
     for row in range(num_of_rows):
         for column in range(num_of_columns):
-            images.append(image.crop((
-                column * image_width,
-                row * image_height,
-                (column * image_width) + image_width,
-                (row * image_height) + image_height
-            )))
+            images.append(
+                image.crop(
+                    (
+                        column * image_width,
+                        row * image_height,
+                        (column * image_width) + image_width,
+                        (row * image_height) + image_height,
+                    )
+                )
+            )
 
     return images
 
 
 @executor_function
-def wallify_gif_image(image: Image.Image, width: int, height: int, *, name: str = None) -> Tuple[list, BytesIO]:
+def wallify_gif_image(
+    image: Image.Image, width: int, height: int, *, name: str = None
+) -> Tuple[list, BytesIO]:
     """
     Wallify a gif image
     :param image: The base Image
@@ -296,7 +317,11 @@ def wallify_gif_image(image: Image.Image, width: int, height: int, *, name: str 
 
     factors = get_wallify_factors(image.size, (width, height))
 
-    (new_width, new_height), (num_of_rows, num_of_columns), (emoji_width, emoji_height) = factors
+    (
+        (new_width, new_height),
+        (num_of_rows, num_of_columns),
+        (emoji_width, emoji_height),
+    ) = factors
 
     for row in range(num_of_rows):
         for column in range(num_of_columns):
@@ -304,12 +329,16 @@ def wallify_gif_image(image: Image.Image, width: int, height: int, *, name: str 
 
             for page in ImageSequence.Iterator(image):
                 page = page.resize((new_width, new_height))
-                frames.append(page.crop((
-                    column * emoji_width,
-                    row * emoji_height,
-                    (column * emoji_width) + emoji_width,
-                    (row * emoji_height) + emoji_height
-                )))
+                frames.append(
+                    page.crop(
+                        (
+                            column * emoji_width,
+                            row * emoji_height,
+                            (column * emoji_width) + emoji_width,
+                            (row * emoji_height) + emoji_height,
+                        )
+                    )
+                )
 
             images.append(frames)
 
@@ -319,7 +348,9 @@ def wallify_gif_image(image: Image.Image, width: int, height: int, *, name: str 
 
 
 def equalize_images(*images) -> List[Image.Image]:
-    sorted_by_area = sorted(((i, i.size[0] * i.size[1]) for i in images), key=lambda t: t[1])
+    sorted_by_area = sorted(
+        ((i, i.size[0] * i.size[1]) for i in images), key=lambda t: t[1]
+    )
 
     base = sorted_by_area[0][0]
     equalized = [base]
@@ -369,11 +400,11 @@ def difference_image(image1: Image.Image, image2: Image.Image) -> Image.Image:
     """
     images = []
     for image in (image1, image2):
-        if image.mode == 'RGB':
+        if image.mode == "RGB":
             images.append(image)
 
         else:
-            images.append(image.convert('RGB'))
+            images.append(image.convert("RGB"))
 
     equalized = equalize_images(*images)
 

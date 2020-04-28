@@ -21,18 +21,27 @@ import discord
 from aioec import EmoteExists
 from discord.ext import commands, flags
 
-from discord_chan import (ImageUrlConverter, ImageUrlDefault, DiscordChan, get_bytes, SubContext)
+from discord_chan import (
+    ImageUrlConverter,
+    ImageUrlDefault,
+    DiscordChan,
+    get_bytes,
+    SubContext,
+)
 
-CUSTOM_EMOJI_REGEX = r'<(?P<animated>a)?:(?P<name>[0-9a-zA-Z_]{2,32}):(?P<id>[0-9]{15,21})>'
+CUSTOM_EMOJI_REGEX = (
+    r"<(?P<animated>a)?:(?P<name>[0-9a-zA-Z_]{2,32}):(?P<id>[0-9]{15,21})>"
+)
 
 
-class Accessibility(commands.Cog, name='accessibility'):
-
+class Accessibility(commands.Cog, name="accessibility"):
     def __init__(self, bot: DiscordChan):
         self.bot = bot
 
     @commands.command()
-    async def sendlink(self, ctx: commands.Context, thing: ImageUrlConverter = ImageUrlDefault):
+    async def sendlink(
+        self, ctx: commands.Context, thing: ImageUrlConverter = ImageUrlDefault
+    ):
         """
         Sends the link of a member, custom emoji, message attachment, message embed, or repeats a link.
         idk why you would use the last one
@@ -40,8 +49,10 @@ class Accessibility(commands.Cog, name='accessibility'):
         thing: str
         await ctx.send(thing)
 
-    @commands.command(aliases=['popembed'])
-    async def sendfile(self, ctx: SubContext, thing: ImageUrlConverter = ImageUrlDefault):
+    @commands.command(aliases=["popembed"])
+    async def sendfile(
+        self, ctx: SubContext, thing: ImageUrlConverter = ImageUrlDefault
+    ):
         """
         Sends the image file of a member, custom emoji, message attachment or message embed
         """
@@ -50,7 +61,7 @@ class Accessibility(commands.Cog, name='accessibility'):
 
         buffer = BytesIO(res.file_bytes)
 
-        file = discord.File(buffer, 'popped.png')
+        file = discord.File(buffer, "popped.png")
         await ctx.send(file=file, no_edit=True)
 
     # # Todo: finish
@@ -69,15 +80,15 @@ class Accessibility(commands.Cog, name='accessibility'):
     #
     #     await ctx.send('\n'.join(res))
 
-    @flags.add_flag('--to-ec', action='store_true', default=False)
-    @flags.command(name='steal-these')
+    @flags.add_flag("--to-ec", action="store_true", default=False)
+    @flags.command(name="steal-these")
     async def steal_these(self, ctx: SubContext, message: discord.Message, **options):
         """
         "Steal" the custom emojis from a message
         pass --to-ec to upload to Emote Collector
         """
-        if options['to_ec'] and not self.bot.ec:
-            return await ctx.send('Emotecollector api is not enabled.')
+        if options["to_ec"] and not self.bot.ec:
+            return await ctx.send("Emotecollector api is not enabled.")
 
         emojis = []
 
@@ -85,32 +96,30 @@ class Accessibility(commands.Cog, name='accessibility'):
             groups = group.groups()
             emojis.append(
                 discord.PartialEmoji(
-                    animated=bool(groups[0]),
-                    name=groups[1],
-                    id=groups[2]
+                    animated=bool(groups[0]), name=groups[1], id=groups[2]
                 )
             )
 
         if not emojis:
-            return await ctx.send('No custom emojis found in message.')
+            return await ctx.send("No custom emojis found in message.")
 
-        if options['to_ec']:
+        if options["to_ec"]:
             for emoji in emojis:
                 try:
-                    await self.bot.ec.create(
-                        name=emoji.name,
-                        url=str(emoji.url)
+                    await self.bot.ec.create(name=emoji.name, url=str(emoji.url))
+
+                    await ctx.send(
+                        f"Emote {emoji.name} added to EmoteCollector.", no_edit=True
                     )
 
-                    await ctx.send(f'Emote {emoji.name} added to EmoteCollector.', no_edit=True)
-
                 except EmoteExists:
-                    await ctx.send(f'Emote named {emoji.name} already exists in EmoteCollector.', no_edit=True)
+                    await ctx.send(
+                        f"Emote named {emoji.name} already exists in EmoteCollector.",
+                        no_edit=True,
+                    )
 
         else:
-            await ctx.send(
-                '\n'.join([f'{e.name}: <{e.url!s}>' for e in emojis])
-            )
+            await ctx.send("\n".join([f"{e.name}: <{e.url!s}>" for e in emojis]))
 
 
 def setup(bot: DiscordChan):

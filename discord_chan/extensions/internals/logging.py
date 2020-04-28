@@ -23,49 +23,54 @@ from loguru import logger
 from discord_chan import PartitionPaginator
 
 
-class Logging(commands.Cog, name='logging'):
-
+class Logging(commands.Cog, name="logging"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.handler_id = logger.add(
             self.send_to_webhook,
-            format='{level.icon} [{level}] ({time:YYYY-MM-DD HH:mm:ss.SSS}) -'
-                   '` {name}:{function}:{line}` - {message}',
-            level='INFO',
-            filter='discord_chan'
+            format="{level.icon} [{level}] ({time:YYYY-MM-DD HH:mm:ss.SSS}) -"
+            "` {name}:{function}:{line}` - {message}",
+            level="INFO",
+            filter="discord_chan",
         )
 
     async def send_to_webhook(self, message):
         if self.bot.is_closed():
             return
 
-        channel = self.bot.get_channel(int(self.bot.config['discord']['logging_channel']))
+        channel = self.bot.get_channel(
+            int(self.bot.config["discord"]["logging_channel"])
+        )
 
         if channel is None:
             # cache populating
             await asyncio.sleep(10)
 
-            channel = self.bot.get_channel(int(self.bot.config['discord']['logging_channel']))
+            channel = self.bot.get_channel(
+                int(self.bot.config["discord"]["logging_channel"])
+            )
 
             if channel is None:
-                raise RuntimeError('Config logging_channel id wrong.')
+                raise RuntimeError("Config logging_channel id wrong.")
 
-        webhook: discord.Webhook = discord.utils.get(await channel.webhooks(), name='Logging')
+        webhook: discord.Webhook = discord.utils.get(
+            await channel.webhooks(), name="Logging"
+        )
 
         if webhook is None:
-            webhook = await channel.create_webhook(name='Logging')
+            webhook = await channel.create_webhook(name="Logging")
 
         pager = PartitionPaginator(prefix=None, suffix=None)
 
         pager.add_line(message)
 
         # 30 = WARNING
-        if message.record['level'].no >= 30:
+        if message.record["level"].no >= 30:
             if self.bot.owner_id:
-                pager.add_line(f'<@!{self.bot.owner_id}>')
+                pager.add_line(f"<@!{self.bot.owner_id}>")
 
             else:
-                pager.add_line(' '.join([f'<@!{i}>' for i in self.bot.owner_ids]))
+                pager.add_line(" ".join([f"<@!{i}>" for i in self.bot.owner_ids]))
 
         if self.bot.owner_id:
             allowed_users = [discord.Object(id=self.bot.owner_id)]
@@ -76,12 +81,10 @@ class Logging(commands.Cog, name='logging'):
         for page in pager.pages:
             await webhook.send(
                 page,
-                username=str(message.record['module']),
+                username=str(message.record["module"]),
                 allowed_mentions=discord.AllowedMentions(
-                    everyone=False,
-                    roles=False,
-                    users=allowed_users
-                )
+                    everyone=False, roles=False, users=allowed_users
+                ),
             )
 
     def cog_unload(self):
@@ -91,34 +94,39 @@ class Logging(commands.Cog, name='logging'):
     async def on_message(self, message: discord.Message):
         if not message.guild and message.author != self.bot.user:
             logger.info(
-                f'DM author={message.author} ({message.author.id}) id={message.id} content={message.content}.'
+                f"DM author={message.author} ({message.author.id}) id={message.id} content={message.content}."
             )
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild: discord.Guild):
-        percent_bots = round((sum(1 for i in guild.members if i.bot) / guild.member_count) * 100)
+        percent_bots = round(
+            (sum(1 for i in guild.members if i.bot) / guild.member_count) * 100
+        )
 
         logger.info(
-            f'Joined_guild name={guild} id={guild.id} owner={guild.owner} ({guild.owner.id})'
-            f' percent_bots={percent_bots}.'
+            f"Joined_guild name={guild} id={guild.id} owner={guild.owner} ({guild.owner.id})"
+            f" percent_bots={percent_bots}."
         )
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: discord.Guild):
-        percent_bots = round((sum(1 for i in guild.members if i.bot) / guild.member_count) * 100)
+        percent_bots = round(
+            (sum(1 for i in guild.members if i.bot) / guild.member_count) * 100
+        )
 
         logger.info(
-            f'left_guild name={guild.name} id={guild.id} owner={guild.owner} ({guild.owner.id})'
-            f' percent_bots={percent_bots}.'
+            f"left_guild name={guild.name} id={guild.id} owner={guild.owner} ({guild.owner.id})"
+            f" percent_bots={percent_bots}."
         )
 
     @commands.Cog.listener()
     async def on_command_completion(self, ctx: commands.Context):
         logger.info(
-            f'Ran command {ctx.command} guild={ctx.guild} ({ctx.guild.id})'
-            f' author={ctx.author} ({ctx.author.id}).'
+            f"Ran command {ctx.command} guild={ctx.guild} ({ctx.guild.id})"
+            f" author={ctx.author} ({ctx.author.id})."
         )
 
+
 def setup(bot: commands.Bot):
-    if bot.config['discord']['logging_channel']:
+    if bot.config["discord"]["logging_channel"]:
         bot.add_cog(Logging(bot))

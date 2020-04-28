@@ -24,32 +24,36 @@ from discord_chan import AuthorBlacklisted
 
 
 async def on_command_error(ctx: commands.Context, error):
-    error = getattr(error, 'original', error)
+    error = getattr(error, "original", error)
 
     if isinstance(error, (commands.CommandNotFound, AuthorBlacklisted)):
         return
 
     # Bypass checks for owner
-    elif isinstance(error, commands.CheckFailure) and await ctx.bot.is_owner(ctx.author):
+    elif isinstance(error, commands.CheckFailure) and await ctx.bot.is_owner(
+        ctx.author
+    ):
         await ctx.reinvoke()
         return
 
     # Reset cooldown when command doesn't finish
-    elif isinstance(error, commands.CommandError) and not isinstance(error, commands.CommandOnCooldown):
+    elif isinstance(error, commands.CommandError) and not isinstance(
+        error, commands.CommandOnCooldown
+    ):
         ctx.command.reset_cooldown(ctx)
         return await ctx.send(str(error))
 
     elif isinstance(error, commands.CommandOnCooldown):
         delta = timedelta(seconds=error.retry_after)
         natural = naturaldelta(delta)
-        return await ctx.send(f'Command on cooldown, retry in {natural}.')
+        return await ctx.send(f"Command on cooldown, retry in {natural}.")
 
     logger.opt(exception=(type(error), error, error.__traceback__)).error(
         f"Unhandled error in command {ctx.command.name}\nInvoke message: {ctx.message.content}"
     )
 
     await ctx.send(
-        f'Unknown error while executing {ctx.command}, you can join the support server (`support` command) for updates'
+        f"Unknown error while executing {ctx.command}, you can join the support server (`support` command) for updates"
     )
 
 

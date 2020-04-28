@@ -34,19 +34,22 @@ from .snipe import Snipe
 
 
 class DiscordChan(commands.AutoShardedBot):
-
-    def __init__(self, config: ConfigParser, *, context: commands.Context = SubContext, **kwargs):
+    def __init__(
+        self, config: ConfigParser, *, context: commands.Context = SubContext, **kwargs
+    ):
         """
         :param config: Config parser object
         :param context: Context factory to use
         """
         super().__init__(
-            command_prefix=kwargs.pop('command_prefix', self.get_command_prefix),
-            case_insensitive=kwargs.pop('case_insensitive', True),
-            max_messages=kwargs.pop('max_messages', 10_000),
-            help_command=kwargs.pop('help_command', Minimal()),
-            allowed_mentions=kwargs.pop('allowed_mentions', discord.AllowedMentions(everyone=False, roles=False)),
-            **kwargs
+            command_prefix=kwargs.pop("command_prefix", self.get_command_prefix),
+            case_insensitive=kwargs.pop("case_insensitive", True),
+            max_messages=kwargs.pop("max_messages", 10_000),
+            help_command=kwargs.pop("help_command", Minimal()),
+            allowed_mentions=kwargs.pop(
+                "allowed_mentions", discord.AllowedMentions(everyone=False, roles=False)
+            ),
+            **kwargs,
         )
         self.config = config
         self.context = context
@@ -62,14 +65,20 @@ class DiscordChan(commands.AutoShardedBot):
         # {bot_id: {prefixes}}
         self.other_bot_prefixes: Dict[int, Set[str]] = defaultdict(lambda: set())
         # {guild_id: {prefixes}}
-        self.prefixes: Dict[int, Set[str]] = defaultdict(lambda: {config['general']['prefix']})
+        self.prefixes: Dict[int, Set[str]] = defaultdict(
+            lambda: {config["general"]["prefix"]}
+        )
         # {send_from: {send_to}}
-        self.channel_links: Dict[discord.TextChannel, Set[discord.TextChannel]] = defaultdict(lambda: set())
+        self.channel_links: Dict[
+            discord.TextChannel, Set[discord.TextChannel]
+        ] = defaultdict(lambda: set())
         # {guild_id: {channel_id: deque[Snipe]}}
-        self.snipes: Dict[int, Dict[int, Deque[Snipe]]] = defaultdict(lambda: defaultdict(lambda: deque(maxlen=5_000)))
+        self.snipes: Dict[int, Dict[int, Deque[Snipe]]] = defaultdict(
+            lambda: defaultdict(lambda: deque(maxlen=5_000))
+        )
 
-        if config['extra_tokens']['emote_collector']:
-            self.ec = EcClient(token=config['extra_tokens']['emote_collector'])
+        if config["extra_tokens"]["emote_collector"]:
+            self.ec = EcClient(token=config["extra_tokens"]["emote_collector"])
 
         else:
             self.ec = None
@@ -81,10 +90,7 @@ class DiscordChan(commands.AutoShardedBot):
         Gets a message from cache
         :param message_id: The message id to get
         """
-        return discord.utils.get(
-            self.cached_messages,
-            id=message_id
-        )
+        return discord.utils.get(self.cached_messages, id=message_id)
 
     async def process_commands(self, message):
         if message.author.bot:
@@ -106,13 +112,13 @@ class DiscordChan(commands.AutoShardedBot):
 
         await self.load_prefixes()
 
-        if self.config['general'].getboolean('load_extensions'):
-            self.load_extensions_from_dir('discord_chan/extensions')
+        if self.config["general"].getboolean("load_extensions"):
+            self.load_extensions_from_dir("discord_chan/extensions")
 
-        logger.info(f'Bot ready with {len(self.extensions.keys())} extensions.')
+        logger.info(f"Bot ready with {len(self.extensions.keys())} extensions.")
 
     def run(self, *args, **kwargs):
-        return super().run(self.config['discord']['token'], *args, **kwargs)
+        return super().run(self.config["discord"]["token"], *args, **kwargs)
 
     def load_extensions_from_dir(self, path: Union[str, pathlib.Path]) -> int:
         """
@@ -132,19 +138,19 @@ class DiscordChan(commands.AutoShardedBot):
 
         extension_names = []
 
-        for subpath in path.glob('**/[!_]*.py'):  # Ignore if starts with _
+        for subpath in path.glob("**/[!_]*.py"):  # Ignore if starts with _
 
-            parts = subpath.with_suffix('').parts
-            if parts[0] == '.':
+            parts = subpath.with_suffix("").parts
+            if parts[0] == ".":
                 parts = parts[1:]
 
-            extension_names.append('.'.join(parts))
+            extension_names.append(".".join(parts))
 
         for ext in extension_names:
             try:
                 self.load_extension(ext)
             except (commands.errors.ExtensionError, commands.errors.ExtensionFailed):
-                logger.exception('Failed loading ' + ext)
+                logger.exception("Failed loading " + ext)
 
         return len(self.extensions.keys()) - before
 
@@ -153,10 +159,12 @@ class DiscordChan(commands.AutoShardedBot):
         """
         Keeps the status message active
         """
-        await self.change_presence(activity=discord.Activity(
-            type=discord.ActivityType.listening,
-            name=f"{self.config['general']['prefix']}help"
-        ))
+        await self.change_presence(
+            activity=discord.Activity(
+                type=discord.ActivityType.listening,
+                name=f"{self.config['general']['prefix']}help",
+            )
+        )
 
     @presence_cycle.before_loop
     async def presence_cycle_before(self):
@@ -166,26 +174,27 @@ class DiscordChan(commands.AutoShardedBot):
     async def presence_cycle_after(self):
         if self.presence_cycle.failed():
             # Only here because it somehow had an error once
-            logger.exception('Presence cycle somehow errored out, restarting.')
+            logger.exception("Presence cycle somehow errored out, restarting.")
             self.presence_cycle.restart()
 
     async def get_command_prefix(self, _, message: discord.Message):
         if message.guild:
             # sorting fixes cases where part of another prefix is a prefix for example
             # if the prefix d was before dc/, c/ would be interpreted as a command
-            prefixes = sorted(self.prefixes[message.guild.id],
-                              key=lambda s: len(s),
-                              reverse=True
-                              )
+            prefixes = sorted(
+                self.prefixes[message.guild.id], key=lambda s: len(s), reverse=True
+            )
 
             return commands.when_mentioned_or(*prefixes)(self, message)
         else:  # DM
-            return commands.when_mentioned_or(self.config['general']['prefix'], '')(self, message)
+            return commands.when_mentioned_or(self.config["general"]["prefix"], "")(
+                self, message
+            )
 
     def blacklist_check(self, ctx: commands.Context):
         if ctx.author.id in self.blacklist:
             reason = self.blacklist[ctx.author.id]
-            raise AuthorBlacklisted(f'{ctx.author} is blacklisted for {reason}.')
+            raise AuthorBlacklisted(f"{ctx.author} is blacklisted for {reason}.")
 
         return True
 
@@ -205,7 +214,7 @@ class DiscordChan(commands.AutoShardedBot):
                 await cursor.executemany(
                     "INSERT INTO prefixes (guild_id, prefixes) VALUES (?, ?) "
                     "ON CONFLICT (guild_id) DO UPDATE SET prefixes = EXCLUDED.prefixes",
-                    self.prefixes.items()
+                    self.prefixes.items(),
                 )
             await connection.commit()
 
@@ -213,8 +222,8 @@ class DiscordChan(commands.AutoShardedBot):
 
     async def load_blacklist(self):
         async with db.get_database() as connection:
-            cursor = await connection.execute('SELECT * FROM blacklist;')
+            cursor = await connection.execute("SELECT * FROM blacklist;")
             for user_id, reason in await cursor.fetchall():
                 self.blacklist[user_id] = reason
 
-        logger.info(f'Loaded {len(self.blacklist)} blacklisted users.')
+        logger.info(f"Loaded {len(self.blacklist)} blacklisted users.")

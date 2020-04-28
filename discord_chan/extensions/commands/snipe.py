@@ -20,18 +20,23 @@ from textwrap import shorten
 import discord
 from discord.ext import commands, flags
 
-from discord_chan import (SnipeMode, DiscordChan, DCMenuPages, snipe_parser,
-                          EmbedFieldProxy, EmbedFieldsPageSource)
+from discord_chan import (
+    SnipeMode,
+    DiscordChan,
+    DCMenuPages,
+    snipe_parser,
+    EmbedFieldProxy,
+    EmbedFieldsPageSource,
+)
 
 
-class Snipe(commands.Cog, name='snipe'):
-
+class Snipe(commands.Cog, name="snipe"):
     def __init__(self, bot: DiscordChan):
         self.bot = bot
 
     # Todo: --diff arg using diff lib; perhaps use ```diff? inconsistent with code blocks
     @snipe_parser
-    @commands.command(cls=flags.FlagCommand, name='snipe')
+    @commands.command(cls=flags.FlagCommand, name="snipe")
     async def snipe_command(self, ctx: commands.Context, **options: dict):
         """
         Snipe delete/edited messages from your server.
@@ -52,34 +57,38 @@ class Snipe(commands.Cog, name='snipe'):
         Nsfw (if not used from one) and channels you can't view are auto filtered out.
         """
 
-        if options['channel'] is None:
+        if options["channel"] is None:
             channel = ctx.channel
         else:
-            channel = options['channel']
+            channel = options["channel"]
 
         # These are filtered out by get_snipes anyway
         if not ctx.channel.is_nsfw() and channel.is_nsfw():
-            return await ctx.send("You cannot snipe a nsfw channel from a non-nsfw channel.")
+            return await ctx.send(
+                "You cannot snipe a nsfw channel from a non-nsfw channel."
+            )
 
         if not channel.permissions_for(ctx.author).read_messages:
-            return await ctx.send("You need permission to view a channel to snipe from it.")
+            return await ctx.send(
+                "You need permission to view a channel to snipe from it."
+            )
 
         # noinspection PyTypeChecker
         snipes = self.get_snipes(
             ctx,
             channel=channel,
-            guild=options['guild'],
-            authors=options['authors'],
-            before=options['before'],
-            after=options['after'],
-            mode=SnipeMode[options['mode']] if options['mode'] else None,
-            contains=options['contains']
+            guild=options["guild"],
+            authors=options["authors"],
+            before=options["before"],
+            after=options["after"],
+            mode=SnipeMode[options["mode"]] if options["mode"] else None,
+            contains=options["contains"],
         )
 
         if not snipes:
             return await ctx.send("No snipes found for this search.")
 
-        if options['list']:
+        if options["list"]:
             proxies = self.get_proxy_fields(snipes)
 
             # 5 * 1,024 = 5,120‬ + 500 (names) = 5,620 < 6000 (max embed size)
@@ -92,7 +101,7 @@ class Snipe(commands.Cog, name='snipe'):
         else:
             try:
                 # noinspection PyTypeChecker
-                snipe = snipes[options['index']]
+                snipe = snipes[options["index"]]
             except IndexError:
                 return await ctx.send("Index out of bounds.")
 
@@ -109,28 +118,31 @@ class Snipe(commands.Cog, name='snipe'):
         for snipe in snipes:
             # (6000 - (1,024 * 5)) / 5 = 176 max size my titles can be
             # 1,024 is the field value limit
-            res.append(EmbedFieldProxy(
-                shorten(str(snipe), 176, placeholder='...'),
-                shorten(snipe.content, 1_024, placeholder='...'),
-                False
-            ))
+            res.append(
+                EmbedFieldProxy(
+                    shorten(str(snipe), 176, placeholder="..."),
+                    shorten(snipe.content, 1_024, placeholder="..."),
+                    False,
+                )
+            )
 
         return res
 
-    def get_snipes(self,
-                   ctx: commands.Context,
-                   *,
-                   channel: discord.TextChannel = None,
-                   guild: bool = False,
-                   authors: typing.List[discord.Member] = None,
-                   before: int = None,
-                   after: int = None,
-                   mode: SnipeMode = None,
-                   contains: str = None
-                   ):
+    def get_snipes(
+        self,
+        ctx: commands.Context,
+        *,
+        channel: discord.TextChannel = None,
+        guild: bool = False,
+        authors: typing.List[discord.Member] = None,
+        before: int = None,
+        after: int = None,
+        mode: SnipeMode = None,
+        contains: str = None,
+    ):
 
         if channel is None and guild is None:
-            raise ValueError('Channel and Guild cannot both be None.')
+            raise ValueError("Channel and Guild cannot both be None.")
 
         filters = [
             lambda snipe: snipe.channel.permissions_for(ctx.author).read_messages
@@ -152,7 +164,7 @@ class Snipe(commands.Cog, name='snipe'):
             filters.append(lambda snipe: snipe.mode == mode)
 
         if contains:
-            to_match = ' '.join(contains)
+            to_match = " ".join(contains)
             filters.append(lambda snipe: to_match in snipe.content)
 
         if guild:

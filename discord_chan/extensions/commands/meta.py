@@ -18,12 +18,19 @@ import discord
 import humanize
 from discord.ext import commands
 
-from discord_chan import (__version__ as dc_version, DCMenuPages, PrologPaginator,
-                          NormalPageSource, checks, BotConverter,
-                          NamedCall, SubContext)
+from discord_chan import (
+    __version__ as dc_version,
+    DCMenuPages,
+    PrologPaginator,
+    NormalPageSource,
+    checks,
+    BotConverter,
+    NamedCall,
+    SubContext,
+)
 
 
-class Meta(commands.Cog, name='meta'):
+class Meta(commands.Cog, name="meta"):
     """Informational commands"""
 
     def __init__(self, bot: commands.Bot):
@@ -34,7 +41,9 @@ class Meta(commands.Cog, name='meta'):
         """
         Sends the bot's websocket latency
         """
-        await ctx.send(f"\N{TABLE TENNIS PADDLE AND BALL} {round(ctx.bot.latency * 1000)}ms")
+        await ctx.send(
+            f"\N{TABLE TENNIS PADDLE AND BALL} {round(ctx.bot.latency * 1000)}ms"
+        )
 
     # noinspection PyUnusedLocal
     @commands.command()
@@ -43,12 +52,14 @@ class Meta(commands.Cog, name='meta'):
         Suggest an idea for the bot
         """
         # lmao
-        await ctx.confirm('Your suggestion has been submitted')
+        await ctx.confirm("Your suggestion has been submitted")
 
     @commands.command()
-    async def invite(self,
-                     ctx: commands.Context,
-                     bot: BotConverter = NamedCall(lambda c, p: c.me, display='DiscordChan')):
+    async def invite(
+        self,
+        ctx: commands.Context,
+        bot: BotConverter = NamedCall(lambda c, p: c.me, display="DiscordChan"),
+    ):
         """
         Get the invite link for a bot,
         defaults to myself
@@ -63,45 +74,43 @@ class Meta(commands.Cog, name='meta'):
         """
         Links to the support server
         """
-        await ctx.send(self.bot.config['general']['support_url'])
+        await ctx.send(self.bot.config["general"]["support_url"])
 
     @commands.command()
     async def source(self, ctx: commands.Context):
         """
         Links to the bot's source url
         """
-        await ctx.send(self.bot.config['general']['source_url'])
+        await ctx.send(self.bot.config["general"]["source_url"])
 
     @commands.command()
     async def vote(self, ctx: commands.Context):
         """
         Links to the vote url
         """
-        await ctx.send(self.bot.config['general']['vote_url'])
+        await ctx.send(self.bot.config["general"]["vote_url"])
 
-    @commands.command(aliases=['info'])
+    @commands.command(aliases=["info"])
     async def about(self, ctx: commands.Context):
         """
         View info of the bot
         """
         data = {
-            'id': self.bot.user.id,
-            'owner': 'StarrFox#6312',
-            'created': humanize.naturaldate(self.bot.user.created_at),
-            'up since': humanize.naturaltime(self.bot.uptime),
-            'guilds': len(self.bot.guilds),
-            'commands': len(set(self.bot.walk_commands())),
-            'dc version': dc_version,
-            'd.py version': discord.__version__
+            "id": self.bot.user.id,
+            "owner": "StarrFox#6312",
+            "created": humanize.naturaldate(self.bot.user.created_at),
+            "up since": humanize.naturaltime(self.bot.uptime),
+            "guilds": len(self.bot.guilds),
+            "commands": len(set(self.bot.walk_commands())),
+            "dc version": dc_version,
+            "d.py version": discord.__version__,
         }
 
-        events_cog = self.bot.get_cog('events')
+        events_cog = self.bot.get_cog("events")
 
         if events_cog:
             data.update(
-                {
-                    'events seen': '{:,}'.format(sum(events_cog.socket_events.values()))
-                }
+                {"events seen": "{:,}".format(sum(events_cog.socket_events.values()))}
             )
 
         paginator = PrologPaginator()
@@ -114,13 +123,13 @@ class Meta(commands.Cog, name='meta'):
 
         await menu.start(ctx)
 
-    @checks.cog_loaded('events')
+    @checks.cog_loaded("events")
     @commands.command()
     async def socketstats(self, ctx: commands.Context):
         """
         View soketstats of the bot
         """
-        events_cog = self.bot.get_cog('events')
+        events_cog = self.bot.get_cog("events")
 
         socket_events = events_cog.socket_events
 
@@ -141,6 +150,7 @@ def setup(bot):
     cog = Meta(bot)
     bot.add_cog(cog)
     bot.help_command.cog = cog
+
 
 def teardown(bot):
     bot.help_command.cog = None
