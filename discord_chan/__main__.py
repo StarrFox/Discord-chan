@@ -22,6 +22,7 @@ from string import Template
 
 import click
 from aiomonitor import start_monitor, cli
+from click_default_group import DefaultGroup
 from loguru import logger
 
 import discord_chan
@@ -38,7 +39,7 @@ ROOT_DIR = Path(__file__).parent
 
 # Todo: add update subparser? git pull, see if config or sql is different?
 # Todo: add gui subparser? shows stats and has buttons to start/stop bot
-@click.group(help='General purpose Discord bot.')
+@click.group(help='General purpose Discord bot.', cls=DefaultGroup, default='run', default_if_no_args=True)
 def main():
     pass
 

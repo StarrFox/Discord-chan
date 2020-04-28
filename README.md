@@ -4,8 +4,8 @@ A general purpose discord bot made with [discord.py](https://github.com/Rapptz/d
 ## Installing
 ```shell script
 python3 -m venv .venv
-source venv/bin/activate
-git clone https://github.com/StarrFox/Discord-chan.git
+source .venv/bin/activate
+git clone https://github.com/StarrFox/Discord-chan
 cd Discord-chan
 pip install .
 discord_chan install [--config path/to/config = config.ini] [--interactive]
@@ -13,7 +13,7 @@ discord_chan install [--config path/to/config = config.ini] [--interactive]
 
 ## Running
 ```shell script
-discord_chan run [--config path/to/config = config.ini] [--debug = False]
+discord_chan [--config path/to/config = config.ini] [--debug = False]
 ```
 
 ## Monitor
