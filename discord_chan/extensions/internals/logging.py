@@ -38,17 +38,13 @@ class Logging(commands.Cog, name="logging"):
         if self.bot.is_closed():
             return
 
-        channel = self.bot.get_channel(
-            int(self.bot.config["discord"]["logging_channel"])
-        )
+        channel = self.bot.get_channel(int(self.bot.config.discord.logging_channel))
 
         if channel is None:
             # cache populating
             await asyncio.sleep(10)
 
-            channel = self.bot.get_channel(
-                int(self.bot.config["discord"]["logging_channel"])
-            )
+            channel = self.bot.get_channel(int(self.bot.config.discord.logging_channel))
 
             if channel is None:
                 raise RuntimeError("Config logging_channel id wrong.")
@@ -128,5 +124,5 @@ class Logging(commands.Cog, name="logging"):
 
 
 def setup(bot: commands.Bot):
-    if bot.config["discord"]["logging_channel"]:
+    if bot.config.discord.logging_channel:
         bot.add_cog(Logging(bot))

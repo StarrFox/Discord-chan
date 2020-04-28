@@ -74,21 +74,21 @@ class Meta(commands.Cog, name="meta"):
         """
         Links to the support server
         """
-        await ctx.send(self.bot.config["general"]["support_url"])
+        await ctx.send(self.bot.config.general.support_url)
 
     @commands.command()
     async def source(self, ctx: commands.Context):
         """
         Links to the bot's source url
         """
-        await ctx.send(self.bot.config["general"]["source_url"])
+        await ctx.send(self.bot.config.general.source_url)
 
     @commands.command()
     async def vote(self, ctx: commands.Context):
         """
         Links to the vote url
         """
-        await ctx.send(self.bot.config["general"]["vote_url"])
+        await ctx.send(self.bot.config.general.vote_url)
 
     @commands.command(aliases=["info"])
     async def about(self, ctx: commands.Context):

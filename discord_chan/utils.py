@@ -16,7 +16,6 @@
 
 import logging
 from collections import OrderedDict
-from configparser import ConfigParser
 
 import discord
 from loguru import logger
@@ -113,7 +112,3 @@ class InterceptHandler(logging.Handler):
         logger.opt(depth=depth, exception=record.exc_info).log(
             level, record.getMessage()
         )
-
-
-class CaseSensitiveConfigParser(ConfigParser):
-    optionxform = staticmethod(str)
