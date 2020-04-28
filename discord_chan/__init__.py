@@ -28,6 +28,6 @@ from .menus import *
 from .monitor import DiscordChanMonitor
 from .snipe import *
 
-__version__ = '1.6.1'
+__version__ = "1.6.1"
 
-logger.disable('discord_chan')
+logger.disable("discord_chan")

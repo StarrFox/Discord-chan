@@ -17,8 +17,7 @@
 from discord.ext import commands
 
 
-class Stats(commands.Cog, name='stats'):
-
+class Stats(commands.Cog, name="stats"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -29,6 +28,7 @@ class Stats(commands.Cog, name='stats'):
     # async def uses(self, ctx: commands.Context):
     #     """View top used commands"""
     #     pass
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(Stats(bot))

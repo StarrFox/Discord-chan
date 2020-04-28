@@ -27,7 +27,7 @@ def is_above(invoker: discord.Member, user: discord.Member):
 
 
 # Todo: add back mod stuff
-class Mod(commands.Cog, name='mod'):
+class Mod(commands.Cog, name="mod"):
     """Moderation commands"""
 
     def __init__(self, bot: commands.Bot):
@@ -40,7 +40,10 @@ class Mod(commands.Cog, name='mod'):
         Base prefix command,
         Lists prefixes
         """
-        prefixes = [f"{idx}. `{prefix}`" for idx, prefix in enumerate(self.bot.prefixes[ctx.guild.id], 1)]
+        prefixes = [
+            f"{idx}. `{prefix}`"
+            for idx, prefix in enumerate(self.bot.prefixes[ctx.guild.id], 1)
+        ]
 
         source = CodeblockPageSource(prefixes, per_page=5)
 
@@ -50,7 +53,7 @@ class Mod(commands.Cog, name='mod'):
 
     @commands.check_any(
         commands.has_permissions(administrator=True),
-        commands.has_permissions(manage_messages=True)
+        commands.has_permissions(manage_messages=True),
     )
     @prefix.command()
     async def add(self, ctx: SubContext, prefix: str):
@@ -59,26 +62,29 @@ class Mod(commands.Cog, name='mod'):
         """
         # it should never be over 20 but just to be sure
         if len(self.bot.prefixes[ctx.guild.id]) >= 20:
-            return await ctx.send('Guild at max prefixes of 20, remove one to add this one.')
+            return await ctx.send(
+                "Guild at max prefixes of 20, remove one to add this one."
+            )
         elif prefix in self.bot.prefixes[ctx.guild.id]:
-            return await ctx.send('Prefix already added.')
+            return await ctx.send("Prefix already added.")
 
         self.bot.prefixes[ctx.guild.id].add(prefix)
         async with db.get_database() as conn:
             async with conn.cursor() as cursor:
-                await cursor.execute("INSERT INTO prefixes (guild_id, prefixes) VALUES (?, ?) "
-                                     "ON CONFLICT (guild_id) DO UPDATE SET prefixes = EXCLUDED.prefixes;",
-                                     (ctx.guild.id, self.bot.prefixes[ctx.guild.id])
-                                     )
+                await cursor.execute(
+                    "INSERT INTO prefixes (guild_id, prefixes) VALUES (?, ?) "
+                    "ON CONFLICT (guild_id) DO UPDATE SET prefixes = EXCLUDED.prefixes;",
+                    (ctx.guild.id, self.bot.prefixes[ctx.guild.id]),
+                )
             await conn.commit()
 
         await ctx.confirm()
 
     @commands.check_any(
         commands.has_permissions(administrator=True),
-        commands.has_permissions(manage_messages=True)
+        commands.has_permissions(manage_messages=True),
     )
-    @prefix.command(aliases=['rem'])
+    @prefix.command(aliases=["rem"])
     async def remove(self, ctx: SubContext, prefix: str):
         """
         Remove a prefix from this guild
@@ -92,12 +98,16 @@ class Mod(commands.Cog, name='mod'):
                 # rather than an empty set
                 if len(self.bot.prefixes[ctx.guild.id]) == 1:
                     del self.bot.prefixes[ctx.guild.id]
-                    await cursor.execute("DELETE FROM prefixes WHERE guild_id IS (?)", (ctx.guild.id,))
+                    await cursor.execute(
+                        "DELETE FROM prefixes WHERE guild_id IS (?)", (ctx.guild.id,)
+                    )
 
                 else:
                     self.bot.prefixes[ctx.guild.id].remove(prefix)
-                    await cursor.execute("UPDATE prefixes SET prefixes=? WHERE guild_id IS ?;",
-                                         (self.bot.prefixes[ctx.guild.id], ctx.guild.id))
+                    await cursor.execute(
+                        "UPDATE prefixes SET prefixes=? WHERE guild_id IS ?;",
+                        (self.bot.prefixes[ctx.guild.id], ctx.guild.id),
+                    )
             await conn.commit()
 
         await ctx.confirm()
@@ -105,11 +115,14 @@ class Mod(commands.Cog, name='mod'):
     @commands.bot_has_permissions(manage_messages=True)
     @commands.has_permissions(manage_messages=True)
     @commands.command()
-    async def purge(self,
-                    ctx: SubContext,
-                    number: int,
-                    user: typing.Optional[discord.Member] = None,
-                    *, text: str = None):
+    async def purge(
+        self,
+        ctx: SubContext,
+        number: int,
+        user: typing.Optional[discord.Member] = None,
+        *,
+        text: str = None,
+    ):
         """
         Purges messages from certain user and/or (with) certain text
         """
@@ -130,7 +143,7 @@ class Mod(commands.Cog, name='mod'):
                 return True
 
         deleted = await ctx.channel.purge(limit=number, check=msgcheck)
-        await ctx.send(f'Deleted {len(deleted)} message(s)', delete_after=5)
+        await ctx.send(f"Deleted {len(deleted)} message(s)", delete_after=5)
 
     @commands.bot_has_permissions(ban_members=True)
     @commands.has_permissions(ban_members=True)
@@ -140,10 +153,10 @@ class Mod(commands.Cog, name='mod'):
         Bans using an id, must not be a current member
         """
         if ctx.guild.get_member(member_id):
-            return await ctx.send('Member is currently in this guild.')
+            return await ctx.send("Member is currently in this guild.")
 
         await ctx.guild.ban(discord.Object(id=member_id), reason=reason)
-        await ctx.confirm('Id hackbanned.')
+        await ctx.confirm("Id hackbanned.")
 
 
 def setup(bot):
