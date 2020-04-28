@@ -134,11 +134,15 @@ class Owner(commands.Cog, name="owner"):
 
     @commands.group(aliases=["bl"], invoke_without_command=True)
     async def blacklist(self, ctx: commands.Context):
-        await ctx.send(
-            "\n".join(
-                f"{user_id}: {reason}" for user_id, reason in self.bot.blacklist.items()
+        if self.bot.blacklist:
+            await ctx.send(
+                "\n".join(
+                    f"{user_id}: {reason}"
+                    for user_id, reason in self.bot.blacklist.items()
+                )
             )
-        )
+        else:
+            await ctx.send("No blacklist set.")
 
     @blacklist.command(name="add")
     async def blacklist_add(

@@ -60,5 +60,7 @@ setup(
         "loguru",
         "aioconsole",
         "click-default-group",
+        "reusables",
+        "python-box",
     ],
 )

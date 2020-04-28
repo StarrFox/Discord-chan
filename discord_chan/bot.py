@@ -16,13 +16,13 @@
 
 import pathlib
 from collections import defaultdict, deque
-from configparser import ConfigParser
 from datetime import datetime
 from typing import Optional, Dict, Union, Deque, Set
 
 import discord
 from aioec import Client as EcClient
-from discord.ext import commands, tasks
+from box import ConfigBox
+from discord.ext import commands
 from jikanpy import AioJikan
 from loguru import logger
 
@@ -35,7 +35,7 @@ from .snipe import Snipe
 
 class DiscordChan(commands.AutoShardedBot):
     def __init__(
-        self, config: ConfigParser, *, context: commands.Context = SubContext, **kwargs
+        self, config: ConfigBox, *, context: commands.Context = SubContext, **kwargs
     ):
         """
         :param config: Config parser object
@@ -49,13 +49,16 @@ class DiscordChan(commands.AutoShardedBot):
             allowed_mentions=kwargs.pop(
                 "allowed_mentions", discord.AllowedMentions(everyone=False, roles=False)
             ),
+            activity=discord.Activity(
+                type=discord.ActivityType.listening,
+                name=f"{config.general.prefix}help",
+            ),
             **kwargs,
         )
         self.config = config
         self.context = context
         self.jikan = AioJikan()
         self.ready_once = False
-        self.presence_cycle.start()  # pylint: disable=no-member
         self.uptime = datetime.now()
         # Todo: make an anime entry object to replace the dicts in the lists
         self.anime_db: Dict[str, list] = {}
@@ -66,7 +69,7 @@ class DiscordChan(commands.AutoShardedBot):
         self.other_bot_prefixes: Dict[int, Set[str]] = defaultdict(lambda: set())
         # {guild_id: {prefixes}}
         self.prefixes: Dict[int, Set[str]] = defaultdict(
-            lambda: {config["general"]["prefix"]}
+            lambda: {config.general.prefix}
         )
         # {send_from: {send_to}}
         self.channel_links: Dict[
@@ -77,8 +80,8 @@ class DiscordChan(commands.AutoShardedBot):
             lambda: defaultdict(lambda: deque(maxlen=5_000))
         )
 
-        if config["extra_tokens"]["emote_collector"]:
-            self.ec = EcClient(token=config["extra_tokens"]["emote_collector"])
+        if config.extra_tokens.emote_collector:
+            self.ec = EcClient(token=config.extra_tokens.emote_collector)
 
         else:
             self.ec = None
@@ -112,13 +115,13 @@ class DiscordChan(commands.AutoShardedBot):
 
         await self.load_prefixes()
 
-        if self.config["general"].getboolean("load_extensions"):
+        if self.config.general.bool("load_extensions"):
             self.load_extensions_from_dir("discord_chan/extensions")
 
         logger.info(f"Bot ready with {len(self.extensions.keys())} extensions.")
 
     def run(self, *args, **kwargs):
-        return super().run(self.config["discord"]["token"], *args, **kwargs)
+        return super().run(self.config.discord.token, *args, **kwargs)
 
     def load_extensions_from_dir(self, path: Union[str, pathlib.Path]) -> int:
         """
@@ -154,29 +157,6 @@ class DiscordChan(commands.AutoShardedBot):
 
         return len(self.extensions.keys()) - before
 
-    @tasks.loop(hours=5)
-    async def presence_cycle(self):
-        """
-        Keeps the status message active
-        """
-        await self.change_presence(
-            activity=discord.Activity(
-                type=discord.ActivityType.listening,
-                name=f"{self.config['general']['prefix']}help",
-            )
-        )
-
-    @presence_cycle.before_loop
-    async def presence_cycle_before(self):
-        await self.wait_until_ready()
-
-    @presence_cycle.after_loop
-    async def presence_cycle_after(self):
-        if self.presence_cycle.failed():
-            # Only here because it somehow had an error once
-            logger.exception("Presence cycle somehow errored out, restarting.")
-            self.presence_cycle.restart()
-
     async def get_command_prefix(self, _, message: discord.Message):
         if message.guild:
             # sorting fixes cases where part of another prefix is a prefix for example
@@ -187,7 +167,7 @@ class DiscordChan(commands.AutoShardedBot):
 
             return commands.when_mentioned_or(*prefixes)(self, message)
         else:  # DM
-            return commands.when_mentioned_or(self.config["general"]["prefix"], "")(
+            return commands.when_mentioned_or(self.config.general.prefix, "")(
                 self, message
             )
 

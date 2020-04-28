@@ -22,11 +22,13 @@ from string import Template
 
 import click
 from aiomonitor import start_monitor, cli
+from box import ConfigBox
 from click_default_group import DefaultGroup
 from loguru import logger
+from reusables import config_dict
 
 import discord_chan
-from discord_chan.utils import InterceptHandler, CaseSensitiveConfigParser
+from discord_chan.utils import InterceptHandler
 
 try:
     import uvloop
@@ -69,14 +71,16 @@ def run(config, debug, no_cache):
     logger.add(sys.stderr, level="INFO", filter="discord_chan")
     logger.add(sys.stderr, level="ERROR", filter="discord")
 
-    # didn't feel like renaming
-    config_file = config
-    config = CaseSensitiveConfigParser(allow_no_value=True, strict=False)
-    config.read(config_file)
+    # # didn't feel like renaming
+    # config_file = config
+    # config = CaseSensitiveConfigParser(allow_no_value=True, strict=False)
+    # config.read(config_file)
 
-    if not config["enviroment"].getboolean("disable"):
+    config = ConfigBox(config_dict(config))
+
+    if not config.enviroment.bool("disable"):
         load_environ(
-            **dict([var for var in config["enviroment"].items() if var[0] != "disable"])
+            **dict([var for var in config.enviroment.items() if var[0] != "disable"])
         )
 
     if debug:
@@ -110,7 +114,13 @@ def load_environ(**kwargs):
     from os import environ
 
     for var, value in kwargs.items():
-        environ[var] = value
+        # All jishaku flags must be caps
+        if var.startswith("jishaku"):
+            environ[var.upper()] = value
+
+        else:
+            environ[var] = value
+
         logger.debug(f"Set ENV var {var.upper()} = {value}")
 
 

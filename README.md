@@ -11,12 +11,12 @@ source .venv/bin/activate
 git clone https://github.com/StarrFox/Discord-chan
 cd Discord-chan
 pip install .
-discord_chan install [--config path/to/config = config.ini] [--interactive]
+discord_chan
 ```
 
 ## Running
 ```shell script
-discord_chan [--config path/to/config = config.ini] [--debug = False]
+discord_chan
 ```
 
 ## Monitor
@@ -38,7 +38,6 @@ enable | Enable or disable a command
 Command | Description
 --- | ---
 [snipe][snipe] | Snipes deleted and edited messages
-[snipe2][snipe] | Like snipe but with command-line args
 [raw][info] | View raw discord objects
 [wallemoji][wallemojis] | Creates multiple pictures out of one
 
