@@ -30,6 +30,7 @@ from discord_chan.utils import InterceptHandler, CaseSensitiveConfigParser
 
 try:
     import uvloop
+
     uvloop.install()
 except ImportError:
     uvloop = None
@@ -39,43 +40,53 @@ ROOT_DIR = Path(__file__).parent
 
 # Todo: add update subparser? git pull, see if config or sql is different?
 # Todo: add gui subparser? shows stats and has buttons to start/stop bot
-@click.group(help='General purpose Discord bot.', cls=DefaultGroup, default='run', default_if_no_args=True)
+@click.group(
+    help="General purpose Discord bot.",
+    cls=DefaultGroup,
+    default="run",
+    default_if_no_args=True,
+)
 def main():
     pass
 
-@main.command(help='Run the bot')
-@click.option('--config',
-              default='config.ini',
-              type=click.Path(exists=True),
-              show_default=True,
-              help='Path to config file.')
-@click.option('--debug', is_flag=True, help='Run in debug mode.')
-@click.option('--no-cache', is_flag=True, help='Run without member cache')
+
+@main.command(help="Run the bot")
+@click.option(
+    "--config",
+    default="config.ini",
+    type=click.Path(exists=True),
+    show_default=True,
+    help="Path to config file.",
+)
+@click.option("--debug", is_flag=True, help="Run in debug mode.")
+@click.option("--no-cache", is_flag=True, help="Run without member cache")
 def run(config, debug, no_cache):
     # noinspection PyArgumentList
     logging.basicConfig(handlers=[InterceptHandler()], level=0)
 
     logger.remove()
-    logger.enable('discord_chan')
-    logger.add(sys.stderr, level='INFO', filter='discord_chan')
-    logger.add(sys.stderr, level='ERROR', filter='discord')
+    logger.enable("discord_chan")
+    logger.add(sys.stderr, level="INFO", filter="discord_chan")
+    logger.add(sys.stderr, level="ERROR", filter="discord")
 
     # didn't feel like renaming
     config_file = config
     config = CaseSensitiveConfigParser(allow_no_value=True, strict=False)
     config.read(config_file)
 
-    if not config['enviroment'].getboolean('disable'):
-        load_environ(**dict([var for var in config['enviroment'].items() if var[0] != 'disable']))
+    if not config["enviroment"].getboolean("disable"):
+        load_environ(
+            **dict([var for var in config["enviroment"].items() if var[0] != "disable"])
+        )
 
     if debug:
         asyncio.get_event_loop().set_debug(True)
-        logging.getLogger('asyncio').setLevel(logging.DEBUG)
+        logging.getLogger("asyncio").setLevel(logging.DEBUG)
 
     kwargs = {}
     if no_cache:
-        kwargs['guild_subscriptions'] = False
-        kwargs['fetch_offline_members'] = False
+        kwargs["guild_subscriptions"] = False
+        kwargs["fetch_offline_members"] = False
 
     bot = discord_chan.DiscordChan(config, **kwargs)
 
@@ -83,10 +94,11 @@ def run(config, debug, no_cache):
     # bot.dispatch('ready')
 
     loop = asyncio.get_event_loop()
-    with start_monitor(loop,
-                       monitor=discord_chan.DiscordChanMonitor,
-                       locals={'bot': bot}):
+    with start_monitor(
+        loop, monitor=discord_chan.DiscordChanMonitor, locals={"bot": bot}
+    ):
         bot.run()
+
 
 def load_environ(**kwargs):
     """
@@ -99,22 +111,23 @@ def load_environ(**kwargs):
 
     for var, value in kwargs.items():
         environ[var] = value
-        logger.debug(f'Set ENV var {var.upper()} = {value}')
+        logger.debug(f"Set ENV var {var.upper()} = {value}")
 
 
-@main.command(help='\"Install\" the bot; general setup before running.')
-@click.option('--config',
-              default='config.ini',
-              type=click.Path(),
-              show_default=True,
-              help='Path to config file.'
-              )
-@click.option('--interactive', is_flag=True, help='Interactive config file setup.')
+@main.command(help='"Install" the bot; general setup before running.')
+@click.option(
+    "--config",
+    default="config.ini",
+    type=click.Path(),
+    show_default=True,
+    help="Path to config file.",
+)
+@click.option("--interactive", is_flag=True, help="Interactive config file setup.")
 def install(config, interactive):
     config_file = Path(config)
 
     if config_file.exists():
-        overwrite = click.confirm('Config file already exists, overwrite?')
+        overwrite = click.confirm("Config file already exists, overwrite?")
 
     else:
         overwrite = True
@@ -127,7 +140,7 @@ def install(config, interactive):
 
     if overwrite:
         if not interactive:
-            with open(ROOT_DIR / 'data' / 'default_config.txt') as fp:
+            with open(ROOT_DIR / "data" / "default_config.txt") as fp:
                 default_config = fp.read()
 
             config_file.write_text(default_config.strip())
@@ -136,9 +149,9 @@ def install(config, interactive):
             res = interactive_install()
             config_file.write_text(res)
 
-        click.echo('Config file made/overwriten.')
+        click.echo("Config file made/overwriten.")
 
-    with open(ROOT_DIR / 'data' / 'default.sql') as fp:
+    with open(ROOT_DIR / "data" / "default.sql") as fp:
         sql_init = fp.read()
 
     async def init_db():
@@ -147,43 +160,41 @@ def install(config, interactive):
                 await cursor.executescript(sql_init.strip())
             await connection.commit()
 
-        print('Initalized DB.')
+        print("Initalized DB.")
 
     asyncio.run(init_db())
 
+
 def interactive_install() -> str:
-    with open(ROOT_DIR / 'data' / 'interactive_config.txt') as fp:
+    with open(ROOT_DIR / "data" / "interactive_config.txt") as fp:
         interactive_config = Template(fp.read())
 
-    click.echo('Starting interactive config...')
-    click.echo('--general section--')
+    click.echo("Starting interactive config...")
+    click.echo("--general section--")
 
-    prefix = click.prompt('Command prefix?')
-    load_extensions = click.prompt('Load base extensions?', type=bool)
+    prefix = click.prompt("Command prefix?")
+    load_extensions = click.prompt("Load base extensions?", type=bool)
 
-    click.echo('--discord section--')
+    click.echo("--discord section--")
 
-    token = click.prompt('Discord bot token?')
+    token = click.prompt("Discord bot token?")
 
-    click.echo('--enviroment section--')
+    click.echo("--enviroment section--")
 
-    disable = click.prompt('Disable enviroment var config?', type=bool)
+    disable = click.prompt("Disable enviroment var config?", type=bool)
 
     return interactive_config.substitute(
-        prefix=prefix,
-        load_extensions=load_extensions,
-        token=token,
-        disable=disable
+        prefix=prefix, load_extensions=load_extensions, token=token, disable=disable
     )
 
 
-@main.command(help='Start the DiscordChanMonitor interface.')
-@click.option('-H', '--host', default='127.0.0.1', type=str, help='Monitor host ip.')
-@click.option('-P', '--port', default=50101, type=int, help='Monitor port number.')
+@main.command(help="Start the DiscordChanMonitor interface.")
+@click.option("-H", "--host", default="127.0.0.1", type=str, help="Monitor host ip.")
+@click.option("-P", "--port", default=50101, type=int, help="Monitor port number.")
 def monitor(host, port):
     cli.monitor_client(host, port)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Todo: test
     main()

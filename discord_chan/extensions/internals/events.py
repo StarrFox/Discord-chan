@@ -30,8 +30,8 @@ from discord_chan import utils, db, SnipeMode, Snipe, DiscordChan
 # Todo: add github cog using github api (replace copycat stuff)
 # Todo: command usage tracking and statistics graphs
 
-class Events(commands.Cog, name='events'):
 
+class Events(commands.Cog, name="events"):
     def __init__(self, bot: DiscordChan):
         self.bot = bot
         self.socket_events = Counter()
@@ -54,7 +54,7 @@ class Events(commands.Cog, name='events'):
         await self.bot.wait_until_ready()
         self.copycat = self.bot.get_channel(605115140278452373)
 
-    @commands.Cog.listener('on_message')
+    @commands.Cog.listener("on_message")
     async def on_copycat(self, message: discord.Message):
         if self.copycat is None:
             return
@@ -88,12 +88,14 @@ class Events(commands.Cog, name='events'):
     async def on_guild_remove(self, guild: discord.Guild):
         self.bot.prefixes.pop(guild.id)
         async with db.get_database() as connection:
-            await connection.execute('DELETE FROM prefixes WHERE guild_id is ?;', (guild.id,))
+            await connection.execute(
+                "DELETE FROM prefixes WHERE guild_id is ?;", (guild.id,)
+            )
             await connection.commit()
 
     @commands.Cog.listener()
     async def on_socket_response(self, message):
-        self.socket_events[message.get('t')] += 1
+        self.socket_events[message.get("t")] += 1
 
     @commands.Cog.listener()
     async def on_command_completion(self, ctx: commands.Context):
@@ -105,24 +107,24 @@ class Events(commands.Cog, name='events'):
         try:
             mode = SnipeMode[mode]
         except KeyError:
-            raise ValueError(f'{mode} is not a valid snipe mode.')
+            raise ValueError(f"{mode} is not a valid snipe mode.")
         if message.content:
             snipe = Snipe(message, mode)
             self.bot.snipes[message.guild.id][message.channel.id].appendleft(snipe)
 
-    @commands.Cog.listener('on_message_delete')
+    @commands.Cog.listener("on_message_delete")
     async def snipe_delete(self, message: discord.Message):
-        self.attempt_add_snipe(message, 'deleted')
+        self.attempt_add_snipe(message, "deleted")
 
-    @commands.Cog.listener('on_bulk_message_delete')
+    @commands.Cog.listener("on_bulk_message_delete")
     async def bulk_snipe_delete(self, messages: [discord.Message]):
         for message in messages:
-            self.attempt_add_snipe(message, 'purged')
+            self.attempt_add_snipe(message, "purged")
 
-    @commands.Cog.listener('on_message_edit')
+    @commands.Cog.listener("on_message_edit")
     async def snipe_edit(self, before: discord.Message, after: discord.Message):
         if before.content != after.content:
-            self.attempt_add_snipe(before, 'edited')
+            self.attempt_add_snipe(before, "edited")
 
     # Anime
 
@@ -134,9 +136,7 @@ class Events(commands.Cog, name='events'):
             self.bot.anime_db = await self.bot.jikan.schedule()
 
             now = datetime.datetime.utcnow()
-            next_monday = datetime.timedelta(
-                days=(7 - now.weekday())
-            )
+            next_monday = datetime.timedelta(days=(7 - now.weekday()))
 
             await asyncio.sleep(next_monday.total_seconds())
 
@@ -147,11 +147,11 @@ class Events(commands.Cog, name='events'):
         Loads channel links into memory as TextChannels
         """
         async with db.get_database() as connection:
-            cursor = await connection.execute('SELECT * FROM channel_links;')
+            cursor = await connection.execute("SELECT * FROM channel_links;")
             for send_from, send_to in await cursor.fetchall():
                 send_from_channel = self.bot.get_channel(send_from)
                 if not send_from_channel:
-                    logger.info(f'{send_from} is no longer accessable.')
+                    logger.info(f"{send_from} is no longer accessable.")
                     continue
 
                 channels = set()
@@ -160,11 +160,13 @@ class Events(commands.Cog, name='events'):
                     if channel:
                         channels.add(channel)
                     else:
-                        logger.info(f'{channel_id} is no longer accessable. (linked to {send_from_channel.name})')
+                        logger.info(
+                            f"{channel_id} is no longer accessable. (linked to {send_from_channel.name})"
+                        )
 
                 self.bot.channel_links[send_from_channel] = channels
 
-    @commands.Cog.listener('on_message')
+    @commands.Cog.listener("on_message")
     async def on_linked_message(self, message: discord.Message):
         """
         Handles the actual "linking" of channels
@@ -179,16 +181,20 @@ class Events(commands.Cog, name='events'):
                 await channel.send(content=message.content)
 
         # send_to -> send_from
-        elif message.channel in [i for s in self.bot.channel_links.values() for i in s] \
-                and message.author != self.bot.user:
+        elif (
+            message.channel in [i for s in self.bot.channel_links.values() for i in s]
+            and message.author != self.bot.user
+        ):
             for send_from in self.bot.channel_links:
                 if message.channel in self.bot.channel_links[send_from]:
-                    webhook = discord.utils.get(await send_from.webhooks(), name='channel_link')
+                    webhook = discord.utils.get(
+                        await send_from.webhooks(), name="channel_link"
+                    )
                     if webhook is None:
-                        webhook = await send_from.create_webhook(name='channel_link')
+                        webhook = await send_from.create_webhook(name="channel_link")
 
                     if len(message.author.display_name) < 20:
-                        name = message.author.display_name + f' [{message.author.id}]'
+                        name = message.author.display_name + f" [{message.author.id}]"
                     else:
                         name = message.author.display_name
 
@@ -196,7 +202,7 @@ class Events(commands.Cog, name='events'):
                         content=message.clean_content if message.content else None,
                         embeds=message.embeds,
                         username=name,
-                        avatar_url=str(message.author.avatar_url_as(format='png'))
+                        avatar_url=str(message.author.avatar_url_as(format="png")),
                     )
 
 

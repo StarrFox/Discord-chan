@@ -27,14 +27,18 @@ bool_dict = {
     "1": True,
     "false": False,
     "off": False,
-    "0": False
+    "0": False,
 }
 
 # from: https://urlregex.com/
-link_regex = r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
+link_regex = (
+    r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
+)
 
 
-async def msg_resend(destination: discord.abc.Messageable, msg: discord.Message) -> discord.Message:
+async def msg_resend(
+    destination: discord.abc.Messageable, msg: discord.Message
+) -> discord.Message:
     """
     Resend a message
     :param destination: Where to send the message
@@ -45,7 +49,7 @@ async def msg_resend(destination: discord.abc.Messageable, msg: discord.Message)
         content=msg.content,
         tts=msg.tts,
         embed=msg.embeds[0] if msg.embeds else None,
-        files=[attachment.to_file() for attachment in msg.attachments]
+        files=[attachment.to_file() for attachment in msg.attachments],
     )
 
 
@@ -65,7 +69,7 @@ def msg_jsonify(message: discord.Message) -> dict:
             "username": message.author.name,
             "avatar": message.author.avatar,
             "discriminator": message.author.discriminator,
-            "bot": message.author.bot
+            "bot": message.author.bot,
         },
         "attachments": [],
         "embeds": [e.to_dict() for e in message.embeds],
@@ -76,13 +80,12 @@ def msg_jsonify(message: discord.Message) -> dict:
         "tts": message.tts,
         "timestamp": str(message.created_at),
         "edited_timestamp": str(message.edited_at),
-        "flags": message.flags
+        "flags": message.flags,
     }
     return data
 
 
 class LRU(OrderedDict):
-
     def __init__(self, maxsize=100, *args, **kwargs):
         self.maxsize = maxsize
         super().__init__(*args, **kwargs)
@@ -107,7 +110,9 @@ class InterceptHandler(logging.Handler):
             frame = frame.f_back
             depth += 1
 
-        logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
+        logger.opt(depth=depth, exception=record.exc_info).log(
+            level, record.getMessage()
+        )
 
 
 class CaseSensitiveConfigParser(ConfigParser):

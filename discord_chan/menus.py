@@ -21,12 +21,18 @@ from typing import Optional, Sequence
 import discord
 from discord.ext import commands, menus
 
-EmbedFieldProxy = namedtuple('EmbedFieldProxy', 'name value inline')
+EmbedFieldProxy = namedtuple("EmbedFieldProxy", "name value inline")
 
 
 class ConfirmationMenu(menus.Menu):
-
-    def __init__(self, to_confirm: str = None, *, owner_id: int = None, send_kwargs=None, **kwargs):
+    def __init__(
+        self,
+        to_confirm: str = None,
+        *,
+        owner_id: int = None,
+        send_kwargs=None,
+        **kwargs,
+    ):
         super().__init__(**kwargs)
 
         if send_kwargs is None:
@@ -37,8 +43,10 @@ class ConfirmationMenu(menus.Menu):
         self.to_confirm = to_confirm
         self.response = None
 
-    async def send_initial_message(self, ctx: commands.Context, channel: discord.TextChannel):
-        return await ctx.send(self.to_confirm or '\u200b', **self.send_kwargs)
+    async def send_initial_message(
+        self, ctx: commands.Context, channel: discord.TextChannel
+    ):
+        return await ctx.send(self.to_confirm or "\u200b", **self.send_kwargs)
 
     def reaction_check(self, payload):
         if payload.message_id != self.message.id:
@@ -54,12 +62,12 @@ class ConfirmationMenu(menus.Menu):
 
         return payload.emoji in self.buttons
 
-    @menus.button('\N{WHITE HEAVY CHECK MARK}')
+    @menus.button("\N{WHITE HEAVY CHECK MARK}")
     async def do_yes(self, _):
         self.response = True
         self.stop()
 
-    @menus.button('\N{CROSS MARK}')
+    @menus.button("\N{CROSS MARK}")
     async def do_no(self, _):
         self.response = False
         self.stop()
@@ -70,7 +78,6 @@ class ConfirmationMenu(menus.Menu):
 
 
 class DCMenuPages(menus.MenuPages):
-
     def __init__(self, source, **kwargs):
         super().__init__(source, **kwargs)
 
@@ -89,33 +96,34 @@ class DCMenuPages(menus.MenuPages):
     def skip_one_or_two(self):
         return self.skip_only_one_page() or self.skip_two_or_less()
 
-    @menus.button('\N{BLACK LEFT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR}\ufe0f',
-                  skip_if=skip_one_or_two)
+    @menus.button(
+        "\N{BLACK LEFT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR}\ufe0f",
+        skip_if=skip_one_or_two,
+    )
     async def go_to_first_page(self, payload):
         """go to the first page"""
         await self.show_page(0)
 
-    @menus.button('\N{BLACK LEFT-POINTING TRIANGLE}\ufe0f',
-                  skip_if=skip_only_one_page)
+    @menus.button("\N{BLACK LEFT-POINTING TRIANGLE}\ufe0f", skip_if=skip_only_one_page)
     async def go_to_previous_page(self, payload):
         """go to the previous page"""
         await self.show_checked_page(self.current_page - 1)
 
-    @menus.button('\N{BLACK RIGHT-POINTING TRIANGLE}\ufe0f',
-                  skip_if=skip_only_one_page)
+    @menus.button("\N{BLACK RIGHT-POINTING TRIANGLE}\ufe0f", skip_if=skip_only_one_page)
     async def go_to_next_page(self, payload):
         """go to the next page"""
         await self.show_checked_page(self.current_page + 1)
 
-    @menus.button('\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR}\ufe0f',
-                  skip_if=skip_one_or_two)
+    @menus.button(
+        "\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR}\ufe0f",
+        skip_if=skip_one_or_two,
+    )
     async def go_to_last_page(self, payload):
         """go to the last page"""
         # The call here is safe because it's guarded by skip_if
         await self.show_page(self._source.get_max_pages() - 1)
 
-    @menus.button('\N{BLACK SQUARE FOR STOP}\ufe0f',
-                  skip_if=skip_only_one_page)
+    @menus.button("\N{BLACK SQUARE FOR STOP}\ufe0f", skip_if=skip_only_one_page)
     async def stop_pages(self, payload):
         """stops the pagination session."""
         await self.message.delete()
@@ -123,7 +131,6 @@ class DCMenuPages(menus.MenuPages):
 
 
 class NormalPageSource(menus.ListPageSource):
-
     def __init__(self, entries: Sequence[str], *, per_page: int = 1):
         super().__init__(entries, per_page=per_page)
 
@@ -131,42 +138,45 @@ class NormalPageSource(menus.ListPageSource):
         if isinstance(page, str):
             return page
         else:
-            return '\n'.join(page)
+            return "\n".join(page)
 
 
 class CodeblockPageSource(menus.ListPageSource):
-
-    def __init__(self, entries: Sequence[str], *, per_page: int = 1, language: Optional[str] = None):
+    def __init__(
+        self,
+        entries: Sequence[str],
+        *,
+        per_page: int = 1,
+        language: Optional[str] = None,
+    ):
         super().__init__(entries, per_page=per_page)
-        self.language = language or ''
+        self.language = language or ""
 
     async def format_page(self, menu, page):
-        base = '```' + self.language + '\n'
+        base = "```" + self.language + "\n"
 
-        base += '\n'.join(page)
+        base += "\n".join(page)
 
-        base += '\n```'
+        base += "\n```"
 
         return base
 
 
 class EmbedFieldsPageSource(menus.ListPageSource):
-
-    def __init__(self,
-                 entries: Sequence[EmbedFieldProxy],
-                 *, per_page: int = 1,
-                 title: Optional[str] = None,
-                 description: Optional[str] = None
-                 ):
+    def __init__(
+        self,
+        entries: Sequence[EmbedFieldProxy],
+        *,
+        per_page: int = 1,
+        title: Optional[str] = None,
+        description: Optional[str] = None,
+    ):
         super().__init__(entries, per_page=per_page)
         self.title = title
         self.description = description
 
     async def format_page(self, menu, page):
-        base = discord.Embed(
-            title=self.title,
-            description=self.description
-        )
+        base = discord.Embed(title=self.title, description=self.description)
 
         if isinstance(page, EmbedFieldProxy):
             return base.add_field(name=page.name, value=page.value, inline=page.inline)
@@ -180,7 +190,6 @@ class EmbedFieldsPageSource(menus.ListPageSource):
 # I should probably pr these changes but idk if this property thing
 # is the correct way to do it so /shrug also the None thing looks dumb
 class FixedNonePaginator(commands.Paginator):
-
     @property
     def _max_size_factor(self):
         if self.prefix is not None and self.suffix is not None:
@@ -190,19 +199,24 @@ class FixedNonePaginator(commands.Paginator):
         else:
             return 0
 
-    def add_line(self, line='', *, empty=False):
-        max_page_size = self.max_size - self._prefix_len - self._suffix_len - self._max_size_factor
+    def add_line(self, line="", *, empty=False):
+        max_page_size = (
+            self.max_size - self._prefix_len - self._suffix_len - self._max_size_factor
+        )
         if len(line) > max_page_size:
-            raise RuntimeError('Line exceeds maximum page size %s' % max_page_size)
+            raise RuntimeError("Line exceeds maximum page size %s" % max_page_size)
 
-        if self._count + len(line) + (0 if self.suffix is None else 1) > self.max_size - self._suffix_len:
+        if (
+            self._count + len(line) + (0 if self.suffix is None else 1)
+            > self.max_size - self._suffix_len
+        ):
             self.close_page()
 
         self._count += len(line) + 1
         self._current_page.append(line)
 
         if empty:
-            self._current_page.append('')
+            self._current_page.append("")
             self._count += 1
 
 
@@ -235,13 +249,15 @@ class PartitionPaginator(FixedNonePaginator):
     Version of WrappedPaginator that uses str.rpartition
     """
 
-    def __init__(self, *args, wrap_on=('\n', ' '), include_wrapped=True, **kwargs):
+    def __init__(self, *args, wrap_on=("\n", " "), include_wrapped=True, **kwargs):
         super().__init__(*args, **kwargs)
         self.wrap_on = wrap_on
         self.include_wrapped = include_wrapped
 
-    def add_line(self, line='', *, empty=False):
-        true_max_size = self.max_size - self._prefix_len - self._suffix_len - self._max_size_factor
+    def add_line(self, line="", *, empty=False):
+        true_max_size = (
+            self.max_size - self._prefix_len - self._suffix_len - self._max_size_factor
+        )
 
         while len(line) > true_max_size:
             search_string = line[0:true_max_size]
@@ -273,13 +289,14 @@ class PartitionPaginator(FixedNonePaginator):
 
 # Todo: replace this with a group-by subclass
 class PrologPaginator(FixedNonePaginator):
-
-    def __init__(self,
-                 prefix: str = '```prolog',
-                 suffix: str = '```',
-                 max_size: int = 500,
-                 align_option: str = '>',
-                 align_places: int = 16):
+    def __init__(
+        self,
+        prefix: str = "```prolog",
+        suffix: str = "```",
+        max_size: int = 500,
+        align_option: str = ">",
+        align_places: int = 16,
+    ):
         """
         :param align_option: How the options should be aligned, uses same
         symboles as f-strings (<, ^, >). Defaults to >
@@ -302,7 +319,7 @@ class PrologPaginator(FixedNonePaginator):
         """
         :param header: The new header to add
         """
-        header = f" {header} ".center(self.align_places * 2, '=')
+        header = f" {header} ".center(self.align_places * 2, "=")
         self.add_line(f"\n{capwords(str(header))}\n")
 
     def add_key_value_pair(self, key: str, value: str):
@@ -310,5 +327,7 @@ class PrologPaginator(FixedNonePaginator):
         :param key: The key to add
         :param value: The value to add
         """
-        self.add_line(f"{capwords(key):{self.align_option}{self.align_places}.{self.align_places}} :: "
-                      f"{capwords(value)}")
+        self.add_line(
+            f"{capwords(key):{self.align_option}{self.align_places}.{self.align_places}} :: "
+            f"{capwords(value)}"
+        )
