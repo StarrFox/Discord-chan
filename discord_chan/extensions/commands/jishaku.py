@@ -27,7 +27,13 @@ from jishaku.paginators import PaginatorInterface
 from jishaku.repl import get_var_dict_from_ctx, AsyncCodeExecutor, AsyncSender
 from terminaltables import AsciiTable
 
-from discord_chan import DCMenuPages, NormalPageSource, PartitionPaginator, SubContext, db
+from discord_chan import (
+    DCMenuPages,
+    NormalPageSource,
+    PartitionPaginator,
+    SubContext,
+    db,
+)
 
 try:
     # noinspection PyPackageRequirements
@@ -70,7 +76,9 @@ class Jishaku(JishakuBase, metaclass=GroupCogMeta, command_parent=jsk):
         try:
             async with ReplResponseReactor(ctx.message):
                 with self.submit(ctx):
-                    executor = AsyncCodeExecutor(argument.content, scope, arg_dict=arg_dict)
+                    executor = AsyncCodeExecutor(
+                        argument.content, scope, arg_dict=arg_dict
+                    )
                     async for send, result in AsyncSender(executor):
                         if result is None:
                             continue
@@ -90,12 +98,14 @@ class Jishaku(JishakuBase, metaclass=GroupCogMeta, command_parent=jsk):
                                 # repr all non-strings
                                 result = repr(result)
 
-                            result = result.replace(self.bot.http.token, '[token omitted]')
-                            if result.strip() == '':
-                                result = '[empty string]'
+                            result = result.replace(
+                                self.bot.http.token, "[token omitted]"
+                            )
+                            if result.strip() == "":
+                                result = "[empty string]"
 
                             if len(result) > 2000:
-                                paginator = PartitionPaginator(prefix='```py')
+                                paginator = PartitionPaginator(prefix="```py")
 
                                 paginator.add_line(result)
 
@@ -106,19 +116,24 @@ class Jishaku(JishakuBase, metaclass=GroupCogMeta, command_parent=jsk):
                                 send(await menu.start(ctx))
 
                             else:
-                                send(await ctx.send(f'```py\n{result}```', no_edit=True))
+                                send(
+                                    await ctx.send(f"```py\n{result}```", no_edit=True)
+                                )
 
         finally:
             scope.clear_intersection(arg_dict)
 
-    @commands.command(name='pip')
+    @commands.command(name="pip")
     async def jsk_pip(self, ctx: commands.Context, *, argument: codeblock_converter):
         """
         Shortcut for 'jsk sh pip'. Invokes the system shell.
         """
-        return await ctx.invoke(self.jsk_shell, argument=Codeblock(argument.language, 'pip ' + argument.content))
+        return await ctx.invoke(
+            self.jsk_shell,
+            argument=Codeblock(argument.language, "pip " + argument.content),
+        )
 
-    @commands.command(name='db', aliases=['sql'])
+    @commands.command(name="db", aliases=["sql"])
     async def jsk_db(self, ctx: commands.Context, *, quarry: str):
         """
         Execute a db quarry
@@ -141,7 +156,9 @@ class Jishaku(JishakuBase, metaclass=GroupCogMeta, command_parent=jsk):
 
                 table = AsciiTable(final)
 
-                paginator = PartitionPaginator(prefix='```sql', max_size=1000, wrap_on=('|', '\n'))
+                paginator = PartitionPaginator(
+                    prefix="```sql", max_size=1000, wrap_on=("|", "\n")
+                )
 
                 paginator.add_line(table.table)
 
@@ -152,7 +169,7 @@ class Jishaku(JishakuBase, metaclass=GroupCogMeta, command_parent=jsk):
                 await menu.start(ctx)
 
             else:
-                await ctx.send('[no result]')
+                await ctx.send("[no result]")
 
     # @commands.group(name='scope')
     # async def jsk_scope(self, ctx: commands.Context, converter: Optional[str] = None, argument: str = None):

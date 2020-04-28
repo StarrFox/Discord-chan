@@ -22,9 +22,8 @@ from discord.ext import commands
 from discord_chan import Connect4, SubContext, MasterMindMenu
 
 
-class Games(commands.Cog, name='games'):
-
-    @commands.command(aliases=['c4'])
+class Games(commands.Cog, name="games"):
+    @commands.command(aliases=["c4"])
     @commands.bot_has_permissions(add_reactions=True)
     @commands.max_concurrency(1, commands.BucketType.user)
     async def connect4(self, ctx: SubContext, member: discord.Member):
@@ -37,8 +36,8 @@ class Games(commands.Cog, name='games'):
             return await ctx.send("You cannot play against yourself or a bot.")
 
         # Command already requires add_reactions so don't need to check for it
-        if not await ctx.prompt(f'{member.mention} agree to play?', owner_id=member.id):
-            return await ctx.send('Game canceled.')
+        if not await ctx.prompt(f"{member.mention} agree to play?", owner_id=member.id):
+            return await ctx.send("Game canceled.")
 
         player1 = choice([ctx.author, member])
         player2 = member if player1 == ctx.author else ctx.author
@@ -48,9 +47,9 @@ class Games(commands.Cog, name='games'):
         if winner:
             await ctx.send(f"{winner.mention} has won.", no_edit=True)
         else:
-            await ctx.send('No one made a move.', no_edit=True)
+            await ctx.send("No one made a move.", no_edit=True)
 
-    @commands.command(aliases=['mm'])
+    @commands.command(aliases=["mm"])
     @commands.bot_has_permissions(add_reactions=True)
     @commands.max_concurrency(1, commands.BucketType.user)
     async def mastermind(self, ctx: SubContext):
@@ -61,13 +60,13 @@ class Games(commands.Cog, name='games'):
         value = await game.run(ctx)
 
         if value:
-            await ctx.send(f'{ctx.author.mention}, You won.', no_edit=True)
+            await ctx.send(f"{ctx.author.mention}, You won.", no_edit=True)
 
         elif value == 0:
             return
 
         else:
-            await ctx.send(f'{ctx.author.mention}, MasterMind timed out.', no_edit=True)
+            await ctx.send(f"{ctx.author.mention}, MasterMind timed out.", no_edit=True)
 
 
 def setup(bot):

@@ -25,12 +25,20 @@ from discord.ext.commands.default import Author, CurrentChannel
 from enchant.checker import SpellChecker
 from uwuify import uwu_text
 
-from discord_chan import (PrologPaginator, ImageFormatConverter, PartitionPaginator,
-                          BetweenConverter, DCMenuPages, NormalPageSource,
-                          DiscordChan, SubContext, NamedCall)
+from discord_chan import (
+    PrologPaginator,
+    ImageFormatConverter,
+    PartitionPaginator,
+    BetweenConverter,
+    DCMenuPages,
+    NormalPageSource,
+    DiscordChan,
+    SubContext,
+    NamedCall,
+)
 
 
-class General(commands.Cog, name='general'):
+class General(commands.Cog, name="general"):
     """General use commands"""
 
     def __init__(self, bot: DiscordChan):
@@ -41,19 +49,17 @@ class General(commands.Cog, name='general'):
         """
         Convert characters to name syntax, or unicode if name isn't found.
         """
-        paginator = PartitionPaginator(prefix=None,
-                                       suffix=None,
-                                       max_size=300,
-                                       wrap_on=('}', '\n')
-                                       )
+        paginator = PartitionPaginator(
+            prefix=None, suffix=None, max_size=300, wrap_on=("}", "\n")
+        )
 
-        final = ''
+        final = ""
         for char in characters:
             try:
                 name = unicodedata.name(char)
-                final += f'\\N{{{name}}}\n'
+                final += f"\\N{{{name}}}\n"
             except ValueError:
-                final += f'\\U{ord(char):0>8x}\n'
+                final += f"\\U{ord(char):0>8x}\n"
 
         paginator.add_line(final)
 
@@ -81,19 +87,19 @@ class General(commands.Cog, name='general'):
         """
         await ctx.send(message)
 
-    @commands.command(aliases=['owoify', 'owo', 'uwu'])
+    @commands.command(aliases=["owoify", "owo", "uwu"])
     async def uwuify(self, ctx: commands.Context, *, message: str):
         """
         Uwuify text
         """
         await ctx.send(uwu_text(message))
 
-    @commands.command(aliases=['spell'])
+    @commands.command(aliases=["spell"])
     async def spellcheck(self, ctx: commands.Context, *, text: str):
         """
         Spellcheck text
         """
-        checker = SpellChecker('en_US', text)
+        checker = SpellChecker("en_US", text)
 
         for error in checker:
             error.replace(str(error.suggest()))
@@ -113,30 +119,30 @@ class General(commands.Cog, name='general'):
         can_mass_delete = ctx.channel.permissions_for(ctx.me).manage_messages
 
         await ctx.channel.purge(limit=amount, check=check, bulk=can_mass_delete)
-        await ctx.confirm('Messages cleaned.')
+        await ctx.confirm("Messages cleaned.")
 
     @commands.command(aliases=["avy", "pfp"])
-    async def avatar(self,
-                     ctx: commands.Context,
-                     member: Optional[discord.Member] = Author,
-                     format: Optional[ImageFormatConverter] = 'png'):
+    async def avatar(
+        self,
+        ctx: commands.Context,
+        member: Optional[discord.Member] = Author,
+        format: Optional[ImageFormatConverter] = "png",
+    ):
         """
         Get a member's avatar
         """
-        await ctx.send(
-            str(member.avatar_url_as(format=format))
-        )
+        await ctx.send(str(member.avatar_url_as(format=format)))
 
-    @commands.command(aliases=['mi', 'userinfo', 'ui'])
+    @commands.command(aliases=["mi", "userinfo", "ui"])
     async def memberinfo(self, ctx: commands.Context, member: discord.Member = Author):
         """
         Get info on a guild member
         """
         data = {
-            'id': member.id,
-            'top role': member.top_role.name,
-            'joined guild': humanize.naturaldate(member.joined_at),
-            'joined discord': humanize.naturaldate(member.created_at)
+            "id": member.id,
+            "top role": member.top_role.name,
+            "joined guild": humanize.naturaldate(member.joined_at),
+            "joined discord": humanize.naturaldate(member.created_at),
         }
 
         paginator = PrologPaginator()
@@ -149,7 +155,7 @@ class General(commands.Cog, name='general'):
 
         await menu.start(ctx)
 
-    @commands.command(aliases=['si', 'gi', 'serverinfo'])
+    @commands.command(aliases=["si", "gi", "serverinfo"])
     async def guildinfo(self, ctx: commands.Context):
         """
         Get info on a guild
@@ -159,21 +165,17 @@ class General(commands.Cog, name='general'):
         humans = guild.member_count - bots
 
         data = {
-            'id': guild.id,
-            'owner': str(guild.owner),
-            'created': humanize.naturaltime(guild.created_at),
-            '# of roles': len(guild.roles),
-            'members': {
-                'humans': humans,
-                'bots': bots,
-                'total': guild.member_count
+            "id": guild.id,
+            "owner": str(guild.owner),
+            "created": humanize.naturaltime(guild.created_at),
+            "# of roles": len(guild.roles),
+            "members": {"humans": humans, "bots": bots, "total": guild.member_count},
+            "channels": {
+                "categories": len(guild.categories),
+                "text": len(guild.text_channels),
+                "voice": len(guild.voice_channels),
+                "total": len(guild.channels),
             },
-            'channels': {
-                'categories': len(guild.categories),
-                'text': len(guild.text_channels),
-                'voice': len(guild.voice_channels),
-                'total': len(guild.channels)
-            }
         }
 
         paginator = PrologPaginator()
@@ -197,7 +199,7 @@ class General(commands.Cog, name='general'):
     @staticmethod
     async def send_raw(ctx: commands.Context, data: dict):
 
-        paginator = PartitionPaginator(prefix='```json', max_size=1985)
+        paginator = PartitionPaginator(prefix="```json", max_size=1985)
 
         to_send = json.dumps(data, indent=4)
 
@@ -209,10 +211,14 @@ class General(commands.Cog, name='general'):
 
         await menu.start(ctx)
 
-    @raw.command(aliases=['msg'])
-    async def message(self,
-                      ctx: commands.Context,
-                      message: discord.Message = NamedCall(lambda c, p: c.message, display='CurrentMessage')):
+    @raw.command(aliases=["msg"])
+    async def message(
+        self,
+        ctx: commands.Context,
+        message: discord.Message = NamedCall(
+            lambda c, p: c.message, display="CurrentMessage"
+        ),
+    ):
         """
         Raw message object,
         can provide channel with channel_id-message-id
@@ -222,7 +228,9 @@ class General(commands.Cog, name='general'):
         await self.send_raw(ctx, data)
 
     @raw.command()
-    async def channel(self, ctx: commands.Context, channel: discord.TextChannel = CurrentChannel):
+    async def channel(
+        self, ctx: commands.Context, channel: discord.TextChannel = CurrentChannel
+    ):
         """
         Raw channel object
         """
@@ -238,9 +246,11 @@ class General(commands.Cog, name='general'):
         await self.send_raw(ctx, data)
 
     @raw.command()
-    async def user(self,
-                   ctx: commands.Context,
-                   userid: int = NamedCall(lambda c, p: c.author.id, display='AuthorID')):
+    async def user(
+        self,
+        ctx: commands.Context,
+        userid: int = NamedCall(lambda c, p: c.author.id, display="AuthorID"),
+    ):
         """
         Raw user object
         """
@@ -251,7 +261,7 @@ class General(commands.Cog, name='general'):
         else:
             await self.send_raw(ctx, data)
 
-    @raw.command(aliases=['server'])
+    @raw.command(aliases=["server"])
     async def guild(self, ctx: commands.Context):
         """
         Raw guild object
@@ -266,7 +276,7 @@ class General(commands.Cog, name='general'):
         Raw invite object
         """
         try:
-            data = await self.bot.http.get_invite(invite.split('/')[-1])
+            data = await self.bot.http.get_invite(invite.split("/")[-1])
         except discord.errors.NotFound:
             await ctx.send("Invalid invite.")
         else:
@@ -279,14 +289,14 @@ class General(commands.Cog, name='general'):
         """
         data = await self.bot.http.get_custom_emoji(emoji.guild.id, emoji.id)
         await self.send_raw(ctx, data)
-        
+
     @raw.command()
     async def role(self, ctx: commands.Context, role: discord.Role):
         """
         Raw role object
         """
         data = await self.bot.http.get_roles(role.guild.id)
-        role_data = discord.utils.find(lambda d: d['id'] == str(role.id), data)
+        role_data = discord.utils.find(lambda d: d["id"] == str(role.id), data)
         await self.send_raw(ctx, role_data)
 
     @commands.command(hidden=True)
@@ -303,7 +313,7 @@ class General(commands.Cog, name='general'):
 
     @commands.command(hidden=True)
     async def otter(self, ctx: commands.Context):
-        await ctx.send('<:otter:596576722154029072>')
+        await ctx.send("<:otter:596576722154029072>")
 
 
 def setup(bot):

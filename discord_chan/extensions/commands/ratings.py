@@ -17,16 +17,22 @@
 import discord
 from discord.ext import commands
 
-from discord_chan import (BetweenConverter, MaxLengthConverter, BotConverter,
-                          db, SubContext, EmbedFieldProxy,
-                          EmbedFieldsPageSource, DCMenuPages)
+from discord_chan import (
+    BetweenConverter,
+    MaxLengthConverter,
+    BotConverter,
+    db,
+    SubContext,
+    EmbedFieldProxy,
+    EmbedFieldsPageSource,
+    DCMenuPages,
+)
 
-STAR = '\N{WHITE MEDIUM STAR}'
-ZERO = '0\N{VARIATION SELECTOR-16}\N{COMBINING ENCLOSING KEYCAP}'
+STAR = "\N{WHITE MEDIUM STAR}"
+ZERO = "0\N{VARIATION SELECTOR-16}\N{COMBINING ENCLOSING KEYCAP}"
 
 
-class Ratings(commands.Cog, name='ratings'):
-
+class Ratings(commands.Cog, name="ratings"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -35,8 +41,8 @@ class Ratings(commands.Cog, name='ratings'):
     async def set_bot_rating(bot_id, user_id, rating, review):
         async with db.get_database() as connection:
             await connection.execute(
-                'INSERT OR REPLACE INTO ratings (bot_id, user_id, rating, review) VALUES (?, ?, ?, ?);',
-                (bot_id, user_id, rating, review)
+                "INSERT OR REPLACE INTO ratings (bot_id, user_id, rating, review) VALUES (?, ?, ?, ?);",
+                (bot_id, user_id, rating, review),
             )
 
             await connection.commit()
@@ -45,8 +51,8 @@ class Ratings(commands.Cog, name='ratings'):
     async def clear_bot_rating(bot_id, user_id):
         async with db.get_database() as connection:
             await connection.execute(
-                'DELETE FROM ratings WHERE bot_id = (?) AND user_id = (?);',
-                (bot_id, user_id)
+                "DELETE FROM ratings WHERE bot_id = (?) AND user_id = (?);",
+                (bot_id, user_id),
             )
 
             await connection.commit()
@@ -55,8 +61,8 @@ class Ratings(commands.Cog, name='ratings'):
     async def get_bot_rating(bot_id, user_id):
         async with db.get_database() as connection:
             cursor = await connection.execute(
-                'SELECT rating, review FROM ratings WHERE bot_id = (?) AND user_id = (?);',
-                (bot_id, user_id)
+                "SELECT rating, review FROM ratings WHERE bot_id = (?) AND user_id = (?);",
+                (bot_id, user_id),
             )
 
             res = await cursor.fetchone()
@@ -68,8 +74,8 @@ class Ratings(commands.Cog, name='ratings'):
     async def get_bot_ratings(bot_id):
         async with db.get_database() as connection:
             cursor = await connection.execute(
-                'SELECT user_id, rating, review FROM ratings WHERE bot_id = (?)',
-                (bot_id,)
+                "SELECT user_id, rating, review FROM ratings WHERE bot_id = (?)",
+                (bot_id,),
             )
 
             return await cursor.fetchall()
@@ -77,7 +83,9 @@ class Ratings(commands.Cog, name='ratings'):
     # Todo: leave this
 
     @staticmethod
-    def format_rating(user: discord.User, rating: int, review: str = None) -> EmbedFieldProxy:
+    def format_rating(
+        user: discord.User, rating: int, review: str = None
+    ) -> EmbedFieldProxy:
         """
         Name: user#discrm
         Rating: <number of stars>
@@ -92,17 +100,19 @@ class Ratings(commands.Cog, name='ratings'):
             value = ZERO
 
         if review:
-            value += '\n\n' + review
+            value += "\n\n" + review
 
         return EmbedFieldProxy(name, value)
 
     @commands.command()
-    async def rate(self,
-                   ctx: SubContext,
-                   bot: BotConverter(),
-                   rating: BetweenConverter(0, 5),
-                   *, review: MaxLengthConverter(300)
-                   ):
+    async def rate(
+        self,
+        ctx: SubContext,
+        bot: BotConverter(),
+        rating: BetweenConverter(0, 5),
+        *,
+        review: MaxLengthConverter(300),
+    ):
         """
         Give a bot a rating 0-5 and an optional review.
         Reviews must be no more than 300 characters.
@@ -111,18 +121,18 @@ class Ratings(commands.Cog, name='ratings'):
         """
         await self.set_bot_rating(bot.id, ctx.author.id, rating, review)
 
-        await ctx.confirm('Bot rated.')
+        await ctx.confirm("Bot rated.")
 
-    @commands.command(name='clear-rating')
+    @commands.command(name="clear-rating")
     async def clear_rating(self, ctx: SubContext, bot: BotConverter()):
         """
         Remove your rating for a bot.
         """
         await self.clear_bot_rating(bot.id, ctx.author.id)
 
-        await ctx.confirm('Rating cleared.')
+        await ctx.confirm("Rating cleared.")
 
-    @commands.command(aliases=['view'])
+    @commands.command(aliases=["view"])
     async def show(self, ctx, *, bot: BotConverter()):
         """
         Show the ratings of a bot.
@@ -130,9 +140,9 @@ class Ratings(commands.Cog, name='ratings'):
         ratings = await self.get_bot_ratings(bot.id)
 
         if not ratings:
-            return await ctx.send('No ratings for this bot.')
+            return await ctx.send("No ratings for this bot.")
 
-        title = f'Ratings for {bot}'
+        title = f"Ratings for {bot}"
 
         average_holder = []
         entries = []
@@ -148,9 +158,11 @@ class Ratings(commands.Cog, name='ratings'):
 
         average = round(sum(average_holder) / len(average_holder), 2)
 
-        description = f'Average: {average}'
+        description = f"Average: {average}"
 
-        source = EmbedFieldsPageSource(entries, per_page=3,  title=title, description=description)
+        source = EmbedFieldsPageSource(
+            entries, per_page=3, title=title, description=description
+        )
 
         menu = DCMenuPages(source)
 

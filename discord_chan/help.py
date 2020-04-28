@@ -19,7 +19,6 @@ from discord.ext import commands
 
 
 class Minimal(commands.MinimalHelpCommand):
-
     def get_destination(self):
         ctx = self.context
         if self.dm_help is True:
@@ -35,14 +34,16 @@ class Minimal(commands.MinimalHelpCommand):
 
     def add_bot_commands_formatting(self, cmds, heading):
         if cmds:
-            joined = ', '.join(f"`{c.name}`" for c in cmds)
-            self.paginator.add_line(f'**{heading}** - {joined}', empty=False)
+            joined = ", ".join(f"`{c.name}`" for c in cmds)
+            self.paginator.add_line(f"**{heading}** - {joined}", empty=False)
 
     def add_aliases_formatting(self, aliases):
         if not aliases:
             return
 
-        self.paginator.add_line('**%s** %s' % (self.aliases_heading, ', '.join(aliases)), empty=True)
+        self.paginator.add_line(
+            "**%s** %s" % (self.aliases_heading, ", ".join(aliases)), empty=True
+        )
 
     def add_command_formatting(self, command):
         if command.description:
@@ -78,7 +79,7 @@ class Minimal(commands.MinimalHelpCommand):
 
         filtered = await self.filter_commands(group.commands, sort=self.sort_commands)
         if filtered:
-            self.paginator.add_line('**%s**:' % self.commands_heading)
+            self.paginator.add_line("**%s**:" % self.commands_heading)
 
             for command in filtered:
                 self.add_subcommand_formatting(command)
@@ -100,9 +101,13 @@ class Minimal(commands.MinimalHelpCommand):
         if note:
             self.paginator.add_line(note, empty=True)
 
-        filtered = await self.filter_commands(cog.get_commands(), sort=self.sort_commands)
+        filtered = await self.filter_commands(
+            cog.get_commands(), sort=self.sort_commands
+        )
         if filtered:
-            self.paginator.add_line('**%s %s**' % (cog.qualified_name, self.commands_heading.lower()))
+            self.paginator.add_line(
+                "**%s %s**" % (cog.qualified_name, self.commands_heading.lower())
+            )
 
             for command in filtered:
                 self.add_subcommand_formatting(command)
@@ -127,7 +132,7 @@ class Minimal(commands.MinimalHelpCommand):
 
         maybe_coro = discord.utils.maybe_coroutine
 
-        keys = command.split(' ')
+        keys = command.split(" ")
         cmd = bot.all_commands.get(keys[0])
 
         if cmd is not None:
@@ -136,7 +141,9 @@ class Minimal(commands.MinimalHelpCommand):
                     found = cmd.all_commands.get(key)
 
                     if found is None:
-                        string = await maybe_coro(self.subcommand_not_found, cmd, self.remove_mentions(key))
+                        string = await maybe_coro(
+                            self.subcommand_not_found, cmd, self.remove_mentions(key)
+                        )
                         return await self.send_error_message(string)
 
                     cmd = found
@@ -151,5 +158,7 @@ class Minimal(commands.MinimalHelpCommand):
             return await self.send_cog_help(cog)
 
         else:
-            string = await maybe_coro(self.command_not_found, self.remove_mentions(keys[0]))
+            string = await maybe_coro(
+                self.command_not_found, self.remove_mentions(keys[0])
+            )
             return await self.send_error_message(string)

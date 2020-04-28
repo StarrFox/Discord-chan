@@ -24,7 +24,6 @@ from .menus import PartitionPaginator, NormalPageSource, DCMenuPages, Confirmati
 
 
 class SubContext(Context):
-
     async def send(self, content=None, **kwargs) -> Message:
         """
         The paginator should never be used there as a just in case
@@ -45,7 +44,10 @@ class SubContext(Context):
 
             menu = DCMenuPages(source)
 
-        if not kwargs.pop('no_edit', False) and self.message.id in self.bot.past_invokes:
+        if (
+            not kwargs.pop("no_edit", False)
+            and self.message.id in self.bot.past_invokes
+        ):
             prev_msg = self.bot.past_invokes[self.message.id]
 
             if menu:
@@ -58,9 +60,9 @@ class SubContext(Context):
                 try:
                     await prev_msg.edit(
                         content=content,
-                        embed=kwargs.pop('embed', None),
+                        embed=kwargs.pop("embed", None),
                         # suppress is annoying to deal with and I don't use it so /shrug
-                        delete_after=kwargs.pop('delete_after', None)
+                        delete_after=kwargs.pop("delete_after", None),
                     )
                     return prev_msg
 
@@ -71,10 +73,7 @@ class SubContext(Context):
             await menu.start(self, wait=True)
             return menu.message
 
-        new_msg = await super().send(
-            content=content,
-            **kwargs
-        )
+        new_msg = await super().send(content=content, **kwargs)
 
         self.bot.past_invokes[self.message.id] = new_msg
         return new_msg
@@ -92,12 +91,14 @@ class SubContext(Context):
         If unable to sends <message>
         """
         try:
-            await self.message.add_reaction('\N{WHITE HEAVY CHECK MARK}')
+            await self.message.add_reaction("\N{WHITE HEAVY CHECK MARK}")
         except HTTPException:
-            message = message or '\N{WHITE HEAVY CHECK MARK}'
+            message = message or "\N{WHITE HEAVY CHECK MARK}"
             return await self.send(message)
 
-    async def prompt(self, message: str = None, *, owner_id: int = None, **send_kwargs) -> bool:
+    async def prompt(
+        self, message: str = None, *, owner_id: int = None, **send_kwargs
+    ) -> bool:
         """
         Prompt for <message> and return True or False
         """

@@ -16,14 +16,13 @@
 
 from discord.ext import commands
 
-class CogNotLoaded(commands.CheckFailure):
 
+class CogNotLoaded(commands.CheckFailure):
     def __init__(self, cog_name):
-        super().__init__(f'{cog_name} is not loaded.')
+        super().__init__(f"{cog_name} is not loaded.")
 
 
 def cog_loaded(cog_name: str):
-
     def pred(ctx):
         if ctx.bot.get_cog(cog_name):
             return True
