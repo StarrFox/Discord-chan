@@ -15,6 +15,7 @@ logging_channel=
 
 [extra_tokens]
 emote_collector=
+top_gg=
 
 [enviroment]
 # all options here will be loaded as environment variables

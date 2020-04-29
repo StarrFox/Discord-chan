@@ -71,11 +71,6 @@ def run(config, debug, no_cache):
     logger.add(sys.stderr, level="INFO", filter="discord_chan")
     logger.add(sys.stderr, level="ERROR", filter="discord")
 
-    # # didn't feel like renaming
-    # config_file = config
-    # config = CaseSensitiveConfigParser(allow_no_value=True, strict=False)
-    # config.read(config_file)
-
     config = ConfigBox(config_dict(config))
 
     if not config.enviroment.bool("disable"):
@@ -166,8 +161,7 @@ def install(config, interactive):
 
     async def init_db():
         async with discord_chan.db.get_database() as connection:
-            async with connection.cursor() as cursor:
-                await cursor.executescript(sql_init.strip())
+            await connection.executescript(sql_init.strip())
             await connection.commit()
 
         print("Initalized DB.")

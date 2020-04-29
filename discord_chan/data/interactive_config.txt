@@ -10,11 +10,12 @@ load_extensions=$load_extensions
 [discord]
 # Discord Bot token
 token=$token
-# needs manage webhooks to log
+# needs manage_webhooks to log
 logging_channel=
 
 [extra_tokens]
 emote_collector=
+tog_gg=
 
 [enviroment]
 # all options here will be loaded as environment variables

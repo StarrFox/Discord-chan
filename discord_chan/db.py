@@ -17,7 +17,7 @@
 import aiosqlite
 
 
-def get_database() -> aiosqlite.Connection:  # I had to rename this to properly type
+def get_database() -> aiosqlite.Connection:
     """
     Gets the discord_chan database
     :return: The db context manager

@@ -21,7 +21,8 @@ from contextlib import suppress
 from typing import Dict, List
 
 import discord
-from discord.ext import commands
+from aiohttp import ClientSession as Session
+from discord.ext import commands, tasks
 from loguru import logger
 
 from discord_chan import utils, db, SnipeMode, Snipe, DiscordChan
@@ -42,11 +43,15 @@ class Events(commands.Cog, name="events"):
         self.tasks.append(asyncio.create_task(self.update_anime_db()))
         self.tasks.append(asyncio.create_task(self.get_copycat()))
         self.tasks.append(asyncio.create_task(self.load_channel_links()))
+        if self.bot.config.extra_tokens.top_gg:
+            self.post_dbl_guilds.start()
 
     def cog_unload(self):
         for task in self.tasks:
             if not task.done():
                 task.cancel()
+
+        self.post_dbl_guilds.cancel()
 
     # Misc
 
@@ -61,6 +66,28 @@ class Events(commands.Cog, name="events"):
 
         if message.channel.id in [381979045090426881, 381965829857738772]:
             await utils.msg_resend(self.copycat, message)
+
+    @tasks.loop(hours=5)
+    async def post_dbl_guilds(self):
+        async with Session(raise_for_status=True) as sess:
+            await sess.post(
+                f"https://top.gg/api/bots/{self.bot.user.id}/stats",
+                headers={"Authorization": self.bot.config.extra_tokens.top_gg},
+                data={"server_count": len(self.bot.guilds)},
+            )
+
+            logger.debug("Posted DBL guild count.")
+
+    @post_dbl_guilds.before_loop
+    async def post_dbl_guild_before(self):
+        await self.bot.wait_until_ready()
+
+    @post_dbl_guilds.after_loop
+    async def post_dbl_guild_after(self):
+        if self.post_dbl_guilds.failed():
+            logger.exception("DBL poster errored out, restarting")
+            await asyncio.sleep(300)
+            self.post_dbl_guilds.restart()
 
     # @commands.Cog.listener('on_message')
     # async def on_bot_message(self, message: discord.Message):

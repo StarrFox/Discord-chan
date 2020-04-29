@@ -64,22 +64,6 @@ class Accessibility(commands.Cog, name="accessibility"):
         file = discord.File(buffer, "popped.png")
         await ctx.send(file=file, no_edit=True)
 
-    # # Todo: finish
-    # @commands.command(name='embed-to-text', aliases=['ett'])
-    # async def embed_to_text(self, ctx: commands.Context, embed: EmbedConverter = EmbedDefault):
-    #     """
-    #     Converts an embed to text format.
-    #     """
-    #     embed: discord.Embed
-    #     data = embed.to_dict()
-    #
-    #     res = []
-    #
-    #     for key, value in data.items():
-    #         res.append(f'{key}: {value!s}')
-    #
-    #     await ctx.send('\n'.join(res))
-
     @flags.add_flag("--to-ec", action="store_true", default=False)
     @flags.command(name="steal-these")
     async def steal_these(self, ctx: SubContext, message: discord.Message, **options):
