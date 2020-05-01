@@ -315,6 +315,9 @@ class General(commands.Cog, name="general"):
     async def otter(self, ctx: commands.Context):
         await ctx.send("<:otter:596576722154029072>")
 
+    @commands.command(hidden=True)
+    async def fricc(self, ctx: commands.Context):
+        await ctx.send("IM FRICCIN OUT")
 
 def setup(bot):
     bot.add_cog(General(bot))
