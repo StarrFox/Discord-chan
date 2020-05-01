@@ -47,7 +47,8 @@ class DiscordChan(commands.AutoShardedBot):
             max_messages=kwargs.pop("max_messages", 10_000),
             help_command=kwargs.pop("help_command", Minimal()),
             allowed_mentions=kwargs.pop(
-                "allowed_mentions", discord.AllowedMentions(everyone=False, roles=False)
+                "allowed_mentions",
+                discord.AllowedMentions(everyone=False, roles=False, users=False),
             ),
             activity=discord.Activity(
                 type=discord.ActivityType.listening,

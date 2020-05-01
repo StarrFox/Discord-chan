@@ -55,7 +55,7 @@ class Connect4(menus.Menu):
         return payload.emoji in self.buttons
 
     async def send_initial_message(self, ctx, channel):
-        return await channel.send(embed=self.embed)
+        return await channel.send(self.discord_message)
 
     async def do_number_button(self, payload):
         move_column = self.numbers.index(payload.emoji.name)
@@ -73,7 +73,7 @@ class Connect4(menus.Menu):
                 self.stop()
 
             self.current_player = next(self.player_cycle)
-            await self.message.edit(embed=self.embed)
+            await self.message.edit(content=self.discord_message)
 
     @menus.button("\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}", position=menus.Last())
     async def do_resend(self, _):
@@ -103,22 +103,40 @@ class Connect4(menus.Menu):
         msg += "".join(self.numbers)
         return msg
 
+    # @property
+    # def embed(self):
+    #     """
+    #     The embed to send to discord
+    #     """
+    #     board_embed = discord.Embed(description=self.board_message)
+    #
+    #     if self.last_move is not None:
+    #         board_embed.add_field(name="Last move", value=self.last_move, inline=False)
+    #
+    #     if self._running:
+    #         board_embed.add_field(
+    #             name="Current turn", value=self.current_player.mention
+    #         )
+    #
+    #     return board_embed
+
     @property
-    def embed(self):
-        """
-        The embed to send to discord
-        """
-        board_embed = discord.Embed(description=self.board_message)
+    def discord_message(self):
+        final = ""
 
         if self.last_move is not None:
-            board_embed.add_field(name="Last move", value=self.last_move, inline=False)
+            final += "Last move:\n"
+            final += self.last_move
+            final += "\n"
 
         if self._running:
-            board_embed.add_field(
-                name="Current turn", value=self.current_player.mention
-            )
+            final += "Current turn:\n"
+            final += self.current_piece + self.current_player.mention
+            final += "\n"
 
-        return board_embed
+        final += self.board_message
+
+        return final
 
     def free(self, num: int):
         for i in range(5, -1, -1):
@@ -127,7 +145,9 @@ class Connect4(menus.Menu):
 
     def make_move(self, row: int, column: int):
         self.board[row][column] = self.current_piece
-        self.last_move = f"{self.current_player.mention}: {column + 1}"
+        self.last_move = (
+            f"{self.current_piece}{self.current_player.mention} ({column + 1})"
+        )
 
     def check_wins(self):
         def check(array: list):
