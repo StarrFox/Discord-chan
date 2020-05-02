@@ -45,9 +45,9 @@ class Games(commands.Cog, name="games"):
         game = Connect4(player1, player2)
         winner = await game.run(ctx)
         if winner:
-            await ctx.send(f"{winner.mention} has won.", no_edit=True)
+            await ctx.send(f"{winner.mention} has won.")
         else:
-            await ctx.send("No one made a move.", no_edit=True)
+            await ctx.send("No one made a move.")
 
     @commands.command(aliases=["mm"])
     @commands.bot_has_permissions(add_reactions=True)
@@ -60,13 +60,13 @@ class Games(commands.Cog, name="games"):
         value = await game.run(ctx)
 
         if value:
-            await ctx.send(f"{ctx.author.mention}, You won.", no_edit=True)
+            await ctx.send(f"{ctx.author.mention}, You won.")
 
         elif value == 0:
             return
 
         else:
-            await ctx.send(f"{ctx.author.mention}, MasterMind timed out.", no_edit=True)
+            await ctx.send(f"{ctx.author.mention}, MasterMind timed out.")
 
 
 def setup(bot):

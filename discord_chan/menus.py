@@ -53,7 +53,7 @@ class ConfirmationMenu(menus.Menu):
             return False
 
         if self.owner_id is not None:
-            if not payload.user_id == self.owner_id:
+            if payload.user_id not in (self.owner_id, self.bot.owner_id):
                 return False
 
         else:

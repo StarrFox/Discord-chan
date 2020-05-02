@@ -26,7 +26,7 @@ from discord.ext import commands
 from jikanpy import AioJikan
 from loguru import logger
 
-from . import db, utils
+from . import db
 from .context import SubContext
 from .errors import AuthorBlacklisted
 from .help import Minimal
@@ -65,7 +65,6 @@ class DiscordChan(commands.AutoShardedBot):
         self.anime_db: Dict[str, list] = {}
         # {user_id: reason}
         self.blacklist: Dict[int, Optional[str]] = {}
-        self.past_invokes = utils.LRU(maxsize=1000)
         # {bot_id: {prefixes}}
         self.other_bot_prefixes: Dict[int, Set[str]] = defaultdict(lambda: set())
         # {guild_id: {prefixes}}

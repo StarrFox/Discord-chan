@@ -63,9 +63,7 @@ class Images(commands.Cog, name="images"):
             )
 
         await ctx.send(
-            ctx.author.mention,
-            file=discord.File(archive, filename=f"{name}.tar"),
-            no_edit=True,
+            ctx.author.mention, file=discord.File(archive, filename=f"{name}.tar")
         )
 
     @commands.command(aliases=["diff"])
@@ -87,7 +85,7 @@ class Images(commands.Cog, name="images"):
 
             file = await discord_chan.image_to_file(difference_image, "difference.png")
 
-        await ctx.send(ctx.author.mention, file=file, no_edit=True)
+        await ctx.send(ctx.author.mention, file=file)
 
     # @commands.command(aliases=['sim'])
     # @commands.cooldown(1, 30, commands.cooldowns.BucketType.user)

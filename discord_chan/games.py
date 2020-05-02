@@ -228,7 +228,6 @@ class MasterMindMenu(menus.Menu):
             f"\n{self.RESEND_ARROW} resend message interface."
             f"\n{self.LEFT_ARROW} backspace last emoji in entry box."
             f"\n{self.RETURN_ARROW} enters guess.",
-            no_edit=True,
         )
 
     @property
@@ -244,16 +243,12 @@ class MasterMindMenu(menus.Menu):
     async def do_entry_button(self, payload):
         if self.position == 5:
             return await self.ctx.send(
-                f"{self.ctx.author.mention}, Max entry reached.",
-                delete_after=5,
-                no_edit=True,
+                f"{self.ctx.author.mention}, Max entry reached.", delete_after=5,
             )
 
         if str(payload.emoji) in self.entry:
             return await self.ctx.send(
-                f"{self.ctx.author.mention}, No duplicate emojis.",
-                delete_after=5,
-                no_edit=True,
+                f"{self.ctx.author.mention}, No duplicate emojis.", delete_after=5,
             )
 
         self.entry[self.position] = str(payload.emoji)
@@ -263,7 +258,7 @@ class MasterMindMenu(menus.Menu):
     @menus.button(RESEND_ARROW, position=menus.Last())
     async def do_resend(self, _):
         await self.message.delete()
-        self.message = msg = await self.ctx.send(self.console, no_edit=True)
+        self.message = msg = await self.ctx.send(self.console)
         for emoji in self.buttons:
             await msg.add_reaction(emoji)
 
@@ -280,9 +275,7 @@ class MasterMindMenu(menus.Menu):
     async def do_enter(self, _):
         if self.position != 5:
             return await self.ctx.send(
-                f"{self.ctx.author.mention}, Entry not full.",
-                delete_after=5,
-                no_edit=True,
+                f"{self.ctx.author.mention}, Entry not full.", delete_after=5,
             )
 
         if self.entry == self.code:
@@ -304,7 +297,6 @@ class MasterMindMenu(menus.Menu):
 
             await self.ctx.send(
                 f'Sorry {self.ctx.author.mention}, out of tries. The code was\n{" ".join(self.code)}.',
-                no_edit=True,
             )
 
             self.stop()

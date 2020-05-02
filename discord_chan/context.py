@@ -17,7 +17,7 @@
 from datetime import datetime
 from typing import Optional
 
-from discord import Message, HTTPException, NotFound
+from discord import Message, HTTPException
 from discord.ext.commands import Context
 
 from .menus import PartitionPaginator, NormalPageSource, DCMenuPages, ConfirmationMenu
@@ -25,14 +25,8 @@ from .menus import PartitionPaginator, NormalPageSource, DCMenuPages, Confirmati
 
 class SubContext(Context):
     async def send(self, content=None, **kwargs) -> Message:
-        """
-        The paginator should never be used there as a just in case
-        no_edit can be passed to not edit past invokes.
-        """
         if content:
             content = str(content)
-
-        menu = None
 
         # If there was more than just content ex: embeds they don't get sent
         # but this should never really be used, so this is ok?
@@ -44,39 +38,10 @@ class SubContext(Context):
 
             menu = DCMenuPages(source)
 
-        if (
-            not kwargs.pop("no_edit", False)
-            and self.message.id in self.bot.past_invokes
-        ):
-            prev_msg = self.bot.past_invokes[self.message.id]
-
-            if menu:
-                menu.message = prev_msg
-                await prev_msg.edit(embed=None)
-                await menu.start(self, wait=True)
-                return menu.message
-
-            else:
-                try:
-                    await prev_msg.edit(
-                        content=content,
-                        embed=kwargs.pop("embed", None),
-                        # suppress is annoying to deal with and I don't use it so /shrug
-                        delete_after=kwargs.pop("delete_after", None),
-                    )
-                    return prev_msg
-
-                except NotFound:
-                    pass
-
-        if menu:
             await menu.start(self, wait=True)
             return menu.message
 
-        new_msg = await super().send(content=content, **kwargs)
-
-        self.bot.past_invokes[self.message.id] = new_msg
-        return new_msg
+        return await super().send(content=content, **kwargs)
 
     @property
     def created_at(self) -> datetime:
