@@ -116,9 +116,7 @@ class Jishaku(JishakuBase, metaclass=GroupCogMeta, command_parent=jsk):
                                 send(await menu.start(ctx))
 
                             else:
-                                send(
-                                    await ctx.send(f"```py\n{result}```", no_edit=True)
-                                )
+                                send(await ctx.send(f"```py\n{result}```"))
 
         finally:
             scope.clear_intersection(arg_dict)

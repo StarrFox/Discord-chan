@@ -319,5 +319,6 @@ class General(commands.Cog, name="general"):
     async def fricc(self, ctx: commands.Context):
         await ctx.send("IM FRICCIN OUT")
 
+
 def setup(bot):
     bot.add_cog(General(bot))

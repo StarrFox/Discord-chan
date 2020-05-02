@@ -62,7 +62,7 @@ class Accessibility(commands.Cog, name="accessibility"):
         buffer = BytesIO(res.file_bytes)
 
         file = discord.File(buffer, "popped.png")
-        await ctx.send(file=file, no_edit=True)
+        await ctx.send(file=file)
 
     @flags.add_flag("--to-ec", action="store_true", default=False)
     @flags.command(name="steal-these")
@@ -92,14 +92,11 @@ class Accessibility(commands.Cog, name="accessibility"):
                 try:
                     await self.bot.ec.create(name=emoji.name, url=str(emoji.url))
 
-                    await ctx.send(
-                        f"Emote {emoji.name} added to EmoteCollector.", no_edit=True
-                    )
+                    await ctx.send(f"Emote {emoji.name} added to EmoteCollector.")
 
                 except EmoteExists:
                     await ctx.send(
-                        f"Emote named {emoji.name} already exists in EmoteCollector.",
-                        no_edit=True,
+                        f"Emote named {emoji.name} already exists in EmoteCollector."
                     )
 
         else:
