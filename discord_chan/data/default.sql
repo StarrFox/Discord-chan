@@ -25,3 +25,7 @@ CREATE TABLE IF NOT EXISTS blacklist (
     user_id INTEGER PRIMARY KEY,
     reason TEXT
 );
+CREATE TABLE IF NOT EXISTS grubninja_settings (
+    key TEXT PRIMARY KEY,
+    "value" TEXT
+);

@@ -16,7 +16,7 @@
 
 from itertools import cycle
 from random import shuffle
-from typing import Optional
+from typing import Optional, Union, Tuple
 
 import discord
 import numpy
@@ -70,6 +70,11 @@ class Connect4(menus.Menu):
 
             if self.check_wins():
                 self.winner = self.current_player
+                self.stop()
+
+            # Tie
+            if self.filler not in self.board:
+                self.winner = self.players
                 self.stop()
 
             self.current_player = next(self.player_cycle)
@@ -177,9 +182,9 @@ class Connect4(menus.Menu):
             if check(diagonal):
                 return True
 
-    async def run(self, ctx) -> Optional[discord.Member]:
+    async def run(self, ctx) -> Optional[Union[discord.Member, Tuple[discord.Member]]]:
         """
-        Run the game and return the winner
+        Run the game and return the winner(s)
         returns None if the first player never made a move
         """
         await self.start(ctx, wait=True)
