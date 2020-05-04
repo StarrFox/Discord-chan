@@ -57,19 +57,17 @@ class Grubninja(commands.Cog, name="grubninja"):
         adds new emoji"""
         # remove old emoji and add new one
         message = await self.get_config("message")
-        if not message:
-            return await ctx.send("Set message before emoji.")
+        if message:
+            split = message.split("-")
+            verification_channel = self.bot.get_channel(int(split[0]))
+            if not verification_channel:
+                return await ctx.send("Verification channel not found.")
 
-        split = message.split("-")
-        verification_channel = self.bot.get_channel(int(split[0]))
-        if not verification_channel:
-            return await ctx.send("Verification channel not found.")
-
-        verification_message: discord.Message = await verification_channel.fetch_message(
-            int(split[1])
-        )
-        await verification_message.clear_reactions()
-        await verification_message.add_reaction(emoji)
+            verification_message: discord.Message = await verification_channel.fetch_message(
+                int(split[1])
+            )
+            await verification_message.clear_reactions()
+            await verification_message.add_reaction(emoji)
 
         await self.set_config("emoji", str(emoji.id))
         await ctx.confirm("Emoji set.")
