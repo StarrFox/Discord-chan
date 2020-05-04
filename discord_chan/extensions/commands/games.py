@@ -45,7 +45,10 @@ class Games(commands.Cog, name="games"):
         game = Connect4(player1, player2)
         winner = await game.run(ctx)
         if winner:
-            await ctx.send(f"{winner.mention} has won.")
+            if isinstance(winner, tuple):
+                await ctx.send(f"{player1.mention} and {player2.mention} tied")
+            else:
+                await ctx.send(f"{winner.mention} has won.")
         else:
             await ctx.send("No one made a move.")
 
