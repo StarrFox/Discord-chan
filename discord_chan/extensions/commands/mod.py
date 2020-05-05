@@ -15,11 +15,12 @@
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
 import typing
+from contextlib import suppress
 
 import discord
 from discord.ext import commands
 
-from discord_chan import db, DCMenuPages, SubContext, CodeblockPageSource
+from discord_chan import CodeblockPageSource, DCMenuPages, SubContext, db
 
 
 def is_above(invoker: discord.Member, user: discord.Member):
@@ -143,7 +144,8 @@ class Mod(commands.Cog, name="mod"):
                 return True
 
         deleted = await ctx.channel.purge(limit=number, check=msgcheck)
-        await ctx.send(f"Deleted {len(deleted)} message(s)", delete_after=5)
+        with suppress(discord.Forbidden):
+            await ctx.send(f"Deleted {len(deleted)} message(s)", delete_after=5)
 
     @commands.bot_has_permissions(ban_members=True)
     @commands.has_permissions(ban_members=True)
