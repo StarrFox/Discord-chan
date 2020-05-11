@@ -16,7 +16,7 @@
 
 from itertools import cycle
 from random import shuffle
-from typing import Optional, Union, Tuple
+from typing import Optional, Tuple, Union
 
 import discord
 import numpy
@@ -78,7 +78,9 @@ class Connect4(menus.Menu):
                 self.stop()
 
             self.current_player = next(self.player_cycle)
-            await self.message.edit(content=self.discord_message)
+            await self.message.edit(
+                content=self.discord_message, allowed_mentions=self.bot.allowed_mentions
+            )
 
     @menus.button("\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}", position=menus.Last())
     async def do_resend(self, _):
