@@ -90,7 +90,7 @@ class General(commands.Cog, name="general"):
     @flags.command(aliases=["owoify", "owo", "uwu"])
     @flags.add_flag("--smiley", action="store_true", default=False)
     @flags.add_flag("--yu", action="store_true", default=False)
-    @flags.add_flag("message", nargs="+")
+    @flags.add_flag("message", nargs="...")
     async def uwuify(self, ctx: commands.Context, **flags):
         """
         Uwuify text
