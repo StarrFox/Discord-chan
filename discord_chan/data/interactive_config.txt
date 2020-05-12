@@ -16,6 +16,8 @@ logging_channel=
 [extra_tokens]
 emote_collector=
 tog_gg=
+api_token=
+product_id=
 
 [enviroment]
 # all options here will be loaded as environment variables
