@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #  Copyright © 2019 StarrFox
 #
 #  Discord Chan is free software: you can redistribute it and/or modify
@@ -21,7 +20,7 @@ from pathlib import Path
 from string import Template
 
 import click
-from aiomonitor import start_monitor, cli
+from aiomonitor import cli, start_monitor
 from box import ConfigBox
 from click_default_group import DefaultGroup
 from loguru import logger

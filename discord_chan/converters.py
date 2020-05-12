@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #  Copyright © 2020 StarrFox
 #
 #  Discord Chan is free software: you can redistribute it and/or modify
@@ -21,7 +20,7 @@ from PIL.Image import Image
 from discord.ext import commands
 
 from . import utils
-from .image import url_to_image, FileTooLarge, InvalidImageType
+from .image import FileTooLarge, InvalidImageType, url_to_image
 
 WEEKDAYS = ["monday", "tuesday", "wendsday", "thursday", "friday", "saturday", "sunday"]
 

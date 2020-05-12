@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #  Copyright © 2019 StarrFox
 #
 #  Discord Chan is free software: you can redistribute it and/or modify
@@ -22,7 +21,7 @@ from textwrap import shorten
 import discord
 from discord.ext import commands
 
-from discord_chan import WeekdayConverter, DiscordChan, checks
+from discord_chan import DiscordChan, WeekdayConverter, checks
 
 THICK_TABLE = str.maketrans(
     {

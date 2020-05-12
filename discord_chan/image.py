@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #  Copyright © 2019 StarrFox
 #
 #  Discord Chan is free software: you can redistribute it and/or modify
@@ -21,12 +20,12 @@ from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 from random import randint
 from tarfile import TarFile, TarInfo
-from typing import Tuple, List, Optional, Callable
+from typing import Callable, List, Optional, Tuple
 
 import aiohttp
-from PIL import Image, ImageSequence, ImageChops
+from PIL import Image, ImageChops, ImageSequence
 from discord import File
-from imagehash import phash, ImageHash
+from imagehash import ImageHash, phash
 
 
 class ImageError(Exception):

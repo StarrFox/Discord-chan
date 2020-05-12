@@ -1,5 +1,4 @@
-﻿# -*- coding: utf-8 -*-
-#  Copyright © 2020 StarrFox
+﻿#  Copyright © 2020 StarrFox
 #
 #  Discord Chan is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU Affero General Public License as published
@@ -22,11 +21,11 @@ from aioec import EmoteExists
 from discord.ext import commands, flags
 
 from discord_chan import (
+    DiscordChan,
     ImageUrlConverter,
     ImageUrlDefault,
-    DiscordChan,
-    get_bytes,
     SubContext,
+    get_bytes,
 )
 
 CUSTOM_EMOJI_REGEX = (
