@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #  Copyright © 2019 StarrFox
 #
 #  Discord Chan is free software: you can redistribute it and/or modify
@@ -19,7 +18,7 @@ from random import choice
 import discord
 from discord.ext import commands
 
-from discord_chan import Connect4, SubContext, MasterMindMenu
+from discord_chan import Connect4, MasterMindMenu, SubContext
 
 
 class Games(commands.Cog, name="games"):

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #  Copyright © 2019 StarrFox
 #
 #  Discord Chan is free software: you can redistribute it and/or modify
@@ -19,7 +18,7 @@ from PIL.Image import Image
 from discord.ext import commands
 
 import discord_chan
-from discord_chan import BetweenConverter, SubContext, ImageConverter, ImageDefault
+from discord_chan import BetweenConverter, ImageConverter, ImageDefault, SubContext
 
 
 # Todo: add more image commands

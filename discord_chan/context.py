@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #  Copyright © 2020 StarrFox
 #
 #  Discord Chan is free software: you can redistribute it and/or modify
@@ -17,10 +16,10 @@
 from datetime import datetime
 from typing import Optional
 
-from discord import Message, HTTPException
+from discord import HTTPException, Message
 from discord.ext.commands import Context
 
-from .menus import PartitionPaginator, NormalPageSource, DCMenuPages, ConfirmationMenu
+from .menus import ConfirmationMenu, DCMenuPages, NormalPageSource, PartitionPaginator
 
 
 class SubContext(Context):

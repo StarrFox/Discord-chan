@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #  Copyright © 2019 StarrFox
 #
 #  Discord Chan is free software: you can redistribute it and/or modify
@@ -21,12 +20,12 @@ import discord
 from discord.ext import commands, flags
 
 from discord_chan import (
-    SnipeMode,
-    DiscordChan,
     DCMenuPages,
-    snipe_parser,
+    DiscordChan,
     EmbedFieldProxy,
     EmbedFieldsPageSource,
+    SnipeMode,
+    snipe_parser,
 )
 
 

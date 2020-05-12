@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #  Copyright © 2019 StarrFox
 #
 #  Discord Chan is free software: you can redistribute it and/or modify
@@ -25,7 +24,7 @@ from aiohttp import ClientSession as Session
 from discord.ext import commands, tasks
 from loguru import logger
 
-from discord_chan import utils, db, SnipeMode, Snipe, DiscordChan
+from discord_chan import DiscordChan, Snipe, SnipeMode, db, utils
 
 
 # Todo: add github cog using github api (replace copycat stuff)

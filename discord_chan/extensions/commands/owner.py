@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #  Copyright © 2019 StarrFox
 #
 #  Discord Chan is free software: you can redistribute it and/or modify
@@ -18,7 +17,7 @@ from typing import Union
 import discord
 from discord.ext import commands
 
-from discord_chan import SubContext, DiscordChan, CrossGuildTextChannelConverter, db
+from discord_chan import CrossGuildTextChannelConverter, DiscordChan, SubContext, db
 
 
 class Owner(commands.Cog, name="owner"):

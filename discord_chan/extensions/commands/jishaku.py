@@ -1,5 +1,4 @@
-﻿# -*- coding: utf-8 -*-
-#  Copyright © 2020 StarrFox
+﻿#  Copyright © 2020 StarrFox
 #
 #  Discord Chan is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU Affero General Public License as published
@@ -17,14 +16,14 @@
 import discord
 from aiosqlite import OperationalError
 from discord.ext import commands
-from jishaku.codeblocks import codeblock_converter, Codeblock
+from jishaku.codeblocks import Codeblock, codeblock_converter
 from jishaku.cog import jsk
 from jishaku.cog_base import JishakuBase
 from jishaku.exception_handling import ReplResponseReactor
 from jishaku.flags import SCOPE_PREFIX
 from jishaku.metacog import GroupCogMeta
 from jishaku.paginators import PaginatorInterface
-from jishaku.repl import get_var_dict_from_ctx, AsyncCodeExecutor, AsyncSender
+from jishaku.repl import AsyncCodeExecutor, AsyncSender, get_var_dict_from_ctx
 from terminaltables import AsciiTable
 
 from discord_chan import (

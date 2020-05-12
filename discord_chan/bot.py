@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #  Copyright © 2019 StarrFox
 #
 #  Discord Chan is free software: you can redistribute it and/or modify
@@ -17,7 +16,7 @@
 import pathlib
 from collections import defaultdict, deque
 from datetime import datetime
-from typing import Optional, Dict, Union, Deque, Set
+from typing import Deque, Dict, Optional, Set, Union
 
 import discord
 from aioec import Client as EcClient

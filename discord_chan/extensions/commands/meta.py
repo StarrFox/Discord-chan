@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #  Copyright © 2019 StarrFox
 #
 #  Discord Chan is free software: you can redistribute it and/or modify
@@ -19,14 +18,14 @@ import humanize
 from discord.ext import commands
 
 from discord_chan import (
-    __version__ as dc_version,
-    DCMenuPages,
-    PrologPaginator,
-    NormalPageSource,
-    checks,
     BotConverter,
+    DCMenuPages,
     NamedCall,
+    NormalPageSource,
+    PrologPaginator,
     SubContext,
+    __version__ as dc_version,
+    checks,
 )
 
 
