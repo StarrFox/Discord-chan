@@ -11,7 +11,7 @@ source .venv/bin/activate
 git clone https://github.com/StarrFox/Discord-chan
 cd Discord-chan
 pip install .
-discord_chan
+discord_chan install
 ```
 
 ## Running

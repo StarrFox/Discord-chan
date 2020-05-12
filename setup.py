@@ -33,6 +33,7 @@ setup(
         "discord_chan",
         "discord_chan.extensions.commands",
         "discord_chan.extensions.internals",
+        "discord_chan.extensions.special",
     ],
     include_package_data=True,
     entry_points={"console_scripts": ["discord_chan = discord_chan.__main__:main"]},

@@ -14,15 +14,15 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
+import datetime
 from typing import Optional
 
-import discord
 import aiohttp
-import datetime
+import discord
 from discord.ext import commands
 from terminaltables import AsciiTable
 
-from discord_chan import db, SubContext
+from discord_chan import SubContext, db
 
 GUILD_ID = 608769523637813249
 CHANNEL_LOG_ID = 709610148355899463
@@ -102,39 +102,48 @@ class Grubninja(commands.Cog, name="grubninja"):
         await ctx.confirm("Status set.")
 
     @grub.command(name="generate")
-    async def generate(self, ctx: SubContext, member: discord.Member):
+    async def grub_generate(self, ctx: SubContext, member: discord.Member):
         """generates a captcha key for a specified user"""
+
         async def create_customer(member: discord.Member):
             create_customer_payload = {
-                'api_token': self.bot.config.extra_tokens.api_token,
-                'product_id': self.bot.config.extra_tokens.product_id,
-                'first': member.name,
-                'last': member.id,
-                'email': 'default@keyzone.com'
+                "api_token": self.bot.config.extra_tokens.api_token,
+                "product_id": self.bot.config.extra_tokens.product_id,
+                "first": member.name,
+                "last": member.id,
+                "email": "default@keyzone.com",
             }
             async with aiohttp.ClientSession() as session:
-                response = await session.post('http://45.77.138.231/api/customer', data=create_customer_payload)
+                response = await session.post(
+                    "http://45.77.138.231/api/customer", data=create_customer_payload
+                )
                 json_response = await response.json()
-                if json_response['result'] == 'success':
-                    customer_id = json_response['message']
+                if json_response["result"] == "success":
+                    customer_id = json_response["message"]
                     return customer_id
-        
-        if customer_id := await create_customer(member):
+
+        customer_id = await create_customer(member)
+        if customer_id:
             create_key_payload = {
-                'api_token': self.bot.config.extra_tokens.api_token,
-                'product_id': self.bot.config.extra_tokens.product_id,
-                'validity': '31622400',
-                'customer_id': customer_id
+                "api_token": self.bot.config.extra_tokens.api_token,
+                "product_id": self.bot.config.extra_tokens.product_id,
+                "validity": "31622400",
+                "customer_id": customer_id,
             }
             async with aiohttp.ClientSession() as session:
-                response = await session.post('http://45.77.138.231/api/create', data=create_key_payload)
+                response = await session.post(
+                    "http://45.77.138.231/api/create", data=create_key_payload
+                )
                 json_response = await response.json()
-                if json_response['result'] == 'success':
-                    await member.send(json_response['message'])
+                if json_response["result"] == "success":
+                    await member.send(json_response["message"])
 
                     channel = await self.bot.fetch_channel(CHANNEL_LOG_ID)
-                    await channel.send(f"""Created key {json_response['message']} at {datetime.date.strftime(datetime.datetime.now(), '%B %d, %Y %I:%M %p')} for {member.name} ({member.id})""")
-
+                    await channel.send(
+                        f"Created key {json_response['message']} at "
+                        f"{datetime.datetime.now().strftime('%B %d, %Y %I:%M %p')}"
+                        f"for {member.name} ({member.id})"
+                    )
 
     # events
 
