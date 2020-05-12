@@ -100,7 +100,7 @@ class Grubninja(commands.Cog, name="grubninja"):
         await self.set_config("status", str(int(toggle)))
         await ctx.confirm("Status set.")
 
-    @grub.command(name="generate")
+    @grub.command(name="generate", aliases=["gen"])
     async def grub_generate(self, ctx: SubContext, member: discord.Member):
         """generates a captcha key for a specified user"""
 
@@ -135,14 +135,18 @@ class Grubninja(commands.Cog, name="grubninja"):
                 )
                 json_response = await response.json()
                 if json_response["result"] == "success":
-                    await member.send(json_response["message"])
-
                     channel = await self.bot.fetch_channel(CHANNEL_LOG_ID)
                     await channel.send(
                         f"Created key {json_response['message']} at "
                         f"{datetime.datetime.now().strftime('%B %d, %Y %I:%M %p')}"
                         f"for {member.name} ({member.id})"
                     )
+
+                try:
+                    await member.send(json_response["message"])
+                    await ctx.confirm("Key created and sent.")
+                except discord.Forbidden:
+                    await ctx.send("User has dms off/bot blocked.")
 
     # events
 
