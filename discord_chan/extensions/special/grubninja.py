@@ -34,6 +34,9 @@ class Grubninja(commands.Cog, name="grubninja"):
     # commands
 
     async def cog_check(self, ctx: commands.Context):
+        if ctx.guild is None:
+            raise commands.NoPrivateMessage()
+
         if ctx.guild.id != GUILD_ID:
             raise commands.CheckFailure("GRUB")
 
@@ -138,7 +141,7 @@ class Grubninja(commands.Cog, name="grubninja"):
                     channel = await self.bot.fetch_channel(CHANNEL_LOG_ID)
                     await channel.send(
                         f"Created key {json_response['message']} at "
-                        f"{datetime.datetime.now().strftime('%B %d, %Y %I:%M %p')}"
+                        f"{datetime.datetime.now().strftime('%B %d, %Y %I:%M %p')} "
                         f"for {member.name} ({member.id})"
                     )
 
