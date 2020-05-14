@@ -40,6 +40,9 @@ class Grubninja(commands.Cog, name="grubninja"):
         if ctx.guild.id != GUILD_ID:
             raise commands.CheckFailure("GRUB")
 
+        if not ctx.author.guild_permissions.administrator:
+            raise commands.CheckFailure("Incorrect penis size to use")
+
         return True
 
     @commands.group(invoke_without_command=True)
