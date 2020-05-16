@@ -86,31 +86,10 @@ class General(commands.Cog, name="general"):
         """
         await ctx.send(message)
 
-    @flags.command(aliases=["owoify", "owo", "uwu"])
-    @flags.add_flag("--smiley", action="store_true", default=False)
-    @flags.add_flag("--yu", action="store_true", default=False)
-    @flags.add_flag("message", nargs="...")
-    async def uwuify(self, ctx: commands.Context, **flags):
-        """
-        Uwuify text
-
-        flags:
-        --smiley: 50% chance of smileys on line endings
-        --yu: u -> yu (doesn't apply to first char of words)
-
-        params:
-        message: the message to uwuify
-        """
-        message = " ".join(flags["message"])
-
-        uwu_flags = 0
-        if flags["smiley"]:
-            uwu_flags |= uwuify.SMILEY
-
-        if flags["yu"]:
-            uwu_flags |= uwuify.YU
-
-        await ctx.send(uwuify.uwu(message, flags=uwu_flags))
+    @commands.command(aliases=["owoify", "owo", "uwu"])
+    async def uwuify(self, ctx: commands.Context, *, message: str):
+        """UwUifies text"""
+        await ctx.send(uwuify.uwu(message, flags=uwuify.SMILEY))
 
     @commands.command(aliases=["spell"])
     async def spellcheck(self, ctx: commands.Context, *, text: str):
