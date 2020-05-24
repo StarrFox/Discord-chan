@@ -25,10 +25,10 @@ class Nsfw(commands.Cog, name="nsfw"):
         self.bot = bot
 
     def cog_check(self, ctx: commands.Context):
-        if not ctx.channel.is_nsfw():
-            raise commands.NSFWChannelRequired(ctx.channel)
+        if ctx.channel.is_nsfw():
+            return True
 
-        return True
+        raise commands.NSFWChannelRequired(ctx.channel)
 
     @commands.command()
     async def neko(self, ctx: commands.Context):
