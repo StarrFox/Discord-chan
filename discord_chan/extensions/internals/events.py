@@ -24,7 +24,7 @@ from aiohttp import ClientSession as Session
 from discord.ext import commands, tasks
 from loguru import logger
 
-from discord_chan import DiscordChan, Snipe, SnipeMode, db, utils
+from discord_chan import DiscordChan, Snipe, SnipeMode, db
 
 
 # Todo: add github cog using github api (replace copycat stuff)
@@ -40,7 +40,6 @@ class Events(commands.Cog, name="events"):
         self.copycat = None
         self.tasks = []
         self.tasks.append(asyncio.create_task(self.update_anime_db()))
-        self.tasks.append(asyncio.create_task(self.get_copycat()))
         self.tasks.append(asyncio.create_task(self.load_channel_links()))
         if self.bot.config.extra_tokens.top_gg:
             self.post_dbl_guilds.start()
@@ -53,18 +52,6 @@ class Events(commands.Cog, name="events"):
         self.post_dbl_guilds.cancel()
 
     # Misc
-
-    async def get_copycat(self):
-        await self.bot.wait_until_ready()
-        self.copycat = self.bot.get_channel(605115140278452373)
-
-    @commands.Cog.listener("on_message")
-    async def on_copycat(self, message: discord.Message):
-        if self.copycat is None:
-            return
-
-        if message.channel.id in [381979045090426881, 381965829857738772]:
-            await utils.msg_resend(self.copycat, message)
 
     @tasks.loop(hours=5)
     async def post_dbl_guilds(self):
