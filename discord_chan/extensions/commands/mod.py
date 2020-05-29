@@ -19,7 +19,13 @@ from contextlib import suppress
 import discord
 from discord.ext import commands
 
-from discord_chan import CodeblockPageSource, DCMenuPages, SubContext, db
+from discord_chan import (
+    BetweenConverter,
+    CodeblockPageSource,
+    DCMenuPages,
+    SubContext,
+    db,
+)
 
 
 def is_above(invoker: discord.Member, user: discord.Member):
@@ -118,13 +124,14 @@ class Mod(commands.Cog, name="mod"):
     async def purge(
         self,
         ctx: SubContext,
-        number: int,
+        number: BetweenConverter(0, 1000),
         user: typing.Optional[discord.Member] = None,
         *,
         text: str = None,
     ):
         """
         Purges messages from certain user and/or (with) certain text
+        <number> must be between 0 and 1000
         """
         await ctx.message.delete()
 
