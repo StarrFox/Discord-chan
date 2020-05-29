@@ -49,6 +49,8 @@ class Accessibility(commands.Cog, name="accessibility"):
         await ctx.send(thing)
 
     @commands.command(aliases=["popembed"])
+    @commands.has_permissions(attach_files=True)
+    @commands.bot_has_permissions(attach_files=True)
     async def sendfile(
         self, ctx: SubContext, thing: ImageUrlConverter = ImageUrlDefault
     ):
