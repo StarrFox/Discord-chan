@@ -30,6 +30,7 @@ class Nsfw(commands.Cog, name="nsfw"):
 
         raise commands.NSFWChannelRequired(ctx.channel)
 
+    @commands.cooldown(10, 60, commands.BucketType.user)
     @commands.command()
     async def neko(self, ctx: commands.Context):
         """Get a random lewd neko"""
