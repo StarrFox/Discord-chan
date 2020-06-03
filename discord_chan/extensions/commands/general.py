@@ -20,7 +20,7 @@ from typing import Optional
 import discord
 import humanize
 import uwuify
-from discord.ext import commands, flags
+from discord.ext import commands
 from discord.ext.commands.default import Author, CurrentChannel
 from enchant.checker import SpellChecker
 
@@ -79,7 +79,7 @@ class General(commands.Cog, name="general"):
     # async def prefixfinder_list(self, ctx: commands.Context):
     #     return
 
-    @flags.command()
+    @commands.command()
     async def say(self, ctx: commands.Context, *, message: str):
         """
         Have the bot say something
@@ -315,6 +315,10 @@ class General(commands.Cog, name="general"):
     @commands.command(hidden=True)
     async def fricc(self, ctx: commands.Context):
         await ctx.send("IM FRICCIN OUT")
+
+    @commands.command(hidden=True)
+    async def bellyrub(self, ctx: commands.Context):
+        await ctx.send("Connor penis size = smol")
 
 
 def setup(bot):
