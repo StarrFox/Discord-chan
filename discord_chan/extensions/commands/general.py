@@ -28,6 +28,7 @@ from discord_chan import (
     BetweenConverter,
     DCMenuPages,
     DiscordChan,
+    FetchedMember,
     ImageFormatConverter,
     NamedCall,
     NormalPageSource,
@@ -71,7 +72,7 @@ class General(commands.Cog, name="general"):
     # # Todo: finish this
     # @checks.cog_loaded('events')
     # @commands.group(aliases=['pf'], invoke_without_command=True)
-    # async def prefixfinder(self, ctx: commands.Context, bot: discord.Member):
+    # async def prefixfinder(self, ctx: commands.Context, bot: FetchedMember):
     #     await ctx.send('wip tm')
     #
     # @checks.cog_loaded('events')
@@ -122,7 +123,7 @@ class General(commands.Cog, name="general"):
     async def avatar(
         self,
         ctx: commands.Context,
-        member: Optional[discord.Member] = Author,
+        member: Optional[FetchedMember] = Author,
         format: Optional[ImageFormatConverter] = "png",
     ):
         """
@@ -131,7 +132,7 @@ class General(commands.Cog, name="general"):
         await ctx.send(str(member.avatar_url_as(format=format)))
 
     @commands.command(aliases=["mi", "userinfo", "ui"])
-    async def memberinfo(self, ctx: commands.Context, member: discord.Member = Author):
+    async def memberinfo(self, ctx: commands.Context, member: FetchedMember = Author):
         """
         Get info on a guild member
         """
@@ -235,7 +236,7 @@ class General(commands.Cog, name="general"):
         await self.send_raw(ctx, data)
 
     @raw.command()
-    async def member(self, ctx: commands.Context, member: discord.Member = Author):
+    async def member(self, ctx: commands.Context, member: FetchedMember = Author):
         """
         Raw member object
         """

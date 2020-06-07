@@ -23,6 +23,7 @@ from discord_chan import (
     BetweenConverter,
     CodeblockPageSource,
     DCMenuPages,
+    FetchedMember,
     SubContext,
     db,
 )
@@ -125,7 +126,7 @@ class Mod(commands.Cog, name="mod"):
         self,
         ctx: SubContext,
         number: BetweenConverter(0, 1000),
-        user: typing.Optional[discord.Member] = None,
+        user: typing.Optional[FetchedMember] = None,
         *,
         text: str = None,
     ):
