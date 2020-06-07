@@ -36,6 +36,37 @@ def _get_from_guilds(bot, getter, argument):
     return result
 
 
+class FetchedMember(commands.Converter):
+    async def convert(self, ctx: commands.Context, argument: str) -> discord.Member:
+        try:
+            member = await commands.MemberConverter().convert(ctx, argument)
+
+        except commands.BadArgument:
+            member = None
+
+        if member:
+            return member
+
+        id_match = re.match(r"<@!?([0-9]+)>$", argument) or re.match(
+            r"([0-9]{15,21})$", argument
+        )
+
+        if id_match:
+            user_id = int(id_match.group(1))
+            member = await ctx.guild.fetch_member(user_id)
+
+            if member:
+                return member
+
+        # someone could be named 15-21 numbers
+        member = ctx.guild.query_members(argument, 1, True)
+
+        if member:
+            return member
+
+        raise commands.BadArgument('Member "{}" not found'.format(argument))
+
+
 class ImageFormatConverter(commands.Converter):
     async def convert(self, ctx: commands.Context, argument: str) -> str:
         if argument in ("png", "gif", "jpeg", "webp"):

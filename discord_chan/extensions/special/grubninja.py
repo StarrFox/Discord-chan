@@ -21,7 +21,7 @@ import discord
 from discord.ext import commands
 from terminaltables import AsciiTable
 
-from discord_chan import SubContext, db
+from discord_chan import FetchedMember, SubContext, db
 
 GUILD_ID = 608769523637813249
 CHANNEL_LOG_ID = 709610148355899463
@@ -107,7 +107,7 @@ class Grubninja(commands.Cog, name="grubninja"):
         await ctx.confirm("Status set.")
 
     @grub.command(name="generate", aliases=["gen"])
-    async def grub_generate(self, ctx: SubContext, member: discord.Member):
+    async def grub_generate(self, ctx: SubContext, member: FetchedMember):
         """generates a captcha key for a specified user"""
 
         async def create_customer(member: discord.Member):

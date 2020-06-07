@@ -117,6 +117,7 @@ class DiscordChan(commands.AutoShardedBot):
         if self.config.general.bool("load_extensions"):
             self.load_extensions_from_dir("discord_chan/extensions")
 
+        logger.info(f"Logged in as {self.user}.")
         logger.info(f"Bot ready with {len(self.extensions.keys())} extensions.")
 
     def run(self, *args, **kwargs):
