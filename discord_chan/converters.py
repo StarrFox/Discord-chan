@@ -59,10 +59,10 @@ class FetchedMember(commands.Converter):
                 return member
 
         # someone could be named 15-21 numbers
-        member = ctx.guild.query_members(argument, 1, True)
+        members = await ctx.guild.query_members(argument)
 
-        if member:
-            return member
+        if members:
+            return members[0]
 
         raise commands.BadArgument('Member "{}" not found'.format(argument))
 
