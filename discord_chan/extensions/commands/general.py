@@ -162,7 +162,7 @@ class General(commands.Cog, name="general"):
 
         data = {
             "id": guild.id,
-            "owner": str(guild.owner),
+            "owner": str(await self.bot.fetch_user(guild.owner_id)),
             "created": humanize.naturaltime(guild.created_at),
             "# of roles": len(guild.roles),
             "members": guild.member_count,
