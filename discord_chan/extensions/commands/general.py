@@ -159,15 +159,13 @@ class General(commands.Cog, name="general"):
         Get info on a guild
         """
         guild = ctx.guild
-        bots = len([m for m in guild.members if m.bot])
-        humans = guild.member_count - bots
 
         data = {
             "id": guild.id,
             "owner": str(guild.owner),
             "created": humanize.naturaltime(guild.created_at),
             "# of roles": len(guild.roles),
-            "members": {"humans": humans, "bots": bots, "total": guild.member_count},
+            "members": guild.member_count,
             "channels": {
                 "categories": len(guild.categories),
                 "text": len(guild.text_channels),
