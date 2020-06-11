@@ -38,14 +38,14 @@ def _get_from_guilds(bot, getter, argument):
 
 class FetchedMember(commands.Converter):
     async def convert(self, ctx: commands.Context, argument: str) -> discord.Member:
-        try:
-            member = await commands.MemberConverter().convert(ctx, argument)
-
-        except commands.BadArgument:
-            member = None
-
-        if member:
-            return member
+        # try:
+        #     member = await commands.MemberConverter().convert(ctx, argument)
+        #
+        # except commands.BadArgument:
+        #     member = None
+        #
+        # if member:
+        #     return member
 
         id_match = re.match(r"<@!?([0-9]+)>$", argument) or re.match(
             r"([0-9]{15,21})$", argument
@@ -59,7 +59,7 @@ class FetchedMember(commands.Converter):
                 return member
 
         # someone could be named 15-21 numbers
-        members = await ctx.guild.query_members(argument)
+        members = await ctx.guild.query_members(argument, cache=False)
 
         if members:
             return members[0]
