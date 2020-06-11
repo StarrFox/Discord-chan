@@ -15,7 +15,6 @@
 
 import json
 import unicodedata
-from typing import Optional
 
 import discord
 import humanize
@@ -29,7 +28,6 @@ from discord_chan import (
     DCMenuPages,
     DiscordChan,
     FetchedMember,
-    ImageFormatConverter,
     NamedCall,
     NormalPageSource,
     PartitionPaginator,
@@ -121,15 +119,12 @@ class General(commands.Cog, name="general"):
 
     @commands.command(aliases=["avy", "pfp"])
     async def avatar(
-        self,
-        ctx: commands.Context,
-        member: Optional[FetchedMember] = Author,
-        format: Optional[ImageFormatConverter] = "png",
+        self, ctx: commands.Context, member: FetchedMember = Author,
     ):
         """
         Get a member's avatar
         """
-        await ctx.send(str(member.avatar_url_as(format=format)))
+        await ctx.send(str(member.avatar_url))
 
     @commands.command(aliases=["mi", "userinfo", "ui"])
     async def memberinfo(self, ctx: commands.Context, member: FetchedMember = Author):
