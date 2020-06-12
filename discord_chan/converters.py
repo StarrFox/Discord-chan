@@ -67,6 +67,12 @@ class FetchedMember(commands.Converter):
         raise commands.BadArgument('Member "{}" not found'.format(argument))
 
 
+class FetchedAuthor(commands.CustomDefault, display="Author"):
+    async def default(self, ctx, param):
+        # We do this because when cache is off ctx.author will only be a user
+        return await ctx.guild.fetch_member(ctx.author.id)
+
+
 class ImageFormatConverter(commands.Converter):
     async def convert(self, ctx: commands.Context, argument: str) -> str:
         if argument in ("png", "gif", "jpeg", "webp"):

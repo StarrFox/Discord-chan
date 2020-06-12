@@ -20,13 +20,14 @@ import discord
 import humanize
 import uwuify
 from discord.ext import commands
-from discord.ext.commands.default import Author, CurrentChannel
+from discord.ext.commands.default import CurrentChannel
 from enchant.checker import SpellChecker
 
 from discord_chan import (
     BetweenConverter,
     DCMenuPages,
     DiscordChan,
+    FetchedAuthor,
     FetchedMember,
     NamedCall,
     NormalPageSource,
@@ -119,7 +120,7 @@ class General(commands.Cog, name="general"):
 
     @commands.command(aliases=["avy", "pfp"])
     async def avatar(
-        self, ctx: commands.Context, member: FetchedMember = Author,
+        self, ctx: commands.Context, member: FetchedMember = FetchedAuthor
     ):
         """
         Get a member's avatar
@@ -127,7 +128,9 @@ class General(commands.Cog, name="general"):
         await ctx.send(str(member.avatar_url))
 
     @commands.command(aliases=["mi", "userinfo", "ui"])
-    async def memberinfo(self, ctx: commands.Context, member: FetchedMember = Author):
+    async def memberinfo(
+        self, ctx: commands.Context, member: FetchedMember = FetchedAuthor
+    ):
         """
         Get info on a guild member
         """
@@ -229,7 +232,9 @@ class General(commands.Cog, name="general"):
         await self.send_raw(ctx, data)
 
     @raw.command()
-    async def member(self, ctx: commands.Context, member: FetchedMember = Author):
+    async def member(
+        self, ctx: commands.Context, member: FetchedMember = FetchedAuthor
+    ):
         """
         Raw member object
         """

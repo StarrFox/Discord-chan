@@ -67,7 +67,12 @@ class Snipe(commands.Cog, name="snipe"):
                 "You cannot snipe a nsfw channel from a non-nsfw channel."
             )
 
-        if not channel.permissions_for(ctx.author).read_messages:
+        if isinstance(ctx.author, discord.User):
+            author = await ctx.guild.get_member(ctx.author.id)
+        else:
+            author = ctx.author
+
+        if not channel.permissions_for(author).read_messages:
             return await ctx.send(
                 "You need permission to view a channel to snipe from it."
             )
@@ -143,9 +148,12 @@ class Snipe(commands.Cog, name="snipe"):
         if channel is None and guild is None:
             raise ValueError("Channel and Guild cannot both be None.")
 
-        filters = [
-            lambda snipe: snipe.channel.permissions_for(ctx.author).read_messages
-        ]
+        if isinstance(ctx.author, discord.User):
+            author = await ctx.guild.get_member(ctx.author.id)
+        else:
+            author = ctx.author
+
+        filters = [lambda snipe: snipe.channel.permissions_for(author).read_messages]
 
         if not ctx.channel.is_nsfw():
             filters.append(lambda snipe: not snipe.channel.is_nsfw())
