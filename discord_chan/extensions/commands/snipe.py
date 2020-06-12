@@ -79,7 +79,8 @@ class Snipe(commands.Cog, name="snipe"):
 
         # noinspection PyTypeChecker
         snipes = self.get_snipes(
-            ctx,
+            command_author=author,
+            command_channel=ctx.channel,
             channel=channel,
             guild=options["guild"],
             authors=options["authors"],
@@ -134,7 +135,8 @@ class Snipe(commands.Cog, name="snipe"):
 
     def get_snipes(
         self,
-        ctx: commands.Context,
+        command_author: discord.Member,
+        command_channel: discord.TextChannel,
         *,
         channel: discord.TextChannel = None,
         guild: bool = False,
@@ -148,14 +150,11 @@ class Snipe(commands.Cog, name="snipe"):
         if channel is None and guild is None:
             raise ValueError("Channel and Guild cannot both be None.")
 
-        if isinstance(ctx.author, discord.User):
-            author = await ctx.guild.get_member(ctx.author.id)
-        else:
-            author = ctx.author
+        filters = [
+            lambda snipe: snipe.channel.permissions_for(command_author).read_messages
+        ]
 
-        filters = [lambda snipe: snipe.channel.permissions_for(author).read_messages]
-
-        if not ctx.channel.is_nsfw():
+        if not command_channel.is_nsfw():
             filters.append(lambda snipe: not snipe.channel.is_nsfw())
 
         if authors:
