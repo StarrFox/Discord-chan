@@ -68,7 +68,7 @@ class Snipe(commands.Cog, name="snipe"):
             )
 
         if isinstance(ctx.author, discord.User):
-            author = await ctx.guild.get_member(ctx.author.id)
+            author = await ctx.guild.fetch_member(ctx.author.id)
         else:
             author = ctx.author
 
