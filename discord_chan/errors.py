@@ -17,4 +17,10 @@ from discord.ext.commands import CommandError
 
 
 class AuthorBlacklisted(CommandError):
-    pass
+    def __init__(self):
+        super().__init__("Sorry but you are blacklisted and cannot use commands.")
+
+
+class BotNoDms(CommandError):
+    def __init__(self):
+        super().__init__("Sorry but this bot is not made for direct messages.")

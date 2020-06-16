@@ -27,7 +27,7 @@ from loguru import logger
 
 from . import db
 from .context import SubContext
-from .errors import AuthorBlacklisted
+from .errors import AuthorBlacklisted, BotNoDms
 from .help import Minimal
 from .snipe import Snipe
 
@@ -86,6 +86,7 @@ class DiscordChan(commands.AutoShardedBot):
             self.ec = None
 
         self.add_check(self.blacklist_check)
+        self.add_check(self.direct_message_check)
 
     def get_message(self, message_id: int) -> Optional[discord.Message]:
         """
@@ -173,8 +174,14 @@ class DiscordChan(commands.AutoShardedBot):
 
     def blacklist_check(self, ctx: commands.Context):
         if ctx.author.id in self.blacklist:
-            reason = self.blacklist[ctx.author.id]
-            raise AuthorBlacklisted(f"{ctx.author} is blacklisted for {reason}.")
+            raise AuthorBlacklisted()
+
+        return True
+
+    @staticmethod
+    def direct_message_check(ctx: commands.Context):
+        if isinstance(ctx.channel, discord.DMChannel):
+            raise BotNoDms()
 
         return True
 
