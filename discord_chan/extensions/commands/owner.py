@@ -158,6 +158,8 @@ class Owner(commands.Cog, name="owner"):
                 "INSERT INTO blacklist (user_id, reason) VALUES (?, ?)", (user, reason)
             )
 
+            await connection.commit()
+
         await ctx.confirm("Added to blacklist.")
 
     @blacklist.command(name="remove", aliases=["rem"])
@@ -172,6 +174,8 @@ class Owner(commands.Cog, name="owner"):
             await connection.execute(
                 "DELETE FROM blacklist WHERE user_id = (?)", (user,)
             )
+
+            await connection.commit()
 
         await ctx.confirm("Removed from blacklist.")
 
