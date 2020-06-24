@@ -329,3 +329,168 @@ class MasterMindMenu(menus.Menu):
             return self.CROSS_MARK
 
         return "".join(sorted(res))
+
+
+class SliderGame(menus.Menu):
+    SPACER = "\N{BLACK LARGE SQUARE}"
+    SLIDER_EMOJIS = [
+        "<:dc_0:725302403712155678>",
+        "<:dc_1:725302408472952892>",
+        "<:dc_2:725302422854959106>",
+        "<:dc_3:725302426999062618>",
+        "<:dc_4:725302430966743042>",
+        "<:dc_5:725302444388515950>",
+        "<:dc_6:725302448633151559>",
+        "<:dc_7:725302452768866336>",
+        "<:dc_8:725302465150582795>",
+        "<:dc_9:725302469592350791>",
+        "<:dc_10:725302474067410995>",
+        "<:dc_11:725302486990061628>",
+        "<:dc_12:725302491578630235>",
+        "<:dc_13:725302496452673587>",
+        "<:dc_14:725302508154650688>",
+        SPACER,
+    ]
+
+    RESEND_ARROW = "\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}"
+
+    ARROW_LEFT = "\N{BLACK LEFT-POINTING TRIANGLE}\N{VARIATION SELECTOR-16}"
+    ARROW_RIGHT = "\N{BLACK RIGHT-POINTING TRIANGLE}\N{VARIATION SELECTOR-16}"
+    ARROW_UP = "\N{UP-POINTING SMALL RED TRIANGLE}"
+    ARROW_DOWN = "\N{DOWN-POINTING SMALL RED TRIANGLE}"
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.board = self.get_board()
+        self.positon = self._find_spacer()
+
+    async def send_initial_message(self, ctx, channel):
+        return await channel.send(self.discord_message)
+
+    # It's pronounced "big brain" :sunglasses:
+    def _find_spacer(self):
+        for row_index, row in enumerate(self.board):
+            for emoji_index, emoji in enumerate(row):
+                if emoji == self.SPACER:
+                    return row_index, emoji_index
+
+    async def check_wins(self):
+        to_check = []
+        for row in self.board:
+            for emoji in row:
+                to_check.append(emoji)
+
+        if to_check == self.SLIDER_EMOJIS:
+            await self.ctx.send(
+                f"{self.ctx.author.mention} has won.",
+                allowed_mentions=discord.AllowedMentions(users=True),
+            )
+
+            self.stop()
+
+    @property
+    def discord_message(self):
+        msg = ""
+        for row in self.board:
+            msg += "".join(row)
+            msg += "\n"
+
+        return msg
+
+    def get_board(self):
+        emojis = self.SLIDER_EMOJIS.copy()
+        shuffle(emojis)
+        board = [*self._groups_of_four(emojis)]
+        return board
+
+    @staticmethod
+    def _groups_of_four(ungrouped):
+        for i in range(0, len(ungrouped), 4):
+            try:
+                yield ungrouped[i : i + 4]
+            except IndexError:
+                yield ungrouped[i : i + 3]
+
+    @menus.button(RESEND_ARROW, position=menus.Last())
+    async def do_resend(self, _):
+        await self.message.delete()
+        self.message = msg = await self.ctx.send(self.discord_message)
+        for emoji in self.buttons:
+            await msg.add_reaction(emoji)
+
+    # Todo: make this not copy paste the same function 4 times
+    @menus.button(ARROW_LEFT, position=menus.First())
+    async def do_arrow_left(self, _):
+        new_position = self.positon[0], self.positon[1] - 1
+        if not 0 < new_position[1] <= 3:
+            return await self.ctx.send(
+                f"{self.ctx.author.mention}, that move is invalid.",
+                allowed_mentions=discord.AllowedMentions(users=True),
+                delete_after=5,
+            )
+
+        emoji = self.board[new_position[0]][new_position[1]]
+
+        self.board[new_position[0]][new_position[1]] = self.SPACER
+        self.board[self.positon[0]][self.positon[1]] = emoji
+        self.positon = new_position
+
+        await self.message.edit(content=self.discord_message)
+        await self.check_wins()
+
+    @menus.button(ARROW_DOWN, position=menus.First(1))
+    async def do_arrow_down(self, _):
+        new_position = self.positon[0] + 1, self.positon[1]
+        if not 0 < new_position[0] <= 3:
+            return await self.ctx.send(
+                f"{self.ctx.author.mention}, that move is invalid.",
+                allowed_mentions=discord.AllowedMentions(users=True),
+                delete_after=5,
+            )
+
+        emoji = self.board[new_position[0]][new_position[1]]
+
+        self.board[new_position[0]][new_position[1]] = self.SPACER
+        self.board[self.positon[0]][self.positon[1]] = emoji
+        self.positon = new_position
+
+        await self.message.edit(content=self.discord_message)
+        await self.check_wins()
+
+    @menus.button(ARROW_UP, position=menus.First(2))
+    async def do_arrow_up(self, _):
+        new_position = self.positon[0] - 1, self.positon[1]
+        if not 0 < new_position[0] <= 3:
+            return await self.ctx.send(
+                f"{self.ctx.author.mention}, that move is invalid.",
+                allowed_mentions=discord.AllowedMentions(users=True),
+                delete_after=5,
+            )
+
+        emoji = self.board[new_position[0]][new_position[1]]
+
+        self.board[new_position[0]][new_position[1]] = self.SPACER
+        self.board[self.positon[0]][self.positon[1]] = emoji
+        self.positon = new_position
+
+        await self.message.edit(content=self.discord_message)
+        await self.check_wins()
+
+    @menus.button(ARROW_RIGHT, position=menus.First(3))
+    async def do_arrow_right(self, _):
+        new_position = self.positon[0], self.positon[1] + 1
+        if not 0 < new_position[1] <= 3:
+            return await self.ctx.send(
+                f"{self.ctx.author.mention}, that move is invalid.",
+                allowed_mentions=discord.AllowedMentions(users=True),
+                delete_after=5,
+            )
+
+        emoji = self.board[new_position[0]][new_position[1]]
+
+        self.board[new_position[0]][new_position[1]] = self.SPACER
+        self.board[self.positon[0]][self.positon[1]] = emoji
+        self.positon = new_position
+
+        await self.message.edit(content=self.discord_message)
+        await self.check_wins()

@@ -39,9 +39,7 @@ setup(
     python_requires=">=3.7",
     install_requires=[
         "jishaku>=1.8",
-        "discord.py @ git+https://github.com/Rapptz/discord.py@refs/pull/1849/merge",
-        # Todo: remove when released
-        "discord-ext-menus @ git+https://github.com/Rapptz/discord-ext-menus",
+        "discord.py @ git+https://github.com/StarrFox/discord.py",
         "numpy",
         "imagehash",
         "aiohttp",
