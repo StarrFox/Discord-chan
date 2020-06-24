@@ -18,7 +18,7 @@ from random import choice
 import discord
 from discord.ext import commands
 
-from discord_chan import Connect4, MasterMindMenu, SubContext
+from discord_chan import Connect4, MasterMindMenu, SliderGame, SubContext
 
 
 class Games(commands.Cog, name="games"):
@@ -69,6 +69,16 @@ class Games(commands.Cog, name="games"):
 
         else:
             await ctx.send(f"{ctx.author.mention}, MasterMind timed out.")
+
+    @commands.command(aliases=["sg"])
+    @commands.bot_has_permissions(add_reactions=True)
+    @commands.max_concurrency(1, commands.BucketType.user)
+    async def slidergame(self, ctx: SubContext):
+        """
+        Play SliderGame.
+        """
+        game = SliderGame()
+        await game.start(ctx, wait=True)
 
 
 def setup(bot):
