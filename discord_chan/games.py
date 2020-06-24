@@ -422,7 +422,7 @@ class SliderGame(menus.Menu):
     @menus.button(ARROW_LEFT, position=menus.First())
     async def do_arrow_left(self, _):
         new_position = self.positon[0], self.positon[1] - 1
-        if not 0 < new_position[1] <= 3:
+        if not -1 < new_position[1] <= 3:
             return await self.ctx.send(
                 f"{self.ctx.author.mention}, that move is invalid.",
                 allowed_mentions=discord.AllowedMentions(users=True),
@@ -441,7 +441,7 @@ class SliderGame(menus.Menu):
     @menus.button(ARROW_DOWN, position=menus.First(1))
     async def do_arrow_down(self, _):
         new_position = self.positon[0] + 1, self.positon[1]
-        if not 0 < new_position[0] <= 3:
+        if not -1 < new_position[0] <= 3:
             return await self.ctx.send(
                 f"{self.ctx.author.mention}, that move is invalid.",
                 allowed_mentions=discord.AllowedMentions(users=True),
@@ -460,7 +460,7 @@ class SliderGame(menus.Menu):
     @menus.button(ARROW_UP, position=menus.First(2))
     async def do_arrow_up(self, _):
         new_position = self.positon[0] - 1, self.positon[1]
-        if not 0 < new_position[0] <= 3:
+        if not -1 < new_position[0] <= 3:
             return await self.ctx.send(
                 f"{self.ctx.author.mention}, that move is invalid.",
                 allowed_mentions=discord.AllowedMentions(users=True),
@@ -479,7 +479,7 @@ class SliderGame(menus.Menu):
     @menus.button(ARROW_RIGHT, position=menus.First(3))
     async def do_arrow_right(self, _):
         new_position = self.positon[0], self.positon[1] + 1
-        if not 0 < new_position[1] <= 3:
+        if not -1 < new_position[1] <= 3:
             return await self.ctx.send(
                 f"{self.ctx.author.mention}, that move is invalid.",
                 allowed_mentions=discord.AllowedMentions(users=True),
