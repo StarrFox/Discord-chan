@@ -419,7 +419,7 @@ class SliderGame(menus.Menu):
                     spacer_collum = emoji_index
                     break
 
-        new_position = target_row, randint(0, 4)
+        new_position = target_row, randint(0, 3)
 
         old_emoji = board[new_position[0]][new_position[1]]
 
