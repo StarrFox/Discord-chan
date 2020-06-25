@@ -14,7 +14,7 @@
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
 from itertools import cycle
-from random import choice, randint, shuffle
+from random import choice, shuffle
 from typing import Optional, Tuple, Union
 
 import discord
@@ -362,8 +362,8 @@ class SliderGame(menus.Menu):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.positon = None
         self.board = self.get_board()
+        self.positon = self._find_spacer()
 
         self.moves = 0
         self.has_won = False
@@ -387,6 +387,13 @@ class SliderGame(menus.Menu):
             self.has_won = True
             self.stop()
 
+    # It's pronounced "big brain" :sunglasses:
+    def _find_spacer(self):
+        for row_index, row in enumerate(self.board):
+            for emoji_index, emoji in enumerate(row):
+                if emoji == self.SPACER:
+                    return row_index, emoji_index
+
     @property
     def discord_message(self):
         msg = ""
@@ -397,51 +404,64 @@ class SliderGame(menus.Menu):
         return msg
 
     def get_board(self):
-        emojis = self._shuffle_with_displacment(self.SLIDER_EMOJIS)
+        emojis = self.SLIDER_EMOJIS.copy()
+        shuffle(emojis)
+
+        inversions = self._count_inversions(emojis)
+        even = inversions % 2 == 0
 
         # This makes the game always solvable
-        row = choice([1, 3])
+        if even:
+            row = choice([1, 3])
+        else:
+            row = choice([0, 2])
+
+        self._place_spacer_on_row(emojis, row)
 
         board = [*self._groups_of_four(emojis)]
 
-        self._place_spacer_on_row(board, row)
-
         return board
 
-    def _place_spacer_on_row(self, board: list, target_row: int):
-        for row_index, row in enumerate(board):
-            for emoji_index, emoji in enumerate(row):
-                if emoji == self.SPACER:
-                    spacer_row = row_index
-                    spacer_collum = emoji_index
+    def _place_spacer_on_row(self, entry: list, target_row: int):
+        spacer_index = entry.index(self.SPACER)
+        target_index = choice([*self._groups_of_four([*range(len(entry))])][target_row])
+
+        if spacer_index < target_index:
+            for index in range(spacer_index, target_index + 1):
+                if index == target_index:
                     break
+                old = entry[index]
+                entry[index] = entry[index + 1]
+                entry[index + 1] = old
 
-        new_position = target_row, randint(0, 3)
+        elif spacer_index > target_index:
+            for index in reversed(range(target_index, spacer_index + 1)):
+                if index == target_row:
+                    break
+                old = entry[index]
+                entry[index] = entry[index - 1]
+                entry[index - 1] = old
 
-        old_emoji = board[new_position[0]][new_position[1]]
+        # == means already in place
+        return entry
 
-        board[spacer_row][spacer_collum] = old_emoji
-        board[new_position[0]][new_position[1]] = self.SPACER
+    def _count_inversions(self, entry):
+        inversions = 0
+        for index in range(len(entry)):
+            if index == len(entry):
+                break
 
-        self.positon = new_position
+            target_emoji = entry[index]
+            target_place = self.SLIDER_EMOJIS.index(target_emoji)
+            for emoji in entry[index + 1 :]:
+                if emoji == self.SPACER:
+                    continue
 
-        return board
+                emoji_place = self.SLIDER_EMOJIS.index(emoji)
+                if target_place > emoji_place:
+                    inversions += 1
 
-    @staticmethod
-    def _shuffle_with_displacment(entry: list):
-        target = entry.copy()
-
-        unmoved = [*range(len(entry))]
-
-        while unmoved:
-            first = choice(unmoved)
-            unmoved.remove(first)
-            second = choice(unmoved)
-            unmoved.remove(second)
-
-            target[first], target[second] = target[second], target[first]
-
-        return target
+        return inversions
 
     @staticmethod
     def _groups_of_four(ungrouped):

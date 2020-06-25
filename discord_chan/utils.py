@@ -115,7 +115,9 @@ class InterceptHandler(logging.Handler):
 
 
 def detailed_human_time(input_seconds: Union[float, int]):
-    minutes, seconds = divmod(int(input_seconds), 60)
+    # drop nanoseconds
+    input_seconds = int(input_seconds)
+    minutes, seconds = divmod(input_seconds, 60)
     hours, minutes = divmod(minutes, 60)
     days, hours = divmod(hours, 24)
     years, days = divmod(days, 365)
@@ -123,6 +125,8 @@ def detailed_human_time(input_seconds: Union[float, int]):
     msgs = []
     if years:
         msgs.append(f"{years} year(s)")
+    if minutes:
+        msgs.append(f"{minutes} minute(s)")
     if days:
         msgs.append(f"{days} day(s)")
     if hours:
