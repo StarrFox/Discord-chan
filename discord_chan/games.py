@@ -14,7 +14,7 @@
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
 from itertools import cycle
-from random import shuffle
+from random import choice, randint, shuffle
 from typing import Optional, Tuple, Union
 
 import discord
@@ -353,6 +353,7 @@ class SliderGame(menus.Menu):
     ]
 
     RESEND_ARROW = "\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}"
+    CROSS_MARK = "\N{CROSS MARK}"
 
     ARROW_LEFT = "\N{BLACK LEFT-POINTING TRIANGLE}\N{VARIATION SELECTOR-16}"
     ARROW_RIGHT = "\N{BLACK RIGHT-POINTING TRIANGLE}\N{VARIATION SELECTOR-16}"
@@ -361,18 +362,20 @@ class SliderGame(menus.Menu):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.positon = None
         self.board = self.get_board()
-        self.positon = self._find_spacer()
+
+        self.moves = 0
+        self.has_won = False
+
+        for button in [
+            menus.Button(e, self.do_arrow_move)
+            for e in [self.ARROW_LEFT, self.ARROW_DOWN, self.ARROW_UP, self.ARROW_RIGHT]
+        ]:
+            self.add_button(button)
 
     async def send_initial_message(self, ctx, channel):
         return await channel.send(self.discord_message)
-
-    # It's pronounced "big brain" :sunglasses:
-    def _find_spacer(self):
-        for row_index, row in enumerate(self.board):
-            for emoji_index, emoji in enumerate(row):
-                if emoji == self.SPACER:
-                    return row_index, emoji_index
 
     async def check_wins(self):
         to_check = []
@@ -381,11 +384,7 @@ class SliderGame(menus.Menu):
                 to_check.append(emoji)
 
         if to_check == self.SLIDER_EMOJIS:
-            await self.ctx.send(
-                f"{self.ctx.author.mention} has won.",
-                allowed_mentions=discord.AllowedMentions(users=True),
-            )
-
+            self.has_won = True
             self.stop()
 
     @property
@@ -398,10 +397,53 @@ class SliderGame(menus.Menu):
         return msg
 
     def get_board(self):
-        emojis = self.SLIDER_EMOJIS.copy()
-        shuffle(emojis)
+        is_even, emojis = self._shuffle_with_displacment(self.SLIDER_EMOJIS)
+
+        if is_even:
+            # row 2 or 4
+            row = choice([1, 3])
+        else:
+            row = choice([0, 2])
+
         board = [*self._groups_of_four(emojis)]
+
+        self._place_spacer_on_row(board, row)
+
         return board
+
+    def _place_spacer_on_row(self, board: list, target_row: int):
+        for row_index, row in enumerate(board):
+            for emoji_index, emoji in enumerate(row):
+                if emoji == self.SPACER:
+                    spacer_row = row_index
+                    spacer_collum = emoji_index
+                    break
+
+        new_position = target_row, randint(0, 4)
+
+        old_emoji = board[new_position[0]][new_position[1]]
+
+        board[spacer_row][spacer_collum] = old_emoji
+        board[new_position[0]][new_position[1]] = self.SPACER
+
+        self.positon = new_position
+
+        return board
+
+    @staticmethod
+    def _shuffle_with_displacment(entry: list):
+        target = entry.copy()
+        number_of_shuffles = choice(range(50, 100 + 1))
+
+        is_even = number_of_shuffles % 2 == 0
+
+        for _ in range(number_of_shuffles + 1):
+            first = randint(0, len(target) - 1)
+            second = randint(0, len(target) - 1)
+
+            target[first], target[second] = target[second], target[first]
+
+        return is_even, target
 
     @staticmethod
     def _groups_of_four(ungrouped):
@@ -418,10 +460,25 @@ class SliderGame(menus.Menu):
         for emoji in self.buttons:
             await msg.add_reaction(emoji)
 
-    # Todo: make this not copy paste the same function 4 times
-    @menus.button(ARROW_LEFT, position=menus.First())
-    async def do_arrow_left(self, _):
-        new_position = self.positon[0], self.positon[1] - 1
+    @menus.button(CROSS_MARK, position=menus.Last(1))
+    async def do_forfeit(self, _):
+        self.stop()
+
+    async def do_arrow_move(self, payload: discord.RawReactionActionEvent):
+        emoji = str(payload.emoji)
+
+        # switch statement be like: bruh?
+        if emoji == self.ARROW_LEFT:
+            new_position = self.positon[0], self.positon[1] - 1
+        elif emoji == self.ARROW_RIGHT:
+            new_position = self.positon[0], self.positon[1] + 1
+        elif emoji == self.ARROW_DOWN:
+            new_position = self.positon[0] + 1, self.positon[1]
+        elif emoji == self.ARROW_UP:
+            new_position = self.positon[0] - 1, self.positon[1]
+        else:
+            new_position = None
+
         if not -1 < new_position[1] <= 3:
             return await self.ctx.send(
                 f"{self.ctx.author.mention}, that move is invalid.",
@@ -435,62 +492,11 @@ class SliderGame(menus.Menu):
         self.board[self.positon[0]][self.positon[1]] = emoji
         self.positon = new_position
 
-        await self.message.edit(content=self.discord_message)
-        await self.check_wins()
-
-    @menus.button(ARROW_DOWN, position=menus.First(1))
-    async def do_arrow_down(self, _):
-        new_position = self.positon[0] + 1, self.positon[1]
-        if not -1 < new_position[0] <= 3:
-            return await self.ctx.send(
-                f"{self.ctx.author.mention}, that move is invalid.",
-                allowed_mentions=discord.AllowedMentions(users=True),
-                delete_after=5,
-            )
-
-        emoji = self.board[new_position[0]][new_position[1]]
-
-        self.board[new_position[0]][new_position[1]] = self.SPACER
-        self.board[self.positon[0]][self.positon[1]] = emoji
-        self.positon = new_position
+        self.moves += 1
 
         await self.message.edit(content=self.discord_message)
         await self.check_wins()
 
-    @menus.button(ARROW_UP, position=menus.First(2))
-    async def do_arrow_up(self, _):
-        new_position = self.positon[0] - 1, self.positon[1]
-        if not -1 < new_position[0] <= 3:
-            return await self.ctx.send(
-                f"{self.ctx.author.mention}, that move is invalid.",
-                allowed_mentions=discord.AllowedMentions(users=True),
-                delete_after=5,
-            )
-
-        emoji = self.board[new_position[0]][new_position[1]]
-
-        self.board[new_position[0]][new_position[1]] = self.SPACER
-        self.board[self.positon[0]][self.positon[1]] = emoji
-        self.positon = new_position
-
-        await self.message.edit(content=self.discord_message)
-        await self.check_wins()
-
-    @menus.button(ARROW_RIGHT, position=menus.First(3))
-    async def do_arrow_right(self, _):
-        new_position = self.positon[0], self.positon[1] + 1
-        if not -1 < new_position[1] <= 3:
-            return await self.ctx.send(
-                f"{self.ctx.author.mention}, that move is invalid.",
-                allowed_mentions=discord.AllowedMentions(users=True),
-                delete_after=5,
-            )
-
-        emoji = self.board[new_position[0]][new_position[1]]
-
-        self.board[new_position[0]][new_position[1]] = self.SPACER
-        self.board[self.positon[0]][self.positon[1]] = emoji
-        self.positon = new_position
-
-        await self.message.edit(content=self.discord_message)
-        await self.check_wins()
+    async def run(self, ctx):
+        await self.start(ctx, wait=True)
+        return self.has_won, self.moves
