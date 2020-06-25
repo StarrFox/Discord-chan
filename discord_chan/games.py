@@ -14,7 +14,7 @@
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
 from itertools import cycle
-from random import choice, shuffle
+from random import choice, randint, shuffle
 from typing import Optional, Tuple, Union
 
 import discord
@@ -364,6 +364,7 @@ class SliderGame(menus.Menu):
         super().__init__(**kwargs)
         self.board = self.get_board()
         self.positon = self._find_spacer()
+        self._randomize_board()
 
         self.moves = 0
         self.has_won = False
@@ -387,6 +388,10 @@ class SliderGame(menus.Menu):
             self.has_won = True
             self.stop()
 
+    def _randomize_board(self):
+        for _ in range(randint(100, 200)):
+            self.random_move()
+
     # It's pronounced "big brain" :sunglasses:
     def _find_spacer(self):
         for row_index, row in enumerate(self.board):
@@ -405,63 +410,9 @@ class SliderGame(menus.Menu):
 
     def get_board(self):
         emojis = self.SLIDER_EMOJIS.copy()
-        shuffle(emojis)
-
-        inversions = self._count_inversions(emojis)
-        even = inversions % 2 == 0
-
-        # This makes the game always solvable
-        if even:
-            row = choice([1, 3])
-        else:
-            row = choice([0, 2])
-
-        self._place_spacer_on_row(emojis, row)
-
         board = [*self._groups_of_four(emojis)]
 
         return board
-
-    def _place_spacer_on_row(self, entry: list, target_row: int):
-        spacer_index = entry.index(self.SPACER)
-        target_index = choice([*self._groups_of_four([*range(len(entry))])][target_row])
-
-        if spacer_index < target_index:
-            for index in range(spacer_index, target_index + 1):
-                if index == target_index:
-                    break
-                old = entry[index]
-                entry[index] = entry[index + 1]
-                entry[index + 1] = old
-
-        elif spacer_index > target_index:
-            for index in reversed(range(target_index, spacer_index + 1)):
-                if index == target_row:
-                    break
-                old = entry[index]
-                entry[index] = entry[index - 1]
-                entry[index - 1] = old
-
-        # == means already in place
-        return entry
-
-    def _count_inversions(self, entry):
-        inversions = 0
-        for index in range(len(entry)):
-            if index == len(entry):
-                break
-
-            target_emoji = entry[index]
-            target_place = self.SLIDER_EMOJIS.index(target_emoji)
-            for emoji in entry[index + 1 :]:
-                if emoji == self.SPACER:
-                    continue
-
-                emoji_place = self.SLIDER_EMOJIS.index(emoji)
-                if target_place > emoji_place:
-                    inversions += 1
-
-        return inversions
 
     @staticmethod
     def _groups_of_four(ungrouped):
@@ -487,33 +438,59 @@ class SliderGame(menus.Menu):
 
         # switch statement be like: bruh?
         if emoji == self.ARROW_LEFT:
-            new_position = self.positon[0], self.positon[1] - 1
+            new_position = self.left
         elif emoji == self.ARROW_RIGHT:
-            new_position = self.positon[0], self.positon[1] + 1
+            new_position = self.right
         elif emoji == self.ARROW_DOWN:
-            new_position = self.positon[0] + 1, self.positon[1]
+            new_position = self.down
         elif emoji == self.ARROW_UP:
-            new_position = self.positon[0] - 1, self.positon[1]
+            new_position = self.up
         else:
             new_position = None
 
-        if not -1 < new_position[1] <= 3:
+        if not 0 <= new_position[0] <= 3 or not 0 <= new_position[1] <= 3:
             return await self.ctx.send(
                 f"{self.ctx.author.mention}, that move is invalid.",
                 allowed_mentions=discord.AllowedMentions(users=True),
                 delete_after=5,
             )
 
+        self.move(new_position)
+
+        self.moves += 1
+
+        await self.message.edit(content=self.discord_message)
+        await self.check_wins()
+
+    @property
+    def up(self):
+        return self.positon[0] - 1, self.positon[1]
+
+    @property
+    def down(self):
+        return self.positon[0] + 1, self.positon[1]
+
+    @property
+    def right(self):
+        return self.positon[0], self.positon[1] + 1
+
+    @property
+    def left(self):
+        return self.positon[0], self.positon[1] - 1
+
+    def move(self, new_position: Tuple[int, int]):
         emoji = self.board[new_position[0]][new_position[1]]
 
         self.board[new_position[0]][new_position[1]] = self.SPACER
         self.board[self.positon[0]][self.positon[1]] = emoji
         self.positon = new_position
 
-        self.moves += 1
+    def random_move(self):
+        new_position = choice([self.up, self.down, self.right, self.left])
+        if not 0 <= new_position[0] <= 3 or not 0 <= new_position[1] <= 3:
+            return
 
-        await self.message.edit(content=self.discord_message)
-        await self.check_wins()
+        self.move(new_position)
 
     async def run(self, ctx):
         await self.start(ctx, wait=True)
