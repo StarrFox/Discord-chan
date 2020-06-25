@@ -15,6 +15,7 @@
 
 import logging
 from collections import OrderedDict
+from typing import Union
 
 import discord
 from loguru import logger
@@ -111,3 +112,25 @@ class InterceptHandler(logging.Handler):
         logger.opt(depth=depth, exception=record.exc_info).log(
             level, record.getMessage()
         )
+
+
+def detailed_human_time(input_seconds: Union[float, int]):
+    minutes, seconds = divmod(input_seconds, 60)
+    hours, minutes = divmod(minutes, 60)
+    days, hours = divmod(hours, 24)
+    years, days = divmod(days, 365)
+
+    msgs = []
+    if years:
+        msgs.append(f"{years} year(s)")
+    if days:
+        msgs.append(f"{days} day(s)")
+    if hours:
+        msgs.append(f"{hours} hour(s)")
+    if seconds:
+        msgs.append(f"{seconds} second(s)")
+
+    if not msgs:
+        msgs.append(f"0 second(s)")
+
+    return ", ".join(msgs)

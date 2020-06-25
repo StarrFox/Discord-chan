@@ -14,11 +14,12 @@
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
 from random import choice
+from time import perf_counter
 
 import discord
 from discord.ext import commands
 
-from discord_chan import Connect4, MasterMindMenu, SliderGame, SubContext
+from discord_chan import Connect4, MasterMindMenu, SliderGame, SubContext, utils
 
 
 class Games(commands.Cog, name="games"):
@@ -77,8 +78,24 @@ class Games(commands.Cog, name="games"):
         """
         Play SliderGame.
         """
-        game = SliderGame()
-        await game.start(ctx, wait=True)
+        # timeout = 10 minutes
+        game = SliderGame(timeout=10 * 60)
+        start = perf_counter()
+        won_game, moves = await game.run(ctx)
+        stop = perf_counter()
+
+        time_msg = utils.detailed_human_time(stop - start)
+
+        if won_game:
+            await ctx.send(
+                f"{ctx.author.mention} has completed the slider in {moves} move(s) within {time_msg}",
+                allowed_mentions=discord.AllowedMentions(users=True),
+            )
+
+        else:
+            await ctx.send(
+                f"{ctx.author.mention} forfeited or their slidergame timed out."
+            )
 
 
 def setup(bot):
