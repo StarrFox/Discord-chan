@@ -389,7 +389,7 @@ class SliderGame(menus.Menu):
             self.stop()
 
     def _randomize_board(self):
-        for _ in range(randint(100, 200)):
+        for _ in range(randint(800, 1000)):
             self.random_move()
 
     # It's pronounced "big brain" :sunglasses:
