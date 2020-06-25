@@ -85,7 +85,7 @@ class Games(commands.Cog, name="games"):
         won_game, moves = await game.run(ctx)
         stop = datetime.utcnow()
 
-        time_delta = stop - stop
+        time_delta = stop - start
 
         time_msg = utils.detailed_human_time(time_delta.total_seconds())
 
