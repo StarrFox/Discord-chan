@@ -399,11 +399,11 @@ class SliderGame(menus.Menu):
     def get_board(self):
         is_even, emojis = self._shuffle_with_displacment(self.SLIDER_EMOJIS)
 
+        # This makes the game always solvable
         if is_even:
-            # row 2 or 4
-            row = choice([1, 3])
-        else:
             row = choice([0, 2])
+        else:
+            row = choice([1, 3])
 
         board = [*self._groups_of_four(emojis)]
 
