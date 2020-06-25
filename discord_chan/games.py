@@ -437,7 +437,7 @@ class SliderGame(menus.Menu):
 
         is_even = number_of_shuffles % 2 == 0
 
-        for _ in range(number_of_shuffles + 1):
+        for _ in range(number_of_shuffles):
             first = randint(0, len(target) - 1)
             second = randint(0, len(target) - 1)
 
