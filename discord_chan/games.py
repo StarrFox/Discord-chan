@@ -397,13 +397,10 @@ class SliderGame(menus.Menu):
         return msg
 
     def get_board(self):
-        is_even, emojis = self._shuffle_with_displacment(self.SLIDER_EMOJIS)
+        emojis = self._shuffle_with_displacment(self.SLIDER_EMOJIS)
 
         # This makes the game always solvable
-        if is_even:
-            row = choice([0, 2])
-        else:
-            row = choice([1, 3])
+        row = choice([1, 3])
 
         board = [*self._groups_of_four(emojis)]
 
@@ -433,17 +430,18 @@ class SliderGame(menus.Menu):
     @staticmethod
     def _shuffle_with_displacment(entry: list):
         target = entry.copy()
-        number_of_shuffles = choice(range(50, 100 + 1))
 
-        is_even = number_of_shuffles % 2 == 0
+        unmoved = [*range(len(entry))]
 
-        for _ in range(number_of_shuffles):
-            first = randint(0, len(target) - 1)
-            second = randint(0, len(target) - 1)
+        while unmoved:
+            first = choice(unmoved)
+            unmoved.remove(first)
+            second = choice(unmoved)
+            unmoved.remove(second)
 
             target[first], target[second] = target[second], target[first]
 
-        return is_even, target
+        return target
 
     @staticmethod
     def _groups_of_four(ungrouped):

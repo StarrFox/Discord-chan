@@ -13,8 +13,8 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
+from datetime import datetime
 from random import choice
-from time import perf_counter
 
 import discord
 from discord.ext import commands
@@ -80,11 +80,14 @@ class Games(commands.Cog, name="games"):
         """
         # timeout = 10 minutes
         game = SliderGame(timeout=10 * 60)
-        start = perf_counter()
+        # perf_counter didn't work for some reason
+        start = datetime.utcnow()
         won_game, moves = await game.run(ctx)
-        stop = perf_counter()
+        stop = datetime.utcnow()
 
-        time_msg = utils.detailed_human_time(stop - start)
+        time_delta = stop - stop
+
+        time_msg = utils.detailed_human_time(time_delta.total_seconds())
 
         if won_game:
             await ctx.send(
