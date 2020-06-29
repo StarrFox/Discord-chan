@@ -114,6 +114,7 @@ class DiscordChan(commands.AutoShardedBot):
         self.ready_once = True
 
         await self.load_prefixes()
+        await self.load_blacklist()
 
         if self.config.general.bool("load_extensions"):
             self.load_extensions_from_dir("discord_chan/extensions")
