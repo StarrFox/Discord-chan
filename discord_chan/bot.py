@@ -105,7 +105,9 @@ class DiscordChan(commands.AutoShardedBot):
 
     async def on_message_edit(self, before, after):
         if before.content != after.content:
-            await self.process_commands(after)
+            # Cache bug, after.author is User while before.author is Member
+            before.content = after.content
+            await self.process_commands(before)
 
     async def on_ready(self):
         if self.ready_once:
