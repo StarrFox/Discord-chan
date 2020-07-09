@@ -28,6 +28,7 @@ from terminaltables import AsciiTable
 
 from discord_chan import (
     DCMenuPages,
+    FetchedUser,
     NormalPageSource,
     PartitionPaginator,
     SubContext,
@@ -119,6 +120,14 @@ class Jishaku(JishakuBase, metaclass=GroupCogMeta, command_parent=jsk):
 
         finally:
             scope.clear_intersection(arg_dict)
+
+    # replaced because we don't have cache
+    @commands.command(name="su")
+    async def jsk_su(
+        self, ctx: commands.Context, target: FetchedUser, *, command_string: str
+    ):
+        target: discord.User
+        await super().jsk_su(ctx, target, command_string=command_string)
 
     @commands.command(name="pip")
     async def jsk_pip(self, ctx: commands.Context, *, argument: codeblock_converter):

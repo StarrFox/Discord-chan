@@ -36,17 +36,31 @@ def _get_from_guilds(bot, getter, argument):
     return result
 
 
+class FetchedUser(commands.Converter):
+    async def convert(self, ctx: commands.Context, argument: str):
+        id_match = re.match(r"<@!?([0-9]+)>$", argument) or re.match(
+            r"([0-9]{15,21})$", argument
+        )
+
+        if id_match:
+            user_id = int(id_match.group(1))
+            for mention in ctx.message.mentions:
+                if mention.id == id_match:
+                    return mention
+
+            user = await ctx.guild.fetch_member(user_id)
+
+            if user:
+                return user
+
+            raise commands.BadArgument(f'User "{user_id}" not found.')
+
+        # gaming in the blood
+        return FetchedMember().convert(ctx, argument)
+
+
 class FetchedMember(commands.Converter):
     async def convert(self, ctx: commands.Context, argument: str) -> discord.Member:
-        # try:
-        #     member = await commands.MemberConverter().convert(ctx, argument)
-        #
-        # except commands.BadArgument:
-        #     member = None
-        #
-        # if member:
-        #     return member
-
         id_match = re.match(r"<@!?([0-9]+)>$", argument) or re.match(
             r"([0-9]{15,21})$", argument
         )
