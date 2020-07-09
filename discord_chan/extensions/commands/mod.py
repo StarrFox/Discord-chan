@@ -161,11 +161,13 @@ class Mod(commands.Cog, name="mod"):
         """
         Bans using an id, must not be a current member
         """
-        if ctx.guild.get_member(member_id):
-            return await ctx.send("Member is currently in this guild.")
+        try:
+            await ctx.guild.fetch_member(member_id)
+        except (discord.Forbidden, discord.HTTPException):
+            await ctx.guild.ban(discord.Object(id=member_id), reason=reason)
+            return await ctx.confirm("Id hackbanned.")
 
-        await ctx.guild.ban(discord.Object(id=member_id), reason=reason)
-        await ctx.confirm("Id hackbanned.")
+        await ctx.send("Member is currently in this guild.")
 
 
 def setup(bot):

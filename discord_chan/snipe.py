@@ -20,6 +20,8 @@ import discord
 import humanize
 from discord.ext import flags
 
+from .converters import FetchedMember
+
 
 class SnipeMode(Enum):
     edited = 0
@@ -56,7 +58,7 @@ def snipe_parser(func: flags.FlagCommand):
     :param func: The FlagCommand to add the parser to
     :return: The new FlagCommand with the added parser
     """
-    flags.add_flag("--authors", nargs="+", type=discord.Member)(func)
+    flags.add_flag("--authors", nargs="+", type=FetchedMember)(func)
     flags.add_flag("--channel", type=discord.TextChannel)(func)
     flags.add_flag("--guild", "--server", action="store_true")(func)
     flags.add_flag("--before", type=int)(func)

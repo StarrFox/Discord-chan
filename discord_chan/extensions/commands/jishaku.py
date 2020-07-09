@@ -127,6 +127,7 @@ class Jishaku(JishakuBase, metaclass=GroupCogMeta, command_parent=jsk):
         self, ctx: commands.Context, target: FetchedUser, *, command_string: str
     ):
         target: discord.User
+        # self is here because of discord.py behavior
         await super().jsk_su(self, ctx, target, command_string=command_string)
 
     @commands.command(name="pip")
