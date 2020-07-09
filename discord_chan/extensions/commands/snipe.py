@@ -55,7 +55,7 @@ class Snipe(commands.Cog, name="snipe"):
 
         Nsfw (if not used from one) and channels you can't view are auto filtered out.
         """
-
+        print(options)
         if options["channel"] is None:
             channel = ctx.channel
         else:
@@ -158,7 +158,8 @@ class Snipe(commands.Cog, name="snipe"):
             filters.append(lambda snipe: not snipe.channel.is_nsfw())
 
         if authors:
-            filters.append(lambda snipe: snipe.author in authors)
+            author_ids = [a.id for a in authors]
+            filters.append(lambda snipe: snipe.author.id in author_ids)
 
         if before:
             filters.append(lambda snipe: snipe.id < before)

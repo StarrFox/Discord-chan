@@ -50,7 +50,7 @@ setup(
         "aiomonitor",
         "jikanpy",
         "aiosqlite",
-        "discord-flags",
+        "discord-flags @ git+https://github.com/StarrFox/discord-ext-flags",
         "uwuify",
         "pyenchant",
         "click",
