@@ -34,6 +34,7 @@ class Snipe(commands.Cog, name="snipe"):
         self.bot = bot
 
     # Todo: --diff arg using diff lib; perhaps use ```diff? inconsistent with code blocks
+    # Todo: --channel -> --channels
     @snipe_parser
     @commands.command(cls=flags.FlagCommand, name="snipe")
     async def snipe_command(self, ctx: commands.Context, **options: dict):
@@ -42,7 +43,7 @@ class Snipe(commands.Cog, name="snipe"):
 
         Optional:
         --authors: List of members that authored the snipe
-        --channel: Channel id to snipe from
+        --channel: Channel to snipe from
         --server: Snipe from the entire server instead of just a channel
         --before: Message id that snipes must be before
         --after: Message id that snipes must be after
