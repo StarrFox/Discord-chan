@@ -105,7 +105,7 @@ class DiscordChan(commands.AutoShardedBot):
 
     async def on_message_edit(self, before, after):
         if before.content != after.content:
-            if after.guild:
+            if after.guild and not isinstance(after.author, discord.Member):
                 # Cache bug, after.author is User while before.author is Member
                 after.author = await after.guild.fetch_member(after.author.id)
 
