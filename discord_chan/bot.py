@@ -95,7 +95,7 @@ class DiscordChan(commands.AutoShardedBot):
         """
         return discord.utils.get(self.cached_messages, id=message_id)
 
-    async def process_commands(self, message):
+    async def process_commands(self, message: discord.Message):
         if message.author.bot:
             return
 
@@ -103,7 +103,7 @@ class DiscordChan(commands.AutoShardedBot):
 
         await self.invoke(ctx)
 
-    async def on_message_edit(self, before, after):
+    async def on_message_edit(self, before: discord.Message, after: discord.Message):
         if before.content != after.content:
             if after.guild and not isinstance(after.author, discord.Member):
                 # Cache bug, after.author is User while before.author is Member
@@ -172,7 +172,7 @@ class DiscordChan(commands.AutoShardedBot):
             )
 
             return commands.when_mentioned_or(*prefixes)(self, message)
-        else:  # DM
+        else:  # DM, which we ignore
             return commands.when_mentioned_or(self.config.general.prefix, "")(
                 self, message
             )
