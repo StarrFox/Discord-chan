@@ -67,7 +67,11 @@ class FetchedMember(commands.Converter):
 
         if id_match:
             user_id = int(id_match.group(1))
-            member = await ctx.guild.fetch_member(user_id)
+            try:
+                member = await ctx.guild.fetch_member(user_id)
+            except discord.HTTPException:
+                # see lower commit on why we don't raise
+                member = None
 
             if member:
                 return member
@@ -171,7 +175,7 @@ class CrossGuildTextChannelConverter(commands.TextChannelConverter):
 
 class BotConverter(commands.Converter):
     async def convert(self, ctx: commands.Context, argument: str) -> discord.Member:
-        member = await commands.MemberConverter().convert(ctx, argument)
+        member = await FetchedMember().convert(ctx, argument)
 
         if member.bot:
             return member
@@ -193,7 +197,7 @@ class ImageUrlConverter(commands.Converter):
 
     async def convert(self, ctx: commands.Context, argument: str) -> str:
         try:
-            member = await commands.MemberConverter().convert(ctx, argument)
+            member = await FetchedMember().convert(ctx, argument)
 
         except commands.BadArgument:
             member = None
