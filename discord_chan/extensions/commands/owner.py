@@ -17,7 +17,7 @@ from typing import Union
 import discord
 from discord.ext import commands
 
-from discord_chan import CrossGuildTextChannelConverter, DiscordChan, SubContext, db
+from discord_chan import (CrossGuildTextChannelConverter, DiscordChan, FetchedUser, SubContext, db)
 
 
 class Owner(commands.Cog, name="owner"):
@@ -34,7 +34,7 @@ class Owner(commands.Cog, name="owner"):
         return True
 
     @commands.command()
-    async def dm(self, ctx: SubContext, user: discord.User, *, msg: str):
+    async def dm(self, ctx: SubContext, user: FetchedUser, *, msg: str):
         await user.send(msg)
         await ctx.confirm("Message sent.")
 
@@ -145,7 +145,7 @@ class Owner(commands.Cog, name="owner"):
 
     @blacklist.command(name="add")
     async def blacklist_add(
-        self, ctx: SubContext, user: Union[discord.User, int], *, reason: str = None
+        self, ctx: SubContext, user: Union[FetchedUser, int], *, reason: str = None
     ):
         if isinstance(user, discord.User):
             user = user.id
@@ -163,7 +163,7 @@ class Owner(commands.Cog, name="owner"):
         await ctx.confirm("Added to blacklist.")
 
     @blacklist.command(name="remove", aliases=["rem"])
-    async def blacklist_remove(self, ctx: SubContext, user: Union[discord.User, int]):
+    async def blacklist_remove(self, ctx: SubContext, user: Union[FetchedUser, int]):
         if isinstance(user, discord.User):
             user = user.id
 
