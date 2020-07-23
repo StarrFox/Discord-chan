@@ -48,7 +48,10 @@ class FetchedUser(commands.Converter):
                 if mention.id == id_match:
                     return mention
 
-            user = await ctx.guild.fetch_member(user_id)
+            try:
+                user = await ctx.bot.fetch_user(user_id)
+            except (discord.NotFound, discord.HTTPException):
+                user = None
 
             if user:
                 return user
