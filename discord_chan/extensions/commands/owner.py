@@ -17,7 +17,13 @@ from typing import Union
 import discord
 from discord.ext import commands
 
-from discord_chan import (CrossGuildTextChannelConverter, DiscordChan, FetchedUser, SubContext, db)
+from discord_chan import (
+    CrossGuildTextChannelConverter,
+    DiscordChan,
+    FetchedUser,
+    SubContext,
+    db,
+)
 
 
 class Owner(commands.Cog, name="owner"):
