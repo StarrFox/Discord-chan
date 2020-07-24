@@ -29,6 +29,7 @@ from discord_chan import (
     DiscordChan,
     FetchedAuthor,
     FetchedMember,
+    FetchedUser,
     NamedCall,
     NormalPageSource,
     PartitionPaginator,
@@ -119,12 +120,11 @@ class General(commands.Cog, name="general"):
         await ctx.confirm("Messages cleaned.")
 
     @commands.command(aliases=["avy", "pfp"])
-    async def avatar(
-        self, ctx: commands.Context, member: FetchedMember = FetchedAuthor
-    ):
+    async def avatar(self, ctx: commands.Context, member: FetchedUser = FetchedAuthor):
         """
         Get a member's avatar
         """
+        member: discord.Member
         await ctx.send(str(member.avatar_url))
 
     @commands.command(aliases=["mi", "userinfo", "ui"])
@@ -318,6 +318,11 @@ class General(commands.Cog, name="general"):
     @commands.command(hidden=True)
     async def bellyrub(self, ctx: commands.Context):
         await ctx.send("Connor penis size = smol")
+
+    @commands.command(hidden=True)
+    async def freecrowns(self, ctx: commands.Context):
+        """Gives a user some crowns"""
+        await ctx.send("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
 
 
 def setup(bot):
