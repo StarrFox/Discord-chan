@@ -320,9 +320,9 @@ class General(commands.Cog, name="general"):
         await ctx.send("Connor penis size = smol")
 
     @commands.command(hidden=True)
-    async def freecrowns(self, ctx: commands.Context):
+    async def freecrowns(self, ctx: commands.Context, user: str = None):
         """Gives a user some crowns"""
-        await ctx.send("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+        await ctx.send("<https://www.youtube.com/watch?v=dQw4w9WgXcQ>")
 
 
 def setup(bot):

@@ -94,14 +94,11 @@ class Logging(commands.Cog, name="logging"):
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild: discord.Guild):
-        percent_bots = round(
-            (sum(1 for i in guild.members if i.bot) / guild.member_count) * 100
-        )
+        # percent_bots = round(
+        #     (sum(1 for i in guild.members if i.bot) / guild.member_count) * 100
+        # )
 
-        logger.info(
-            f"Joined_guild name={guild} id={guild.id} owner={guild.owner} ({guild.owner.id})"
-            f" percent_bots={percent_bots}."
-        )
+        logger.info(f"Joined_guild name={guild} id={guild.id} owner={guild.owner}.")
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: discord.Guild):
