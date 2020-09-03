@@ -59,7 +59,7 @@ class FetchedUser(commands.Converter):
             raise commands.BadArgument(f'User "{user_id}" not found.')
 
         # gaming in the blood
-        return FetchedMember().convert(ctx, argument)
+        return await FetchedMember().convert(ctx, argument)
 
 
 class FetchedMember(commands.Converter):
