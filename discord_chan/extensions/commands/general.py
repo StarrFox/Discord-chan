@@ -156,14 +156,14 @@ class General(commands.Cog, name="general"):
         """
         Get info on a guild
         """
-        guild = ctx.guild
+        guild = await self.bot.fetch_guild(ctx.guild.id)
 
         data = {
             "id": guild.id,
             "owner": str(await self.bot.fetch_user(guild.owner_id)),
             "created": humanize.naturaltime(guild.created_at),
             "# of roles": len(guild.roles),
-            "members": guild.member_count,
+            "members": guild.approximate_member_count,
             "channels": {
                 "categories": len(guild.categories),
                 "text": len(guild.text_channels),
