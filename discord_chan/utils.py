@@ -105,6 +105,9 @@ class InterceptHandler(logging.Handler):
 
         # Find caller from where originated the logged message
         frame, depth = logging.currentframe(), 2
+        if not frame.f_code:
+            return  # Don't care
+
         while frame.f_code.co_filename == logging.__file__:
             frame = frame.f_back
             depth += 1
