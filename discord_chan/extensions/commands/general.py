@@ -158,6 +158,9 @@ class General(commands.Cog, name="general"):
         """
         guild = await self.bot.fetch_guild(ctx.guild.id)
 
+        # I don't have guild.channels
+        channels = await guild.fetch_channels()
+
         data = {
             "id": guild.id,
             "owner": str(await self.bot.fetch_user(guild.owner_id)),
@@ -165,10 +168,16 @@ class General(commands.Cog, name="general"):
             "# of roles": len(guild.roles),
             "members": guild.approximate_member_count,
             "channels": {
-                "categories": len(guild.categories),
-                "text": len(guild.text_channels),
-                "voice": len(guild.voice_channels),
-                "total": len(guild.channels),
+                "categories": len(
+                    [c for c in channels if isinstance(c, discord.CategoryChannel)]
+                ),
+                "text": len(
+                    [c for c in channels if isinstance(c, discord.TextChannel)]
+                ),
+                "voice": len(
+                    [c for c in channels if isinstance(c, discord.VoiceChannel)]
+                ),
+                "total": len(channels),
             },
         }
 

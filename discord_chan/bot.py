@@ -199,7 +199,7 @@ class DiscordChan(commands.AutoShardedBot):
 
         logger.info(f"Loaded prefixes for {len(self.prefixes)} guilds.")
 
-    # This doesnt actually get called anymore
+    # This doesn't actually get called anymore
     async def unload_prefixes(self):
         async with db.get_database() as connection:
             async with connection.cursor() as cursor:

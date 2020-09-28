@@ -31,10 +31,11 @@ from discord_chan.utils import InterceptHandler
 
 try:
     import uvloop
-
-    uvloop.install()
 except ImportError:
     uvloop = None
+else:
+    uvloop.install()
+
 
 ROOT_DIR = Path(__file__).parent
 
