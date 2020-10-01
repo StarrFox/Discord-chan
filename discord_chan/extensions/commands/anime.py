@@ -67,6 +67,13 @@ class Anime(commands.Cog, name="anime"):
         """
         await ctx.send(message.lower().translate(THICK_TABLE))
 
+    @commands.command(hidden=True)
+    async def shampoo(self, ctx: commands.Context):
+        """
+        shampoo
+        """
+        await ctx.send("<:shampoo:760406584164614164>")
+
     @commands.group(name="anime", invoke_without_command=True)
     async def anime_command(self, ctx: commands.Context):
         """
