@@ -35,6 +35,7 @@ class Snipe(commands.Cog, name="snipe"):
 
     # Todo: --diff arg using diff lib; perhaps use ```diff? inconsistent with code blocks
     # Todo: --channel -> --channels
+    @commands.bot_has_permissions(embed_links=True)
     @snipe_parser
     @commands.command(cls=flags.FlagCommand, name="snipe")
     async def snipe_command(self, ctx: commands.Context, **options: dict):
