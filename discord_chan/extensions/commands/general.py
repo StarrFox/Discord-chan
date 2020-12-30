@@ -14,6 +14,7 @@
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
 import json
+import random
 import unicodedata
 
 import discord
@@ -35,6 +36,7 @@ from discord_chan import (
     PartitionPaginator,
     PrologPaginator,
     SubContext,
+    TimeConverter,
 )
 
 
@@ -68,6 +70,10 @@ class General(commands.Cog, name="general"):
         menu = DCMenuPages(source)
 
         await menu.start(ctx)
+
+    @commands.command()
+    async def time_convert(self, ctx: commands.Context, *times: TimeConverter):
+        await ctx.send(f"total={sum(times)}\n\n{times}")
 
     # # Todo: finish this
     # @checks.cog_loaded('events')
@@ -329,9 +335,20 @@ class General(commands.Cog, name="general"):
         await ctx.send("Connor penis size = smol")
 
     @commands.command(hidden=True)
-    async def freecrowns(self, ctx: commands.Context, user: str = None):
-        """Gives a user some crowns"""
-        await ctx.send("<https://www.youtube.com/watch?v=dQw4w9WgXcQ>")
+    async def boobie(self, ctx: commands.Context):
+        boobie_words = [
+            "big",
+            "fat",
+            "juicy",
+            "massive",
+            "yummy",
+            "thicc",
+            "large",
+            "huge",
+            "ginormous",
+        ]
+        wn = random.randrange(1, 8)
+        await ctx.send(" ".join(boobie_words[:wn]) + " boobie")
 
 
 def setup(bot):

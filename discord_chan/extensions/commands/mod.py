@@ -169,6 +169,17 @@ class Mod(commands.Cog, name="mod"):
 
         await ctx.send("Member is currently in this guild.")
 
+    # @commands.command()
+    # async def mute(
+    #     self,
+    #     ctx: SubContext,
+    #     member: FetchedMember,
+    #     time: commands.Greedy[TimeConverter],
+    #     *,
+    #     reason: str,
+    # ):
+    #     await ctx.send(f"{member=} {time=} {reason=}")
+
 
 def setup(bot):
     bot.add_cog(Mod(bot))

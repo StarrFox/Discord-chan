@@ -26,6 +26,22 @@ WEEKDAYS = ["monday", "tuesday", "wendsday", "thursday", "friday", "saturday", "
 
 WEEKDAY_ABBRS = {d.replace("day", ""): d for d in WEEKDAYS}
 
+TIME_REGEX = re.compile(
+    r"(?P<days>\d+ ?d(ay)?s?)|(?P<months>\d+ ?mo(nth)?s?)|(?P<minutes>\d+ ?m(in)?(ute)?s?)|"
+    r"(?P<years>\d+ ?y(ear)?s?)|(?P<seconds>\d+ ?s(ec)?(ond)?s?)|(?P<hours>\d+ ?h(our)?s?)|(?P<weeks>\d+ ?w(eek)?s?)"
+)
+
+
+TIME_TABLE = {
+    "seconds": 1,
+    "minutes": 60,
+    "hours": 3600,
+    "days": 86400,
+    "weeks": 604800,
+    "months": 2592000,
+    "years": 31536000,
+}
+
 
 def _get_from_guilds(bot, getter, argument):
     result = None
@@ -334,3 +350,33 @@ class NamedCall(commands.default.Call):
 
     def __str__(self):
         return self.display
+
+
+class TimeConverter(commands.Converter):
+    """
+    Converts a time phrase to a number of seconds
+
+    1min -> 60
+    1m   -> 60
+    2m   -> 120
+    """
+
+    async def convert(self, ctx: commands.Context, argument: str) -> int:
+        match = TIME_REGEX.match(argument)
+
+        if not match:
+            raise commands.BadArgument(f"{argument} is not a valid time")
+
+        total = 0
+
+        digit_re = re.compile(r"\d+")
+
+        for group, value in match.groupdict().items():
+            if value is None:
+                continue
+
+            int_value = int(digit_re.match(value).group(0))
+
+            total += TIME_TABLE[group] * int_value
+
+        return total
