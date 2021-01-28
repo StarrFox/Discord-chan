@@ -13,7 +13,6 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
-import discord
 from aiohttp import ClientSession as session
 from discord.ext import commands
 
@@ -37,7 +36,7 @@ class Nsfw(commands.Cog, name="nsfw"):
         async with session() as sess:
             async with sess.get(NEKO_URL) as res:
                 url = (await res.json())["url"]
-                await ctx.send(embed=discord.Embed().set_image(url=url))
+                await ctx.send(url)
 
 
 def setup(bot: commands.Bot):

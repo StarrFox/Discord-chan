@@ -13,6 +13,7 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
+import datetime
 import re
 
 import discord
@@ -377,6 +378,28 @@ class TimeConverter(commands.Converter):
 
             int_value = int(digit_re.match(value).group(0))
 
-            total += TIME_TABLE[group] * int_value
+            if group == "years":
+                current_year = datetime.datetime.utcnow().year
+
+                # Leap year
+                if current_year % 4 == 0:
+                    total += 1 * int_value
+
+                else:
+                    total += TIME_TABLE["years"] * int_value
+
+            elif group == "months":
+                now = datetime.datetime.utcnow()
+
+                if now.month == 12:
+                    next_month = now.replace(month=1, year=now.year + 1)
+
+                else:
+                    next_month = now.replace(month=now.month + 1)
+
+                total += int((next_month - now).total_seconds())
+
+            else:
+                total += TIME_TABLE[group] * int_value
 
         return total
