@@ -134,7 +134,8 @@ class Mod(commands.Cog, name="mod"):
         Purges messages from certain user and/or (with) certain text
         <number> must be between 0 and 1000
         """
-        await ctx.message.delete()
+        with suppress(discord.Forbidden, discord.NotFound):
+            await ctx.message.delete()
 
         def msgcheck(msg):
             if user and text:
@@ -151,7 +152,7 @@ class Mod(commands.Cog, name="mod"):
                 return True
 
         deleted = await ctx.channel.purge(limit=number, check=msgcheck)
-        with suppress(discord.Forbidden):
+        with suppress(discord.Forbidden, discord.NotFound):
             await ctx.send(f"Deleted {len(deleted)} message(s)", delete_after=5)
 
     @commands.bot_has_permissions(ban_members=True)
