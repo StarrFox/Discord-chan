@@ -27,6 +27,6 @@ from .menus import *
 from .monitor import DiscordChanMonitor
 from .snipe import *
 
-__version__ = "1.10.3"
+__version__ = "1.10.4"
 
 logger.disable("discord_chan")

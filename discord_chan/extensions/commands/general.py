@@ -347,7 +347,7 @@ class General(commands.Cog, name="general"):
             "huge",
             "ginormous",
         ]
-        wn = random.randrange(1, 8)
+        wn = random.randrange(1, len(boobie_words) + 1)
         await ctx.send(" ".join(boobie_words[:wn]) + " boobie")
 
 
