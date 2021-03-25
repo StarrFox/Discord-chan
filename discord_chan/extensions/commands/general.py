@@ -320,7 +320,7 @@ class General(commands.Cog, name="general"):
 
     @commands.command(hidden=True)
     async def chika(self, ctx: commands.Context):
-        await ctx.send("https://www.youtube.com/watch?v=iS2s9deFClY")
+        await ctx.send("https://www.youtube.com/watch?v=-rokG9XS37w")
 
     @commands.command(hidden=True)
     async def otter(self, ctx: commands.Context):
