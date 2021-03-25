@@ -114,7 +114,6 @@ class DiscordChanMonitor(Monitor):
             ["Stat", "Value"],
             ["Extensions", len(bot.extensions)],
             ["Commands", len(set(bot.walk_commands()))],
-            ["Past Invokes", len(bot.past_invokes)],
             ["Latency", f"{round(bot.latency * 1000)}ms"],
             ["Discord Chan", f"v{dc_version}"],
             ["Discord.py", f"v{dpy_version}"],
