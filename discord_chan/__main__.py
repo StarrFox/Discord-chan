@@ -99,6 +99,7 @@ def run(config, debug, no_cache):
         bot.run()
 
 
+# TODO: remove
 def load_environ(**kwargs):
     """
     Loads the kwargs as enviroment variables
@@ -145,10 +146,7 @@ def install(config, interactive):
 
     if overwrite:
         if not interactive:
-            with open(ROOT_DIR / "data" / "default_config.txt") as fp:
-                default_config = fp.read()
-
-            config_file.write_text(default_config.strip())
+            config_file.write_text(discord_chan.constants.DEFAULT_CONFIG)
 
         else:
             res = interactive_install()
@@ -156,12 +154,9 @@ def install(config, interactive):
 
         click.echo("Config file made/overwriten.")
 
-    with open(ROOT_DIR / "data" / "default.sql") as fp:
-        sql_init = fp.read()
-
     async def init_db():
         async with discord_chan.db.get_database() as connection:
-            await connection.executescript(sql_init.strip())
+            await connection.executescript(discord_chan.constants.DEFAULT_SQL)
             await connection.commit()
 
         print("Initalized DB.")
@@ -170,8 +165,7 @@ def install(config, interactive):
 
 
 def interactive_install() -> str:
-    with open(ROOT_DIR / "data" / "interactive_config.txt") as fp:
-        interactive_config = Template(fp.read())
+    interactive_config = Template(discord_chan.constants.INTERACTIVE_CONFIG)
 
     click.echo("Starting interactive config...")
     click.echo("--general section--")
