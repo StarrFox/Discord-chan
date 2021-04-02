@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "discord-chan"
+version = "1.11.0"
+description = "General purpose Discord bot"
+authors = ["StarrFox <starrfox6312@gmail.com>"]
+license = "AGPL-3.0-or-later"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+"discord.py" = {git = "https://github.com/StarrFox/discord.py"}
+discord-flags = {git = "https://github.com/StarrFox/discord-ext-flags"}
+jishaku = "^1.20.0"
+numpy = "^1.20.2"
+ImageHash = "^4.2.0"
+colorclass = "^2.2.0"
+terminaltables = "^3.1.0"
+aiomonitor = "^0.4.5"
+jikanpy = "^4.3.1"
+aiosqlite = "^0.17.0"
+uwuify = "^1.0.1"
+pyenchant = "^3.2.0"
+click = "^7.1.2"
+click-default-group = "^1.2.2"
+loguru = "^0.5.3"
+reusables = "^0.9.6"
+python-box = "^5.3.0"
+
+[tool.poetry.dev-dependencies]
+
+[tool.poetry.scripts]
+discord_chan = "discord_chan.__main__:main"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

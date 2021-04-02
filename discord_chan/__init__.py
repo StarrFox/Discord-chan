@@ -15,7 +15,7 @@
 
 from loguru import logger
 
-from . import checks, db, utils
+from . import checks, constants, db, utils
 from .bot import DiscordChan
 from .context import SubContext
 from .converters import *
@@ -26,7 +26,5 @@ from .image import *
 from .menus import *
 from .monitor import DiscordChanMonitor
 from .snipe import *
-
-__version__ = "1.11.0"
 
 logger.disable("discord_chan")

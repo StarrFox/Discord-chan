@@ -6,11 +6,9 @@ A general purpose discord bot made with [discord.py](https://github.com/Rapptz/d
 
 ## Installing
 ```shell script
-python3 -m venv .venv
-source .venv/bin/activate
 git clone https://github.com/StarrFox/Discord-chan
 cd Discord-chan
-pip install .
+poetry install
 discord_chan install
 ```
 
@@ -34,13 +32,6 @@ cmds | Lists currently loaded commands
 extensions | Lists currently loaded extensions
 enable | Enable or disable a command
 
-## Command highlights
-Command | Description
---- | ---
-[snipe][snipe] | Snipes deleted and edited messages
-[raw][info] | View raw discord objects
-[wallemoji][wallemojis] | Creates multiple pictures out of one
-
 ## Jishaku flags
 Jishaku flags allow you to customize how Jishaku runs
 
@@ -55,7 +46,3 @@ These flags can be set either in the config or through some other way of accessi
 the enviroment variables.
 If you wish to set them yourself make sure to disable the 'load enviroment' option
 in the config file.
-
-[wallemojis]: /discord_chan/extensions/commands/images.py
-[info]: /discord_chan/extensions/commands/meta.py
-[snipe]: /discord_chan/extensions/commands/snipe.py
