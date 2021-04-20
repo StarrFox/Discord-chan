@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "discord-chan"
-version = "1.11.1"
+version = "1.11.2"
 description = "General purpose Discord bot"
 authors = ["StarrFox <starrfox6312@gmail.com>"]
 license = "AGPL-3.0-or-later"
@@ -9,7 +9,7 @@ license = "AGPL-3.0-or-later"
 python = "^3.8"
 "discord.py" = {git = "https://github.com/StarrFox/discord.py"}
 discord-flags = {git = "https://github.com/StarrFox/discord-ext-flags"}
-jishaku = "^1.20.0"
+jishaku = "1.19.2.202"
 numpy = "^1.20.2"
 ImageHash = "^4.2.0"
 colorclass = "^2.2.0"
