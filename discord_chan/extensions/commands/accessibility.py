@@ -17,8 +17,7 @@ import re
 from io import BytesIO
 
 import discord
-from aioec import EmoteExists
-from discord.ext import commands, flags
+from discord.ext import commands
 
 from discord_chan import (
     DiscordChan,
@@ -65,16 +64,11 @@ class Accessibility(commands.Cog, name="accessibility"):
         file = discord.File(buffer, "popped.png")
         await ctx.send(file=file)
 
-    @flags.add_flag("--to-ec", action="store_true", default=False)
-    @flags.command(name="steal-these")
-    async def steal_these(self, ctx: SubContext, message: discord.Message, **options):
+    @commands.command(name="steal-these")
+    async def steal_these(self, ctx: SubContext, message: discord.Message):
         """
         "Steal" the custom emojis from a message
-        pass --to-ec to upload to Emote Collector
         """
-        if options["to_ec"] and not self.bot.ec:
-            return await ctx.send("Emotecollector api is not enabled.")
-
         emojis = []
 
         for group in re.finditer(CUSTOM_EMOJI_REGEX, message.content):
@@ -88,20 +82,7 @@ class Accessibility(commands.Cog, name="accessibility"):
         if not emojis:
             return await ctx.send("No custom emojis found in message.")
 
-        if options["to_ec"]:
-            for emoji in emojis:
-                try:
-                    await self.bot.ec.create(name=emoji.name, url=str(emoji.url))
-
-                    await ctx.send(f"Emote {emoji.name} added to EmoteCollector.")
-
-                except EmoteExists:
-                    await ctx.send(
-                        f"Emote named {emoji.name} already exists in EmoteCollector."
-                    )
-
-        else:
-            await ctx.send("\n".join([f"{e.name}: <{e.url!s}>" for e in emojis]))
+        await ctx.send("\n".join([f"{e.name}: <{e.url!s}>" for e in emojis]))
 
 
 def setup(bot: DiscordChan):

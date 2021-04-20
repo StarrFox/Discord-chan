@@ -58,7 +58,6 @@ token=
 logging_channel=
 
 [extra_tokens]
-emote_collector=
 top_gg=
 api_token=
 product_id=
@@ -93,7 +92,6 @@ token=$token
 logging_channel=
 
 [extra_tokens]
-emote_collector=
 tog_gg=
 api_token=
 product_id=

@@ -19,7 +19,6 @@ from datetime import datetime
 from typing import Deque, Dict, Optional, Set, Union
 
 import discord
-from aioec import Client as EcClient
 from box import ConfigBox
 from discord.ext import commands
 from jikanpy import AioJikan
@@ -78,12 +77,6 @@ class DiscordChan(commands.AutoShardedBot):
         self.snipes: Dict[int, Dict[int, Deque[Snipe]]] = defaultdict(
             lambda: defaultdict(lambda: deque(maxlen=5_000))
         )
-
-        if config.extra_tokens.emote_collector:
-            self.ec = EcClient(token=config.extra_tokens.emote_collector)
-
-        else:
-            self.ec = None
 
         self.add_check(self.blacklist_check)
         self.add_check(self.direct_message_check)
