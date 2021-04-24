@@ -24,7 +24,6 @@ from discord_chan import (
     NormalPageSource,
     PrologPaginator,
     SubContext,
-    __version__ as dc_version,
     checks,
 )
 
@@ -101,7 +100,6 @@ class Meta(commands.Cog, name="meta"):
             "up since": humanize.naturaltime(self.bot.uptime),
             "guilds": len(self.bot.guilds),
             "commands": len(set(self.bot.walk_commands())),
-            "dc version": dc_version,
             "d.py version": discord.__version__,
         }
 
