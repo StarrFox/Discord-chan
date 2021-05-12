@@ -90,7 +90,7 @@ def run(config, debug, no_cache):
     bot = discord_chan.DiscordChan(config, **kwargs)
 
     # Todo: make sure to remove this debug call
-    # bot.dispatch('ready')
+    bot.dispatch("ready")
 
     loop = asyncio.get_event_loop()
     with start_monitor(
