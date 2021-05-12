@@ -24,6 +24,7 @@ click-default-group = "^1.2.2"
 loguru = "^0.5.3"
 reusables = "^0.9.6"
 python-box = "^5.3.0"
+discord-ext-menus = {git = "https://github.com/Rapptz/discord-ext-menus"}
 
 [tool.poetry.dev-dependencies]
 

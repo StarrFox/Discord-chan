@@ -132,6 +132,24 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "discord-ext-menus"
+version = "1.0.0a30+g309c702"
+description = "An extension module to make reaction based menus with discord.py"
+category = "main"
+optional = false
+python-versions = ">=3.5.3"
+develop = false
+
+[package.dependencies]
+"discord.py" = ">=1.2.5"
+
+[package.source]
+type = "git"
+url = "https://github.com/Rapptz/discord-ext-menus"
+reference = "master"
+resolved_reference = "309c70222eec33acacb8c21bbb0fbe9bc57de661"
+
+[[package]]
 name = "discord-flags"
 version = "2.2.0"
 description = "A Discord.py extension allowing you to pass flags as arguments."
@@ -437,7 +455,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "61a33d03ecae2ccc242c4d524c018f2c810deb276922080c17b7152eb1b2191b"
+content-hash = "5870bc40dcc4f2d63aae5571aba2bd0335458c595fd2ce378154260d90658f61"
 
 [metadata.files]
 aioconsole = [
@@ -500,6 +518,7 @@ colorama = [
 colorclass = [
     {file = "colorclass-2.2.0.tar.gz", hash = "sha256:b05c2a348dfc1aff2d502527d78a5b7b7e2f85da94a96c5081210d8e9ee8e18b"},
 ]
+discord-ext-menus = []
 discord-flags = []
 "discord.py" = []
 humanize = [
