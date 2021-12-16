@@ -179,6 +179,15 @@ class Events(commands.Cog, name="events"):
 
                 self.bot.channel_links[send_from_channel] = channels
 
+    @commands.Cog.listener("on_member_join")
+    async def on_role_persist_join(self, member: discord.Member):
+        if member.guild.id in self.bot.role_persist.keys():
+            if member.id in self.bot.role_persist[member.guild.id]:
+                for role_id in self.bot.role_persist[member.guild.id][member.id]:
+                    with suppress():
+                        role = member.guild.get_role(role_id)
+                        await member.add_roles(role)
+
     @commands.Cog.listener("on_message")
     async def on_linked_message(self, message: discord.Message):
         """

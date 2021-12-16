@@ -24,6 +24,7 @@ from discord_chan import (
     CodeblockPageSource,
     DCMenuPages,
     FetchedMember,
+    FetchedUser,
     SubContext,
     db,
 )
@@ -170,16 +171,35 @@ class Mod(commands.Cog, name="mod"):
 
         await ctx.send("Member is currently in this guild.")
 
-    # @commands.command()
-    # async def mute(
-    #     self,
-    #     ctx: SubContext,
-    #     member: FetchedMember,
-    #     time: commands.Greedy[TimeConverter],
-    #     *,
-    #     reason: str,
-    # ):
-    #     await ctx.send(f"{member=} {time=} {reason=}")
+    @commands.bot_has_permissions(manage_roles=True)
+    @commands.has_permissions(manage_roles=True)
+    @commands.command(aliases=["rp"])
+    async def rolepersist(
+        self,
+        ctx: SubContext,
+        role: discord.Role,
+        member: typing.Union[FetchedUser, int],
+    ):
+        if not isinstance(member, int):
+            member = member.id
+
+        self.bot.role_persist[ctx.guild.id][member].add(role.id)
+        await ctx.confirm("Added")
+
+    @commands.bot_has_permissions(manage_roles=True)
+    @commands.has_permissions(manage_roles=True)
+    @commands.command(aliases=["rrp"])
+    async def removerolepersist(
+        self,
+        ctx: SubContext,
+        role: discord.Role,
+        member: typing.Union[FetchedUser, int],
+    ):
+        if not isinstance(member, int):
+            member = member.id
+
+        self.bot.role_persist[ctx.guild.id][member].discard(role.id)
+        await ctx.confirm("Removed")
 
 
 def setup(bot):
