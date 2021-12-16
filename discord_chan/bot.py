@@ -77,6 +77,8 @@ class DiscordChan(commands.AutoShardedBot):
         self.snipes: Dict[int, Dict[int, Deque[Snipe]]] = defaultdict(
             lambda: defaultdict(lambda: deque(maxlen=5_000))
         )
+        # {guild_id: {user_id: [role_ids*]}}
+        self.role_persist = defaultdict(lambda: defaultdict(set))
 
         self.add_check(self.blacklist_check)
         self.add_check(self.direct_message_check)
