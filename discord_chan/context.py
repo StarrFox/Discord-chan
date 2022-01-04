@@ -60,6 +60,17 @@ class SubContext(Context):
             message = message or "\N{WHITE HEAVY CHECK MARK}"
             return await self.send(message)
 
+    async def deny(self, message: str = None) -> Optional[Message]:
+        """
+        Adds a cross to ctx.message.
+        If unable to sends <message>
+        """
+        try:
+            await self.message.add_reaction("\N{CROSS MARK}")
+        except HTTPException:
+            message = message or "\N{CROSS MARK}"
+            return await self.send(message)
+
     async def prompt(
         self, message: str = None, *, owner_id: int = None, **send_kwargs
     ) -> bool:
