@@ -24,6 +24,7 @@ from discord.ext import commands
 import discord_chan
 from discord_chan import DiscordChan, WeekdayConverter, checks
 
+
 THICK_TABLE = str.maketrans(
     {
         "a": "卂",
@@ -184,6 +185,7 @@ class Anime(commands.Cog, name="anime"):
 
     @commands.command(aliases=["sb"])
     @checks.some_guilds([724060352010125412])
+    @commands.is_nsfw()
     async def safebooru(self, ctx: commands.Context, *tags: str):
         if image_url := await discord_chan.get_random_safebooru_post(list(tags)):
             embed = discord.Embed(description="\u200b")
