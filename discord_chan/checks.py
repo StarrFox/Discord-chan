@@ -29,3 +29,10 @@ def cog_loaded(cog_name: str):
         raise CogNotLoaded(cog_name)
 
     return commands.check(pred)
+
+
+async def some_guilds(guilds: list[int]):
+    def pred(ctx):
+        return ctx.guild.id in guilds
+
+    return commands.check(pred)

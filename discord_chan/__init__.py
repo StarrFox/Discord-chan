@@ -26,5 +26,6 @@ from .image import *
 from .menus import *
 from .monitor import DiscordChanMonitor
 from .snipe import *
+from .safebooru_api import *
 
 logger.disable("discord_chan")
