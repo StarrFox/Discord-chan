@@ -13,6 +13,8 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
+from typing import List
+
 from discord.ext import commands
 
 
@@ -31,7 +33,7 @@ def cog_loaded(cog_name: str):
     return commands.check(pred)
 
 
-async def some_guilds(guilds: list[int]):
+async def some_guilds(guilds: List[int]):
     def pred(ctx):
         return ctx.guild.id in guilds
 
