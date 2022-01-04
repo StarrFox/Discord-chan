@@ -185,7 +185,7 @@ class Anime(commands.Cog, name="anime"):
     @commands.command(aliases=["sb"])
     @checks.some_guilds([724060352010125412])
     async def safebooru(self, ctx: commands.Context, *tags: str):
-        if image_url := await discord_chan.get_random_safebooru_post(tags):
+        if image_url := await discord_chan.get_random_safebooru_post(list(tags)):
             e = discord.Embed(image=image_url)
             await ctx.send(embed=e)
         else:
