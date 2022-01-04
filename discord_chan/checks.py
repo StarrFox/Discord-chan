@@ -33,7 +33,7 @@ def cog_loaded(cog_name: str):
     return commands.check(pred)
 
 
-async def some_guilds(guilds: List[int]):
+def some_guilds(guilds: List[int]):
     def pred(ctx):
         return ctx.guild.id in guilds
 
