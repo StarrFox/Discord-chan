@@ -21,6 +21,7 @@ from textwrap import shorten
 import discord
 from discord.ext import commands
 
+import discord_chan
 from discord_chan import DiscordChan, WeekdayConverter, checks
 
 THICK_TABLE = str.maketrans(
@@ -180,6 +181,15 @@ class Anime(commands.Cog, name="anime"):
             await embed_message.clear_reactions()
 
         await embed_message.edit(embed=self.anime_embed(result))
+
+    @commands.command(aliases=["sb"])
+    @checks.some_guilds([724060352010125412])
+    async def safebooru(self, ctx: commands.Context, *tags: str):
+        if image_url := await discord_chan.get_random_safebooru_post(tags):
+            e = discord.Embed(image=image_url)
+            await ctx.send(embed=e)
+        else:
+            await ctx.deny("No posts found")
 
 
 def setup(bot):
