@@ -24,7 +24,16 @@ import aiohttp
 
 
 SAFEBOORU_BASE_URL = "https://safebooru.org/index.php?page=dapi&s=post&q=index"
-SUBTRACTIVE_NSFW_TAGS = ["-panties", "-underwear", "-bra", "-bikini", "-ass", "-exercise", "-sweat", "-topless", "-bare_back", "-mind_control", "-clothes_lift", "-squatting", "-bodysuit", "-micro_bra", "-bdsm", "-sexually_suggestive", "-suggestive_fluid", "-blood", "-poop", "-large_breasts", "-spread_legs", "-gigantic_breasts", "-crossdressing", "-nude", "-convenient_censoring", "-latex", "-topless_male", "-crop_top", "-skirt_pull", "-no_panties", "-stomach_cutout", "-undersized_clothing", "-nipples", "-skin_tight", "-groin", "-yuri", "-yaoi", "-french_kiss", "-swimsuit", "-convenient_leg", "-tagme"]
+# SUBTRACTIVE_NSFW_TAGS = ["-panties", "-underwear", "-bra", "-bikini", "-ass", "-exercise", "-sweat",
+#                          "-topless", "-bare_back", "-mind_control", "-clothes_lift", "-squatting",
+#                          "-bodysuit", "-micro_bra", "-bdsm", "-sexually_suggestive", "-suggestive_fluid",
+#                          "-blood", "-poop", "-large_breasts", "-spread_legs", "-gigantic_breasts", "-crossdressing",
+#                          "-nude", "-convenient_censoring", "-latex", "-topless_male", "-crop_top", "-skirt_pull",
+#                          "-no_panties", "-stomach_cutout", "-undersized_clothing", "-nipples", "-skin_tight",
+#                          "-groin", "-yuri", "-yaoi", "-french_kiss", "-swimsuit", "-convenient_leg", "-tagme"]
+
+SUBTRACTIVE_NSFW_TAGS = ["-blood", "-poop", "-tagme"]
+
 
 
 def join_safebooru_tags(tags: List[str]) -> str:
