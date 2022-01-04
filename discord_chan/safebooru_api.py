@@ -18,7 +18,7 @@ import asyncio
 import random
 import urllib.parse
 import xml.etree.ElementTree
-from typing import Optional
+from typing import Optional, List
 
 import aiohttp
 
@@ -27,11 +27,11 @@ SAFEBOORU_BASE_URL = "https://safebooru.org/index.php?page=dapi&s=post&q=index"
 SUBTRACTIVE_NSFW_TAGS = ["-panties", "-underwear", "-bra", "-bikini", "-ass", "-exercise", "-sweat", "-topless", "-bare_back", "-mind_control", "-clothes_lift", "-squatting", "-bodysuit", "-micro_bra", "-bdsm", "-sexually_suggestive", "-suggestive_fluid", "-blood", "-poop", "-large_breasts", "-spread_legs", "-gigantic_breasts", "-crossdressing", "-nude", "-convenient_censoring", "-latex", "-topless_male", "-crop_top", "-skirt_pull", "-no_panties", "-stomach_cutout", "-undersized_clothing", "-nipples", "-skin_tight", "-groin", "-yuri", "-yaoi", "-french_kiss", "-swimsuit", "-convenient_leg", "-tagme"]
 
 
-def join_safebooru_tags(tags: list[str]) -> str:
+def join_safebooru_tags(tags: List[str]) -> str:
     return "+".join([urllib.parse.quote(x) for x in tags])
 
 
-async def get_safebooru_post_count(tags: list[str]) -> Optional[int]:
+async def get_safebooru_post_count(tags: List[str]) -> Optional[int]:
     async with aiohttp.ClientSession() as session:
         async with session.get(SAFEBOORU_BASE_URL + f"&limit=0&tags={join_safebooru_tags(tags + SUBTRACTIVE_NSFW_TAGS)}") as resp:
             if resp.status == 200:
@@ -40,7 +40,7 @@ async def get_safebooru_post_count(tags: list[str]) -> Optional[int]:
                     return int(amount)
 
 
-async def get_safebooru_posts(tags: list[str], page: int=0) -> list[str]:
+async def get_safebooru_posts(tags: List[str], page: int=0) -> List[str]:
     result = []
 
     async with aiohttp.ClientSession() as session:
@@ -55,7 +55,7 @@ async def get_safebooru_posts(tags: list[str], page: int=0) -> list[str]:
             return result
 
 
-async def get_random_safebooru_post(tags: list[str]) -> Optional[str]:
+async def get_random_safebooru_post(tags: List[str]) -> Optional[str]:
     if post_count := await get_safebooru_post_count(tags):
         page = random.randint(0, int(post_count / 100))
 
@@ -63,7 +63,3 @@ async def get_random_safebooru_post(tags: list[str]) -> Optional[str]:
         post_count = len(posts)
         if post_count > 0:
             return posts[random.randint(0, post_count-1)]
-
-
-if __name__ == "__main__":
-    print(asyncio.run(get_random_safebooru_post(["?"])))
