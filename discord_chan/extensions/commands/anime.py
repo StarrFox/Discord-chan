@@ -144,9 +144,9 @@ class Anime(commands.Cog, name="anime"):
             [f"{idx + 1}. {i['title']}" for idx, i in enumerate(results[:5])]
         )
 
-        e = discord.Embed(description=msg)
+        embed = discord.Embed(description=msg)
 
-        embed_message = await ctx.send(embed=e)
+        embed_message = await ctx.send(embed=embed)
 
         reactions = [
             f"{i}\N{VARIATION SELECTOR-16}\N{COMBINING ENCLOSING KEYCAP}"
@@ -186,8 +186,9 @@ class Anime(commands.Cog, name="anime"):
     @checks.some_guilds([724060352010125412])
     async def safebooru(self, ctx: commands.Context, *tags: str):
         if image_url := await discord_chan.get_random_safebooru_post(list(tags)):
-            e = discord.Embed(image=image_url)
-            await ctx.send(embed=e)
+            embed = discord.Embed(description="\u200b")
+            embed.set_image(url=image_url)
+            await ctx.send(embed=embed)
         else:
             await ctx.deny("No posts found")
 
