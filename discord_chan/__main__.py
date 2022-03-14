@@ -16,15 +16,13 @@
 import asyncio
 import logging
 import sys
+import os
 from pathlib import Path
-from string import Template
 
 import click
-from aiomonitor import cli, start_monitor
-from box import ConfigBox
+import dotenv
 from click_default_group import DefaultGroup
 from loguru import logger
-from reusables import config_dict
 
 import discord_chan
 from discord_chan.utils import InterceptHandler
@@ -36,12 +34,11 @@ except ImportError:
 else:
     uvloop.install()
 
+dotenv.load_dotenv()
 
 ROOT_DIR = Path(__file__).parent
 
 
-# Todo: add update subparser? git pull, see if config or sql is different?
-# Todo: add gui subparser? shows stats and has buttons to start/stop bot
 @click.group(
     help="General purpose Discord bot.",
     cls=DefaultGroup,
@@ -53,16 +50,9 @@ def main():
 
 
 @main.command(help="Run the bot")
-@click.option(
-    "--config",
-    default="config.ini",
-    type=click.Path(exists=True),
-    show_default=True,
-    help="Path to config file.",
-)
 @click.option("--debug", is_flag=True, help="Run in debug mode.")
 @click.option("--no-cache", is_flag=True, help="Run without member cache")
-def run(config, debug, no_cache):
+def run(debug, no_cache):
     # noinspection PyArgumentList
     logging.basicConfig(handlers=[InterceptHandler()], level=0)
 
@@ -70,13 +60,6 @@ def run(config, debug, no_cache):
     logger.enable("discord_chan")
     logger.add(sys.stderr, level="INFO", filter="discord_chan")
     logger.add(sys.stderr, level="ERROR", filter="discord")
-
-    config = ConfigBox(config_dict(config))
-
-    if not config.enviroment.bool("disable"):
-        load_environ(
-            **dict([var for var in config.enviroment.items() if var[0] != "disable"])
-        )
 
     if debug:
         asyncio.get_event_loop().set_debug(True)
@@ -87,110 +70,12 @@ def run(config, debug, no_cache):
         kwargs["guild_subscriptions"] = False
         kwargs["fetch_offline_members"] = False
 
-    bot = discord_chan.DiscordChan(config, **kwargs)
+    bot = discord_chan.DiscordChan(**kwargs)
 
     # Todo: make sure to remove this debug call
-    bot.dispatch("ready")
+    # bot.dispatch("ready")
 
-    loop = asyncio.get_event_loop()
-    with start_monitor(
-        loop, monitor=discord_chan.DiscordChanMonitor, locals={"bot": bot}
-    ):
-        bot.run()
-
-
-# TODO: remove
-def load_environ(**kwargs):
-    """
-    Loads the kwargs as enviroment variables
-    :param kwargs: The enviroment variables to load
-    :return:
-    """
-
-    from os import environ
-
-    for var, value in kwargs.items():
-        # All jishaku flags must be caps
-        if var.startswith("jishaku"):
-            environ[var.upper()] = value
-
-        else:
-            environ[var] = value
-
-        logger.debug(f"Set ENV var {var.upper()} = {value}")
-
-
-@main.command(help='"Install" the bot; general setup before running.')
-@click.option(
-    "--config",
-    default="config.ini",
-    type=click.Path(),
-    show_default=True,
-    help="Path to config file.",
-)
-@click.option("--interactive", is_flag=True, help="Interactive config file setup.")
-def install(config, interactive):
-    config_file = Path(config)
-
-    if config_file.exists():
-        overwrite = click.confirm("Config file already exists, overwrite?")
-
-    else:
-        overwrite = True
-
-        try:
-            config_file.touch()
-
-        except Exception as e:
-            exit(str(e))
-
-    if overwrite:
-        if not interactive:
-            config_file.write_text(discord_chan.constants.DEFAULT_CONFIG)
-
-        else:
-            res = interactive_install()
-            config_file.write_text(res)
-
-        click.echo("Config file made/overwriten.")
-
-    async def init_db():
-        async with discord_chan.db.get_database() as connection:
-            await connection.executescript(discord_chan.constants.DEFAULT_SQL)
-            await connection.commit()
-
-        print("Initalized DB.")
-
-    asyncio.run(init_db())
-
-
-def interactive_install() -> str:
-    interactive_config = Template(discord_chan.constants.INTERACTIVE_CONFIG)
-
-    click.echo("Starting interactive config...")
-    click.echo("--general section--")
-
-    prefix = click.prompt("Command prefix?")
-    load_extensions = click.prompt("Load base extensions?", type=bool)
-
-    click.echo("--discord section--")
-
-    token = click.prompt("Discord bot token?")
-
-    click.echo("--enviroment section--")
-
-    disable = click.prompt("Disable enviroment var config?", type=bool)
-
-    return interactive_config.substitute(
-        prefix=prefix, load_extensions=load_extensions, token=token, disable=disable
-    )
-
-
-@main.command(help="Start the DiscordChanMonitor interface.")
-@click.option("-H", "--host", default="127.0.0.1", type=str, help="Monitor host ip.")
-@click.option("-P", "--port", default=50101, type=int, help="Monitor port number.")
-def monitor(host, port):
-    cli.monitor_client(host, port)
+    bot.run(os.getenv("DISCORD_TOKEN"))
 
 
 if __name__ == "__main__":

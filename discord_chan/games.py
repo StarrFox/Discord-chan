@@ -38,7 +38,6 @@ class Connect4(menus.Menu):
         self.winner = None
         # noinspection PyTypeChecker
         self.board = numpy.full((6, 7), self.filler)
-        # This is kinda hacky but /shrug
         for button in [
             menus.Button(num, self.do_number_button) for num in self.numbers
         ]:

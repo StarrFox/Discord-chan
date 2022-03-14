@@ -17,11 +17,9 @@ import datetime
 import re
 
 import discord
-from PIL.Image import Image
 from discord.ext import commands
 
 from . import utils
-from .image import FileTooLarge, InvalidImageType, url_to_image
 
 WEEKDAYS = ["monday", "tuesday", "wendsday", "thursday", "friday", "saturday", "sunday"]
 
@@ -103,12 +101,6 @@ class FetchedMember(commands.Converter):
             return members[0]
 
         raise commands.BadArgument('Member "{}" not found'.format(argument))
-
-
-class FetchedAuthor(commands.CustomDefault, display="Author"):
-    async def default(self, ctx, param):
-        # We do this because when cache is off ctx.author will only be a user
-        return await ctx.guild.fetch_member(ctx.author.id)
 
 
 class ImageFormatConverter(commands.Converter):
@@ -276,50 +268,6 @@ class ImageUrlConverter(commands.Converter):
         )
 
 
-class ImageUrlDefault(commands.CustomDefault, display="LastImage"):
-    async def default(self, ctx: commands.Context, param: str) -> str:
-        if ctx.message.attachments:
-            return ctx.message.attachments[0].url
-
-        async for message in ctx.history():
-            if message.attachments:
-                return message.attachments[0].url
-
-            if message.embeds:
-                embed = message.embeds[0]
-
-                if embed.type == "image":
-                    if embed.url:
-                        return embed.url
-
-                elif embed.image:
-                    return embed.image.url
-
-        raise commands.MissingRequiredArgument(param)
-
-
-class ImageConverter(ImageUrlConverter):
-    async def convert(self, ctx: commands.Context, argument: str) -> Image:
-        url = await super().convert(ctx, argument)
-
-        try:
-            return await url_to_image(url)
-
-        except (FileTooLarge, InvalidImageType) as e:
-            raise commands.BadArgument(str(e))
-
-
-class ImageDefault(ImageUrlDefault, display="LastImage"):
-    async def default(self, ctx: commands.Context, param: str) -> Image:
-        url = await super().default(ctx, param)
-
-        try:
-            return await url_to_image(url)
-
-        except (FileTooLarge, InvalidImageType):
-            raise commands.MissingRequiredArgument(param)
-
-
 class EmbedConverter(commands.MessageConverter):
     async def convert(self, ctx: commands.Context, argument: str):
         message = await super().convert(ctx, argument)
@@ -328,29 +276,6 @@ class EmbedConverter(commands.MessageConverter):
             raise commands.BadArgument("Message had no embed.")
 
         return message.embeds[0]
-
-
-class EmbedDefault(commands.CustomDefault, display="LastEmbed"):
-    async def default(self, ctx: commands.Context, param: str) -> discord.Embed:
-        # No idea when this would apply
-        if ctx.message.embeds:
-            return ctx.message.embeds[0]
-
-        async for message in ctx.history():
-            if message.embeds:
-                return message.embeds[0]
-
-        raise commands.MissingRequiredArgument(param)
-
-
-class NamedCall(commands.default.Call):
-    def __init__(self, callback, *, display=None):
-        super().__init__(callback)
-        if display:
-            self.display = display
-
-    def __str__(self):
-        return self.display
 
 
 class TimeConverter(commands.Converter):

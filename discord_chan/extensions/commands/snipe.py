@@ -195,5 +195,5 @@ class Snipe(commands.Cog, name="snipe"):
         return snipes
 
 
-def setup(bot):
-    bot.add_cog(Snipe(bot))
+async def setup(bot):
+    await bot.add_cog(Snipe(bot))

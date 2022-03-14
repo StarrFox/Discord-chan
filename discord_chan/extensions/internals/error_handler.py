@@ -19,13 +19,11 @@ from discord.ext import commands
 from humanize import naturaldelta
 from loguru import logger
 
-from discord_chan import AuthorBlacklisted
-
 
 async def on_command_error(ctx: commands.Context, error):
     error = getattr(error, "original", error)
 
-    if isinstance(error, (commands.CommandNotFound, AuthorBlacklisted)):
+    if isinstance(error, commands.CommandNotFound):
         return
 
     # Bypass checks for owner
@@ -56,9 +54,9 @@ async def on_command_error(ctx: commands.Context, error):
     )
 
 
-def setup(bot: commands.Bot):
+async def setup(bot: commands.Bot):
     bot.add_listener(on_command_error)
 
 
-def teardown(bot: commands.Bot):
+async def teardown(bot: commands.Bot):
     bot.remove_listener(on_command_error)

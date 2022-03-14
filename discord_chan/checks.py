@@ -24,17 +24,17 @@ class CogNotLoaded(commands.CheckFailure):
 
 
 def cog_loaded(cog_name: str):
-    def pred(ctx):
+    def _pred(ctx):
         if ctx.bot.get_cog(cog_name):
             return True
 
         raise CogNotLoaded(cog_name)
 
-    return commands.check(pred)
+    return commands.check(_pred)
 
 
 def some_guilds(guilds: List[int]):
-    def pred(ctx):
+    def _pred(ctx):
         return ctx.guild.id in guilds
 
-    return commands.check(pred)
+    return commands.check(_pred)
