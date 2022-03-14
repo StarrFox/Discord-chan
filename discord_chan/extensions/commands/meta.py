@@ -20,7 +20,6 @@ from discord.ext import commands
 from discord_chan import (
     BotConverter,
     DCMenuPages,
-    NamedCall,
     NormalPageSource,
     PrologPaginator,
     SubContext,
@@ -56,12 +55,15 @@ class Meta(commands.Cog, name="meta"):
     async def invite(
         self,
         ctx: commands.Context,
-        bot: BotConverter = NamedCall(lambda c, p: c.me, display="DiscordChan"),
+        bot: BotConverter = None,
     ):
         """
         Get the invite link for a bot,
         defaults to myself
         """
+        if bot is None:
+            bot = ctx.me
+
         bot: discord.Member
 
         url = discord.utils.oauth_url(bot.id)
@@ -72,21 +74,14 @@ class Meta(commands.Cog, name="meta"):
         """
         Links to the support server
         """
-        await ctx.send(self.bot.config.general.support_url)
+        await ctx.send("https://discord.gg/h8Aqs47rz4")
 
     @commands.command()
     async def source(self, ctx: commands.Context):
         """
         Links to the bot's source url
         """
-        await ctx.send(self.bot.config.general.source_url)
-
-    @commands.command()
-    async def vote(self, ctx: commands.Context):
-        """
-        Links to the vote url
-        """
-        await ctx.send(self.bot.config.general.vote_url)
+        await ctx.send("https://github.com/StarrFox/Discord-chan")
 
     @commands.command(aliases=["info"])
     async def about(self, ctx: commands.Context):
@@ -111,11 +106,8 @@ class Meta(commands.Cog, name="meta"):
             )
 
         paginator = PrologPaginator()
-
         paginator.recursively_add_dictonary({self.bot.user.name: data})
-
         source = NormalPageSource(paginator.pages)
-
         menu = DCMenuPages(source)
 
         await menu.start(ctx)
@@ -127,27 +119,21 @@ class Meta(commands.Cog, name="meta"):
         View soketstats of the bot
         """
         events_cog = self.bot.get_cog("events")
-
         socket_events = events_cog.socket_events
-
         total = sum(socket_events.values())
-
         paginator = PrologPaginator(align_places=20)
-
         paginator.recursively_add_dictonary({f"{total:,} total": socket_events})
-
         source = NormalPageSource(paginator.pages)
-
         menu = DCMenuPages(source)
 
         await menu.start(ctx)
 
 
-def setup(bot):
+async def setup(bot):
     cog = Meta(bot)
-    bot.add_cog(cog)
+    await bot.add_cog(cog)
     bot.help_command.cog = cog
 
 
-def teardown(bot):
+async def teardown(bot):
     bot.help_command.cog = None

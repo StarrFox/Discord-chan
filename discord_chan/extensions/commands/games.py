@@ -101,5 +101,5 @@ class Games(commands.Cog, name="games"):
             )
 
 
-def setup(bot):
-    bot.add_cog(Games())
+async def setup(bot):
+    await bot.add_cog(Games())

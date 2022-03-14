@@ -21,17 +21,14 @@ import discord
 import humanize
 import uwuify
 from discord.ext import commands
-from discord.ext.commands.default import CurrentChannel
 from enchant.checker import SpellChecker
 
 from discord_chan import (
     BetweenConverter,
     DCMenuPages,
     DiscordChan,
-    FetchedAuthor,
     FetchedMember,
     FetchedUser,
-    NamedCall,
     NormalPageSource,
     PartitionPaginator,
     PrologPaginator,
@@ -75,17 +72,6 @@ class General(commands.Cog, name="general"):
     async def time_convert(self, ctx: commands.Context, *times: TimeConverter):
         await ctx.send(f"total={sum(times)}\n\n{times}")
 
-    # # Todo: finish this
-    # @checks.cog_loaded('events')
-    # @commands.group(aliases=['pf'], invoke_without_command=True)
-    # async def prefixfinder(self, ctx: commands.Context, bot: FetchedMember):
-    #     await ctx.send('wip tm')
-    #
-    # @checks.cog_loaded('events')
-    # @prefixfinder.command(name='list')
-    # async def prefixfinder_list(self, ctx: commands.Context):
-    #     return
-
     @commands.command()
     async def say(self, ctx: commands.Context, *, message: str):
         """
@@ -126,20 +112,26 @@ class General(commands.Cog, name="general"):
         await ctx.confirm("Messages cleaned.")
 
     @commands.command(aliases=["avy", "pfp"])
-    async def avatar(self, ctx: commands.Context, member: FetchedUser = FetchedAuthor):
+    async def avatar(self, ctx: commands.Context, member: FetchedUser = None):
         """
         Get a member's avatar
         """
+        if member is None:
+            member = await ctx.guild.fetch_member(ctx.author.id)
+
         member: discord.Member
         await ctx.send(str(member.avatar_url))
 
     @commands.command(aliases=["mi", "userinfo", "ui"])
     async def memberinfo(
-        self, ctx: commands.Context, member: FetchedMember = FetchedAuthor
+        self, ctx: commands.Context, member: FetchedMember = None
     ):
         """
         Get info on a guild member
         """
+        if member is None:
+            member = await ctx.guild.fetch_member(ctx.author.id)
+
         data = {
             "id": member.id,
             "top role": member.top_role.name,
@@ -188,11 +180,8 @@ class General(commands.Cog, name="general"):
         }
 
         paginator = PrologPaginator()
-
         paginator.recursively_add_dictonary({guild.name: data})
-
         source = NormalPageSource(paginator.pages)
-
         menu = DCMenuPages(source)
 
         await menu.start(ctx)
@@ -209,13 +198,9 @@ class General(commands.Cog, name="general"):
     async def send_raw(ctx: commands.Context, data: dict):
 
         paginator = PartitionPaginator(prefix="```json", max_size=1985)
-
         to_send = json.dumps(data, indent=4)
-
         paginator.add_line(to_send)
-
         source = NormalPageSource(paginator.pages)
-
         menu = DCMenuPages(source)
 
         await menu.start(ctx)
@@ -224,35 +209,41 @@ class General(commands.Cog, name="general"):
     async def message(
         self,
         ctx: commands.Context,
-        message: discord.Message = NamedCall(
-            lambda c, p: c.message, display="CurrentMessage"
-        ),
+        message: discord.Message = None,
     ):
         """
         Raw message object,
         can provide channel with channel_id-message-id
         (shift-click copy id)
         """
+        if message is None:
+            message = ctx.message
+
         data = await self.bot.http.get_message(message.channel.id, message.id)
         await self.send_raw(ctx, data)
 
     @raw.command()
     async def channel(
-        self, ctx: commands.Context, channel: discord.TextChannel = CurrentChannel
+        self, ctx: commands.Context, channel: discord.TextChannel = None
     ):
         """
         Raw channel object
         """
+        if channel is None:
+            channel = ctx.channel
         data = await self.bot.http.get_channel(channel.id)
         await self.send_raw(ctx, data)
 
     @raw.command()
     async def member(
-        self, ctx: commands.Context, member: FetchedMember = FetchedAuthor
+        self, ctx: commands.Context, member: FetchedMember = None
     ):
         """
         Raw member object
         """
+        if member is None:
+            member = await ctx.guild.fetch_member(ctx.author.id)
+
         data = await self.bot.http.get_member(member.guild.id, member.id)
         await self.send_raw(ctx, data)
 
@@ -260,11 +251,14 @@ class General(commands.Cog, name="general"):
     async def user(
         self,
         ctx: commands.Context,
-        userid: int = NamedCall(lambda c, p: c.author.id, display="AuthorID"),
+        userid: int = None,
     ):
         """
         Raw user object
         """
+        if userid is None:
+            userid = ctx.author.id
+
         try:
             data = await self.bot.http.get_user(userid)
         except discord.errors.NotFound:
@@ -310,46 +304,6 @@ class General(commands.Cog, name="general"):
         role_data = discord.utils.find(lambda d: d["id"] == str(role.id), data)
         await self.send_raw(ctx, role_data)
 
-    @commands.command(hidden=True)
-    async def ham(self, ctx: commands.Context):
-        await ctx.send("https://youtu.be/yCei3RrNSmY")
 
-    @commands.command(hidden=True)
-    async def weeee(self, ctx: commands.Context):
-        await ctx.send("https://www.youtube.com/watch?v=2Y1iPavaOTE")
-
-    @commands.command(hidden=True)
-    async def chika(self, ctx: commands.Context):
-        await ctx.send("https://www.youtube.com/watch?v=-rokG9XS37w")
-
-    @commands.command(hidden=True)
-    async def otter(self, ctx: commands.Context):
-        await ctx.send("<:otter:692105646270578779>")
-
-    @commands.command(hidden=True)
-    async def fricc(self, ctx: commands.Context):
-        await ctx.send("IM FRICCIN OUT")
-
-    @commands.command(hidden=True)
-    async def bellyrub(self, ctx: commands.Context):
-        await ctx.send("Connor penis size = smol")
-
-    @commands.command(hidden=True)
-    async def boobie(self, ctx: commands.Context):
-        boobie_words = [
-            "big",
-            "fat",
-            "juicy",
-            "massive",
-            "yummy",
-            "thicc",
-            "large",
-            "huge",
-            "ginormous",
-        ]
-        wn = random.randrange(1, len(boobie_words) + 1)
-        await ctx.send(" ".join(boobie_words[:wn]) + " boobie")
-
-
-def setup(bot):
-    bot.add_cog(General(bot))
+async def setup(bot):
+    await bot.add_cog(General(bot))

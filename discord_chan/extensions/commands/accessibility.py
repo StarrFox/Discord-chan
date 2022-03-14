@@ -14,17 +14,13 @@
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
 import re
-from io import BytesIO
 
 import discord
 from discord.ext import commands
 
 from discord_chan import (
     DiscordChan,
-    ImageUrlConverter,
-    ImageUrlDefault,
     SubContext,
-    get_bytes,
 )
 
 CUSTOM_EMOJI_REGEX = (
@@ -35,34 +31,6 @@ CUSTOM_EMOJI_REGEX = (
 class Accessibility(commands.Cog, name="accessibility"):
     def __init__(self, bot: DiscordChan):
         self.bot = bot
-
-    @commands.command()
-    async def sendlink(
-        self, ctx: commands.Context, thing: ImageUrlConverter = ImageUrlDefault
-    ):
-        """
-        Sends the link of a member, custom emoji, message attachment, message embed, or repeats a link.
-        idk why you would use the last one
-        """
-        thing: str
-        await ctx.send(thing)
-
-    @commands.command(aliases=["popembed"])
-    @commands.has_permissions(attach_files=True)
-    @commands.bot_has_permissions(attach_files=True)
-    async def sendfile(
-        self, ctx: SubContext, thing: ImageUrlConverter = ImageUrlDefault
-    ):
-        """
-        Sends the image file of a member, custom emoji, message attachment or message embed
-        """
-        thing: str
-        res = await get_bytes(thing, max_length=8)
-
-        buffer = BytesIO(res.file_bytes)
-
-        file = discord.File(buffer, "popped.png")
-        await ctx.send(file=file)
 
     @commands.command(name="steal-these")
     async def steal_these(self, ctx: SubContext, message: discord.Message):
@@ -85,5 +53,5 @@ class Accessibility(commands.Cog, name="accessibility"):
         await ctx.send("\n".join([f"{e.name}: <{e.url!s}>" for e in emojis]))
 
 
-def setup(bot: DiscordChan):
-    bot.add_cog(Accessibility(bot))
+async def setup(bot: DiscordChan):
+    await bot.add_cog(Accessibility(bot))

@@ -21,12 +21,9 @@ from discord.ext import commands
 
 from discord_chan import (
     BetweenConverter,
-    CodeblockPageSource,
-    DCMenuPages,
     FetchedMember,
     FetchedUser,
     SubContext,
-    db,
 )
 
 
@@ -40,85 +37,6 @@ class Mod(commands.Cog, name="mod"):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-
-    @commands.guild_only()
-    @commands.group(invoke_without_command=True, aliases=["prefixes"])
-    async def prefix(self, ctx: commands.Context):
-        """
-        Base prefix command,
-        Lists prefixes
-        """
-        prefixes = [
-            f"{idx}. `{prefix}`"
-            for idx, prefix in enumerate(self.bot.prefixes[ctx.guild.id], 1)
-        ]
-
-        source = CodeblockPageSource(prefixes, per_page=5)
-
-        menu = DCMenuPages(source)
-
-        await menu.start(ctx)
-
-    @commands.check_any(
-        commands.has_permissions(administrator=True),
-        commands.has_permissions(manage_messages=True),
-    )
-    @prefix.command()
-    async def add(self, ctx: SubContext, prefix: str):
-        """
-        Adds a prefix to this guild
-        """
-        # it should never be over 20 but just to be sure
-        if len(self.bot.prefixes[ctx.guild.id]) >= 20:
-            return await ctx.send(
-                "Guild at max prefixes of 20, remove one to add this one."
-            )
-        elif prefix in self.bot.prefixes[ctx.guild.id]:
-            return await ctx.send("Prefix already added.")
-
-        self.bot.prefixes[ctx.guild.id].add(prefix)
-        async with db.get_database() as conn:
-            async with conn.cursor() as cursor:
-                await cursor.execute(
-                    "INSERT INTO prefixes (guild_id, prefixes) VALUES (?, ?) "
-                    "ON CONFLICT (guild_id) DO UPDATE SET prefixes = EXCLUDED.prefixes;",
-                    (ctx.guild.id, self.bot.prefixes[ctx.guild.id]),
-                )
-            await conn.commit()
-
-        await ctx.confirm()
-
-    @commands.check_any(
-        commands.has_permissions(administrator=True),
-        commands.has_permissions(manage_messages=True),
-    )
-    @prefix.command(aliases=["rem"])
-    async def remove(self, ctx: SubContext, prefix: str):
-        """
-        Remove a prefix from this guild
-        """
-        if prefix not in self.bot.prefixes[ctx.guild.id]:
-            return await ctx.send("Prefix not in this guild's prefixes.")
-
-        async with db.get_database() as conn:
-            async with conn.cursor() as cursor:
-                # It's the only one in the guild so just reset to default prefix
-                # rather than an empty set
-                if len(self.bot.prefixes[ctx.guild.id]) == 1:
-                    del self.bot.prefixes[ctx.guild.id]
-                    await cursor.execute(
-                        "DELETE FROM prefixes WHERE guild_id IS (?)", (ctx.guild.id,)
-                    )
-
-                else:
-                    self.bot.prefixes[ctx.guild.id].remove(prefix)
-                    await cursor.execute(
-                        "UPDATE prefixes SET prefixes=? WHERE guild_id IS ?;",
-                        (self.bot.prefixes[ctx.guild.id], ctx.guild.id),
-                    )
-            await conn.commit()
-
-        await ctx.confirm()
 
     @commands.bot_has_permissions(manage_messages=True)
     @commands.has_permissions(manage_messages=True)
@@ -202,5 +120,5 @@ class Mod(commands.Cog, name="mod"):
         await ctx.confirm("Removed")
 
 
-def setup(bot):
-    bot.add_cog(Mod(bot))
+async def setup(bot):
+    await bot.add_cog(Mod(bot))

@@ -16,29 +16,24 @@
 import pathlib
 from collections import defaultdict, deque
 from datetime import datetime
-from typing import Deque, Dict, Optional, Set, Union
+from typing import Deque, Dict, Optional, Union, Type
 
 import discord
-from box import ConfigBox
 from discord.ext import commands
-from jikanpy import AioJikan
 from loguru import logger
 
-from . import db
 from .context import SubContext
-from .errors import AuthorBlacklisted, BotNoDms
 from .help import Minimal
 from .snipe import Snipe
 
 
+DEFAULT_PREFIXES = ["dc/", "DC/"]
+
+
 class DiscordChan(commands.AutoShardedBot):
     def __init__(
-        self, config: ConfigBox, *, context: commands.Context = SubContext, **kwargs
+        self, *, context: Type[commands.Context] = SubContext, **kwargs
     ):
-        """
-        :param config: Config parser object
-        :param context: Context factory to use
-        """
         super().__init__(
             command_prefix=kwargs.pop("command_prefix", self.get_command_prefix),
             case_insensitive=kwargs.pop("case_insensitive", True),
@@ -50,37 +45,19 @@ class DiscordChan(commands.AutoShardedBot):
             ),
             activity=discord.Activity(
                 type=discord.ActivityType.listening,
-                name=f"{config.general.prefix}help",
+                name=f"dc/help",
             ),
+            intents=kwargs.pop("intents", discord.Intents.all()),
             **kwargs,
         )
-        self.config = config
         self.context = context
-        self.jikan = AioJikan()
         self.ready_once = False
         self.uptime = datetime.now()
-        # Todo: make an anime entry object to replace the dicts in the lists
-        self.anime_db: Dict[str, list] = {}
-        # {user_id: reason}
-        self.blacklist: Dict[int, Optional[str]] = {}
-        # {bot_id: {prefixes}}
-        self.other_bot_prefixes: Dict[int, Set[str]] = defaultdict(lambda: set())
-        # {guild_id: {prefixes}}
-        self.prefixes: Dict[int, Set[str]] = defaultdict(
-            lambda: {config.general.prefix}
-        )
-        # {send_from: {send_to}}
-        self.channel_links: Dict[
-            discord.TextChannel, Set[discord.TextChannel]
-        ] = defaultdict(lambda: set())
         # {guild_id: {channel_id: deque[Snipe]}}
         self.snipes: Dict[int, Dict[int, Deque[Snipe]]] = defaultdict(
             lambda: defaultdict(lambda: deque(maxlen=5_000))
         )
-        # {guild_id: {user_id: [role_ids*]}}
-        self.role_persist = defaultdict(lambda: defaultdict(set))
 
-        self.add_check(self.blacklist_check)
         self.add_check(self.direct_message_check)
 
     def get_message(self, message_id: int) -> Optional[discord.Message]:
@@ -112,19 +89,13 @@ class DiscordChan(commands.AutoShardedBot):
 
         self.ready_once = True
 
-        await self.load_prefixes()
-        await self.load_blacklist()
-
-        if self.config.general.bool("load_extensions"):
-            self.load_extensions_from_dir("discord_chan/extensions")
+        await self.load_extension("jishaku")
+        await self.load_extensions_from_dir("extensions")
 
         logger.info(f"Logged in as {self.user}.")
         logger.info(f"Bot ready with {len(self.extensions.keys())} extensions.")
 
-    def run(self, *args, **kwargs):
-        return super().run(self.config.discord.token, *args, **kwargs)
-
-    def load_extensions_from_dir(self, path: Union[str, pathlib.Path]) -> int:
+    async def load_extensions_from_dir(self, path: Union[str, pathlib.Path]) -> int:
         """
         Loads any python files in a directory and it's children
         as extensions
@@ -152,65 +123,18 @@ class DiscordChan(commands.AutoShardedBot):
 
         for ext in extension_names:
             try:
-                self.load_extension(ext)
+                await self.load_extension(ext)
             except (commands.errors.ExtensionError, commands.errors.ExtensionFailed):
                 logger.exception("Failed loading " + ext)
 
         return len(self.extensions.keys()) - before
 
     async def get_command_prefix(self, _, message: discord.Message):
-        if message.guild:
-            # sorting fixes cases where part of another prefix is a prefix for example
-            # if the prefix d was before dc/, c/ would be interpreted as a command
-            prefixes = sorted(
-                self.prefixes[message.guild.id], key=lambda s: len(s), reverse=True
-            )
-
-            return commands.when_mentioned_or(*prefixes)(self, message)
-        else:  # DM, which we ignore
-            return commands.when_mentioned_or(self.config.general.prefix, "")(
-                self, message
-            )
-
-    def blacklist_check(self, ctx: commands.Context):
-        if ctx.author.id in self.blacklist:
-            raise AuthorBlacklisted()
-
-        return True
+        return commands.when_mentioned_or(*DEFAULT_PREFIXES)(self, message)
 
     @staticmethod
     def direct_message_check(ctx: commands.Context):
         if isinstance(ctx.channel, discord.DMChannel):
-            raise BotNoDms()
+            raise commands.NoPrivateMessage()
 
         return True
-
-    async def load_prefixes(self):
-        async with db.get_database() as connection:
-            async with connection.cursor() as cursor:
-                await cursor.execute("SELECT * FROM prefixes;")
-                for guild_id, prefixes in await cursor.fetchall():
-                    self.prefixes[guild_id] = prefixes
-
-        logger.info(f"Loaded prefixes for {len(self.prefixes)} guilds.")
-
-    # This doesn't actually get called anymore
-    async def unload_prefixes(self):
-        async with db.get_database() as connection:
-            async with connection.cursor() as cursor:
-                await cursor.executemany(
-                    "INSERT INTO prefixes (guild_id, prefixes) VALUES (?, ?) "
-                    "ON CONFLICT (guild_id) DO UPDATE SET prefixes = EXCLUDED.prefixes",
-                    self.prefixes.items(),
-                )
-            await connection.commit()
-
-        logger.info(f"Unloaded prefixes for {len(self.prefixes)} guilds.")
-
-    async def load_blacklist(self):
-        async with db.get_database() as connection:
-            cursor = await connection.execute("SELECT * FROM blacklist;")
-            for user_id, reason in await cursor.fetchall():
-                self.blacklist[user_id] = reason
-
-        logger.info(f"Loaded {len(self.blacklist)} blacklisted users.")

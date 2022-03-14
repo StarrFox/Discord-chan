@@ -13,8 +13,6 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
-
-import asyncio
 import random
 import urllib.parse
 import xml.etree.ElementTree
@@ -33,7 +31,6 @@ SAFEBOORU_BASE_URL = "https://safebooru.org/index.php?page=dapi&s=post&q=index"
 #                          "-groin", "-yuri", "-yaoi", "-french_kiss", "-swimsuit", "-convenient_leg", "-tagme"]
 
 SUBTRACTIVE_NSFW_TAGS = ["-blood", "-poop", "-tagme"]
-
 
 
 def join_safebooru_tags(tags: List[str]) -> str:

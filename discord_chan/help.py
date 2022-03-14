@@ -29,7 +29,7 @@ class Minimal(commands.MinimalHelpCommand):
 
     def get_opening_note(self):
         command_name = self.context.invoked_with
-        return f"Use `{self.clean_prefix}{command_name} <command/cog>` for more info on a command/cog."
+        return f"Use `dc/{command_name} <command/cog>` for more info on a command/cog."
 
     def add_bot_commands_formatting(self, cmds, heading):
         if cmds:
