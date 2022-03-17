@@ -13,6 +13,7 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
+from dataclasses import dataclass
 import random
 import urllib.parse
 import xml.etree.ElementTree
@@ -31,6 +32,13 @@ SAFEBOORU_BASE_URL = "https://safebooru.org/index.php?page=dapi&s=post&q=index"
 #                          "-groin", "-yuri", "-yaoi", "-french_kiss", "-swimsuit", "-convenient_leg", "-tagme"]
 
 SUBTRACTIVE_NSFW_TAGS = ["-blood", "-poop", "-tagme"]
+
+
+@dataclass
+class SafebooruPost:
+  url: str
+  post_index: int
+  tag_post_count: int
 
 
 def join_safebooru_tags(tags: List[str]) -> str:
@@ -61,11 +69,16 @@ async def get_safebooru_posts(tags: List[str], page: int=0) -> List[str]:
             return result
 
 
-async def get_random_safebooru_post(tags: List[str]) -> Optional[str]:
-    if post_count := await get_safebooru_post_count(tags):
-        page = random.randint(0, int(post_count / 100))
+async def get_random_safebooru_post(tags: List[str]) -> Optional[SafebooruPost]:
+    if total_post_count := await get_safebooru_post_count(tags):
+        page = random.randint(0, int(total_post_count / 100))
 
         posts = await get_safebooru_posts(tags, page)
         post_count = len(posts)
         if post_count > 0:
-            return posts[random.randint(0, post_count-1)]
+            post_index = random.randint(0, post_count-1)
+            return SafebooruPost(
+              url=posts[post_index],
+              post_index=post_index,
+              tag_post_count=total_post_count
+            )
