@@ -21,6 +21,8 @@ from pathlib import Path
 
 import click
 import dotenv
+import discord
+import discord.http
 from click_default_group import DefaultGroup
 from loguru import logger
 
@@ -37,6 +39,14 @@ else:
 dotenv.load_dotenv()
 
 ROOT_DIR = Path(__file__).parent
+
+
+# TODO: remove
+class VersionLockedRoute(discord.http.Route):
+    BASE = "https://discord.com/api/v8"
+
+
+discord.http.Route = VersionLockedRoute
 
 
 @click.group(

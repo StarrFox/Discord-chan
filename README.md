@@ -7,6 +7,8 @@ A general purpose discord bot made with [discord.py](https://github.com/Rapptz/d
 ## Installing
 ```shell script
 poetry install
+# or
+pip install .
 ```
 
 ## Running
