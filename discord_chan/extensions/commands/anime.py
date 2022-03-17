@@ -68,9 +68,9 @@ class Anime(commands.Cog, name="anime"):
     @checks.some_guilds([724060352010125412])
     @commands.is_nsfw()
     async def safebooru(self, ctx: commands.Context, *tags: str):
-        if image_url := await discord_chan.get_random_safebooru_post(list(tags)):
-            embed = discord.Embed(description="\u200b")
-            embed.set_image(url=image_url)
+        if post := await discord_chan.get_random_safebooru_post(list(tags)):
+            embed = discord.Embed(description=f"Post {post.post_index+1}/{post.tag_post_count}")
+            embed.set_image(url=post.url)
             await ctx.send(embed=embed)
         else:
             await ctx.deny("No posts found")
