@@ -47,7 +47,7 @@ class DiscordChan(commands.AutoShardedBot):
                 type=discord.ActivityType.listening,
                 name=f"dc/help",
             ),
-            intents=kwargs.pop("intents", discord.Intents.all()),
+            intents=kwargs.pop("intents", discord.Intents.default()),
             **kwargs,
         )
         self.context = context
