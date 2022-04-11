@@ -13,11 +13,12 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
 
-from dataclasses import dataclass
+import re
 import random
 import urllib.parse
-import xml.etree.ElementTree
+import xml.etree.ElementTree as ElementTree
 from typing import Optional, List
+from dataclasses import dataclass
 
 import aiohttp
 
@@ -41,36 +42,40 @@ class SafebooruPost:
     tag_post_count: int
 
 
-def join_safebooru_tags(tags: List[str]) -> str:
+def prepare_safebooru_tags(tags: List[str], *, replace_spaces: bool = True, ) -> str:
+    if replace_spaces:
+        tags = [re.sub(r"\s+", "_", tag) for tag in tags]
+
+    tags += SUBTRACTIVE_NSFW_TAGS
+
     return "+".join([urllib.parse.quote(x) for x in tags])
 
 
-async def get_safebooru_post_count(tags: List[str]) -> Optional[int]:
+async def request_safebooru(**params) -> ElementTree:
+    if "tags" in params:
+        params["tags"] = prepare_safebooru_tags(params["tags"])
+
     async with aiohttp.ClientSession() as session:
-        async with session.get(
-                SAFEBOORU_BASE_URL + f"&limit=0&tags={join_safebooru_tags(tags + SUBTRACTIVE_NSFW_TAGS)}"
-        ) as resp:
+        async with session.get(SAFEBOORU_BASE_URL + "&".join(params)) as resp:
             if resp.status == 200:
-                tree = xml.etree.ElementTree.fromstring(await resp.content.read())
-                if amount := tree.get("count"):
-                    return int(amount)
+                return ElementTree.fromstring(await resp.content.read())
+
+
+async def get_safebooru_post_count(tags: List[str]) -> Optional[int]:
+    tree = await request_safebooru(tags=tags, limit=0)
+    if amount := tree.get("count"):
+        return int(amount)
 
 
 async def get_safebooru_posts(tags: List[str], page: int=0) -> List[str]:
     result = []
+    tree = await request_safebooru(tags=tags, pid=page)
 
-    async with aiohttp.ClientSession() as session:
-        async with session.get(
-                SAFEBOORU_BASE_URL + f"&pid={page}&tags={join_safebooru_tags(tags + SUBTRACTIVE_NSFW_TAGS)}"
-        ) as resp:
-            if resp.status == 200:
-                tree = xml.etree.ElementTree.fromstring(await resp.content.read())
+    for post in tree:
+        if post_url := post.get("file_url"):
+            result.append(post_url)
 
-                for post in tree:
-                    if post_url := post.get("file_url"):
-                        result.append(post_url)
-
-            return result
+    return result
 
 
 async def get_random_safebooru_post(tags: List[str]) -> Optional[SafebooruPost]:

@@ -90,7 +90,10 @@ class DiscordChan(commands.AutoShardedBot):
         self.ready_once = True
 
         await self.load_extension("jishaku")
-        await self.load_extensions_from_dir("extensions")
+
+        root = pathlib.Path(__file__).parent
+        extensions_path = root / "extensions"
+        await self.load_extensions_from_dir(extensions_path)
 
         logger.info(f"Logged in as {self.user}.")
         logger.info(f"Bot ready with {len(self.extensions.keys())} extensions.")
