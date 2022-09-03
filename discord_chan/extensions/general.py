@@ -5,7 +5,7 @@ import discord
 import humanize
 import uwuify
 from discord.ext import commands
-from enchant.checker import SpellChecker
+
 
 from discord_chan import (
     BetweenConverter,
@@ -19,6 +19,11 @@ from discord_chan import (
     SubContext,
     TimeConverter,
 )
+
+try:
+    from enchant.checker import SpellChecker
+except ImportError:
+    SpellChecker = None
 
 
 class General(commands.Cog, name="general"):
@@ -73,6 +78,9 @@ class General(commands.Cog, name="general"):
         """
         Spellcheck text
         """
+        if SpellChecker is None:
+            return await ctx.send("Spell checking is not enabled.")
+
         checker = SpellChecker("en_US", text)
 
         for error in checker:

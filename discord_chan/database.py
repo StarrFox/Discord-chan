@@ -20,7 +20,7 @@ class Snipe(sqlmodel.SQLModel, table=True):
         return humanize.naturaltime(datetime.utcnow() - self.time)
 
 
-# TODO: store database in a reasonable location
+# TODO: make database a docker volume for persistent between container builds
 
 data_dir = appdirs.user_data_dir(appname="StarrFox_bot", appauthor="StarrFox")
 
