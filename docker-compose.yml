@@ -9,6 +9,8 @@ services:
       dockerfile: ./Dockerfile
     secrets:
       - discord_token
+    environment:
+      IN_DOCKER: true
 
 secrets:
   discord_token:
