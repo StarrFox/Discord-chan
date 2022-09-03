@@ -10,7 +10,7 @@ services:
     secrets:
       - discord_token
     environment:
-      IN_DOCKER: true
+      IN_DOCKER: "true"
 
 secrets:
   discord_token:
