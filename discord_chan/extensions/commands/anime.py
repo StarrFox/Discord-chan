@@ -1,23 +1,8 @@
-#  Copyright © 2019 StarrFox
-#
-#  Discord Chan is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU Affero General Public License as published
-#  by the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  Discord Chan is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU Affero General Public License for more details.
-#
-#  You should have received a copy of the GNU Affero General Public License
-#  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
-
 import discord
 from discord.ext import commands
 
 import discord_chan
-from discord_chan import DiscordChan, checks
+from discord_chan import DiscordChan, checks, SubContext
 
 
 THICK_TABLE = str.maketrans(
@@ -58,16 +43,17 @@ class Anime(commands.Cog, name="anime"):
         self.bot = bot
 
     @commands.command()
-    async def thickify(self, ctx: commands.Context, *, message: str):
+    async def thickify(self, ctx: SubContext, *, message: str):
         """
         thickify text
         """
         await ctx.send(message.lower().translate(THICK_TABLE))
 
+    # TODO: fix
     @commands.command(aliases=["sb"])
-    @checks.some_guilds([724060352010125412])
+    @checks.some_guilds([536702243119038464])
     @commands.is_nsfw()
-    async def safebooru(self, ctx: commands.Context, *tags: str):
+    async def safebooru(self, ctx: SubContext, *tags: str):
         if post := await discord_chan.get_random_safebooru_post(list(tags)):
             embed = discord.Embed(description=f"Post {post.post_index+1}/{post.tag_post_count}")
             embed.set_image(url=post.url)

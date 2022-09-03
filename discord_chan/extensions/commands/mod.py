@@ -1,18 +1,3 @@
-#  Copyright © 2019 StarrFox
-#
-#  Discord Chan is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU Affero General Public License as published
-#  by the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  Discord Chan is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU Affero General Public License for more details.
-#
-#  You should have received a copy of the GNU Affero General Public License
-#  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
-
 import typing
 from contextlib import suppress
 
@@ -22,7 +7,6 @@ from discord.ext import commands
 from discord_chan import (
     BetweenConverter,
     FetchedMember,
-    FetchedUser,
     SubContext,
 )
 
@@ -88,36 +72,6 @@ class Mod(commands.Cog, name="mod"):
             return await ctx.confirm("Id hackbanned.")
 
         await ctx.send("Member is currently in this guild.")
-
-    @commands.bot_has_permissions(manage_roles=True)
-    @commands.has_permissions(manage_roles=True)
-    @commands.command(aliases=["rp"])
-    async def rolepersist(
-        self,
-        ctx: SubContext,
-        role: discord.Role,
-        member: typing.Union[FetchedUser, int],
-    ):
-        if not isinstance(member, int):
-            member = member.id
-
-        self.bot.role_persist[ctx.guild.id][member].add(role.id)
-        await ctx.confirm("Added")
-
-    @commands.bot_has_permissions(manage_roles=True)
-    @commands.has_permissions(manage_roles=True)
-    @commands.command(aliases=["rrp"])
-    async def removerolepersist(
-        self,
-        ctx: SubContext,
-        role: discord.Role,
-        member: typing.Union[FetchedUser, int],
-    ):
-        if not isinstance(member, int):
-            member = member.id
-
-        self.bot.role_persist[ctx.guild.id][member].discard(role.id)
-        await ctx.confirm("Removed")
 
 
 async def setup(bot):

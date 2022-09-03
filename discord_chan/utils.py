@@ -1,18 +1,3 @@
-#  Copyright © 2019 StarrFox
-#  #
-#  Discord Chan is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU Affero General Public License as published
-#  by the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#  #
-#  Discord Chan is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU Affero General Public License for more details.
-#  #
-#  You should have received a copy of the GNU Affero General Public License
-#  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
-
 import logging
 from collections import OrderedDict
 from typing import Union
@@ -48,7 +33,7 @@ async def msg_resend(
         content=msg.content,
         tts=msg.tts,
         embed=msg.embeds[0] if msg.embeds else None,
-        files=[attachment.to_file() for attachment in msg.attachments],
+        files=[await attachment.to_file() for attachment in msg.attachments],
     )
 
 
@@ -59,6 +44,8 @@ def msg_jsonify(message: discord.Message) -> dict:
     :param message: The Message to convert
     :return:
     """
+    # it doesn't recognize Enum.value
+    # noinspection PyUnresolvedReferences
     data = {
         "id": str(message.id),
         "type": message.type.value,

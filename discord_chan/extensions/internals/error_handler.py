@@ -1,26 +1,11 @@
-#  Copyright © 2020 StarrFox
-#
-#  Discord Chan is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU Affero General Public License as published
-#  by the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  Discord Chan is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU Affero General Public License for more details.
-#
-#  You should have received a copy of the GNU Affero General Public License
-#  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
-
 from datetime import timedelta
 
+import humanize
 from discord.ext import commands
-from humanize import naturaldelta
 from loguru import logger
 
 
-async def on_command_error(ctx: commands.Context, error):
+async def on_command_error(ctx: commands.Context, error: Exception):
     error = getattr(error, "original", error)
 
     if isinstance(error, commands.CommandNotFound):
@@ -42,7 +27,7 @@ async def on_command_error(ctx: commands.Context, error):
 
     elif isinstance(error, commands.CommandOnCooldown):
         delta = timedelta(seconds=error.retry_after)
-        natural = naturaldelta(delta)
+        natural = humanize.naturaldelta(delta)
         return await ctx.send(f"Command on cooldown, retry in {natural}.")
 
     logger.opt(exception=(type(error), error, error.__traceback__)).error(
@@ -50,7 +35,7 @@ async def on_command_error(ctx: commands.Context, error):
     )
 
     await ctx.send(
-        f"Unknown error while executing {ctx.command}, you can join the support server (`support` command) for updates"
+        f"Unknown error while executing {ctx.command}"
     )
 
 

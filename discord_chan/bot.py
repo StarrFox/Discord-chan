@@ -1,22 +1,7 @@
-#  Copyright © 2019 StarrFox
-#
-#  Discord Chan is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU Affero General Public License as published
-#  by the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  Discord Chan is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU Affero General Public License for more details.
-#
-#  You should have received a copy of the GNU Affero General Public License
-#  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
-
 import pathlib
-from collections import defaultdict, deque
+import os
 from datetime import datetime
-from typing import Deque, Dict, Optional, Union, Type
+from typing import Optional, Union, Type
 
 import discord
 from discord.ext import commands
@@ -24,10 +9,9 @@ from loguru import logger
 
 from .context import SubContext
 from .help import Minimal
-from .snipe import Snipe
 
 
-DEFAULT_PREFIXES = ["dc/", "DC/"]
+DEFAULT_PREFIXES = ["sf/", "SF/"]
 
 
 class DiscordChan(commands.AutoShardedBot):
@@ -45,18 +29,14 @@ class DiscordChan(commands.AutoShardedBot):
             ),
             activity=discord.Activity(
                 type=discord.ActivityType.listening,
-                name=f"dc/help",
+                name=f"sf/help",
             ),
-            intents=kwargs.pop("intents", discord.Intents.default()),
+            intents=kwargs.pop("intents", discord.Intents.all()),
             **kwargs,
         )
         self.context = context
         self.ready_once = False
         self.uptime = datetime.now()
-        # {guild_id: {channel_id: deque[Snipe]}}
-        self.snipes: Dict[int, Dict[int, Deque[Snipe]]] = defaultdict(
-            lambda: defaultdict(lambda: deque(maxlen=5_000))
-        )
 
         self.add_check(self.direct_message_check)
 
@@ -116,7 +96,10 @@ class DiscordChan(commands.AutoShardedBot):
 
         extension_names = []
 
+        current_working_directory = pathlib.Path(os.getcwd())
+
         for subpath in path.glob("**/[!_]*.py"):  # Ignore if starts with _
+            subpath = subpath.relative_to(current_working_directory)
 
             parts = subpath.with_suffix("").parts
             if parts[0] == ".":

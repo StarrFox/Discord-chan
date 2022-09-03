@@ -4,6 +4,8 @@
 
 A general purpose discord bot made with [discord.py](https://github.com/Rapptz/discord.py)
 
+
+
 ## Installing
 ```shell script
 poetry install

@@ -1,18 +1,3 @@
-#  Copyright © 2020 StarrFox
-#
-#  Discord Chan is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU Affero General Public License as published
-#  by the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  Discord Chan is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU Affero General Public License for more details.
-#
-#  You should have received a copy of the GNU Affero General Public License
-#  along with Discord Chan.  If not, see <https://www.gnu.org/licenses/>.
-
 import datetime
 import re
 
@@ -53,8 +38,8 @@ def _get_from_guilds(bot, getter, argument):
 
 class FetchedUser(commands.Converter):
     async def convert(self, ctx: commands.Context, argument: str):
-        id_match = re.match(r"<@!?([0-9]+)>$", argument) or re.match(
-            r"([0-9]{15,21})$", argument
+        id_match = re.match(r"<@!?(\d+)>$", argument) or re.match(
+            r"(\d{15,21})$", argument
         )
 
         if id_match:
