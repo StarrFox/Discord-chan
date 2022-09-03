@@ -112,7 +112,7 @@ class General(commands.Cog, name="general"):
             member = await ctx.guild.fetch_member(ctx.author.id)
 
         member: discord.Member
-        await ctx.send(str(member.avatar_url))
+        await ctx.send(str(member.avatar.url))
 
     @commands.command(aliases=["mi", "userinfo", "ui"])
     async def memberinfo(
