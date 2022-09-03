@@ -41,7 +41,13 @@ async def request_safebooru(**params) -> ElementTree:
         params["tags"] = prepare_safebooru_tags(params["tags"])
 
     async with aiohttp.ClientSession() as session:
-        async with session.get(SAFEBOORU_BASE_URL + "&".join(params)) as resp:
+        param_strings = []
+        for name, value in params.items():
+            param_strings.append(f"{name}={value}")
+
+        request_url = SAFEBOORU_BASE_URL + "&" + "&".join(param_strings)
+
+        async with session.get(request_url) as resp:
             if resp.status == 200:
                 return ElementTree.fromstring(await resp.content.read())
 
@@ -52,7 +58,7 @@ async def get_safebooru_post_count(tags: List[str]) -> Optional[int]:
         return int(amount)
 
 
-async def get_safebooru_posts(tags: List[str], page: int=0) -> List[str]:
+async def get_safebooru_posts(tags: List[str], page: int = 0) -> List[str]:
     result = []
     tree = await request_safebooru(tags=tags, pid=page)
 
@@ -76,3 +82,11 @@ async def get_random_safebooru_post(tags: List[str]) -> Optional[SafebooruPost]:
               post_index=post_index + (page * 100),
               tag_post_count=total_post_count
             )
+
+
+if __name__ == "__main__":
+    async def main():
+        print(await get_random_safebooru_post(["god"]))
+
+    import asyncio
+    asyncio.run(main())
