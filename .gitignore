@@ -105,7 +105,7 @@ venv.bak/
 .mypy_cache/
 
 # secrets
-config.ini
+discord_token.secret
 
 # storage
 discord_chan.db

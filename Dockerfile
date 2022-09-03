@@ -6,7 +6,7 @@ WORKDIR /discord_chan
 
 COPY poetry.lock pyproject.toml ./
 RUN poetry config virtualenvs.in-project true --local
-RUN poetry install --only main
+RUN poetry install
 
 COPY . .
 CMD [ "poetry", "run", "discord_chan" ]

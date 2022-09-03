@@ -5,13 +5,12 @@ import os
 from pathlib import Path
 
 import click
-import dotenv
-from click_default_group import DefaultGroup
 from loguru import logger
 
 import discord_chan
 from discord_chan.utils import InterceptHandler
 
+# only works on linux
 try:
     import uvloop
 except ImportError:
@@ -19,24 +18,24 @@ except ImportError:
 else:
     uvloop.install()
 
-dotenv.load_dotenv()
+
+os.environ["JISHAKU_HIDE"] = "true"
+os.environ["JISHAKU_NO_DM_TRACEBACK"] = "true"
+os.environ["JISHAKU_NO_UNDERSCORE"] = "true"
+os.environ["JISHAKU_RETAIN"] = "true"
+
+
+if os.environ.get("IN_DOCKER", "false") == "true":
+    IN_DOCKER = True
+else:
+    IN_DOCKER = False
 
 ROOT_DIR = Path(__file__).parent
 
 
-@click.group(
-    help="General purpose Discord bot.",
-    cls=DefaultGroup,
-    default="run",
-    default_if_no_args=True,
-)
-def main():
-    pass
-
-
-@main.command(help="Run the bot")
+@click.command()
 @click.option("--debug", is_flag=True, help="Run in debug mode.")
-def run(debug):
+def main(debug):
     # noinspection PyArgumentList
     logging.basicConfig(handlers=[InterceptHandler()], level=0)
 
@@ -50,7 +49,17 @@ def run(debug):
         logging.getLogger("asyncio").setLevel(logging.DEBUG)
 
     bot = discord_chan.DiscordChan()
-    bot.run(os.getenv("DISCORD_TOKEN"))
+
+    if IN_DOCKER:
+        secret_path = "/run/secrets/discord_token"
+
+    else:
+        secret_path = "./../discord_token.secret"
+
+    with open(secret_path) as fp:
+        discord_token = fp.read().strip("\n")
+
+    bot.run(discord_token)
 
 
 if __name__ == "__main__":

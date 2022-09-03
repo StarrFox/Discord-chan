@@ -42,7 +42,7 @@ def add_snipe(snipe: Snipe):
 def get_snipes(
         server_id: int = None,
         author: int = None,
-        channel: list[int] = None,
+        channel: int = None,
         mode: str = None,
 ) -> list[Snipe]:
     with sqlmodel.Session(engine) as session:
