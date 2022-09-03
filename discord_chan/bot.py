@@ -11,7 +11,7 @@ from .context import SubContext
 from .help import Minimal
 
 
-DEFAULT_PREFIXES = ["sf/", "SF/"]
+DEFAULT_PREFIXES = ["sf/", "SF/", "dc/", "DC/"]
 
 
 class DiscordChan(commands.AutoShardedBot):

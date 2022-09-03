@@ -4,4 +4,4 @@ build:
     docker build --tag starrfox_bot .
 
 run:
-    docker-compose up -d
+    docker-compose up --build -d
