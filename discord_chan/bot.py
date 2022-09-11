@@ -70,6 +70,7 @@ class DiscordChan(commands.AutoShardedBot):
         self.ready_once = True
 
         await self.load_extension("jishaku")
+        await self.load_extension("discord_chan.emote_manager.emote_manager")
 
         root = pathlib.Path(__file__).parent
         extensions_path = root / "extensions"

@@ -54,7 +54,7 @@ def main(debug):
         secret_path = "/run/secrets/discord_token"
 
     else:
-        secret_path = "./../discord_token.secret"
+        secret_path = "discord_token.secret"
 
     with open(secret_path) as fp:
         discord_token = fp.read().strip("\n")
