@@ -54,7 +54,11 @@ class Snipe(commands.Cog, name="snipe"):
         snipes = database.get_snipes(server_id=ctx.guild.id, channel=ctx.channel.id)
         total_snipes = len(snipes)
         # they are ordered by creation time
-        target_snipe = snipes[0]
+
+        if index > total_snipes - 1:
+            return await ctx.send(f"There are only {total_snipes} in this channel")
+
+        target_snipe = snipes[index]
         target_author = ctx.guild.get_member(target_snipe.author)
 
         embed = discord.Embed(
