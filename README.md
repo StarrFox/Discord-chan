@@ -16,5 +16,5 @@ pip install .
 ## Running
 set env var DISCORD_TOKEN to your token
 ```shell script
-discord_chan
+poetry run discord_chan
 ```
