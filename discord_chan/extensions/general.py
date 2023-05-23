@@ -115,9 +115,7 @@ class General(commands.Cog, name="general"):
         await ctx.send(str(member.avatar.url))
 
     @commands.command(aliases=["mi", "userinfo", "ui"])
-    async def memberinfo(
-        self, ctx: commands.Context, member: FetchedMember = None
-    ):
+    async def memberinfo(self, ctx: commands.Context, member: FetchedMember = None):
         """
         Get info on a guild member
         """
@@ -215,9 +213,7 @@ class General(commands.Cog, name="general"):
         await self.send_raw(ctx, data)
 
     @raw.command()
-    async def channel(
-        self, ctx: commands.Context, channel: discord.TextChannel = None
-    ):
+    async def channel(self, ctx: commands.Context, channel: discord.TextChannel = None):
         """
         Raw channel object
         """
@@ -227,9 +223,7 @@ class General(commands.Cog, name="general"):
         await self.send_raw(ctx, data)
 
     @raw.command()
-    async def member(
-        self, ctx: commands.Context, member: FetchedMember = None
-    ):
+    async def member(self, ctx: commands.Context, member: FetchedMember = None):
         """
         Raw member object
         """

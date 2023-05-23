@@ -24,14 +24,15 @@ from concurrent.futures.thread import ThreadPoolExecutor
 
 from . import errors
 
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 try:
     import wand.image
-except (ImportError, OSError):
-    logger.warning('Failed to import wand.image. Image manipulation functions will be unavailable.')
-else:
     import wand.exceptions
+except (ImportError, OSError):
+    logger.warning(
+        "Failed to import wand.image. Image manipulation functions will be unavailable."
+    )
 
 
 # Modified from https://github.com/Gorialis/jishaku/blob/master/jishaku/functools.py#L19
@@ -79,19 +80,25 @@ def resize_until_small(image_data: bytes) -> bytes:
     image_data = io.BytesIO(image_data)
     max_resolution = 128  # pixels
     image_size = size(image_data)
-    if image_size <= 256 * 2 ** 10:
+    if image_size <= 256 * 2**10:
         return image_data.read()
 
     try:
         with wand.image.Image(blob=image_data) as original_image:
             while True:
-                logger.debug('image size too big (%s bytes)', image_size)
-                logger.debug('attempting resize to at most%s*%s pixels', max_resolution, max_resolution)
+                logger.debug("image size too big (%s bytes)", image_size)
+                logger.debug(
+                    "attempting resize to at most%s*%s pixels",
+                    max_resolution,
+                    max_resolution,
+                )
 
                 with original_image.clone() as resized:
-                    resized.transform(resize=f'{max_resolution}x{max_resolution}')
+                    resized.transform(resize=f"{max_resolution}x{max_resolution}")
                     image_size = len(resized.make_blob())
-                    if image_size <= 256 * 2 ** 10 or max_resolution < 32:  # don't resize past 256KiB or 32×32
+                    if (
+                        image_size <= 256 * 2**10 or max_resolution < 32
+                    ):  # don't resize past 256KiB or 32×32
                         image_data.truncate(0)
                         image_data.seek(0)
                         resized.save(file=image_data)
@@ -109,7 +116,9 @@ def resize_until_small(image_data: bytes) -> bytes:
 def convert_to_gif(image_data: bytes) -> bytes:
     image_data = io.BytesIO(image_data)
     try:
-        with wand.image.Image(blob=image_data) as orig, orig.convert('gif') as converted:
+        with wand.image.Image(blob=image_data) as orig, orig.convert(
+            "gif"
+        ) as converted:
             # discord tries to stop us from abusing animated gif slots by detecting single frame gifs
             # so make it two frames
             converted.sequence[0].delay = 0  # show the first frame forever
@@ -126,21 +135,21 @@ def convert_to_gif(image_data: bytes) -> bytes:
 
 
 def mime_type_for_image(data):
-    if data.startswith(b'\x89PNG\r\n\x1a\n'):
-        return 'image/png'
-    if data.startswith(b'\xFF\xD8') and data.rstrip(b'\0').endswith(b'\xFF\xD9'):
-        return 'image/jpeg'
-    if data.startswith((b'GIF87a', b'GIF89a')):
-        return 'image/gif'
-    if data.startswith(b'RIFF') and data[8:12] == b'WEBP':
-        return 'image/webp'
+    if data.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "image/png"
+    if data.startswith(b"\xFF\xD8") and data.rstrip(b"\0").endswith(b"\xFF\xD9"):
+        return "image/jpeg"
+    if data.startswith((b"GIF87a", b"GIF89a")):
+        return "image/gif"
+    if data.startswith(b"RIFF") and data[8:12] == b"WEBP":
+        return "image/webp"
     raise errors.InvalidImageError
 
 
 def image_to_base64_url(data):
-    fmt = 'data:{mime};base64,{data}'
+    fmt = "data:{mime};base64,{data}"
     mime = mime_type_for_image(data)
-    b64 = base64.b64encode(data).decode('ascii')
+    b64 = base64.b64encode(data).decode("ascii")
     return fmt.format(mime=mime, data=b64)
 
 

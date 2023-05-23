@@ -25,9 +25,18 @@ from discord.ext.commands import Context
 # Copyright © 2016-2017 Pandentia and contributors
 # https://github.com/Thessia/Liara/blob/75fa11948b8b2ea27842d8815a32e51ef280a999/cogs/utils/paginator.py
 
+
 class Paginator:
-    def __init__(self, ctx: Context, pages: typing.Iterable, *, timeout=300, delete_message=False,
-                 delete_message_on_timeout=False, text_message=None):
+    def __init__(
+        self,
+        ctx: Context,
+        pages: typing.Iterable,
+        *,
+        timeout=300,
+        delete_message=False,
+        delete_message_on_timeout=False,
+        text_message=None
+    ):
 
         self.pages = list(pages)
         self.timeout = timeout
@@ -42,13 +51,13 @@ class Paginator:
         self._message = None
         self._client = ctx.bot
 
-        self.footer = 'Page {} of {}'
+        self.footer = "Page {} of {}"
         self.navigation = {
-            '\N{BLACK LEFT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR}': self.first_page,
-            '\N{BLACK LEFT-POINTING TRIANGLE}': self.previous_page,
-            '\N{BLACK RIGHT-POINTING TRIANGLE}': self.next_page,
-            '\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR}': self.last_page,
-            '\N{BLACK SQUARE FOR STOP}': self.stop
+            "\N{BLACK LEFT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR}": self.first_page,
+            "\N{BLACK LEFT-POINTING TRIANGLE}": self.previous_page,
+            "\N{BLACK RIGHT-POINTING TRIANGLE}": self.next_page,
+            "\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR}": self.last_page,
+            "\N{BLACK SQUARE FOR STOP}": self.stop,
         }
 
         self._page = None
@@ -61,7 +70,9 @@ class Paginator:
             return False
 
         target_emoji = str(reaction.emoji)
-        return bool(discord.utils.find(lambda emoji: target_emoji == emoji, self.navigation))
+        return bool(
+            discord.utils.find(lambda emoji: target_emoji == emoji, self.navigation)
+        )
 
     async def begin(self):
         """Starts pagination"""
@@ -73,9 +84,8 @@ class Paginator:
         while not self._stopped:
             try:
                 reaction: RawReactionActionEvent = await self._client.wait_for(
-                    'raw_reaction_add',
-                    check=self.react_check,
-                    timeout=self.timeout)
+                    "raw_reaction_add", check=self.react_check, timeout=self.timeout
+                )
             except asyncio.TimeoutError:
                 await self.stop(delete=self.delete_msg_timeout)
                 continue
@@ -84,7 +94,9 @@ class Paginator:
 
             await asyncio.sleep(0.2)
             with contextlib.suppress(discord.HTTPException):
-                await self._message.remove_reaction(reaction.emoji, discord.Object(reaction.user_id))
+                await self._message.remove_reaction(
+                    reaction.emoji, discord.Object(reaction.user_id)
+                )
 
     async def stop(self, *, delete=None):
         """Aborts pagination."""
@@ -112,9 +124,9 @@ class Paginator:
         self._embed.description = self.pages[self._page]
         self._embed.set_footer(text=self.footer.format(self._page + 1, len(self.pages)))
 
-        kwargs = {'embed': self._embed}
+        kwargs = {"embed": self._embed}
         if self.text_message:
-            kwargs['content'] = self.text_message
+            kwargs["content"] = self.text_message
 
         if self._message:
             await self._message.edit(**kwargs)
@@ -145,7 +157,7 @@ class Paginator:
 class ListPaginator(Paginator):
     def __init__(self, ctx, _list: list, per_page=10, **kwargs):
         pages = []
-        page = ''
+        page = ""
         c = 0
         l = len(_list)
         for i in _list:
@@ -153,12 +165,12 @@ class ListPaginator(Paginator):
                 break
             if c % per_page == 0 and page:
                 pages.append(page.strip())
-                page = ''
-            page += '{}. {}\n'.format(c + 1, i)
+                page = ""
+            page += "{}. {}\n".format(c + 1, i)
 
             c += 1
         pages.append(page.strip())
         # shut up, IDEA
         # noinspection PyArgumentList
         super().__init__(ctx, pages, **kwargs)
-        self.footer += ' ({} entries)'.format(l)
+        self.footer += " ({} entries)".format(l)

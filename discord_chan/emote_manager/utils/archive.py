@@ -21,18 +21,19 @@ from typing import Iterable, Tuple, Optional
 
 from . import errors
 
-ArchiveInfo = collections.namedtuple('ArchiveInfo', 'filename content error')
+ArchiveInfo = collections.namedtuple("ArchiveInfo", "filename content error")
 
 
-def extract(archive, *, size_limit=None) \
-        -> Iterable[Tuple[str, Optional[bytes], Optional[BaseException]]]:
+def extract(
+    archive, *, size_limit=None
+) -> Iterable[Tuple[str, Optional[bytes], Optional[BaseException]]]:
     """
-	extract a binary file-like object representing a zip or uncompressed tar archive, yielding filenames and contents.
+    extract a binary file-like object representing a zip or uncompressed tar archive, yielding filenames and contents.
 
-	yields ArchiveInfo objects: (filename: str, content: typing.Optional[bytes], error: )
-	if size_limit is not None and the size limit is exceeded, or for any other error, yield None for content
-	on success, error will be None
-	"""
+    yields ArchiveInfo objects: (filename: str, content: typing.Optional[bytes], error: )
+    if size_limit is not None and the size limit is exceeded, or for any other error, yield None for content
+    on success, error will be None
+    """
 
     try:
         yield from extract_zip(archive, size_limit=size_limit)
@@ -45,7 +46,7 @@ def extract(archive, *, size_limit=None) \
     try:
         yield from extract_tar(archive, size_limit=size_limit)
     except tarfile.ReadError as exc:
-        raise ValueError('not a valid zip or tar file') from exc
+        raise ValueError("not a valid zip or tar file") from exc
     finally:
         archive.seek(0)
 
@@ -58,7 +59,8 @@ def extract_zip(archive, *, size_limit=None):
                 yield ArchiveInfo(
                     filename=member.filename,
                     content=None,
-                    error=errors.FileTooBigError(member.file_size, size_limit))
+                    error=errors.FileTooBigError(member.file_size, size_limit),
+                )
                 continue
 
             try:
@@ -77,10 +79,13 @@ def extract_tar(archive, *, size_limit=None):
                 yield ArchiveInfo(
                     filename=member.name,
                     content=None,
-                    error=errors.FileTooBigError(member.size, size_limit))
+                    error=errors.FileTooBigError(member.size, size_limit),
+                )
                 continue
 
-            yield ArchiveInfo(member.name, content=tar.extractfile(member).read(), error=None)
+            yield ArchiveInfo(
+                member.name, content=tar.extractfile(member).read(), error=None
+            )
 
 
 async def extract_async(archive, size_limit=None):
@@ -97,11 +102,11 @@ def main():
     arc = io.BytesIO(sys.stdin.detach().read())
     for name, data, error in extract(arc):
         if error is not None:
-            print(f'{name}: {error}')
+            print(f"{name}: {error}")
             continue
 
-        print(f'{name}: {humanize.naturalsize(len(data)):>10}')
+        print(f"{name}: {humanize.naturalsize(len(data)):>10}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -24,12 +24,6 @@ os.environ["JISHAKU_NO_DM_TRACEBACK"] = "true"
 os.environ["JISHAKU_NO_UNDERSCORE"] = "true"
 os.environ["JISHAKU_RETAIN"] = "true"
 
-
-if os.environ.get("IN_DOCKER", "false") == "true":
-    IN_DOCKER = True
-else:
-    IN_DOCKER = False
-
 ROOT_DIR = Path(__file__).parent
 
 
@@ -49,12 +43,7 @@ def main(debug):
         logging.getLogger("asyncio").setLevel(logging.DEBUG)
 
     bot = discord_chan.DiscordChan()
-
-    if IN_DOCKER:
-        secret_path = "/run/secrets/discord_token"
-
-    else:
-        secret_path = "discord_token.secret"
+    secret_path = "discord_token.secret"
 
     with open(secret_path) as fp:
         discord_token = fp.read().strip("\n")

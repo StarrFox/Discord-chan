@@ -55,7 +55,9 @@ class Anime(commands.Cog, name="anime"):
     @commands.is_nsfw()
     async def safebooru(self, ctx: SubContext, *tags: str):
         if post := await discord_chan.get_random_safebooru_post(list(tags)):
-            embed = discord.Embed(description=f"Post {post.post_index+1}/{post.tag_post_count}")
+            embed = discord.Embed(
+                description=f"Post {post.post_index+1}/{post.tag_post_count}"
+            )
             embed.set_image(url=post.url)
             await ctx.send(embed=embed)
         else:

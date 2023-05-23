@@ -108,7 +108,7 @@ class EmoteManager(commands.Cog):
 
     # noinspection PyDefaultArgument
     def public(
-            command, public_commands=public_commands
+        command, public_commands=public_commands
     ):  # resolve some kinda scope issue that i don't understand
         public_commands.add(command.qualified_name)
         return command
@@ -123,8 +123,8 @@ class EmoteManager(commands.Cog):
             return True
 
         if (
-                not context.author.guild_permissions.manage_emojis
-                or not context.guild.me.guild_permissions.manage_emojis
+            not context.author.guild_permissions.manage_emojis
+            or not context.guild.me.guild_permissions.manage_emojis
         ):
             raise errors.MissingManageEmojisPermission
 
@@ -367,7 +367,7 @@ class EmoteManager(commands.Cog):
             50_000_000  # prevent someone from trying to make a giant compressed file
         )
         async for name, img, error in utils.archive.extract_async(
-                io.BytesIO(archive), size_limit=limit
+            io.BytesIO(archive), size_limit=limit
         ):
             try:
                 utils_image.mime_type_for_image(img)
@@ -419,7 +419,7 @@ class EmoteManager(commands.Cog):
             raise errors.HTTPException(exc.status)
 
     async def add_safe_bytes(
-            self, context, name, author_id, image_data: bytes, *, reason=None
+        self, context, name, author_id, image_data: bytes, *, reason=None
     ):
         """Try to add an emote from bytes. On error, return a string that should be sent to the user.
 
@@ -430,8 +430,8 @@ class EmoteManager(commands.Cog):
         )
         # >= rather than == because there are sneaky ways to exceed the limit
         if (
-                counts[False] >= context.guild.emoji_limit
-                and counts[True] >= context.guild.emoji_limit
+            counts[False] >= context.guild.emoji_limit
+            and counts[True] >= context.guild.emoji_limit
         ):
             # we raise instead of returning a string in order to abort commands that run this function in a loop
             raise commands.UserInputError("This server is out of emote slots.")
@@ -462,7 +462,7 @@ class EmoteManager(commands.Cog):
 
     # noinspection PyDefaultArgument
     async def fetch(
-            self, url, valid_mimetypes=IMAGE_MIMETYPES, *, validate_headers=True
+        self, url, valid_mimetypes=IMAGE_MIMETYPES, *, validate_headers=True
     ):
         valid_mimetypes = valid_mimetypes or self.IMAGE_MIMETYPES
 
@@ -488,15 +488,11 @@ class EmoteManager(commands.Cog):
                 )
 
         if validate_headers:
-            await validate(
-                self.http.head(
-                    url, timeout=10
-                )
-            )
+            await validate(self.http.head(url, timeout=10))
         return await validate(self.http.get(url))
 
     async def create_emote_from_bytes(
-            self, guild, name, author_id, image_data: bytes, *, reason=None
+        self, guild, name, author_id, image_data: bytes, *, reason=None
     ):
         image_data = await utils_image.resize_until_small(image_data)
         if reason is None:
@@ -516,7 +512,7 @@ class EmoteManager(commands.Cog):
             await emote.delete(
                 reason=f"Removed by {utils.format_user(self.bot, context.author.id)}"
             )
-            await context.send(fr"Emote \:{emote.name}: successfully removed.")
+            await context.send(rf"Emote \:{emote.name}: successfully removed.")
         else:
             for emote in (emote,) + emotes:
                 await context.invoke(self.remove, emote)
@@ -542,7 +538,7 @@ class EmoteManager(commands.Cog):
                 + utils.format_http_exception(ex)
             )
 
-        await context.send(fr"Emote successfully renamed to \:{new_name}:")
+        await context.send(rf"Emote successfully renamed to \:{new_name}:")
 
     @public
     @emote_type_filter_default
@@ -631,7 +627,7 @@ class EmoteManager(commands.Cog):
 
         message = ["Multiple emotes were found with that name. Which one do you mean?"]
         for i, emote in enumerate(candidates, 1):
-            message.append(fr"{i}. {emote} (\:{emote.name}:)")
+            message.append(rf"{i}. {emote} (\:{emote.name}:)")
 
         await context.send("\n".join(message))
 

@@ -16,10 +16,11 @@
 import functools
 
 _emote_type_predicates = {
-    '': lambda _: True,  # allow usage as a "consume rest" converter
-    'all': lambda _: True,
-    'static': lambda e: not e.animated,
-    'animated': lambda e: e.animated}
+    "": lambda _: True,  # allow usage as a "consume rest" converter
+    "all": lambda _: True,
+    "static": lambda e: not e.animated,
+    "animated": lambda e: e.animated,
+}
 
 
 # this is kind of a hack to ensure that the last argument is always converted, even if the default is used.

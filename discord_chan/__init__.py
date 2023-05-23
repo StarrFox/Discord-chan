@@ -8,5 +8,7 @@ from .games import *
 from .help import *
 from .menus import *
 from .safebooru_api import *
+from .snipe import Snipe, SnipeMode
+from .database import Database
 
 logger.disable("discord_chan")

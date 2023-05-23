@@ -1,20 +1,19 @@
 # Discord Chan
 
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-
 A general purpose discord bot made with [discord.py](https://github.com/Rapptz/discord.py)
 
-
-
 ## Installing
+
 ```shell script
-poetry install
+$ poetry install
 # or
-pip install .
+$ pip install .
 ```
 
 ## Running
-set env var DISCORD_TOKEN to your token
+
+# TODO: mention how to set token
+
 ```shell script
 poetry run discord_chan
 ```

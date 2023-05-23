@@ -1,5 +1,4 @@
 import pathlib
-import os
 from datetime import datetime
 from typing import Optional, Union, Type
 
@@ -9,15 +8,16 @@ from loguru import logger
 
 from .context import SubContext
 from .help import Minimal
+from .database import Database
 
 
-DEFAULT_PREFIXES = ["sf/", "SF/", "dc/", "DC/"]
+# TODO: remove debug prefix
+DEFAULT_PREFIXES = ["sf/", "SF/", "dc/", "DC/", "dg/"]
+ROOT = pathlib.Path(__file__).parent
 
 
 class DiscordChan(commands.AutoShardedBot):
-    def __init__(
-        self, *, context: Type[commands.Context] = SubContext, **kwargs
-    ):
+    def __init__(self, *, context: Type[commands.Context] = SubContext, **kwargs):
         super().__init__(
             command_prefix=kwargs.pop("command_prefix", self.get_command_prefix),
             case_insensitive=kwargs.pop("case_insensitive", True),
@@ -37,6 +37,7 @@ class DiscordChan(commands.AutoShardedBot):
         self.context = context
         self.ready_once = False
         self.uptime = datetime.now()
+        self.database = Database()
 
         self.add_check(self.direct_message_check)
 
@@ -97,10 +98,8 @@ class DiscordChan(commands.AutoShardedBot):
 
         extension_names = []
 
-        current_working_directory = pathlib.Path(os.getcwd())
-
         for subpath in path.glob("**/[!_]*.py"):  # Ignore if starts with _
-            subpath = subpath.relative_to(current_working_directory)
+            subpath = subpath.relative_to(ROOT)
 
             parts = subpath.with_suffix("").parts
             if parts[0] == ".":
@@ -110,7 +109,7 @@ class DiscordChan(commands.AutoShardedBot):
 
         for ext in extension_names:
             try:
-                await self.load_extension(ext)
+                await self.load_extension("discord_chan." + ext)
             except (commands.errors.ExtensionError, commands.errors.ExtensionFailed):
                 logger.exception("Failed loading " + ext)
 

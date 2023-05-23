@@ -35,9 +35,7 @@ async def on_command_error(ctx: commands.Context, error: Exception):
         f"Unhandled error in command {ctx.command.name}\nInvoke message: {ctx.message.content}"
     )
 
-    await ctx.send(
-        f"Unknown error while executing {ctx.command}: {error}"
-    )
+    await ctx.send(f"Unknown error while executing {ctx.command}: {error}")
 
 
 async def setup(bot: commands.Bot):

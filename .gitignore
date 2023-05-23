@@ -109,3 +109,7 @@ discord_token.secret
 
 # storage
 discord_chan.db
+
+# nix
+result
+.direnv

@@ -1,15 +1,14 @@
-import typing
-from textwrap import shorten
-
 import discord
 from discord.ext import commands
+from discord_chan.snipe import SnipeMode, Snipe as Snipe_obj
+
+import pendulum
 
 from discord_chan import (
     DCMenuPages,
     DiscordChan,
     EmbedFieldProxy,
     EmbedFieldsPageSource,
-    database,
 )
 
 
@@ -19,39 +18,49 @@ class Snipe(commands.Cog, name="snipe"):
 
     @commands.Cog.listener("on_message_delete")
     async def snipe_delete(self, message: discord.Message):
-        self.attempt_add_snipe(message, "deleted")
+        await self.attempt_add_snipe(message, "deleted")
 
     @commands.Cog.listener("on_bulk_message_delete")
     async def bulk_snipe_delete(self, messages: list[discord.Message]):
         for message in messages:
-            self.attempt_add_snipe(message, "purged")
+            await self.attempt_add_snipe(message, "purged")
 
     @commands.Cog.listener("on_message_edit")
     async def snipe_edit(self, before: discord.Message, after: discord.Message):
         if before.content != after.content:
-            self.attempt_add_snipe(before, "edited")
+            await self.attempt_add_snipe(before, "edited")
 
-    @staticmethod
-    def attempt_add_snipe(message: discord.Message, mode: str):
+    async def attempt_add_snipe(self, message: discord.Message, mode: str):
         if mode not in ("edited", "purged", "deleted"):
             raise ValueError(f"{mode} is not a valid snipe mode.")
 
         if message.content:
-            snipe = database.Snipe(
+            snipe = Snipe_obj(
                 id=message.id,
-                mode=mode,
+                mode=SnipeMode[mode],
                 author=message.author.id,
                 content=message.content,
                 channel=message.channel.id,
                 server=message.guild.id,
+                time=pendulum.now("UTC"),
             )
 
-            database.add_snipe(snipe)
+            await self.bot.database.add_snipe(snipe)
 
     @commands.bot_has_permissions(embed_links=True)
     @commands.group(name="snipe", invoke_without_command=True)
     async def snipe_command(self, ctx: commands.Context, index: int = 0):
-        snipes = database.get_snipes(server_id=ctx.guild.id, channel=ctx.channel.id)
+        negative = False
+
+        if index < 0:
+            negative = True
+
+        if abs(index) > 10_000_000:
+            return await ctx.send(f"{index} is over the index cap of (-)10,000,000; do you really have that many snipes?")
+
+        snipes = await self.bot.database.get_snipes(
+            server=ctx.guild.id, channel=ctx.channel.id, limit=abs(index) + 1, negative=negative,
+        )
         total_snipes = len(snipes)
         # they are ordered by creation time
 
@@ -62,18 +71,23 @@ class Snipe(commands.Cog, name="snipe"):
         target_author = ctx.guild.get_member(target_snipe.author)
 
         embed = discord.Embed(
-            title=f"[{target_snipe.mode}] {target_author} {target_snipe.readable_time}",
+            title=f"[{target_snipe.mode.name}] {target_author} {target_snipe.discord_timestamp}",
             description=target_snipe.content,
         )
 
+        # TODO: fix total snipes number
         embed.set_footer(text=f"{index}/{total_snipes - 1}")
 
         await ctx.send(embed=embed)
 
     # return as list
-    @snipe_command.command(name="channel")
-    async def snipe_channel(self, ctx: commands.Context, channel: discord.TextChannel = commands.CurrentChannel):
-        pass
+    # @snipe_command.command(name="channel")
+    # async def snipe_channel(
+    #     self,
+    #     ctx: commands.Context,
+    #     channel: discord.TextChannel = commands.CurrentChannel,
+    # ):
+    #     pass
 
     # @commands.bot_has_permissions(embed_links=True)
     # @snipe_parser

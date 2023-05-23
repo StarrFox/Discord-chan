@@ -1,81 +1,133 @@
-import os
-from datetime import datetime
+from itertools import count
 
-import appdirs
-import humanize
-import sqlmodel
+import asyncpg
+import pendulum
 
-
-class Snipe(sqlmodel.SQLModel, table=True):
-    id: int = sqlmodel.Field(primary_key=True)
-    mode: str = sqlmodel.Field(default="edited", primary_key=True)
-    author: int
-    content: str
-    channel: int
-    server: int
-    time: datetime = sqlmodel.Field(default_factory=datetime.utcnow, primary_key=True)
-
-    @property
-    def readable_time(self) -> str:
-        return humanize.naturaltime(datetime.utcnow() - self.time)
+from discord_chan.snipe import Snipe, SnipeMode
 
 
-# TODO: make database a docker volume for persistent between container builds
-
-data_dir = appdirs.user_data_dir(appname="StarrFox_bot", appauthor="StarrFox")
-
-if not os.path.exists(data_dir):
-    os.mkdir(data_dir)
-
-# if it says it can't read the database file, the directory wasn't made correctly
-engine = sqlmodel.create_engine(f"sqlite:///{data_dir}/sfb.db")
-sqlmodel.SQLModel.metadata.create_all(engine)
+# TODO: add enviorment variables for these
+DATABASE_user = "starr"
+DATABASE_name = "discord_chan"
 
 
-# TODO: test if this blocks long enough to be an issue
-def add_snipe(snipe: Snipe):
-    with sqlmodel.Session(engine) as session:
-        session.add(snipe)
-        session.commit()
+DATABASE_snipe_table = """
+CREATE TABLE IF NOT EXISTS snipes (
+    id BIGINT,
+    mode INT,
+    server BIGINT,
+    author BIGINT,
+    channel BIGINT,
+    time FLOAT,
+    content TEXT
+);
+""".strip()
 
 
-def get_snipes(
-        server_id: int = None,
+class Database:
+    def __init__(self):
+        self._connection: asyncpg.Pool = None
+        self._ensured: bool = False
+
+    async def _ensure_tables(self, pool: asyncpg.Pool):
+        if self._ensured:
+            return
+
+        self._ensured = True
+
+        async with pool.acquire() as connection:
+            await connection.execute(DATABASE_snipe_table)
+
+    async def connect(self) -> asyncpg.Pool:
+        if self._connection is not None:
+            return self._connection
+
+        self._connection = await asyncpg.create_pool(
+            user=DATABASE_user, database=DATABASE_name
+        )
+        await self._ensure_tables(self._connection)
+        return self._connection
+
+    async def add_snipe(self, snipe: Snipe):
+        pool = await self.connect()
+
+        async with pool.acquire() as connection:
+            await connection.execute(
+                "INSERT INTO snipes(id, server, author, channel, mode, time, content) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+                snipe.id,
+                snipe.server,
+                snipe.author,
+                snipe.channel,
+                snipe.mode.value,
+                snipe.time.timestamp(),
+                snipe.content,
+            )
+
+    # TODO: add contains
+    async def get_snipes(
+        self,
+        *,
+        server: int = None,
         author: int = None,
         channel: int = None,
-        mode: str = None,
-) -> list[Snipe]:
-    with sqlmodel.Session(engine) as session:
-        statement = sqlmodel.select(Snipe)
+        mode: SnipeMode = None,
+        limit: int = None,
+        negative: bool = False,
+    ) -> list[Snipe]:
+        pool = await self.connect()
 
-        statement = statement.order_by(Snipe.time)
+        args = []
+        query = []
+        row_limit = ""
+        counter = count(start=1, step=1)
 
-        if server_id:
-            statement = statement.where(Snipe.server == server_id)
+        if server is not None:
+            query.append(f"server = ${next(counter)}")
+            args.append(server)
 
-        if author:
-            statement = statement.where(Snipe.author == author)
+        if author is not None:
+            query.append(f"author = ${next(counter)}")
+            args.append(author)
 
-        if channel:
-            statement = statement.where(Snipe.channel == channel)
+        if channel is not None:
+            query.append(f"channel = ${next(counter)}")
+            args.append(channel)
 
-        if mode:
-            statement = statement.where(Snipe.mode == mode)
+        if mode is not None:
+            query.append(f"server = ${next(counter)}")
+            args.append(mode)
 
-        # reverse them so newer snipes are on top
-        return session.exec(statement).all()[::-1]
+        if query:
+            query = "WHERE " + " and ".join(query) + " "
 
+        if limit is not None:
+            if limit > 10_000_000:
+                raise RuntimeError(f"requested limit of {limit} when the max is 10,000,000")
 
-if __name__ == "__main__":
-    # for _snipe in [
-    #     Snipe(id=2, author=123, content="an edited message", channel=321, server=1),
-    #     Snipe(id=3, author=123, content="an edited message", channel=321, server=1),
-    #     Snipe(id=4, author=1234, content="an edited message", channel=321, server=2),
-    #     Snipe(id=5, author=1234, content="an edited message", channel=321, server=2),
-    #     Snipe(id=6, author=12345, content="an edited message", channel=321, server=3),
-    #     Snipe(id=7, author=12345, content="an edited message", channel=321, server=3),
-    # ]:
-    #     add_snipe(_snipe)
+            row_limit = f"LIMIT {limit}"
 
-    from pprint import pprint
-    pprint(get_snipes())
+        if negative:
+            order = "ASC"
+        else:
+            order = "DESC"
+
+        async with pool.acquire() as connection:
+            snipe_records = await connection.fetch(
+                "SELECT * from snipes " + query + f"ORDER BY time {order} " + row_limit + ";", *args
+            )
+
+            snipes = []
+            for snipe_record in snipe_records:
+                snipes.append(
+                    Snipe(
+                        id=snipe_record["id"],
+                        mode=SnipeMode(snipe_record["mode"]),
+                        author=snipe_record["author"],
+                        content=snipe_record["content"],
+                        server=snipe_record["server"],
+                        channel=snipe_record["channel"],
+                        time=pendulum.from_timestamp(snipe_record["time"]),
+                    )
+                )
+
+            return snipes

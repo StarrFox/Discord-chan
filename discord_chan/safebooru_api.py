@@ -27,7 +27,11 @@ class SafebooruPost:
     tag_post_count: int
 
 
-def prepare_safebooru_tags(tags: List[str], *, replace_spaces: bool = True, ) -> str:
+def prepare_safebooru_tags(
+    tags: List[str],
+    *,
+    replace_spaces: bool = True,
+) -> str:
     if replace_spaces:
         tags = [re.sub(r"\s+", "_", tag) for tag in tags]
 
@@ -76,17 +80,19 @@ async def get_random_safebooru_post(tags: List[str]) -> Optional[SafebooruPost]:
         posts = await get_safebooru_posts(tags, page)
         post_count = len(posts)
         if post_count > 0:
-            post_index = random.randint(0, post_count-1)
+            post_index = random.randint(0, post_count - 1)
             return SafebooruPost(
-              url=posts[post_index],
-              post_index=post_index + (page * 100),
-              tag_post_count=total_post_count
+                url=posts[post_index],
+                post_index=post_index + (page * 100),
+                tag_post_count=total_post_count,
             )
 
 
 if __name__ == "__main__":
+
     async def main():
         print(await get_random_safebooru_post(["god"]))
 
     import asyncio
+
     asyncio.run(main())

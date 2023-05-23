@@ -656,7 +656,7 @@ class GamerReplacer:
             end += offset - 1
 
             replacement = random.choice(CATCHPHRASES)
-            seperated[start: end + 1] = replacement
+            seperated[start : end + 1] = replacement
 
             replaced_len = len(replacement)
             offset += replaced_len - length
@@ -766,7 +766,7 @@ class GamerWords(commands.Cog):
         if text_match or file_match:
             for attach in message.attachments:
                 if attach.size >= getattr(
-                    message.guild, "filesize_limit", 8 * 1024 ** 2
+                    message.guild, "filesize_limit", 8 * 1024**2
                 ):
                     await message.delete(delay=0.2)
                     return
