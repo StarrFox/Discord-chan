@@ -58,14 +58,12 @@ class Snipe(commands.Cog, name="snipe"):
         if abs(index) > 10_000_000:
             return await ctx.send(f"{index} is over the index cap of (-)10,000,000; do you really have that many snipes?")
 
-        snipes = await self.bot.database.get_snipes(
+        snipes, snipe_count = await self.bot.database.get_snipes(
             server=ctx.guild.id, channel=ctx.channel.id, limit=abs(index) + 1, negative=negative,
         )
         total_snipes = len(snipes)
-        # they are ordered by creation time
-
         if index > total_snipes - 1:
-            return await ctx.send(f"There are only {total_snipes} in this channel")
+            return await ctx.send(f"Only {total_snipes} snipes from this query")
 
         target_snipe = snipes[index]
         target_author = ctx.guild.get_member(target_snipe.author)
@@ -76,7 +74,7 @@ class Snipe(commands.Cog, name="snipe"):
         )
 
         # TODO: fix total snipes number
-        embed.set_footer(text=f"{index}/{total_snipes - 1}")
+        embed.set_footer(text=f"{index}/{snipe_count - 1}")
 
         await ctx.send(embed=embed)
 

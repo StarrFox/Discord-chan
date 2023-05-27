@@ -73,7 +73,7 @@ class Database:
         mode: SnipeMode = None,
         limit: int = None,
         negative: bool = False,
-    ) -> list[Snipe]:
+    ) -> tuple[list[Snipe], int]:
         pool = await self.connect()
 
         args = []
@@ -112,9 +112,13 @@ class Database:
             order = "DESC"
 
         async with pool.acquire() as connection:
+            connection: asyncpg.Connection
             snipe_records = await connection.fetch(
-                "SELECT * from snipes " + query + f"ORDER BY time {order} " + row_limit + ";", *args
+                "SELECT * FROM snipes " + query + f"ORDER BY time {order} " + row_limit + ";", *args
             )
+
+            snipe_count_record = await connection.fetchrow("SELECT count(*) FROM snipes " + query + ";", *args)
+            snipe_count = snipe_count_record["count"]
 
             snipes = []
             for snipe_record in snipe_records:
@@ -130,4 +134,4 @@ class Database:
                     )
                 )
 
-            return snipes
+            return snipes, snipe_count

@@ -53,7 +53,7 @@ LICENSE_NOTICE = """
 Edited version of Emote Manager for use in lambadanator
 
 Original license:
-© 2018–2020 lambda#0987
+© 2018-2020 lambda#0987
 
 Emote Manager is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
