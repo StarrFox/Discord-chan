@@ -77,28 +77,30 @@ class Database:
         pool = await self.connect()
 
         args = []
-        query = []
+        query_parts = []
         row_limit = ""
         counter = count(start=1, step=1)
 
         if server is not None:
-            query.append(f"server = ${next(counter)}")
+            query_parts.append(f"server = ${next(counter)}")
             args.append(server)
 
         if author is not None:
-            query.append(f"author = ${next(counter)}")
+            query_parts.append(f"author = ${next(counter)}")
             args.append(author)
 
         if channel is not None:
-            query.append(f"channel = ${next(counter)}")
+            query_parts.append(f"channel = ${next(counter)}")
             args.append(channel)
 
         if mode is not None:
-            query.append(f"server = ${next(counter)}")
-            args.append(mode)
+            query_parts.append(f"server = ${next(counter)}")
+            args.append(mode.value)
 
         if query:
-            query = "WHERE " + " and ".join(query) + " "
+            query = "WHERE " + " and ".join(query_parts) + " "
+        else:
+            query = ""
 
         if limit is not None:
             if limit > 10_000_000:
