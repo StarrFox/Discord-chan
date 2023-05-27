@@ -102,7 +102,9 @@ class Database:
 
         if limit is not None:
             if limit > 10_000_000:
-                raise RuntimeError(f"requested limit of {limit} when the max is 10,000,000")
+                raise RuntimeError(
+                    f"requested limit of {limit} when the max is 10,000,000"
+                )
 
             row_limit = f"LIMIT {limit}"
 
@@ -114,10 +116,17 @@ class Database:
         async with pool.acquire() as connection:
             connection: asyncpg.Connection
             snipe_records = await connection.fetch(
-                "SELECT * FROM snipes " + query + f"ORDER BY time {order} " + row_limit + ";", *args
+                "SELECT * FROM snipes "
+                + query
+                + f"ORDER BY time {order} "
+                + row_limit
+                + ";",
+                *args,
             )
 
-            snipe_count_record = await connection.fetchrow("SELECT count(*) FROM snipes " + query + ";", *args)
+            snipe_count_record = await connection.fetchrow(
+                "SELECT count(*) FROM snipes " + query + ";", *args
+            )
             snipe_count = snipe_count_record["count"]
 
             snipes = []

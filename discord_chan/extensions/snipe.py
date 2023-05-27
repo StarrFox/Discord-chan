@@ -56,10 +56,15 @@ class Snipe(commands.Cog, name="snipe"):
             negative = True
 
         if abs(index) > 10_000_000:
-            return await ctx.send(f"{index} is over the index cap of (-)10,000,000; do you really have that many snipes?")
+            return await ctx.send(
+                f"{index} is over the index cap of (-)10,000,000; do you really have that many snipes?"
+            )
 
         snipes, snipe_count = await self.bot.database.get_snipes(
-            server=ctx.guild.id, channel=ctx.channel.id, limit=abs(index) + 1, negative=negative,
+            server=ctx.guild.id,
+            channel=ctx.channel.id,
+            limit=abs(index) + 1,
+            negative=negative,
         )
         total_snipes = len(snipes)
         if index > total_snipes - 1:
