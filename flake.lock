@@ -36,7 +36,28 @@
     "root": {
       "inputs": {
         "flake-utils": "flake-utils",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "starrpkgs": "starrpkgs"
+      }
+    },
+    "starrpkgs": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1685281348,
+        "narHash": "sha256-y30iYjihFKoxSMP/H3Hj4ikbuosJ6Df893vbpI0h4nc=",
+        "owner": "StarrFox",
+        "repo": "packages",
+        "rev": "5bd311560e62a6bf7679f8c1d956b9d2ba856de5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "StarrFox",
+        "repo": "packages",
+        "type": "github"
       }
     },
     "systems": {

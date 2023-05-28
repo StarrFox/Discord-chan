@@ -21,7 +21,6 @@ jishaku = "^2.5.1"
 discord-ext-menus = {git = "https://github.com/Rapptz/discord-ext-menus"}
 pendulum = "^2.1.2"
 asyncpg = "^0.27.0"
-commitizen = "^3.2.2"
 
 [tool.poetry.scripts]
 discord-chan = "discord_chan.__main__:main"

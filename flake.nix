@@ -4,16 +4,22 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
+    starrpkgs = {
+      url = "github:StarrFox/packages";
+      inputs.nixpkgs.follows = "nixpkgs";
+    }; 
   };
 
   outputs = {
     self,
     nixpkgs,
     flake-utils,
+    starrpkgs,
   }:
     flake-utils.lib.eachDefaultSystem (
       system: let
         pkgs = nixpkgs.legacyPackages.${system};
+        spkgs = starrpkgs.packages.${system};
 
         customOverrides = self: super: {
           uwuify = super.uwuify.overridePythonAttrs (
@@ -72,7 +78,7 @@
 
         devShell = pkgs.mkShell {
           name = "discord-chan";
-          packages = with pkgs; [poetry just alejandra black isort];
+          packages = with pkgs; [poetry spkgs.commitizen just alejandra black isort];
         };
       }
     );
