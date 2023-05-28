@@ -22,13 +22,13 @@ import logging
 import typing
 from concurrent.futures.thread import ThreadPoolExecutor
 
-from . import errors
-
 from loguru import logger
 
+from . import errors
+
 try:
-    import wand.image
     import wand.exceptions
+    import wand.image
 except (ImportError, OSError):
     logger.warning(
         "Failed to import wand.image. Image manipulation functions will be unavailable."

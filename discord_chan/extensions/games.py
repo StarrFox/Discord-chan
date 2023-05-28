@@ -4,7 +4,8 @@ from random import choice
 import discord
 from discord.ext import commands
 
-from discord_chan import Connect4, MasterMindMenu, SliderGame, SubContext, utils
+from discord_chan import (Connect4, MasterMindMenu, SliderGame, SubContext,
+                          utils)
 
 
 class Games(commands.Cog, name="games"):

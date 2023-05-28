@@ -1,10 +1,6 @@
 from discord.ext import commands
 
-from discord_chan import (
-    DiscordChan,
-    FetchedUser,
-    SubContext,
-)
+from discord_chan import DiscordChan, FetchedUser, SubContext
 
 
 class Owner(commands.Cog, name="owner"):

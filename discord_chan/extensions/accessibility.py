@@ -3,10 +3,7 @@
 import discord
 from discord.ext import commands
 
-from discord_chan import (
-    DiscordChan,
-    SubContext,
-)
+from discord_chan import DiscordChan, SubContext
 
 CUSTOM_EMOJI_REGEX = (
     r"<(?P<animated>a)?:(?P<name>[0-9a-zA-Z_]{2,32}):(?P<id>[0-9]{15,21})>"

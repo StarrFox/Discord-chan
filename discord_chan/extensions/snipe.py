@@ -1,15 +1,11 @@
 import discord
-from discord.ext import commands
-from discord_chan.snipe import SnipeMode, Snipe as Snipe_obj
-
 import pendulum
+from discord.ext import commands
 
-from discord_chan import (
-    DCMenuPages,
-    DiscordChan,
-    EmbedFieldProxy,
-    EmbedFieldsPageSource,
-)
+from discord_chan import (DCMenuPages, DiscordChan, EmbedFieldProxy,
+                          EmbedFieldsPageSource)
+from discord_chan.snipe import Snipe as Snipe_obj
+from discord_chan.snipe import SnipeMode
 
 
 class Snipe(commands.Cog, name="snipe"):

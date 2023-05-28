@@ -4,11 +4,7 @@ from contextlib import suppress
 import discord
 from discord.ext import commands
 
-from discord_chan import (
-    BetweenConverter,
-    FetchedMember,
-    SubContext,
-)
+from discord_chan import BetweenConverter, FetchedMember, SubContext
 
 
 def is_above(invoker: discord.Member, user: discord.Member):

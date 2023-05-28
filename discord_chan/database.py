@@ -5,7 +5,6 @@ import pendulum
 
 from discord_chan.snipe import Snipe, SnipeMode
 
-
 # TODO: add enviorment variables for these
 DATABASE_user = "starr"
 DATABASE_name = "discord_chan"
@@ -97,7 +96,7 @@ class Database:
             query_parts.append(f"server = ${next(counter)}")
             args.append(mode.value)
 
-        if query:
+        if query_parts:
             query = "WHERE " + " and ".join(query_parts) + " "
         else:
             query = ""

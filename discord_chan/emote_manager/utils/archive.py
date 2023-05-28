@@ -17,7 +17,7 @@ import asyncio
 import collections
 import tarfile
 import zipfile
-from typing import Iterable, Tuple, Optional
+from typing import Iterable, Optional, Tuple
 
 from . import errors
 

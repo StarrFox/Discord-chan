@@ -6,19 +6,10 @@ import humanize
 import uwuify
 from discord.ext import commands
 
-
-from discord_chan import (
-    BetweenConverter,
-    DCMenuPages,
-    DiscordChan,
-    FetchedMember,
-    FetchedUser,
-    NormalPageSource,
-    PartitionPaginator,
-    PrologPaginator,
-    SubContext,
-    TimeConverter,
-)
+from discord_chan import (BetweenConverter, DCMenuPages, DiscordChan,
+                          FetchedMember, FetchedUser, NormalPageSource,
+                          PartitionPaginator, PrologPaginator, SubContext,
+                          TimeConverter)
 
 try:
     from enchant.checker import SpellChecker

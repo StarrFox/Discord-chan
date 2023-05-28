@@ -51,16 +51,15 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
 # THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import random
-import collections
-import re
 import asyncio
+import collections
+import random
+import re
 from string import ascii_letters
 
 import discord
-from discord.ext import commands
 import unidecode
-
+from discord.ext import commands
 
 GAMER_REGEX = r"(b+\s*r+\s*u+\s*h+)"
 # noinspection SpellCheckingInspection

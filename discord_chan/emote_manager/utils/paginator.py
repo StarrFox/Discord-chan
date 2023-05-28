@@ -21,7 +21,6 @@ import discord
 from discord import RawReactionActionEvent
 from discord.ext.commands import Context
 
-
 # Copyright © 2016-2017 Pandentia and contributors
 # https://github.com/Thessia/Liara/blob/75fa11948b8b2ea27842d8815a32e51ef280a999/cogs/utils/paginator.py
 

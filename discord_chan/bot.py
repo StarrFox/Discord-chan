@@ -1,15 +1,14 @@
 import pathlib
 from datetime import datetime
-from typing import Optional, Union, Type
+from typing import Optional, Type, Union
 
 import discord
 from discord.ext import commands
 from loguru import logger
 
 from .context import SubContext
-from .help import Minimal
 from .database import Database
-
+from .help import Minimal
 
 # TODO: remove debug prefix
 DEFAULT_PREFIXES = ["sf/", "SF/", "dc/", "DC/", "dg/"]

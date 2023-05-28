@@ -1,12 +1,11 @@
-import re
 import random
+import re
 import urllib.parse
 import xml.etree.ElementTree as ElementTree
-from typing import Optional, List
 from dataclasses import dataclass
+from typing import List, Optional
 
 import aiohttp
-
 
 SAFEBOORU_BASE_URL = "https://safebooru.org/index.php?page=dapi&s=post&q=index"
 # SUBTRACTIVE_NSFW_TAGS = ["-panties", "-underwear", "-bra", "-bikini", "-ass", "-exercise", "-sweat",

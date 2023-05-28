@@ -2,8 +2,7 @@ import discord
 from discord.ext import commands
 
 import discord_chan
-from discord_chan import DiscordChan, checks, SubContext
-
+from discord_chan import DiscordChan, SubContext, checks
 
 THICK_TABLE = str.maketrans(
     {
