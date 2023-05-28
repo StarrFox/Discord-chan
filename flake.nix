@@ -71,8 +71,8 @@
         buildInputs = with pkgs; [python3Packages.wand];
 
         devShell = pkgs.mkShell {
+          name = "discord-chan";
           packages = with pkgs; [poetry commitizen just alejandra black isort];
-          inputsFrom = builtins.attrValues self.packages.${system};
         };
       }
     );
