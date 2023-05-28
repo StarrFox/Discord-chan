@@ -34,8 +34,7 @@ from discord.ext import commands
 import discord_chan.emote_manager.utils as utils
 import discord_chan.emote_manager.utils.image as utils_image
 from discord_chan.emote_manager.utils import errors
-from discord_chan.emote_manager.utils.converter import \
-    emote_type_filter_default
+from discord_chan.emote_manager.utils.converter import emote_type_filter_default
 from discord_chan.emote_manager.utils.paginator import ListPaginator
 
 logger = logging.getLogger(__name__)

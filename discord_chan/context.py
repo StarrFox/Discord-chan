@@ -4,8 +4,7 @@ from typing import Optional
 from discord import HTTPException, Message
 from discord.ext.commands import Context
 
-from .menus import (ConfirmationMenu, DCMenuPages, NormalPageSource,
-                    PartitionPaginator)
+from .menus import ConfirmationMenu, DCMenuPages, NormalPageSource, PartitionPaginator
 
 
 class SubContext(Context):

@@ -36,7 +36,6 @@ class Paginator:
         delete_message_on_timeout=False,
         text_message=None
     ):
-
         self.pages = list(pages)
         self.timeout = timeout
         self.author = ctx.author

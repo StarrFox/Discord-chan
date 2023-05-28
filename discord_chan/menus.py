@@ -249,7 +249,6 @@ class PartitionPaginator(FixedNonePaginator):
             wrapped = False
 
             for delimiter in self.wrap_on:
-
                 partition = search_string.rpartition(delimiter)
 
                 if len(partition[0]) > 0:

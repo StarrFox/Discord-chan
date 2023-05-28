@@ -6,9 +6,13 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
+  outputs = {
+    self,
+    nixpkgs,
+    flake-utils,
+  }:
+    flake-utils.lib.eachDefaultSystem (
+      system: let
         pkgs = nixpkgs.legacyPackages.${system};
 
         customOverrides = self: super: {
@@ -64,10 +68,10 @@
         defaultPackage = self.packages.${system}.${packageName};
 
         # we use this wand because it has a patch to the correct image magick
-        buildInputs = with pkgs; [ python3Packages.wand ];
+        buildInputs = with pkgs; [python3Packages.wand];
 
         devShell = pkgs.mkShell {
-          buildInputs = with pkgs; [ poetry commitizen just python3Packages.wand ];
+          packages = with pkgs; [poetry commitizen just alejandra black isort];
           inputsFrom = builtins.attrValues self.packages.${system};
         };
       }

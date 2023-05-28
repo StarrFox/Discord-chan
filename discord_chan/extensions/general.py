@@ -6,10 +6,18 @@ import humanize
 import uwuify
 from discord.ext import commands
 
-from discord_chan import (BetweenConverter, DCMenuPages, DiscordChan,
-                          FetchedMember, FetchedUser, NormalPageSource,
-                          PartitionPaginator, PrologPaginator, SubContext,
-                          TimeConverter)
+from discord_chan import (
+    BetweenConverter,
+    DCMenuPages,
+    DiscordChan,
+    FetchedMember,
+    FetchedUser,
+    NormalPageSource,
+    PartitionPaginator,
+    PrologPaginator,
+    SubContext,
+    TimeConverter,
+)
 
 try:
     from enchant.checker import SpellChecker
@@ -177,7 +185,6 @@ class General(commands.Cog, name="general"):
 
     @staticmethod
     async def send_raw(ctx: commands.Context, data: dict):
-
         paginator = PartitionPaginator(prefix="```json", max_size=1985)
         to_send = json.dumps(data, indent=4)
         paginator.add_line(to_send)

@@ -51,7 +51,8 @@ def format_http_exception(exception: discord.HTTPException):
 
 def strip_angle_brackets(string):
     """Strip leading < and trailing > from a string.
-    Useful if a user sends you a url like <this> to avoid embeds, or to convert emotes to reactions."""
+    Useful if a user sends you a url like <this> to avoid embeds, or to convert emotes to reactions.
+    """
     if string.startswith("<") and string.endswith(">"):
         return string[1:-1]
     return string
