@@ -72,7 +72,7 @@
 
         devShell = pkgs.mkShell {
           name = "discord-chan";
-          packages = with pkgs; [poetry commitizen just alejandra black isort];
+          packages = with pkgs; [poetry just alejandra black isort];
         };
       }
     );
