@@ -14,6 +14,9 @@ with lib; let
 
   defaultUser = "discord_chan";
 in {
+  # used for debugging
+  _file = "discord_chan.nix";
+  
   options.services.discord_chan = {
     enable = mkEnableOption "discord_chan service";
     user = mkOption {
@@ -59,6 +62,7 @@ in {
       ${defaultUser} = {
         description = "discord chan process owner";
         group = defaultUser;
+        isSystemUser = true;
       };
     };
 
