@@ -77,7 +77,9 @@
     };
 
     nixosModules = {
-      ${packageName} = import ./modules/discord_chan.nix;
+      ${packageName} = import ./modules/discord_chan.nix {
+        selfpkgs = self.packages.${system};
+      };
       default = self.nixosModules.${packageName};
     };
 

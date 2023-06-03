@@ -1,6 +1,9 @@
 # TODO: make database name option
 {
-  selfpkgs,
+    selfpkgs, 
+    ...
+}:
+{
   config,
   lib,
   pkgs,
