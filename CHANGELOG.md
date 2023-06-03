@@ -3,5 +3,3 @@
 ### Fix
 
 - **flake.nix**: remove python imputs from devshell
-
-## 1.0.1 (2020-02-05)
