@@ -29,7 +29,13 @@ ROOT_DIR = Path(__file__).parent
 
 @click.command()
 @click.option("--debug", is_flag=True, help="Run in debug mode.")
-def main(debug):
+@click.option(
+    "--secret",
+    help="Path to secret file",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default="discord_token.secret",
+)
+def main(debug: bool, secret: Path):
     # noinspection PyArgumentList
     logging.basicConfig(handlers=[InterceptHandler()], level=0)
 
@@ -43,9 +49,8 @@ def main(debug):
         logging.getLogger("asyncio").setLevel(logging.DEBUG)
 
     bot = discord_chan.DiscordChan()
-    secret_path = "discord_token.secret"
 
-    with open(secret_path) as fp:
+    with open(secret) as fp:
         discord_token = fp.read().strip("\n")
 
     bot.run(discord_token)

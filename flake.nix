@@ -7,7 +7,7 @@
     starrpkgs = {
       url = "github:StarrFox/packages";
       inputs.nixpkgs.follows = "nixpkgs";
-    }; 
+    };
   };
 
   outputs = {
@@ -53,6 +53,8 @@
               buildInputs = (old.buildInputs or []) ++ [super.setuptools];
             }
           );
+          # this wand version patched the imageMagick library path
+          wand = pkgs.python3Packages.wand;
         };
 
         app = pkgs.poetry2nix.mkPoetryApplication {
@@ -72,9 +74,6 @@
         packages.${packageName} = app;
 
         defaultPackage = self.packages.${system}.${packageName};
-
-        # we use this wand because it has a patch to the correct image magick
-        buildInputs = with pkgs; [python3Packages.wand];
 
         devShell = pkgs.mkShell {
           name = "discord-chan";

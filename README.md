@@ -12,8 +12,8 @@ $ pip install .
 
 ## Running
 
-# TODO: mention how to set token
-
 ```shell script
 poetry run discord_chan
 ```
+
+you can pass a path to your own token file with --secret
