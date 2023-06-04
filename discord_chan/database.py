@@ -1,3 +1,5 @@
+import os
+import pwd
 from itertools import count
 
 import asyncpg
@@ -5,8 +7,12 @@ import pendulum
 
 from discord_chan.snipe import Snipe, SnipeMode
 
+def get_current_username() -> str:
+    return pwd.getpwuid(os.getuid()).pw_name
+
+
 # TODO: add enviorment variables for these
-DATABASE_user = "starr"
+DATABASE_user = get_current_username()
 DATABASE_name = "discord_chan"
 
 
