@@ -67,8 +67,11 @@ class Snipe(commands.Cog, name="snipe"):
             negative=negative,
         )
         total_snipes = len(snipes)
-        if index > total_snipes - 1:
-            return await ctx.send(f"Only {total_snipes} snipes from this query")
+
+        if total_snipes == 0:
+            return await ctx.send("0 Snipes found for this query")
+        elif index > total_snipes - 1:
+            return await ctx.send(f"Only {total_snipes} snipes found for this query")
 
         target_snipe = snipes[index]
         target_author = ctx.guild.get_member(target_snipe.author)
