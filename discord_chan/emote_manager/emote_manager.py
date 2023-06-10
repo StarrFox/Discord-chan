@@ -137,7 +137,7 @@ class EmoteManager(commands.Cog):
 
         if isinstance(error, commands.NoPrivateMessage):
             await context.send(
-                f"{self.bot.success_emojis[False]} Sorry, this command may only be used in a server."
+                f"❌ Sorry, this command may only be used in a server."
             )
 
     @commands.group(invoke_without_command=True)
@@ -193,7 +193,7 @@ class EmoteManager(commands.Cog):
         if not ran:
             return await context.send("Error: no custom emotes were provided.")
 
-        await context.message.add_reaction(self.bot.success_emojis[True])
+        await context.message.add_reaction("✅")
 
     @classmethod
     def parse_add_command_args(cls, context, args):
@@ -359,7 +359,7 @@ class EmoteManager(commands.Cog):
         await self.add_from_archive(context, archive)
         with contextlib.suppress(discord.HTTPException):
             # so they know when we're done
-            await context.message.add_reaction(self.bot.success_emojis[True])
+            await context.message.add_reaction("✅")
 
     # noinspection PyTypeChecker
     async def add_from_archive(self, context, archive):
@@ -517,7 +517,7 @@ class EmoteManager(commands.Cog):
             for emote in (emote,) + emotes:
                 await context.invoke(self.remove, emote)
             with contextlib.suppress(discord.HTTPException):
-                await context.message.add_reaction(self.bot.success_emojis[True])
+                await context.message.add_reaction("✅")
 
     @em.command(aliases=("mv",))
     async def rename(self, context, old, new_name):
