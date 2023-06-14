@@ -20,57 +20,6 @@ link_regex = (
 )
 
 
-async def msg_resend(
-    destination: discord.abc.Messageable, msg: discord.Message
-) -> discord.Message:
-    """
-    Resend a message
-    :param destination: Where to send the message
-    :param msg: The Message to send
-    :return: The Message sent
-    """
-    return await destination.send(
-        content=msg.content,
-        tts=msg.tts,
-        embed=msg.embeds[0] if msg.embeds else None,
-        files=[await attachment.to_file() for attachment in msg.attachments],
-    )
-
-
-def msg_jsonify(message: discord.Message) -> dict:
-    """
-    Converts a Message to dict representation
-    This is the same as what Discord sends
-    :param message: The Message to convert
-    :return:
-    """
-    # it doesn't recognize Enum.value
-    # noinspection PyUnresolvedReferences
-    data = {
-        "id": str(message.id),
-        "type": message.type.value,
-        "content": message.content,
-        "author": {
-            "id": str(message.author.id),
-            "username": message.author.name,
-            "avatar": message.author.avatar,
-            "discriminator": message.author.discriminator,
-            "bot": message.author.bot,
-        },
-        "attachments": [],
-        "embeds": [e.to_dict() for e in message.embeds],
-        "mentions": [],
-        "mention_roles": [],
-        "pinned": message.pinned,
-        "mention_everyone": message.mention_everyone,
-        "tts": message.tts,
-        "timestamp": str(message.created_at),
-        "edited_timestamp": str(message.edited_at),
-        "flags": message.flags,
-    }
-    return data
-
-
 class LRU(OrderedDict):
     def __init__(self, maxsize=100, *args, **kwargs):
         self.maxsize = maxsize
@@ -95,8 +44,15 @@ class InterceptHandler(logging.Handler):
         if not frame.f_code:
             return  # Don't care
 
+        if frame is None:
+            return
+
         while frame.f_code.co_filename == logging.__file__:
             frame = frame.f_back
+
+            if frame is None:
+                return
+
             depth += 1
 
         logger.opt(depth=depth, exception=record.exc_info).log(

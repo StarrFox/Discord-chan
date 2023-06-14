@@ -41,7 +41,7 @@ class Snipe(commands.Cog, name="snipe"):
                 author=message.author.id,
                 content=message.content,
                 channel=message.channel.id,
-                server=message.guild.id,
+                server=message.guild.id if message.guild is not None else 0,
                 time=pendulum.now("UTC"),
             )
 
@@ -61,7 +61,7 @@ class Snipe(commands.Cog, name="snipe"):
             )
 
         snipes, snipe_count = await self.bot.database.get_snipes(
-            server=ctx.guild.id,
+            server=ctx.guild.id if ctx.guild else 0,
             channel=ctx.channel.id,
             limit=abs(index) + 1,
             negative=negative,
@@ -74,14 +74,22 @@ class Snipe(commands.Cog, name="snipe"):
             return await ctx.send(f"Only {total_snipes} snipes found for this query")
 
         target_snipe = snipes[index]
-        target_author = ctx.guild.get_member(target_snipe.author)
+        if ctx.guild is not None:
+            target_author = ctx.guild.get_member(target_snipe.author)
+        else:
+            target_author = self.bot.get_user(target_snipe.author)
+
+            if target_author is None:
+                try:
+                    target_author = await self.bot.fetch_user(target_snipe.author)
+                except discord.NotFound:
+                    target_author = "[User unreadable]"
 
         embed = discord.Embed(
             title=f"[{target_snipe.mode.name}] {target_author} {target_snipe.discord_timestamp}",
             description=target_snipe.content,
         )
 
-        # TODO: fix total snipes number
         embed.set_footer(text=f"{index}/{snipe_count - 1}")
 
         await ctx.send(embed=embed)

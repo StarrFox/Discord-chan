@@ -18,16 +18,18 @@ class Mod(commands.Cog, name="mod"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
+
+    @commands.command()
     @commands.bot_has_permissions(manage_messages=True)
     @commands.has_permissions(manage_messages=True)
-    @commands.command()
+    @commands.guild_only()
     async def purge(
         self,
         ctx: SubContext,
-        number: BetweenConverter(0, 1000),
+        number: typing.Annotated[int, BetweenConverter(0, 1000)],
         user: typing.Optional[FetchedMember] = None,
         *,
-        text: str = None,
+        text: typing.Optional[str] = None,
     ):
         """
         Purges messages from certain user and/or (with) certain text
@@ -50,17 +52,22 @@ class Mod(commands.Cog, name="mod"):
             else:
                 return True
 
+        # these are the only places the command can be invoked from
+        assert isinstance(ctx.channel, discord.abc.Messageable) and isinstance(ctx.channel, discord.abc.GuildChannel)
         deleted = await ctx.channel.purge(limit=number, check=msgcheck)
         with suppress(discord.Forbidden, discord.NotFound):
             await ctx.send(f"Deleted {len(deleted)} message(s)", delete_after=5)
 
+    @commands.command()
     @commands.bot_has_permissions(ban_members=True)
     @commands.has_permissions(ban_members=True)
-    @commands.command()
+    @commands.guild_only()
     async def hackban(self, ctx: SubContext, member_id: int, *, reason=None):
         """
         Bans using an id, must not be a current member
         """
+        # guild_only ensures this
+        assert ctx.guild is not None
         try:
             await ctx.guild.fetch_member(member_id)
         except (discord.Forbidden, discord.HTTPException):

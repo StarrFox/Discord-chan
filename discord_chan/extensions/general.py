@@ -1,5 +1,7 @@
 import json
 import unicodedata
+import typing
+from operator import attrgetter
 
 import discord
 import humanize
@@ -57,7 +59,7 @@ class General(commands.Cog, name="general"):
         await menu.start(ctx)
 
     @commands.command()
-    async def time_convert(self, ctx: commands.Context, *times: TimeConverter):
+    async def time_convert(self, ctx: commands.Context, *times: typing.Annotated[int, TimeConverter]):
         await ctx.send(f"total={sum(times)}\n\n{times}")
 
     @commands.command()
@@ -85,10 +87,11 @@ class General(commands.Cog, name="general"):
         for error in checker:
             error.replace(str(error.suggest()))
 
-        await ctx.send(checker.get_text())
+        await ctx.send(str(checker.get_text()))
 
     @commands.command()
-    async def clean(self, ctx: SubContext, amount: BetweenConverter(1, 100) = 10):
+    @commands.guild_only()
+    async def clean(self, ctx: SubContext, amount: typing.Annotated[int, BetweenConverter(1, 100)] = 10):
         """
         Delete's the bot's last <amount> message(s)
         amount must be between 1 and 100, defaulting to 10
@@ -97,34 +100,35 @@ class General(commands.Cog, name="general"):
         def check(message):
             return message.author == ctx.me
 
+        assert isinstance(ctx.me, discord.Member)
         can_mass_delete = ctx.channel.permissions_for(ctx.me).manage_messages
 
+        assert isinstance(ctx.channel, discord.abc.Messageable) and isinstance(ctx.channel, discord.abc.GuildChannel)
         await ctx.channel.purge(limit=amount, check=check, bulk=can_mass_delete)
         await ctx.confirm("Messages cleaned.")
 
     @commands.command(aliases=["avy", "pfp"])
-    async def avatar(self, ctx: commands.Context, member: FetchedUser = None):
+    async def avatar(self, ctx: commands.Context, member: typing.Annotated[discord.User, FetchedUser] = commands.Author):
         """
         Get a member's avatar
         """
-        if member is None:
-            member = await ctx.guild.fetch_member(ctx.author.id)
-
-        member: discord.Member
-        await ctx.send(str(member.avatar.url))
+        await ctx.send(str(member.display_avatar.url))
 
     @commands.command(aliases=["mi", "userinfo", "ui"])
-    async def memberinfo(self, ctx: commands.Context, member: FetchedMember = None):
+    @commands.guild_only()
+    async def memberinfo(self, ctx: commands.Context, member: typing.Annotated[discord.Member, FetchedMember] = commands.Author):
         """
         Get info on a guild member
         """
-        if member is None:
-            member = await ctx.guild.fetch_member(ctx.author.id)
+        if member.joined_at is not None:
+            joined = humanize.naturaldate(member.joined_at)
+        else:
+            joined = "[Joined at unreadable]"
 
         data = {
             "id": member.id,
             "top role": member.top_role.name,
-            "joined guild": humanize.naturaldate(member.joined_at),
+            "joined guild": joined,
             "joined discord": humanize.naturaldate(member.created_at),
         }
 
@@ -139,18 +143,25 @@ class General(commands.Cog, name="general"):
         await menu.start(ctx)
 
     @commands.command(aliases=["si", "gi", "serverinfo"])
+    @commands.guild_only()
     async def guildinfo(self, ctx: commands.Context):
         """
         Get info on a guild
         """
+        assert ctx.guild is not None
         guild = await self.bot.fetch_guild(ctx.guild.id)
 
         # I don't have guild.channels
         channels = await guild.fetch_channels()
 
+        if guild.owner_id is not None:
+            owner = str(await self.bot.fetch_user(guild.owner_id))
+        else:
+            owner = "[Owner unreadable]"
+
         data = {
             "id": guild.id,
-            "owner": str(await self.bot.fetch_user(guild.owner_id)),
+            "owner": owner,
             "created": humanize.naturaltime(guild.created_at),
             "# of roles": len(guild.roles),
             "members": guild.approximate_member_count,
@@ -184,7 +195,7 @@ class General(commands.Cog, name="general"):
         await ctx.send_help("raw")
 
     @staticmethod
-    async def send_raw(ctx: commands.Context, data: dict):
+    async def send_raw(ctx: commands.Context, data: typing.Any):
         paginator = PartitionPaginator(prefix="```json", max_size=1985)
         to_send = json.dumps(data, indent=4)
         paginator.add_line(to_send)
@@ -197,37 +208,33 @@ class General(commands.Cog, name="general"):
     async def message(
         self,
         ctx: commands.Context,
-        message: discord.Message = None,
+        message: discord.Message = commands.parameter(
+            converter=discord.Message,
+            displayed_default="<this message>",
+            default=attrgetter("message")
+        ),
     ):
         """
         Raw message object,
         can provide channel with channel_id-message-id
         (shift-click copy id)
         """
-        if message is None:
-            message = ctx.message
-
         data = await self.bot.http.get_message(message.channel.id, message.id)
         await self.send_raw(ctx, data)
 
     @raw.command()
-    async def channel(self, ctx: commands.Context, channel: discord.TextChannel = None):
+    async def channel(self, ctx: commands.Context, channel: discord.TextChannel = commands.CurrentChannel):
         """
         Raw channel object
         """
-        if channel is None:
-            channel = ctx.channel
         data = await self.bot.http.get_channel(channel.id)
         await self.send_raw(ctx, data)
 
     @raw.command()
-    async def member(self, ctx: commands.Context, member: FetchedMember = None):
+    async def member(self, ctx: commands.Context, member: typing.Annotated[discord.Member, FetchedMember] = commands.Author):
         """
         Raw member object
         """
-        if member is None:
-            member = await ctx.guild.fetch_member(ctx.author.id)
-
         data = await self.bot.http.get_member(member.guild.id, member.id)
         await self.send_raw(ctx, data)
 
@@ -235,14 +242,14 @@ class General(commands.Cog, name="general"):
     async def user(
         self,
         ctx: commands.Context,
-        userid: int = None,
+        userid: int = commands.parameter(
+            displayed_default="<your id>",
+            default=lambda ctx: ctx.author.id
+        ),
     ):
         """
         Raw user object
         """
-        if userid is None:
-            userid = ctx.author.id
-
         try:
             data = await self.bot.http.get_user(userid)
         except discord.errors.NotFound:
@@ -251,10 +258,12 @@ class General(commands.Cog, name="general"):
             await self.send_raw(ctx, data)
 
     @raw.command(aliases=["server"])
+    @commands.guild_only()
     async def guild(self, ctx: commands.Context):
         """
         Raw guild object
         """
+        assert ctx.guild is not None
         data = await self.bot.http.get_guild(ctx.guild.id)
         await self.send_raw(ctx, data)
 
@@ -276,6 +285,9 @@ class General(commands.Cog, name="general"):
         """
         Raw emoji object
         """
+        if emoji.guild is None:
+            return await ctx.send("Emoji has no guild set")
+
         data = await self.bot.http.get_custom_emoji(emoji.guild.id, emoji.id)
         await self.send_raw(ctx, data)
 

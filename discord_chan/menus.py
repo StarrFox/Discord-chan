@@ -25,7 +25,7 @@ class ConfirmationMenu(menus.Menu):
         self.owner_id = owner_id
         self.send_kwargs = send_kwargs
         self.to_confirm = to_confirm
-        self.response = None
+        self.response = False
 
     async def send_initial_message(
         self, ctx: commands.Context, channel: discord.TextChannel

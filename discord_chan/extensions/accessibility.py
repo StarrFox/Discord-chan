@@ -25,7 +25,7 @@ class Accessibility(commands.Cog, name="accessibility"):
             groups = group.groups()
             emojis.append(
                 discord.PartialEmoji(
-                    animated=bool(groups[0]), name=groups[1], id=groups[2]
+                    animated=bool(groups[0]), name=groups[1], id=int(groups[2])
                 )
             )
 

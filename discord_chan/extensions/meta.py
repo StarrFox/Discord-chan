@@ -1,3 +1,5 @@
+from typing import Optional, Annotated
+
 import discord
 from discord.ext import commands
 
@@ -23,18 +25,16 @@ class Meta(commands.Cog, name="meta"):
     async def invite(
         self,
         ctx: commands.Context,
-        bot: BotConverter = None,
+        target_bot: Annotated[Optional[discord.Member | discord.User | discord.ClientUser], BotConverter] = None,
     ):
         """
         Get the invite link for a bot,
         defaults to myself
         """
-        if bot is None:
-            bot = ctx.me
+        if target_bot is None:
+            target_bot = ctx.me
 
-        bot: discord.Member
-
-        url = discord.utils.oauth_url(bot.id)
+        url = discord.utils.oauth_url(target_bot.id)
         await ctx.send(url)
 
     @commands.command()

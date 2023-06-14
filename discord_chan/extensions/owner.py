@@ -1,3 +1,6 @@
+from typing import Annotated
+
+import discord
 from discord.ext import commands
 
 from discord_chan import DiscordChan, FetchedUser, SubContext
@@ -13,18 +16,18 @@ class Owner(commands.Cog, name="owner"):
 
     async def cog_check(self, ctx: commands.Context):
         if not await self.bot.is_owner(ctx.author):
-            raise commands.NotOwner("You do not own this bot.")
+            raise commands.NotOwner("You do not own this bot")
         return True
 
     @commands.command()
-    async def dm(self, ctx: SubContext, user: FetchedUser, *, msg: str):
+    async def dm(self, ctx: SubContext, user: Annotated[discord.User, FetchedUser], *, msg: str):
         await user.send(msg)
         await ctx.confirm("Message sent.")
 
     @commands.command(aliases=["off", "restart"])
     async def shutdown(self, ctx: SubContext):
         await ctx.confirm("Logging out....")
-        await self.bot.logout()
+        await self.bot.close()
 
     @commands.command()
     async def enable(self, ctx: SubContext, *, cmd):
@@ -47,14 +50,6 @@ class Owner(commands.Cog, name="owner"):
         command.enabled = False
 
         await ctx.confirm("Command disabled.")
-
-    @commands.command(hidden=True)
-    async def loadjsk(self, ctx: SubContext):
-        """
-        Backup command to load jishaku
-        """
-        await self.bot.load_extension("jishaku")
-        await ctx.confirm("Jishaku loaded.")
 
 
 async def setup(bot):

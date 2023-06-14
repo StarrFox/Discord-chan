@@ -1,11 +1,16 @@
 import os
 import pwd
+import asyncio
 from itertools import count
+from typing import Optional, NamedTuple
 
 import asyncpg
 import pendulum
+from loguru import logger
+from discord.ext.commands import CommandError
 
 from discord_chan.snipe import Snipe, SnipeMode
+
 
 def get_current_username() -> str:
     return pwd.getpwuid(os.getuid()).pw_name
@@ -16,7 +21,12 @@ DATABASE_user = get_current_username()
 DATABASE_name = "discord_chan"
 
 
-DATABASE_snipe_table = """
+class CoinsEntry(NamedTuple):
+    user_id: int
+    coins: int
+
+
+DBSCHEMA = """
 CREATE TABLE IF NOT EXISTS snipes (
     id BIGINT,
     mode INT,
@@ -26,32 +36,111 @@ CREATE TABLE IF NOT EXISTS snipes (
     time FLOAT,
     content TEXT
 );
+
+CREATE TABLE IF NOT EXISTS coins (
+    user_id BIGINT PRIMARY KEY,
+    amount BIGINT
+);
 """.strip()
 
 
 class Database:
     def __init__(self):
-        self._connection: asyncpg.Pool = None
+        self._connection: Optional[asyncpg.Pool] = None
         self._ensured: bool = False
+        self._connection_lock = asyncio.Lock()
 
     async def _ensure_tables(self, pool: asyncpg.Pool):
+        # A lock isnt needed here because .connect is already locked
         if self._ensured:
             return
 
         self._ensured = True
 
         async with pool.acquire() as connection:
-            await connection.execute(DATABASE_snipe_table)
+            await connection.execute(DBSCHEMA)
 
     async def connect(self) -> asyncpg.Pool:
-        if self._connection is not None:
+        async with self._connection_lock:
+            if self._connection is not None:
+                return self._connection
+
+            self._connection = await asyncpg.create_pool(
+                user=DATABASE_user, database=DATABASE_name
+            )
+            assert self._connection is not None
+            await self._ensure_tables(self._connection)
             return self._connection
 
-        self._connection = await asyncpg.create_pool(
-            user=DATABASE_user, database=DATABASE_name
-        )
-        await self._ensure_tables(self._connection)
-        return self._connection
+    async def delete_coin_account(self, user_id: int):
+        pool = await self.connect()
+
+        async with pool.acquire() as connection:
+            await connection.execute("DELETE FROM coins WHERE user_id = $1;", user_id)
+
+        logger.info(f"Deleted coin account {user_id}")
+
+    async def get_coin_balance(self, user_id: int) -> int:
+        pool = await self.connect()
+
+        async with pool.acquire() as connection:
+            connection: asyncpg.Connection
+            row = await connection.fetchrow(
+                "SELECT * FROM coins WHERE user_id = $1;", user_id
+            )
+
+            if row is not None:
+                return row["amount"]
+
+            return 0
+
+    async def get_all_coin_balances(self) -> list[CoinsEntry]:
+        pool = await self.connect()
+
+        async with pool.acquire() as connection:
+            connection: asyncpg.Connection
+            rows = await connection.fetch(
+                "SELECT user_id, amount FROM coins ORDER BY amount DESC;"
+            )
+
+            result = []
+            for row in rows:
+                result.append((row["user_id"], row["amount"]))
+
+            return result
+
+    async def set_coins(self, user_id: int, amount: int):
+        pool = await self.connect()
+
+        async with pool.acquire() as connection:
+            connection: asyncpg.Connection
+            await connection.execute(
+                "INSERT INTO coins (user_id, amount) VALUES ($1, $2) ON CONFLICT (user_id) DO UPDATE SET amount = EXCLUDED.amount;",
+                user_id,
+                amount,
+            )
+
+        logger.info(f"Set coin account {user_id} to {amount}.")
+
+    async def add_coins(self, user_id: int, amount: int):
+        current = await self.get_coin_balance(user_id)
+        new_balance = current + amount
+        if new_balance.bit_length() >= 64:
+            raise CommandError(
+                "New balance would be over int64, are you sure you need that many coins?"
+            )
+        await self.set_coins(user_id, new_balance)
+        return new_balance
+
+    async def remove_coins(self, user_id: int, amount: int):
+        current = await self.get_coin_balance(user_id)
+        new_balance = current - amount
+        if new_balance.bit_length() >= 64:
+            raise CommandError(
+                "New balance would be over int64, are you sure you need that many coins?"
+            )
+        await self.set_coins(user_id, new_balance)
+        return new_balance
 
     async def add_snipe(self, snipe: Snipe):
         pool = await self.connect()
@@ -72,11 +161,11 @@ class Database:
     async def get_snipes(
         self,
         *,
-        server: int = None,
-        author: int = None,
-        channel: int = None,
-        mode: SnipeMode = None,
-        limit: int = None,
+        server: Optional[int] = None,
+        author: Optional[int] = None,
+        channel: Optional[int] = None,
+        mode: Optional[SnipeMode] = None,
+        limit: Optional[int] = None,
         negative: bool = False,
     ) -> tuple[list[Snipe], int]:
         pool = await self.connect()
@@ -134,7 +223,10 @@ class Database:
             snipe_count_record = await connection.fetchrow(
                 "SELECT count(*) FROM snipes " + query + ";", *args
             )
-            snipe_count = snipe_count_record["count"]
+            if snipe_count_record is None:
+                snipe_count = 0
+            else:
+                snipe_count: int = snipe_count_record["count"]
 
             snipes = []
             for snipe_record in snipe_records:
