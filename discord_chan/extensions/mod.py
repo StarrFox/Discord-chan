@@ -18,7 +18,6 @@ class Mod(commands.Cog, name="mod"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-
     @commands.command()
     @commands.bot_has_permissions(manage_messages=True)
     @commands.has_permissions(manage_messages=True)
@@ -53,7 +52,9 @@ class Mod(commands.Cog, name="mod"):
                 return True
 
         # these are the only places the command can be invoked from
-        assert isinstance(ctx.channel, discord.abc.Messageable) and isinstance(ctx.channel, discord.abc.GuildChannel)
+        assert isinstance(ctx.channel, discord.abc.Messageable) and isinstance(
+            ctx.channel, discord.abc.GuildChannel
+        )
         deleted = await ctx.channel.purge(limit=number, check=msgcheck)
         with suppress(discord.Forbidden, discord.NotFound):
             await ctx.send(f"Deleted {len(deleted)} message(s)", delete_after=5)

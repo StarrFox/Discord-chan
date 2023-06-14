@@ -85,7 +85,15 @@
 
     devShells.${system}.default = pkgs.mkShell {
       name = "discord-chan";
-      packages = with pkgs; [poetry spkgs.commitizen just alejandra black isort];
+      packages = with pkgs; [
+        poetry
+        spkgs.commitizen
+        just
+        alejandra
+        black
+        isort
+        python3Packages.vulture
+      ];
     };
   };
 }

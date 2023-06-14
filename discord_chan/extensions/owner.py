@@ -20,7 +20,9 @@ class Owner(commands.Cog, name="owner"):
         return True
 
     @commands.command()
-    async def dm(self, ctx: SubContext, user: Annotated[discord.User, FetchedUser], *, msg: str):
+    async def dm(
+        self, ctx: SubContext, user: Annotated[discord.User, FetchedUser], *, msg: str
+    ):
         await user.send(msg)
         await ctx.confirm("Message sent.")
 

@@ -1,9 +1,5 @@
 # TODO: make database name option
-{
-    selfpkgs, 
-    ...
-}:
-{
+{selfpkgs, ...}: {
   config,
   lib,
   pkgs,
@@ -16,7 +12,7 @@ with lib; let
 in {
   # used for debugging
   _file = "discord_chan.nix";
-  
+
   options.services.discord_chan = {
     enable = mkEnableOption "discord_chan service";
     user = mkOption {

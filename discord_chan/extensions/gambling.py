@@ -1,11 +1,11 @@
 import random
-from typing import TYPE_CHECKING, Optional, Literal
+from typing import TYPE_CHECKING, Literal, Optional
 
 import discord
 from discord.ext import commands
 from loguru import logger
 
-from discord_chan.menus import NormalPageSource, DCMenuPages
+from discord_chan.menus import DCMenuPages, NormalPageSource
 
 if TYPE_CHECKING:
     from discord_chan import DiscordChan, SubContext
@@ -31,9 +31,7 @@ class Gambling(commands.Cog):
 
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
-    async def coins(
-        self, ctx: "SubContext", member: Optional[discord.Member] = None
-    ):
+    async def coins(self, ctx: "SubContext", member: Optional[discord.Member] = None):
         """
         View another member or your aacoin amount.
         """
@@ -44,9 +42,7 @@ class Gambling(commands.Cog):
 
         amount = await self.bot.database.get_coin_balance(member.id)
         plural = amount != 1
-        await ctx.send(
-            f"{member} has {amount} coin{'s' if plural else ''}"
-        )
+        await ctx.send(f"{member} has {amount} coin{'s' if plural else ''}")
 
     @coins.command(name="all")
     async def view_all_aacoins(self, ctx: "SubContext"):

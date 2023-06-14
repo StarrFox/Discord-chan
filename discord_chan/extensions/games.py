@@ -4,7 +4,14 @@ from random import choice
 import discord
 from discord.ext import commands
 
-from discord_chan import Connect4, MasterMindMenu, SliderGame, SubContext, utils, DiscordChan
+from discord_chan import (
+    Connect4,
+    DiscordChan,
+    MasterMindMenu,
+    SliderGame,
+    SubContext,
+    utils,
+)
 
 
 class Games(commands.Cog, name="games"):
@@ -31,7 +38,9 @@ class Games(commands.Cog, name="games"):
         player1 = choice([ctx.author, member])
         player2 = member if player1 == ctx.author else ctx.author
 
-        if not isinstance(player1, discord.Member) or not isinstance(player2, discord.Member):
+        if not isinstance(player1, discord.Member) or not isinstance(
+            player2, discord.Member
+        ):
             return await ctx.send("connect 4 must be used from a server")
 
         game = Connect4(player1, player2)
@@ -83,7 +92,7 @@ class Games(commands.Cog, name="games"):
 
         if won_game:
             await ctx.send(
-                f"{ctx.author.mention} has completed the slider in {moves} move(s) within {time_msg};" \
+                f"{ctx.author.mention} has completed the slider in {moves} move(s) within {time_msg};"
                 " adding 1 coin for finishing",
                 allowed_mentions=discord.AllowedMentions(users=True),
             )

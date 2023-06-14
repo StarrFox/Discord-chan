@@ -136,9 +136,7 @@ class EmoteManager(commands.Cog):
             await context.send(error)
 
         if isinstance(error, commands.NoPrivateMessage):
-            await context.send(
-                f"❌ Sorry, this command may only be used in a server."
-            )
+            await context.send(f"❌ Sorry, this command may only be used in a server.")
 
     @commands.group(invoke_without_command=True)
     async def em(self, context):

@@ -24,8 +24,6 @@ os.environ["JISHAKU_NO_DM_TRACEBACK"] = "true"
 os.environ["JISHAKU_NO_UNDERSCORE"] = "true"
 os.environ["JISHAKU_RETAIN"] = "true"
 
-ROOT_DIR = Path(__file__).parent
-
 
 @click.command()
 @click.option("--debug", is_flag=True, help="Run in debug mode.")

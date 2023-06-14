@@ -1,6 +1,6 @@
 import json
-import unicodedata
 import typing
+import unicodedata
 from operator import attrgetter
 
 import discord
@@ -59,7 +59,9 @@ class General(commands.Cog, name="general"):
         await menu.start(ctx)
 
     @commands.command()
-    async def time_convert(self, ctx: commands.Context, *times: typing.Annotated[int, TimeConverter]):
+    async def time_convert(
+        self, ctx: commands.Context, *times: typing.Annotated[int, TimeConverter]
+    ):
         await ctx.send(f"total={sum(times)}\n\n{times}")
 
     @commands.command()
@@ -91,7 +93,11 @@ class General(commands.Cog, name="general"):
 
     @commands.command()
     @commands.guild_only()
-    async def clean(self, ctx: SubContext, amount: typing.Annotated[int, BetweenConverter(1, 100)] = 10):
+    async def clean(
+        self,
+        ctx: SubContext,
+        amount: typing.Annotated[int, BetweenConverter(1, 100)] = 10,
+    ):
         """
         Delete's the bot's last <amount> message(s)
         amount must be between 1 and 100, defaulting to 10
@@ -103,12 +109,18 @@ class General(commands.Cog, name="general"):
         assert isinstance(ctx.me, discord.Member)
         can_mass_delete = ctx.channel.permissions_for(ctx.me).manage_messages
 
-        assert isinstance(ctx.channel, discord.abc.Messageable) and isinstance(ctx.channel, discord.abc.GuildChannel)
+        assert isinstance(ctx.channel, discord.abc.Messageable) and isinstance(
+            ctx.channel, discord.abc.GuildChannel
+        )
         await ctx.channel.purge(limit=amount, check=check, bulk=can_mass_delete)
         await ctx.confirm("Messages cleaned.")
 
     @commands.command(aliases=["avy", "pfp"])
-    async def avatar(self, ctx: commands.Context, member: typing.Annotated[discord.User, FetchedUser] = commands.Author):
+    async def avatar(
+        self,
+        ctx: commands.Context,
+        member: typing.Annotated[discord.User, FetchedUser] = commands.Author,
+    ):
         """
         Get a member's avatar
         """
@@ -116,7 +128,11 @@ class General(commands.Cog, name="general"):
 
     @commands.command(aliases=["mi", "userinfo", "ui"])
     @commands.guild_only()
-    async def memberinfo(self, ctx: commands.Context, member: typing.Annotated[discord.Member, FetchedMember] = commands.Author):
+    async def memberinfo(
+        self,
+        ctx: commands.Context,
+        member: typing.Annotated[discord.Member, FetchedMember] = commands.Author,
+    ):
         """
         Get info on a guild member
         """
@@ -211,7 +227,7 @@ class General(commands.Cog, name="general"):
         message: discord.Message = commands.parameter(
             converter=discord.Message,
             displayed_default="<this message>",
-            default=attrgetter("message")
+            default=attrgetter("message"),
         ),
     ):
         """
@@ -223,7 +239,11 @@ class General(commands.Cog, name="general"):
         await self.send_raw(ctx, data)
 
     @raw.command()
-    async def channel(self, ctx: commands.Context, channel: discord.TextChannel = commands.CurrentChannel):
+    async def channel(
+        self,
+        ctx: commands.Context,
+        channel: discord.TextChannel = commands.CurrentChannel,
+    ):
         """
         Raw channel object
         """
@@ -231,7 +251,11 @@ class General(commands.Cog, name="general"):
         await self.send_raw(ctx, data)
 
     @raw.command()
-    async def member(self, ctx: commands.Context, member: typing.Annotated[discord.Member, FetchedMember] = commands.Author):
+    async def member(
+        self,
+        ctx: commands.Context,
+        member: typing.Annotated[discord.Member, FetchedMember] = commands.Author,
+    ):
         """
         Raw member object
         """
@@ -243,8 +267,7 @@ class General(commands.Cog, name="general"):
         self,
         ctx: commands.Context,
         userid: int = commands.parameter(
-            displayed_default="<your id>",
-            default=lambda ctx: ctx.author.id
+            displayed_default="<your id>", default=lambda ctx: ctx.author.id
         ),
     ):
         """

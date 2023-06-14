@@ -1,4 +1,4 @@
-from typing import Optional, Annotated
+from typing import Annotated, Optional
 
 import discord
 from discord.ext import commands
@@ -25,7 +25,9 @@ class Meta(commands.Cog, name="meta"):
     async def invite(
         self,
         ctx: commands.Context,
-        target_bot: Annotated[Optional[discord.Member | discord.User | discord.ClientUser], BotConverter] = None,
+        target_bot: Annotated[
+            Optional[discord.Member | discord.User | discord.ClientUser], BotConverter
+        ] = None,
     ):
         """
         Get the invite link for a bot,
