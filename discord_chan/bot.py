@@ -10,8 +10,8 @@ from .context import SubContext
 from .database import Database
 from .help import Minimal
 
-# TODO: remove debug prefix
-DEFAULT_PREFIXES = ["sf/", "SF/", "dc/", "DC/", "dg/"]
+# TODO: add debug prefix if running in --debug mode
+DEFAULT_PREFIXES = ["sf/", "SF/", "dc/", "DC/"]
 ROOT = pathlib.Path(__file__).parent
 
 

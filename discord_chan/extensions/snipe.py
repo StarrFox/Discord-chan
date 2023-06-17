@@ -50,11 +50,8 @@ class Snipe(commands.Cog, name="snipe"):
     @commands.bot_has_permissions(embed_links=True)
     @commands.group(name="snipe", invoke_without_command=True)
     async def snipe_command(self, ctx: commands.Context, index: int = 0):
-        negative = False
-
-        if index < 0:
-            negative = True
-
+        negative = index < 0
+ 
         if abs(index) > 10_000_000:
             return await ctx.send(
                 f"{index} is over the index cap of (-)10,000,000; do you really have that many snipes?"
@@ -70,10 +67,17 @@ class Snipe(commands.Cog, name="snipe"):
 
         if total_snipes == 0:
             return await ctx.send("0 Snipes found for this query")
-        elif index > total_snipes - 1:
+
+        if negative and abs(index) > (total_snipes + 1):
+            return await ctx.send(f"Only {total_snipes} snipes found for this query")
+        elif not negative and index > (total_snipes - 1):
             return await ctx.send(f"Only {total_snipes} snipes found for this query")
 
-        target_snipe = snipes[index]
+        if negative:
+            target_snipe = snipes[abs(index) - 1]
+        else:
+            target_snipe = snipes[index]
+
         if ctx.guild is not None:
             target_author = ctx.guild.get_member(target_snipe.author)
         else:
