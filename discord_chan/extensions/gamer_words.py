@@ -668,14 +668,10 @@ class GamerReplacer:
 class GamerWords(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.webhook_cache = collections.defaultdict(
-            lambda: collections.defaultdict(list)
-        )
         self.server_toggles = {}
 
-        # {guild:{channel:[webhook]}}
-        bot.loop.create_task(self.populate_webhook_cache())
         bot.loop.create_task(self.clear_usernames())
+        self._webhook_lock = asyncio.Lock()
 
     @commands.group(invoke_without_command=True, aliases=["gamerwords"])
     async def gw(self, context):
@@ -684,6 +680,7 @@ class GamerWords(commands.Cog):
         """
         await context.send_help("gamerwords")
 
+    # TODO: save toggles to db
     @gw.command()
     @commands.is_owner()
     async def toggle(self, context):
@@ -709,33 +706,18 @@ class GamerWords(commands.Cog):
         match = re.search(GAMER_REGEX, string, flags=re.IGNORECASE)
         return match
 
-    async def populate_webhook_cache(self):
-        await self.bot.wait_until_ready()
-        for guild in self.bot.guilds:
-            for channel in guild.text_channels:
-                try:
-                    for webhook in await channel.webhooks():
-                        if webhook.user == guild.me:
-                            self.webhook_cache[guild][webhook.channel].append(webhook)
-                except discord.HTTPException:
-                    continue
+    async def get_webhook(self, channel: discord.TextChannel):
+        # this prevents us creating 2 webhooks at the same time
+        async with self._webhook_lock:
+            for webhook in await channel.webhooks():
+                if webhook.user == channel.guild.me:
+                    return webhook
 
-    @commands.Cog.listener()
-    async def on_webhooks_update(self, channel):
-        webhooks = await channel.webhooks()
-        webhooks = [webhook for webhook in webhooks if webhook.user == channel.guild.me]
-        self.webhook_cache[channel.guild][channel] = webhooks
-
-    async def get_webhook(self, channel):
-        try:
-            webhook = self.webhook_cache[channel.guild][channel][0]
-            return webhook
-        except (KeyError, IndexError):
             try:
-                webhook = await channel.create_webhook(name="GamerHook")
-                return webhook
+                return await channel.create_webhook(name="GamerHook")
             except discord.HTTPException:
                 return None
+
 
     @commands.Cog.listener()
     async def on_message(self, message):
