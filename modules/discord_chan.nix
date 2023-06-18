@@ -7,8 +7,8 @@
 }:
 with lib; let
   cfg = config.services.discord_chan;
-
   defaultUser = "discord_chan";
+  spkgs = selfpkgs.${pkgs.system};
 in {
   # used for debugging
   _file = "discord_chan.nix";
@@ -50,7 +50,7 @@ in {
         User = cfg.user;
         Group = cfg.group;
         Restart = "always";
-        ExecStart = "${selfpkgs.discord_chan}/bin/discord-chan --secret ${cfg.tokenFile}";
+        ExecStart = "${spkgs.discord_chan}/bin/discord-chan --secret ${cfg.tokenFile}";
       };
     };
 
