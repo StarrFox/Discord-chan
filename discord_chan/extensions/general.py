@@ -58,11 +58,11 @@ class General(commands.Cog, name="general"):
 
         await menu.start(ctx)
 
-    @commands.command()
-    async def time_convert(
-        self, ctx: commands.Context, *times: typing.Annotated[int, TimeConverter]
-    ):
-        await ctx.send(f"total={sum(times)}\n\n{times}")
+    # @commands.command()
+    # async def time_convert(
+    #     self, ctx: commands.Context, *times: typing.Annotated[int, TimeConverter]
+    # ):
+    #     await ctx.send(f"total={sum(times)}\n\n{times}")
 
     @commands.command()
     async def say(self, ctx: commands.Context, *, message: str):
@@ -76,6 +76,7 @@ class General(commands.Cog, name="general"):
         """UwUifies text"""
         await ctx.send(uwuify.uwu(message, flags=uwuify.SMILEY))
 
+    # TODO: include enchant in nix flake
     @commands.command(aliases=["spell"])
     async def spellcheck(self, ctx: commands.Context, *, text: str):
         """

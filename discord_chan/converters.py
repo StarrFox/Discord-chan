@@ -1,10 +1,12 @@
 import datetime
 import re
+from typing import Optional
 
 import discord
 from discord.ext import commands
 
 from . import utils
+
 
 WEEKDAYS = ["monday", "tuesday", "wendsday", "thursday", "friday", "saturday", "sunday"]
 
@@ -25,15 +27,6 @@ TIME_TABLE = {
     "months": 2592000,
     "years": 31536000,
 }
-
-
-def _get_from_guilds(bot, getter, argument):
-    result = None
-    for guild in bot.guilds:
-        result = getattr(guild, getter)(argument)
-        if result:
-            return result
-    return result
 
 
 class FetchedUser(commands.Converter):
@@ -58,12 +51,14 @@ class FetchedUser(commands.Converter):
 
             raise commands.BadArgument(f'User "{user_id}" not found.')
 
-        # gaming in the blood
         return await FetchedMember().convert(ctx, argument)
 
 
 class FetchedMember(commands.Converter):
     async def convert(self, ctx: commands.Context, argument: str) -> discord.Member:
+        if ctx.guild is None:
+            raise commands.BadArgument("Cannot fetch members from dms")
+
         id_match = re.match(r"<@!?([0-9]+)>$", argument) or re.match(
             r"([0-9]{15,21})$", argument
         )
@@ -105,11 +100,11 @@ class BetweenConverter(commands.Converter):
 
     async def convert(self, ctx: commands.Context, argument: str) -> int:
         try:
-            argument = int(argument)
+            converted_argument = int(argument)
         except ValueError:
             raise commands.BadArgument("{} is not a valid number.".format(argument))
-        if self.num1 <= argument <= self.num2:
-            return argument
+        if self.num1 <= converted_argument <= self.num2:
+            return converted_argument
 
         raise commands.BadArgument(
             "{} is not between {} and {}".format(argument, self.num1, self.num2)
@@ -140,36 +135,6 @@ class WeekdayConverter(commands.Converter):
         raise commands.BadArgument("{} is not a valid weekday.".format(argument))
 
 
-class CrossGuildTextChannelConverter(commands.TextChannelConverter):
-    """
-    Makes the DM behavior the default
-    """
-
-    async def convert(
-        self, ctx: commands.Context, argument: str
-    ) -> discord.TextChannel:
-        bot = ctx.bot
-
-        match = self._get_id_match(argument) or re.match(r"<#([0-9]+)>$", argument)
-
-        if match is None:
-            # not a mention
-            def check(c):
-                return isinstance(c, discord.TextChannel) and c.name == argument
-
-            result = discord.utils.find(check, bot.get_all_channels())
-
-        else:
-            channel_id = int(match.group(1))
-
-            result = _get_from_guilds(bot, "get_channel", channel_id)
-
-        if not isinstance(result, discord.TextChannel):
-            raise commands.BadArgument('Channel "{}" not found.'.format(argument))
-
-        return result
-
-
 class BotConverter(commands.Converter):
     async def convert(self, ctx: commands.Context, argument: str) -> discord.Member:
         member = await FetchedMember().convert(ctx, argument)
@@ -189,7 +154,7 @@ class ImageUrlConverter(commands.Converter):
     4. Url regex
     """
 
-    def __init__(self, force_format: str = None):
+    def __init__(self, force_format: Optional[str] = None):
         self.force_format = force_format
 
     async def convert(self, ctx: commands.Context, argument: str) -> str:
@@ -200,11 +165,12 @@ class ImageUrlConverter(commands.Converter):
             member = None
 
         if member:
-            if not self.force_format:
-                return str(member.avatar_url_as(static_format="png"))
+            if self.force_format is None:
+                return member.display_avatar.with_static_format("png").url
 
             else:
-                return str(member.avatar_url_as(format=self.force_format))
+                # I couldn't get the type checking for this to work
+                return member.display_avatar.with_static_format(self.force_format).url # type: ignore
 
         try:
             message = await commands.MessageConverter().convert(ctx, argument)
@@ -224,7 +190,8 @@ class ImageUrlConverter(commands.Converter):
                         return embed.url
 
                 elif embed.image:
-                    return embed.image.url
+                    # .url should always be set in this case
+                    return embed.image.url # type: ignore
 
             raise commands.BadArgument("Message has no attachments/embed images.")
 
@@ -236,7 +203,8 @@ class ImageUrlConverter(commands.Converter):
 
         if emoji:
             if not self.force_format:
-                return str(emoji.url)
+                if emoji.is_custom_emoji:
+                    return str(emoji.url)
 
             else:
                 return (
@@ -286,14 +254,14 @@ class TimeConverter(commands.Converter):
             if value is None:
                 continue
 
-            int_value = int(digit_re.match(value).group(0))
+            int_value = int(digit_re.match(value).group(0)) # type: ignore
 
             if group == "years":
                 current_year = datetime.datetime.utcnow().year
 
                 # Leap year
                 if current_year % 4 == 0:
-                    total += 1 * int_value
+                    total += (TIME_TABLE["years"] * int_value) + TIME_TABLE["days"]
 
                 else:
                     total += TIME_TABLE["years"] * int_value

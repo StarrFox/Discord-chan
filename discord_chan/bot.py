@@ -10,13 +10,13 @@ from .context import SubContext
 from .database import Database
 from .help import Minimal
 
-# TODO: add debug prefix if running in --debug mode
 DEFAULT_PREFIXES = ["sf/", "SF/", "dc/", "DC/"]
 ROOT = pathlib.Path(__file__).parent
 
 
 class DiscordChan(commands.AutoShardedBot):
     def __init__(self, *, context: Type[commands.Context] = SubContext, **kwargs):
+        self.debug_mode: bool = kwargs.pop("debug_mode", False)
         super().__init__(
             command_prefix=kwargs.pop("command_prefix", self.get_command_prefix),
             case_insensitive=kwargs.pop("case_insensitive", True),
@@ -115,7 +115,12 @@ class DiscordChan(commands.AutoShardedBot):
         return len(self.extensions.keys()) - before
 
     async def get_command_prefix(self, _, message: discord.Message):
-        return commands.when_mentioned_or(*DEFAULT_PREFIXES)(self, message)
+        prefixes = DEFAULT_PREFIXES
+
+        if self.debug_mode:
+            prefixes.append("dg/")
+
+        return commands.when_mentioned_or(*prefixes)(self, message)
 
     @staticmethod
     def direct_message_check(ctx: commands.Context):

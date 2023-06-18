@@ -46,7 +46,7 @@ def main(debug: bool, secret: Path):
         asyncio.get_event_loop().set_debug(True)
         logging.getLogger("asyncio").setLevel(logging.DEBUG)
 
-    bot = discord_chan.DiscordChan()
+    bot = discord_chan.DiscordChan(debug_mode=debug)
 
     with open(secret) as fp:
         discord_token = fp.read().strip("\n")
