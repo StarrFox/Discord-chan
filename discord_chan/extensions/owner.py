@@ -1,9 +1,6 @@
-from typing import Annotated
-
-import discord
 from discord.ext import commands
 
-from discord_chan import DiscordChan, FetchedUser, SubContext
+from discord_chan import DiscordChan, SubContext
 
 
 class Owner(commands.Cog, name="owner"):
@@ -20,18 +17,6 @@ class Owner(commands.Cog, name="owner"):
         return True
 
     @commands.command()
-    async def dm(
-        self, ctx: SubContext, user: Annotated[discord.User, FetchedUser], *, msg: str
-    ):
-        await user.send(msg)
-        await ctx.confirm("Message sent.")
-
-    @commands.command(aliases=["off", "restart"])
-    async def shutdown(self, ctx: SubContext):
-        await ctx.confirm("Logging out....")
-        await self.bot.close()
-
-    @commands.command()
     async def enable(self, ctx: SubContext, *, cmd):
         command = self.bot.get_command(cmd)
 
@@ -39,7 +24,6 @@ class Owner(commands.Cog, name="owner"):
             return await ctx.send("Command not found.")
 
         command.enabled = True
-
         await ctx.confirm("Command enabled.")
 
     @commands.command()
@@ -50,7 +34,6 @@ class Owner(commands.Cog, name="owner"):
             return await ctx.send("Command not found.")
 
         command.enabled = False
-
         await ctx.confirm("Command disabled.")
 
 

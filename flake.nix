@@ -7,9 +7,11 @@
     nix-systems.url = "github:nix-systems/default";
     starrpkgs = {
       url = "github:StarrFox/packages";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-parts.follows = "flake-parts";
-      inputs.nix-systems.follows = "nix-systems";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-parts.follows = "flake-parts";
+        nix-systems.follows = "nix-systems";
+      };
     };
   };
 
