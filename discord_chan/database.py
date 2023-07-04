@@ -188,7 +188,7 @@ class Database:
             args.append(channel)
 
         if mode is not None:
-            query_parts.append(f"server = ${next(counter)}")
+            query_parts.append(f"mode = ${next(counter)}")
             args.append(mode.value)
 
         if query_parts:

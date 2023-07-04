@@ -1,3 +1,5 @@
+from typing import Optional
+
 import discord
 import pendulum
 from discord.ext import commands
@@ -10,6 +12,12 @@ from discord_chan import (
 )
 from discord_chan.snipe import Snipe as Snipe_obj
 from discord_chan.snipe import SnipeMode
+
+
+class SnipeQueryFlags(commands.FlagConverter, delimiter=" ", prefix="--"):
+    channel: Optional[discord.TextChannel]
+    mode: Optional[SnipeMode]
+    author: Optional[discord.Member]
 
 
 class Snipe(commands.Cog, name="snipe"):
@@ -49,7 +57,18 @@ class Snipe(commands.Cog, name="snipe"):
 
     @commands.bot_has_permissions(embed_links=True)
     @commands.group(name="snipe", invoke_without_command=True)
-    async def snipe_command(self, ctx: commands.Context, index: int = 0):
+    async def snipe_command(self, ctx: commands.Context, index: Optional[int] = 0, *, query_flags: SnipeQueryFlags):
+        """
+        Snipe for edited/purged/deleted messages
+
+        flags:
+            --channel: the channel
+            --author: the author
+            --mode: the snipe mode (edited/purged/deleted)
+        """
+        # the Optional on index is just so discord.py allows invokation like `dc/snipe --mode edited`
+        assert index is not None
+
         negative = index < 0
  
         if abs(index) > 10_000_000:
@@ -57,11 +76,23 @@ class Snipe(commands.Cog, name="snipe"):
                 f"{index} is over the index cap of (-)10,000,000; do you really have that many snipes?"
             )
 
+        if query_flags.channel is not None:
+            assert isinstance(ctx.channel, discord.TextChannel)
+
+            if query_flags.channel.nsfw and not ctx.channel.nsfw:
+                raise commands.BadArgument("Cannot snipe a nsfw channel from a non-nsfw channel")
+
+            snipe_channel = query_flags.channel
+        else:
+            snipe_channel = ctx.channel
+
         snipes, snipe_count = await self.bot.database.get_snipes(
             server=ctx.guild.id if ctx.guild else 0,
-            channel=ctx.channel.id,
+            channel=snipe_channel.id,
             limit=abs(index) + 1,
             negative=negative,
+            author=query_flags.author.id if query_flags.author else None,
+            mode=query_flags.mode
         )
         total_snipes = len(snipes)
 
@@ -98,13 +129,16 @@ class Snipe(commands.Cog, name="snipe"):
 
         await ctx.send(embed=embed)
 
-    # return as list
-    # @snipe_command.command(name="channel")
-    # async def snipe_channel(
-    #     self,
-    #     ctx: commands.Context,
-    #     channel: discord.TextChannel = commands.CurrentChannel,
-    # ):
+    # @snipe_command.command(name="list")
+    # async def snipe_list(self, ctx: commands.Context, *, query_flags: SnipeQueryFlags):
+    #     """
+    #     List snipes
+
+    #     flags:
+    #         --channel: the channel
+    #         --author: the author
+    #         --mode: the snipe mode (edited/purged/deleted)
+    #     """
     #     pass
 
     # @commands.bot_has_permissions(embed_links=True)
