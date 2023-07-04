@@ -12,6 +12,10 @@ bump:
     git push
     git push --tags
 
+update:
+    nix flake update
+    poetry update
+
 # TODO: treefmt?
 format:
     isort .
