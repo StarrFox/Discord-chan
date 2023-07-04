@@ -16,6 +16,9 @@ update:
     nix flake update
     poetry update
 
+run:
+    poetry run discord-chan --debug
+
 # TODO: treefmt?
 format:
     isort .
