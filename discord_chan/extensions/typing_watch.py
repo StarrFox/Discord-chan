@@ -48,7 +48,7 @@ class TypingWatch(commands.Cog, name="typing_watch"):
             await self.bot.wait_for("message", check=_predicate, timeout=300)
         except asyncio.TimeoutError:
             # TODO: make this send an image showing them typing instead
-            await channel.send(f"{user} typed without sending a message")
+            await channel.send(f"{user.display_name} typed without sending a message")
         else:
             del self.typing_watchers[channel.id][user.id]
 
