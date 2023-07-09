@@ -122,7 +122,8 @@ class Minimal(commands.MinimalHelpCommand):
         if cmd is not None:
             if isinstance(cmd, commands.Group):
                 for key in keys[1:]:
-                    found = cmd.all_commands.get(key)
+                    # .all_commands is provided by GroupMixin
+                    found = cmd.all_commands.get(key) # type: ignore
 
                     if found is None:
                         string = await maybe_coro(

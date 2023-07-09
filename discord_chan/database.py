@@ -41,6 +41,12 @@ CREATE TABLE IF NOT EXISTS coins (
     user_id BIGINT PRIMARY KEY,
     amount BIGINT
 );
+
+CREATE TABLE IF NOT EXISTS enabled_features (
+    guild_id BIGINT,
+    feature_name TEXT,
+    PRIMARY KEY (guild_id, feature_name)
+);
 """.strip()
 
 
@@ -71,6 +77,34 @@ class Database:
             assert self._connection is not None
             await self._ensure_tables(self._connection)
             return self._connection
+
+    async def get_guild_enabled_features(self, guild_id: int) -> list[str]:
+        pool = await self.connect()
+
+        async with pool.acquire() as connection:
+            connection: asyncpg.Connection
+            records: list[asyncpg.Record] = await connection.fetch("SELECT feature_name FROM enabled_features WHERE guild_id = $1;", guild_id)
+
+            result: list[str] = []
+
+            for record in records:
+                result.append(record["feature_name"])
+
+        return result
+
+    async def enable_guild_enabled_feature(self, guild_id: int, feature_name: str):
+        pool = await self.connect()
+
+        async with pool.acquire() as connection:
+            connection: asyncpg.Connection
+            await connection.execute("INSERT INTO enabled_features (guild_id, feature_name) VALUES ($1, $2);", guild_id, feature_name)
+
+    async def disable_guild_enabled_feature(self, guild_id: int, feature_name: str):
+        pool = await self.connect()
+
+        async with pool.acquire() as connection:
+            connection: asyncpg.Connection
+            await connection.execute("DELETE FROM enabled_features WHERE guild_id = $1 AND feature_name = $2;", guild_id, feature_name)
 
     async def delete_coin_account(self, user_id: int):
         pool = await self.connect()

@@ -23,3 +23,13 @@ def some_guilds(guilds: List[int]):
         return ctx.guild.id in guilds
 
     return commands.check(_pred)
+
+
+def guild_owner():
+    def _pred(ctx: commands.Context):
+        if ctx.guild is None:
+            return False
+
+        return ctx.author.id == ctx.guild.owner_id
+
+    return commands.check(_pred)
