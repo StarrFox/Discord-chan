@@ -33,3 +33,13 @@ def guild_owner():
         return ctx.author.id == ctx.guild.owner_id
 
     return commands.check(_pred)
+
+
+def feature_enabled(feature: str):
+    async def _pred(ctx: commands.Context):
+        if ctx.guild is None:
+            return False
+
+        return await ctx.bot.is_feature_enabled(ctx.guild.id, feature)
+
+    return commands.check(_pred)

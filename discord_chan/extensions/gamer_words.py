@@ -52,7 +52,6 @@
 # THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import asyncio
-import collections
 import random
 import re
 from string import ascii_letters
@@ -61,6 +60,10 @@ import discord
 import unidecode
 from discord.ext import commands
 
+import discord_chan
+
+
+FEATURENAME = "gamer_words"
 GAMER_REGEX = r"(b+\s*r+\s*u+\s*h+)"
 # noinspection SpellCheckingInspection
 CATCHPHRASES = [
@@ -666,39 +669,40 @@ class GamerReplacer:
 
 
 class GamerWords(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: discord_chan.DiscordChan):
         self.bot = bot
-        self.server_toggles = {}
 
         bot.loop.create_task(self.clear_usernames())
         self._webhook_lock = asyncio.Lock()
 
     @commands.group(invoke_without_command=True, aliases=["gamerwords"])
-    async def gw(self, context):
+    @commands.guild_only()
+    async def gw(self, context: commands.Context):
         """
         Base command for gamerwords commands
         """
-        await context.send_help("gamerwords")
+        assert context.guild is not None
 
-    # TODO: save toggles to db
+        if await self.bot.is_feature_enabled(context.guild.id, FEATURENAME):
+            return await context.send("Gamer words is enabled for this guild")
+        
+        return await context.send("Gamer words is disabled for this guild")
+
     @gw.command()
-    @commands.is_owner()
-    async def toggle(self, context):
+    @discord_chan.checks.guild_owner()
+    @commands.guild_only()
+    async def toggle(self, context: discord_chan.SubContext):
         """
         Toggle the replacer for this server
         """
-        if self.server_toggles.get(context.guild.id, None) is None:
-            self.server_toggles[context.guild.id] = False
+        assert context.guild is not None
 
-        current = self.server_toggles[context.guild.id]
+        if await self.bot.is_feature_enabled(context.guild.id, FEATURENAME):
+            await self.bot.set_feature_disabled(context.guild.id, FEATURENAME)
+            return await context.confirm("Gamer words disabled")
 
-        if current is True:
-            self.server_toggles[context.guild.id] = False
-            await context.send("Toggled off")
-
-        else:
-            self.server_toggles[context.guild.id] = True
-            await context.send("Toggled on")
+        await self.bot.set_feature_enabled(context.guild.id, FEATURENAME)
+        return await context.confirm("Gamer words enabled")
 
     @staticmethod
     def has_gamer_words(string):
@@ -718,24 +722,25 @@ class GamerWords(commands.Cog):
             except discord.HTTPException:
                 return None
 
-
     @commands.Cog.listener()
     async def on_message(self, message):
-        if self.skip_if(message):
+        if await self.skip_if(message):
             return
+
         await self.handle_new_gamer_message(message)
 
     @commands.Cog.listener()
     async def on_message_edit(self, old_message, new_message):
-        if self.skip_if(old_message):
+        if await self.skip_if(old_message):
             return
+
         await self.handle_new_gamer_message(new_message)
 
-    def skip_if(self, message):
+    async def skip_if(self, message) -> bool:
         return (
             message.author.bot
             or not message.guild
-            or self.server_toggles.get(message.guild.id, None) in (None, False)
+            or not await self.bot.is_feature_enabled(message.guild.id, FEATURENAME)
         )
 
     async def handle_new_gamer_message(self, message):
