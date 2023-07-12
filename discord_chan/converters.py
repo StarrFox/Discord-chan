@@ -4,6 +4,7 @@ from typing import Optional
 
 import discord
 from discord.ext import commands
+from discord.ext.commands.context import Context
 
 from . import utils
 
@@ -109,6 +110,38 @@ class BetweenConverter(commands.Converter):
         raise commands.BadArgument(
             "{} is not between {} and {}".format(argument, self.num1, self.num2)
         )
+
+
+class UnderConverter(commands.Converter):
+    def __init__(self, under: int):
+        self.under = under
+
+    async def convert(self, _, argument: str) -> int:
+        try:
+            converted_argument = int(argument)
+        except ValueError:
+            raise commands.BadArgument(f"{argument} is not a valid number")
+        
+        if converted_argument < self.under:
+            return converted_argument
+        
+        raise commands.BadArgument(f"{argument} is not under {self.under}")
+
+
+class OverConverter(commands.Converter):
+    def __init__(self, over: int):
+        self.over = over
+
+    async def convert(self, _, argument: str) -> int:
+        try:
+            converted_argument = int(argument)
+        except ValueError:
+            raise commands.BadArgument(f"{argument} is not a valid number")
+        
+        if converted_argument > self.over:
+            return converted_argument
+        
+        raise commands.BadArgument(f"{argument} is not over {self.over}")
 
 
 class MaxLengthConverter(commands.Converter):

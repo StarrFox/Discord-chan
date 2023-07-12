@@ -1,10 +1,13 @@
 import random
 from typing import TYPE_CHECKING, Literal, Optional
+import typing
 
 import discord
 from discord.ext import commands
 from loguru import logger
 
+import discord_chan
+from discord_chan.converters import OverConverter
 from discord_chan.menus import DCMenuPages, NormalPageSource
 
 if TYPE_CHECKING:
@@ -16,18 +19,9 @@ class Gambling(commands.Cog):
         super().__init__()
         self.bot = bot
 
-    async def has_amount(self, user_id, amount: int) -> bool:
+    async def has_amount(self, user_id: int, amount: int) -> bool:
         balance = await self.bot.database.get_coin_balance(user_id)
         return balance >= amount
-
-    @commands.command()
-    @commands.is_owner()
-    async def add(self, ctx: "SubContext", member: discord.Member, amount: int):
-        """
-        Add coins to a member
-        """
-        await self.bot.database.add_coins(member.id, amount)
-        await ctx.send(f"Added {amount} to {member}'s coin balance")
 
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
@@ -43,6 +37,39 @@ class Gambling(commands.Cog):
         amount = await self.bot.database.get_coin_balance(member.id)
         plural = amount != 1
         await ctx.send(f"{member} has {amount} coin{'s' if plural else ''}")
+
+    # this is called admin_add to not be confused with the give command
+    @coins.command()
+    @discord_chan.checks.guild_owner()
+    async def admin_add(self, ctx: "SubContext", member: discord.Member, amount: int):
+        """
+        Add coins to a member
+        """
+        await self.bot.database.add_coins(member.id, amount)
+        await ctx.send(f"Added {amount} to {member}'s coin balance")
+
+    @coins.command()
+    async def give(
+        self,
+        ctx: "SubContext",
+        member: discord.Member,
+        amount: typing.Annotated[int, OverConverter(0)]
+        ):
+        """Give some of your coins to another member"""
+        if not await self.has_amount(ctx.author.id, amount):
+            return await ctx.send(f"You don't have enough coins to give {amount}")
+
+        singular = "" if amount == 1 else "s"
+
+        if await ctx.prompt(
+            f"Are you sure you want to send {amount} coin{singular} to {member.mention}",
+            owner_id=ctx.author.id
+            ):
+            await self.bot.database.remove_coins(ctx.author.id, amount)
+            await self.bot.database.add_coins(member.id, amount)
+            await ctx.send("sent")
+        else:
+            await ctx.send("Sending canceled")
 
     @coins.command(name="all")
     async def view_all_aacoins(self, ctx: "SubContext"):
