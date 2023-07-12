@@ -57,7 +57,13 @@ class Snipe(commands.Cog, name="snipe"):
 
     @commands.bot_has_permissions(embed_links=True)
     @commands.group(name="snipe", invoke_without_command=True)
-    async def snipe_command(self, ctx: commands.Context, index: Optional[int] = 0, *, query_flags: SnipeQueryFlags):
+    async def snipe_command(
+        self,
+        ctx: commands.Context,
+        index: Optional[int] = 0,
+        *,
+        query_flags: SnipeQueryFlags,
+    ):
         """
         Snipe for edited/purged/deleted messages
 
@@ -70,7 +76,7 @@ class Snipe(commands.Cog, name="snipe"):
         assert index is not None
 
         negative = index < 0
- 
+
         if abs(index) > 10_000_000:
             return await ctx.send(
                 f"{index} is over the index cap of (-)10,000,000; do you really have that many snipes?"
@@ -80,7 +86,9 @@ class Snipe(commands.Cog, name="snipe"):
             assert isinstance(ctx.channel, discord.TextChannel)
 
             if query_flags.channel.nsfw and not ctx.channel.nsfw:
-                raise commands.BadArgument("Cannot snipe a nsfw channel from a non-nsfw channel")
+                raise commands.BadArgument(
+                    "Cannot snipe a nsfw channel from a non-nsfw channel"
+                )
 
             snipe_channel = query_flags.channel
         else:
@@ -92,7 +100,7 @@ class Snipe(commands.Cog, name="snipe"):
             limit=abs(index) + 1,
             negative=negative,
             author=query_flags.author.id if query_flags.author else None,
-            mode=query_flags.mode
+            mode=query_flags.mode,
         )
         total_snipes = len(snipes)
 

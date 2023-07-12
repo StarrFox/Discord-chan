@@ -8,7 +8,6 @@ from discord.ext.commands.context import Context
 
 from . import utils
 
-
 WEEKDAYS = ["monday", "tuesday", "wendsday", "thursday", "friday", "saturday", "sunday"]
 
 WEEKDAY_ABBRS = {d.replace("day", ""): d for d in WEEKDAYS}
@@ -121,10 +120,10 @@ class UnderConverter(commands.Converter):
             converted_argument = int(argument)
         except ValueError:
             raise commands.BadArgument(f"{argument} is not a valid number")
-        
+
         if converted_argument < self.under:
             return converted_argument
-        
+
         raise commands.BadArgument(f"{argument} is not under {self.under}")
 
 
@@ -137,10 +136,10 @@ class OverConverter(commands.Converter):
             converted_argument = int(argument)
         except ValueError:
             raise commands.BadArgument(f"{argument} is not a valid number")
-        
+
         if converted_argument > self.over:
             return converted_argument
-        
+
         raise commands.BadArgument(f"{argument} is not over {self.over}")
 
 
@@ -203,7 +202,7 @@ class ImageUrlConverter(commands.Converter):
 
             else:
                 # I couldn't get the type checking for this to work
-                return member.display_avatar.with_static_format(self.force_format).url # type: ignore
+                return member.display_avatar.with_static_format(self.force_format).url  # type: ignore
 
         try:
             message = await commands.MessageConverter().convert(ctx, argument)
@@ -224,7 +223,7 @@ class ImageUrlConverter(commands.Converter):
 
                 elif embed.image:
                     # .url should always be set in this case
-                    return embed.image.url # type: ignore
+                    return embed.image.url  # type: ignore
 
             raise commands.BadArgument("Message has no attachments/embed images.")
 
@@ -287,7 +286,7 @@ class TimeConverter(commands.Converter):
             if value is None:
                 continue
 
-            int_value = int(digit_re.match(value).group(0)) # type: ignore
+            int_value = int(digit_re.match(value).group(0))  # type: ignore
 
             if group == "years":
                 current_year = datetime.datetime.utcnow().year

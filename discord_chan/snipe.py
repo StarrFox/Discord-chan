@@ -16,7 +16,9 @@ class SnipeMode(Enum):
         try:
             return cls[argument]
         except KeyError:
-            raise commands.BadArgument(f"{argument} is not a valid snipe mode (edited/purged/deleted)")
+            raise commands.BadArgument(
+                f"{argument} is not a valid snipe mode (edited/purged/deleted)"
+            )
 
 
 @dataclass

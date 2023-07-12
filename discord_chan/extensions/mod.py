@@ -88,7 +88,7 @@ class Mod(commands.Cog, name="mod"):
         Base command for role commands
         """
         await ctx.send_help("role")
-    
+
     # @role.command()
     # @commands.bot_has_guild_permissions(manage_roles=True)
     # @commands.has_guild_permissions(manage_roles=True)
@@ -99,7 +99,9 @@ class Mod(commands.Cog, name="mod"):
     #     pass
 
     @staticmethod
-    def get_perm_diff(default_perms: discord.Permissions, role_perms: discord.Permissions) -> list[str]:
+    def get_perm_diff(
+        default_perms: discord.Permissions, role_perms: discord.Permissions
+    ) -> list[str]:
         default_role_permissions = dict(default_perms)
 
         differences = []
@@ -115,7 +117,9 @@ class Mod(commands.Cog, name="mod"):
         Manage role permissions
         """
         assert ctx.guild is not None
-        differences = self.get_perm_diff(ctx.guild.default_role.permissions, role.permissions)
+        differences = self.get_perm_diff(
+            ctx.guild.default_role.permissions, role.permissions
+        )
         difference_message = ", ".join(map(lambda perm: "`" + perm + "`", differences))
         return await ctx.send(f"Enabled permissions: {difference_message}")
 
@@ -130,9 +134,13 @@ class Mod(commands.Cog, name="mod"):
 
         for role in ctx.guild.roles:
             if role != ctx.guild.default_role:
-                differences = self.get_perm_diff(ctx.guild.default_role.permissions, role.permissions)
+                differences = self.get_perm_diff(
+                    ctx.guild.default_role.permissions, role.permissions
+                )
                 if differences:
-                    difference_message = ", ".join(map(lambda perm: "`" + perm + "`", differences))
+                    difference_message = ", ".join(
+                        map(lambda perm: "`" + perm + "`", differences)
+                    )
                     message_parts.append(f"{role.name}: " + difference_message)
 
         return await ctx.send("\n".join(message_parts))

@@ -62,7 +62,6 @@ from discord.ext import commands
 
 import discord_chan
 
-
 FEATURENAME = "gamer_words"
 GAMER_REGEX = r"(b+\s*r+\s*u+\s*h+)"
 # noinspection SpellCheckingInspection
@@ -685,7 +684,7 @@ class GamerWords(commands.Cog):
 
         if await self.bot.is_feature_enabled(context.guild.id, FEATURENAME):
             return await context.send("Gamer words is enabled for this guild")
-        
+
         return await context.send("Gamer words is disabled for this guild")
 
     @gw.command()

@@ -1,5 +1,5 @@
-from collections import defaultdict
 import pathlib
+from collections import defaultdict
 from datetime import datetime
 from typing import Optional, Type, Union
 
@@ -46,18 +46,24 @@ class DiscordChan(commands.AutoShardedBot):
     async def is_feature_enabled(self, guild_id: int, feature: str) -> bool:
         if self._enabled_features_cache.get(guild_id):
             return feature in self._enabled_features_cache[guild_id]
-        
+
         # note: empty list is accepted
-        self._enabled_features_cache[guild_id] = await self.database.get_guild_enabled_features(guild_id)
+        self._enabled_features_cache[
+            guild_id
+        ] = await self.database.get_guild_enabled_features(guild_id)
         return feature in self._enabled_features_cache[guild_id]
 
     async def set_feature_enabled(self, guild_id: int, feature: str):
         await self.database.enable_guild_enabled_feature(guild_id, feature)
-        self._enabled_features_cache[guild_id] = await self.database.get_guild_enabled_features(guild_id)
+        self._enabled_features_cache[
+            guild_id
+        ] = await self.database.get_guild_enabled_features(guild_id)
 
     async def set_feature_disabled(self, guild_id: int, feature: str):
         await self.database.disable_guild_enabled_feature(guild_id, feature)
-        self._enabled_features_cache[guild_id] = await self.database.get_guild_enabled_features(guild_id)
+        self._enabled_features_cache[
+            guild_id
+        ] = await self.database.get_guild_enabled_features(guild_id)
 
     def get_message(self, message_id: int) -> Optional[discord.Message]:
         """

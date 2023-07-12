@@ -1,6 +1,6 @@
 import random
-from typing import TYPE_CHECKING, Literal, Optional
 import typing
+from typing import TYPE_CHECKING, Literal, Optional
 
 import discord
 from discord.ext import commands
@@ -53,8 +53,8 @@ class Gambling(commands.Cog):
         self,
         ctx: "SubContext",
         member: discord.Member,
-        amount: typing.Annotated[int, OverConverter(0)]
-        ):
+        amount: typing.Annotated[int, OverConverter(0)],
+    ):
         """Give some of your coins to another member"""
         if not await self.has_amount(ctx.author.id, amount):
             return await ctx.send(f"You don't have enough coins to give {amount}")
@@ -63,8 +63,8 @@ class Gambling(commands.Cog):
 
         if await ctx.prompt(
             f"Are you sure you want to send {amount} coin{singular} to {member.mention}",
-            owner_id=ctx.author.id
-            ):
+            owner_id=ctx.author.id,
+        ):
             await self.bot.database.remove_coins(ctx.author.id, amount)
             await self.bot.database.add_coins(member.id, amount)
             await ctx.send("sent")
