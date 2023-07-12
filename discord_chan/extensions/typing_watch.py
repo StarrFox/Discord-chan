@@ -63,20 +63,19 @@ class TypingWatch(commands.Cog, name="typing_watch"):
             return await ctx.send("Typing watch is enabled for this guild")
         else:
             return await ctx.send("Typing watch is not enabled for this guild")
-        
-    @tw.command()
-    @discord_chan.checks.guild_owner()
-    async def enable(self, ctx: discord_chan.SubContext):
-        assert ctx.guild is not None
-        await self.bot.set_feature_enabled(ctx.guild.id, FEATURE_NAME)
-        await ctx.confirm("Typing watch enabled")
 
     @tw.command()
     @discord_chan.checks.guild_owner()
-    async def disable(self, ctx: discord_chan.SubContext):
+    async def toggle(self, ctx: discord_chan.SubContext):
+        """Toggle typing watch status"""
         assert ctx.guild is not None
-        await self.bot.set_feature_disabled(ctx.guild.id, FEATURE_NAME)
-        await ctx.confirm("Typing watch disabled")
+
+        if await self.bot.is_feature_enabled(ctx.guild.id, FEATURE_NAME):
+            await self.bot.set_feature_disabled(ctx.guild.id, FEATURE_NAME)
+            return await ctx.confirm("Typing watch disabled")
+
+        await self.bot.set_feature_enabled(ctx.guild.id, FEATURE_NAME)
+        return await ctx.confirm("Typing watch enabled")
 
 
 async def setup(bot: discord_chan.DiscordChan):
