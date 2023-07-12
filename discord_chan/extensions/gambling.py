@@ -72,9 +72,9 @@ class Gambling(commands.Cog):
             await ctx.send("Sending canceled")
 
     @coins.command(name="all")
-    async def view_all_aacoins(self, ctx: "SubContext"):
+    async def view_all_coins(self, ctx: "SubContext"):
         """
-        View all aacoins sorted by amount.
+        View all coins sorted by amount.
         """
         lb = await self.bot.database.get_all_coin_balances()
 
