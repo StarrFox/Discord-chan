@@ -22,6 +22,7 @@ class Games(commands.Cog, name="games"):
     @commands.command(aliases=["c4"])
     @commands.bot_has_permissions(add_reactions=True)
     @commands.max_concurrency(1, commands.BucketType.user)
+    @commands.guild_only()
     async def connect4(self, ctx: SubContext, member: discord.Member):
         """
         Play connect4 with another member

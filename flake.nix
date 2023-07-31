@@ -91,6 +91,7 @@
             black
             isort
             python3Packages.vulture
+            python3Packages.python-lsp-server
           ];
         };
       };
