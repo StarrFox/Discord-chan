@@ -33,6 +33,12 @@
       }: let
         spkgs = starrpkgs.packages.${system};
 
+        # python311Optimized = pkgs.python311.override {
+        #     enableOptimizations = true;
+        #     reproducibleBuild = false;
+        #     self = python311Optimized;
+        # };
+
         customOverrides = self: super: {
           uwuify = super.uwuify.overridePythonAttrs (
             old: {
@@ -66,13 +72,14 @@
             }
           );
           # this wand version patched the imageMagick library path
-          wand = pkgs.python3Packages.wand;
-          pyenchant = pkgs.python3Packages.pyenchant;
+          wand = pkgs.python311.pkgs.wand;
+          pyenchant = pkgs.python311.pkgs.pyenchant;
         };
       in {
         packages.discord_chan = pkgs.poetry2nix.mkPoetryApplication {
           projectDir = ./.;
           preferWheels = true;
+          python = pkgs.python311;
           overrides = [
             pkgs.poetry2nix.defaultPoetryOverrides
             customOverrides
