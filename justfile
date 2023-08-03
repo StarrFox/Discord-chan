@@ -23,7 +23,8 @@ bump:
 # update deps
 update:
     nix flake update
-    poetry update
+    # the poetry devs dont allow this with normal update for some unknown reason
+    poetry up --latest
 
 # run debug build
 run:

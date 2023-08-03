@@ -94,14 +94,15 @@
         devShells.default = pkgs.mkShell {
           name = "discord-chan";
           packages = with pkgs; [
-            poetry
+            (poetry.withPlugins(ps: with ps; [poetry-plugin-up]))
+            python311
             spkgs.commitizen
             just
             alejandra
-            black
-            isort
-            python3Packages.vulture
-            python3Packages.python-lsp-server
+            python311.pkgs.black
+            python311.pkgs.isort
+            python311.pkgs.vulture
+            python311.pkgs.python-lsp-server
           ];
         };
       };
