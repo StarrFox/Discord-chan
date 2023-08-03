@@ -73,7 +73,6 @@
           );
           # this wand version patched the imageMagick library path
           wand = pkgs.python311.pkgs.wand;
-          pyenchant = pkgs.python311.pkgs.pyenchant;
         };
       in {
         packages.discord_chan = pkgs.poetry2nix.mkPoetryApplication {

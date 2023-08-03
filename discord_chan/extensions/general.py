@@ -20,11 +20,6 @@ from discord_chan import (
     SubContext,
 )
 
-try:
-    from enchant.checker import SpellChecker
-except ImportError:
-    SpellChecker = None
-
 
 class General(commands.Cog, name="general"):
     """General use commands"""
@@ -74,22 +69,6 @@ class General(commands.Cog, name="general"):
     async def uwuify(self, ctx: commands.Context, *, message: str):
         """UwUifies text"""
         await ctx.send(uwuify.uwu(message, flags=uwuify.SMILEY))
-
-    # TODO: figure out how to include dictonary
-    # @commands.command(aliases=["spell"])
-    # async def spellcheck(self, ctx: commands.Context, *, text: str):
-    #     """
-    #     Spellcheck text
-    #     """
-    #     if SpellChecker is None:
-    #         return await ctx.send("Spell checking is not enabled.")
-
-    #     checker = SpellChecker("en_US", text)
-
-    #     for error in checker:
-    #         error.replace(str(error.suggest()))
-
-    #     await ctx.send(str(checker.get_text()))
 
     @commands.command()
     @commands.guild_only()
