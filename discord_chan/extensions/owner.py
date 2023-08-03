@@ -1,3 +1,7 @@
+from io import BytesIO
+
+import aiohttp
+import discord
 from discord.ext import commands
 
 from discord_chan import DiscordChan, SubContext
@@ -35,6 +39,19 @@ class Owner(commands.Cog, name="owner"):
 
         command.enabled = False
         await ctx.confirm("Command disabled.")
+
+    @commands.command()
+    async def resend_file(self, ctx: SubContext, url: str):
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                data = await response.read()
+
+        try:
+            filename = url.split("/")[-1]
+        except IndexError:
+            filename = None
+
+        await ctx.send(file=discord.File(BytesIO(data), filename))
 
 
 async def setup(bot):
