@@ -27,7 +27,7 @@ update:
 
 # run debug build
 run:
-    poetry run discord-chan --debug
+    nix run . -- --debug
 
 # format
 format:
