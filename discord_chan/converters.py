@@ -1,32 +1,16 @@
-import datetime
 import re
 from typing import Optional
 
 import discord
 from discord.ext import commands
-from discord.ext.commands.context import Context
+from PIL.Image import Image
 
 from . import utils
+from .image import FileTooLarge, InvalidImageType, url_to_image
 
 WEEKDAYS = ["monday", "tuesday", "wendsday", "thursday", "friday", "saturday", "sunday"]
 
 WEEKDAY_ABBRS = {d.replace("day", ""): d for d in WEEKDAYS}
-
-TIME_REGEX = re.compile(
-    r"(?P<days>\d+ ?d(ay)?s?)|(?P<months>\d+ ?mo(nth)?s?)|(?P<minutes>\d+ ?m(in)?(ute)?s?)|"
-    r"(?P<years>\d+ ?y(ear)?s?)|(?P<seconds>\d+ ?s(ec)?(ond)?s?)|(?P<hours>\d+ ?h(our)?s?)|(?P<weeks>\d+ ?w(eek)?s?)"
-)
-
-
-TIME_TABLE = {
-    "seconds": 1,
-    "minutes": 60,
-    "hours": 3600,
-    "days": 86400,
-    "weeks": 604800,
-    "months": 2592000,
-    "years": 31536000,
-}
 
 
 class FetchedUser(commands.Converter):
@@ -253,6 +237,60 @@ class ImageUrlConverter(commands.Converter):
         )
 
 
+async def last_image_url(ctx: commands.Context) -> str:
+    if ctx.message.attachments:
+        return ctx.message.attachments[0].url
+
+    async for message in ctx.history(limit=10):
+        if message.attachments:
+            return message.attachments[0].url
+
+        if message.embeds:
+            embed = message.embeds[0]
+
+            if embed.type == "image":
+                if embed.url:
+                    return embed.url
+
+            elif embed.image is not None:
+                assert embed.image.url is not None
+                return embed.image.url
+
+    raise commands.CheckFailure("No image attached or in history")
+
+
+LastImageUrl = commands.parameter(
+    default=last_image_url,
+    displayed_default="last image",
+)
+
+
+class ImageConverter(ImageUrlConverter):
+    async def convert(self, ctx: commands.Context, argument: str) -> Image:
+        url = await super().convert(ctx, argument)
+
+        try:
+            return await url_to_image(url)
+
+        except (FileTooLarge, InvalidImageType) as e:
+            raise commands.BadArgument(str(e))
+
+
+async def last_image(ctx: commands.Context):
+    url = await last_image_url(ctx)
+    try:
+        return await url_to_image(url)
+
+    except (FileTooLarge, InvalidImageType) as e:
+        raise commands.BadArgument(str(e))
+
+
+LastImage = commands.parameter(
+    default=last_image,
+    displayed_default="last image",
+)
+
+
 class EmbedConverter(commands.MessageConverter):
     async def convert(self, ctx: commands.Context, argument: str):
         message = await super().convert(ctx, argument)
@@ -261,55 +299,3 @@ class EmbedConverter(commands.MessageConverter):
             raise commands.BadArgument("Message had no embed.")
 
         return message.embeds[0]
-
-
-class TimeConverter(commands.Converter):
-    """
-    Converts a time phrase to a number of seconds
-
-    1min -> 60
-    1m   -> 60
-    2m   -> 120
-    """
-
-    async def convert(self, ctx: commands.Context, argument: str) -> int:
-        match = TIME_REGEX.match(argument)
-
-        if not match:
-            raise commands.BadArgument(f"{argument} is not a valid time")
-
-        total = 0
-
-        digit_re = re.compile(r"\d+")
-
-        for group, value in match.groupdict().items():
-            if value is None:
-                continue
-
-            int_value = int(digit_re.match(value).group(0))  # type: ignore
-
-            if group == "years":
-                current_year = datetime.datetime.utcnow().year
-
-                # Leap year
-                if current_year % 4 == 0:
-                    total += (TIME_TABLE["years"] * int_value) + TIME_TABLE["days"]
-
-                else:
-                    total += TIME_TABLE["years"] * int_value
-
-            elif group == "months":
-                now = datetime.datetime.utcnow()
-
-                if now.month == 12:
-                    next_month = now.replace(month=1, year=now.year + 1)
-
-                else:
-                    next_month = now.replace(month=now.month + 1)
-
-                total += int((next_month - now).total_seconds())
-
-            else:
-                total += TIME_TABLE[group] * int_value
-
-        return total

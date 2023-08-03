@@ -93,7 +93,7 @@
         devShells.default = pkgs.mkShell {
           name = "discord-chan";
           packages = with pkgs; [
-            (poetry.withPlugins(ps: with ps; [poetry-plugin-up]))
+            (poetry.withPlugins (ps: with ps; [poetry-plugin-up]))
             python311
             spkgs.commitizen
             just
