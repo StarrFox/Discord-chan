@@ -67,6 +67,7 @@
           );
           # this wand version patched the imageMagick library path
           wand = pkgs.python3Packages.wand;
+          pyenchant = pkgs.python3Packages.pyenchant;
         };
       in {
         packages.discord_chan = pkgs.poetry2nix.mkPoetryApplication {
@@ -77,6 +78,8 @@
             customOverrides
           ];
           groups = ["images"];
+          # I can't figure out how to give it a dictonary
+          #buildInputs = with pkgs; [hunspell hunspellDicts.en_US];
         };
 
         packages.default = self'.packages.discord_chan;
