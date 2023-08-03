@@ -50,7 +50,7 @@ class Images(commands.Cog, name="images"):
         )
 
     @commands.command(aliases=["diff"])
-    @commands.cooldown(1, 30, commands.cooldowns.BucketType.user)
+    @commands.cooldown(1, 1, commands.cooldowns.BucketType.user)
     async def difference(
         self,
         ctx: SubContext,
