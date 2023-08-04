@@ -104,36 +104,15 @@ class EmoteManager(commands.Cog):
 
         self.bot.loop.create_task(close())
 
-    public_commands = set()
-
-    # noinspection PyDefaultArgument
-    def public(
-        command, public_commands=public_commands
-    ):  # resolve some kinda scope issue that i don't understand
-        public_commands.add(command.qualified_name)
-        return command
-
     async def cog_check(self, context):
+        # only allow in guilds
         if not context.guild:
             raise commands.NoPrivateMessage
 
-        # we can't just do `context.command in self.public_commands` here
-        # because apparently Command.__eq__ is not defined
-        if context.command.qualified_name in self.public_commands:
-            return True
-
-        if (
-            not context.author.guild_permissions.manage_emojis
-            or not context.guild.me.guild_permissions.manage_emojis
-        ):
-            raise errors.MissingManageEmojisPermission
-
-        return True
-
     @commands.Cog.listener()
-    async def on_command_error(self, context, error):
+    async def on_command_error(self, context: commands.Context, error):
         if isinstance(error, errors.EmoteManagerError):
-            await context.send(error)
+            await context.send(str(error))
 
         if isinstance(error, commands.NoPrivateMessage):
             await context.send(f"❌ Sorry, this command may only be used in a server.")
@@ -153,7 +132,9 @@ class EmoteManager(commands.Cog):
         await context.send(LICENSE_NOTICE)
 
     @em.command(usage="[name] <image URL or custom emote>")
-    async def add(self, context, *args):
+    @commands.has_permissions(manage_expressions=True)
+    @commands.bot_has_permissions(manage_expressions=True)
+    async def add(self, context: commands.Context, *args: str):
         """Add a new emote to this server.
 
         You can use it like this:
@@ -172,7 +153,9 @@ class EmoteManager(commands.Cog):
         await context.send(message)
 
     @em.command(name="add-these")
-    async def add_these(self, context, *emotes):
+    @commands.has_permissions(manage_expressions=True)
+    @commands.bot_has_permissions(manage_expressions=True)
+    async def add_these(self, context: commands.Context, *emotes):
         """Add a bunch of custom emotes."""
 
         ran = False
@@ -181,7 +164,7 @@ class EmoteManager(commands.Cog):
         for match in re.finditer(utils.emote.RE_CUSTOM_EMOTE, "".join(emotes)):
             ran = True
             animated, name, id = match.groups()
-            image_url = utils.emote.url(id, animated=animated)
+            image_url = utils.emote.url(id, animated=bool(animated))
             async with context.typing():
                 message = await self.add_safe(
                     context, name, image_url, context.author.id
@@ -194,12 +177,12 @@ class EmoteManager(commands.Cog):
         await context.message.add_reaction("✅")
 
     @classmethod
-    def parse_add_command_args(cls, context, args):
+    def parse_add_command_args(cls, context: commands.Context, args: tuple[str, ...]):
         if context.message.attachments:
             return cls.parse_add_command_attachment(context, args)
 
         elif len(args) == 1:
-            match = utils.emote.RE_CUSTOM_EMOTE.match(args[0])
+            match: re.Match[str] | None = utils.emote.RE_CUSTOM_EMOTE.match(args[0])
             if match is None:
                 raise commands.BadArgument(
                     "Error: I expected a custom emote as the first argument, "
@@ -210,7 +193,7 @@ class EmoteManager(commands.Cog):
                 )
             else:
                 animated, name, id = match.groups()
-                url = utils.emote.url(id, animated=animated)
+                url = utils.emote.url(id, animated=bool(animated))
 
             return name, url
 
@@ -220,15 +203,14 @@ class EmoteManager(commands.Cog):
             if match is None:
                 url = utils.strip_angle_brackets(args[1])
             else:
-                url = utils.emote.url(match["id"], animated=match["animated"])
+                url = utils.emote.url(match["id"], animated=bool(match["animated"]))
 
             return name, url
 
-        elif not args:
-            raise commands.BadArgument("Your message had no emotes and no name!")
+        raise commands.BadArgument("Your message had no emotes and no name!")
 
     @classmethod
-    def parse_add_command_attachment(cls, context, args):
+    def parse_add_command_attachment(cls, context: commands.Context, args):
         attachment = context.message.attachments[0]
         name = cls.format_emote_filename("".join(args) if args else attachment.filename)
         url = attachment.url
@@ -236,16 +218,15 @@ class EmoteManager(commands.Cog):
         return name, url
 
     @staticmethod
-    def format_emote_filename(filename):
+    def format_emote_filename(filename) -> str:
         """format a filename to an emote name as discord does when you upload an emote image"""
         left, sep, right = posixpath.splitext(filename)[0].rpartition("-")
         return (left or right).replace(" ", "")
 
-    @public
     @emote_type_filter_default
     @em.command()
     @commands.bot_has_permissions(attach_files=True)
-    async def export(self, context, image_type="all"):
+    async def export(self, context: commands.Context, image_type="all"):
         """Export all emotes from this server to a zip file, suitable for use with the import command.
 
         If “animated” is provided, only include animated emotes.
@@ -254,8 +235,9 @@ class EmoteManager(commands.Cog):
 
         This command requires the “attach files” permission.
         """
+        # TODO: remove the weird emote_type_filter_default thing
         # noinspection PyTypeChecker
-        emotes = list(filter(image_type, context.guild.emojis))
+        emotes = list(filter(image_type, context.guild.emojis)) # type: ignore
         if not emotes:
             raise commands.BadArgument(
                 "No emotes of that type were found in this server."
@@ -265,8 +247,8 @@ class EmoteManager(commands.Cog):
             async for zip_file in self.archive_emotes(context, emotes):
                 await context.send(file=zip_file)
 
-    async def archive_emotes(self, context, emotes):
-        filesize_limit = context.guild.filesize_limit
+    async def archive_emotes(self, context: commands.Context, emotes):
+        filesize_limit = context.guild.filesize_limit # type: ignore
         discrims = collections.defaultdict(int)
         downloaded = collections.deque()
 
@@ -327,13 +309,15 @@ class EmoteManager(commands.Cog):
                     break
 
             out.seek(0)
-            yield discord.File(out, f"emotes-{context.guild.id}-{count}.zip")
+            yield discord.File(out, f"emotes-{context.guild.id}-{count}.zip") # type: ignore
             count += 1
 
     @em.command(
         name="import", aliases=["add-zip", "add-tar", "add-from-zip", "add-from-tar"]
     )
-    async def import_(self, context, url=None):
+    @commands.has_permissions(manage_expressions=True)
+    @commands.bot_has_permissions(manage_expressions=True)
+    async def import_(self, context: commands.Context, url=None):
         """Add several emotes from a .zip or .tar archive.
 
         You may either pass a URL to an archive or upload one as an attachment.
@@ -359,8 +343,7 @@ class EmoteManager(commands.Cog):
             # so they know when we're done
             await context.message.add_reaction("✅")
 
-    # noinspection PyTypeChecker
-    async def add_from_archive(self, context, archive):
+    async def add_from_archive(self, context: commands.Context, archive):
         limit = (
             50_000_000  # prevent someone from trying to make a giant compressed file
         )
@@ -374,8 +357,9 @@ class EmoteManager(commands.Cog):
             if error is None:
                 name = self.format_emote_filename(posixpath.basename(name))
                 async with context.typing():
+                    # we can ignore the type here because content should be set if error is None
                     message = await self.add_safe_bytes(
-                        context, name, context.author.id, img
+                        context, name, context.author.id, img # type: ignore
                     )
                 await context.send(message)
                 continue
@@ -390,14 +374,14 @@ class EmoteManager(commands.Cog):
 
             await context.send(f"{name}: {error}")
 
-    async def add_safe(self, context, name, url, author_id, *, reason=None):
+    async def add_safe(self, context: commands.Context, name, url, author_id, *, reason=None):
         """Try to add an emote. Returns a string that should be sent to the user."""
         try:
             image_data = await self.fetch_safe(url)
         except errors.InvalidFileError:
             raise errors.InvalidImageError
 
-        if type(image_data) is str:  # error case
+        if isinstance(image_data, str):  # error case
             return image_data
         return await self.add_safe_bytes(
             context, name, author_id, image_data, reason=reason
@@ -417,26 +401,26 @@ class EmoteManager(commands.Cog):
             raise errors.HTTPException(exc.status)
 
     async def add_safe_bytes(
-        self, context, name, author_id, image_data: bytes, *, reason=None
+        self, context: commands.Context, name, author_id, image_data: bytes, *, reason=None
     ):
         """Try to add an emote from bytes. On error, return a string that should be sent to the user.
 
         If the image is static and there are not enough free static slots, convert the image to a gif instead.
         """
         counts = collections.Counter(
-            map(operator.attrgetter("animated"), context.guild.emojis)
+            map(operator.attrgetter("animated"), context.guild.emojis) # type: ignore
         )
         # >= rather than == because there are sneaky ways to exceed the limit
         if (
-            counts[False] >= context.guild.emoji_limit
-            and counts[True] >= context.guild.emoji_limit
+            counts[False] >= context.guild.emoji_limit # type: ignore
+            and counts[True] >= context.guild.emoji_limit # type: ignore
         ):
             # we raise instead of returning a string in order to abort commands that run this function in a loop
             raise commands.UserInputError("This server is out of emote slots.")
 
         static = utils_image.mime_type_for_image(image_data) != "image/gif"
         converted = False
-        if static and counts[False] >= context.guild.emoji_limit:
+        if static and counts[False] >= context.guild.emoji_limit: # type: ignore
             image_data = await utils_image.convert_to_gif(image_data)
             converted = True
 
@@ -473,7 +457,7 @@ class EmoteManager(commands.Cog):
             if mimetype not in valid_mimetypes:
                 raise errors.InvalidFileError
 
-        async def validate(request):
+        async def validate(request) -> bytes:
             try:
                 async with request as response:
                     _validate_headers(response)
@@ -500,7 +484,9 @@ class EmoteManager(commands.Cog):
         )
 
     @em.command(aliases=("delete", "delet", "rm"))
-    async def remove(self, context, emote, *emotes):
+    @commands.has_permissions(manage_expressions=True)
+    @commands.bot_has_permissions(manage_expressions=True)
+    async def remove(self, context: commands.Context, emote, *emotes):
         """Remove an emote from this server.
 
         emotes: the name of an emote or of one or more emotes you'd like to remove.
@@ -518,7 +504,9 @@ class EmoteManager(commands.Cog):
                 await context.message.add_reaction("✅")
 
     @em.command(aliases=("mv",))
-    async def rename(self, context, old, new_name):
+    @commands.has_permissions(manage_expressions=True)
+    @commands.bot_has_permissions(manage_expressions=True)
+    async def rename(self, context: commands.Context, old, new_name):
         """Rename an emote on this server.
 
         old: the name of the emote to rename, or the emote itself
@@ -538,10 +526,9 @@ class EmoteManager(commands.Cog):
 
         await context.send(rf"Emote successfully renamed to \:{new_name}:")
 
-    @public
     @emote_type_filter_default
     @em.command(aliases=("ls", "dir"))
-    async def list(self, context, image_type="all"):
+    async def list(self, context: commands.Context, image_type="all"):
         """A list of all emotes on this server.
 
         The list shows each emote and its raw form.
@@ -550,9 +537,10 @@ class EmoteManager(commands.Cog):
         If "static" is provided, only show static emotes.
         If “all” is provided, show all emotes.
         """
+        # TODO: another emote_type_filter_default usage
         # noinspection PyTypeChecker
         emotes = sorted(
-            filter(image_type, context.guild.emojis), key=lambda e: e.name.lower()
+            filter(image_type, context.guild.emojis), key=lambda e: e.name.lower() # type: ignore
         )
 
         processed = []
@@ -564,7 +552,6 @@ class EmoteManager(commands.Cog):
         self.paginators.add(paginator)
         await paginator.begin()
 
-    @public
     @em.command(aliases=["status"])
     async def stats(self, context):
         """The current number of animated and static emotes relative to the limits."""
@@ -592,7 +579,7 @@ class EmoteManager(commands.Cog):
         )
 
     @em.command(aliases=["embiggen"])
-    async def big(self, context, emote):
+    async def big(self, context: commands.Context, emote):
         """Shows the original image for the given emote.
 
         emote: the emote to embiggen.
@@ -600,21 +587,21 @@ class EmoteManager(commands.Cog):
         emote = await self.parse_emote(context, emote)
         await context.send(f"{emote.name}: {emote.url}")
 
-    async def parse_emote(self, context, name_or_emote):
+    async def parse_emote(self, context: commands.Context, name_or_emote):
         match = utils.emote.RE_CUSTOM_EMOTE.match(name_or_emote)
         if match:
             id = int(match.group("id"))
-            emote = discord.utils.get(context.guild.emojis, id=id)
+            emote = discord.utils.get(context.guild.emojis, id=id) # type: ignore
             if emote:
                 return emote
         name = name_or_emote
         return await self.disambiguate(context, name)
 
-    async def disambiguate(self, context, name):
+    async def disambiguate(self, context: commands.Context, name):
         name = name.strip(":")  # in case the user tries :foo: and foo is animated
         candidates = [
             e
-            for e in context.guild.emojis
+            for e in context.guild.emojis # type: ignore
             if e.name.lower() == name.lower() and e.require_colons
         ]
         if not candidates:

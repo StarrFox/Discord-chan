@@ -45,8 +45,8 @@ class Paginator:
         self.text_message = text_message
 
         self._stopped = None  # we use this later
-        self._embed = None
-        self._message = None
+        self._embed: discord.Embed | None = None
+        self._message: discord.Message | None = None
         self._client = ctx.bot
 
         self.footer = "Page {} of {}"
@@ -58,13 +58,13 @@ class Paginator:
             "\N{BLACK SQUARE FOR STOP}": self.stop,
         }
 
-        self._page = None
+        self._page = 0
 
     def react_check(self, reaction: discord.RawReactionActionEvent):
         if reaction.user_id != self.author.id:
             return False
 
-        if reaction.message_id != self._message.id:
+        if reaction.message_id != self._message.id: # type: ignore
             return False
 
         target_emoji = str(reaction.emoji)
@@ -78,7 +78,7 @@ class Paginator:
         self._embed = discord.Embed()
         await self.first_page()
         for button in self.navigation:
-            await self._message.add_reaction(button)
+            await self._message.add_reaction(button) # type: ignore
         while not self._stopped:
             try:
                 reaction: RawReactionActionEvent = await self._client.wait_for(
@@ -92,7 +92,7 @@ class Paginator:
 
             await asyncio.sleep(0.2)
             with contextlib.suppress(discord.HTTPException):
-                await self._message.remove_reaction(
+                await self._message.remove_reaction( # type: ignore
                     reaction.emoji, discord.Object(reaction.user_id)
                 )
 
@@ -103,33 +103,33 @@ class Paginator:
 
         if delete:
             with contextlib.suppress(discord.HTTPException):
-                await self._message.delete()
+                await self._message.delete() # type: ignore
         else:
             await self._clear_reactions()
         self._stopped = True
 
     async def _clear_reactions(self):
         try:
-            await self._message.clear_reactions()
+            await self._message.clear_reactions() # type: ignore
         except discord.Forbidden:
             for button in self.navigation:
                 with contextlib.suppress(discord.HTTPException):
-                    await self._message.remove_reaction(button, self._message.author)
+                    await self._message.remove_reaction(button, self._message.author) # type: ignore
         except discord.HTTPException:
             pass
 
     async def format_page(self):
-        self._embed.description = self.pages[self._page]
-        self._embed.set_footer(text=self.footer.format(self._page + 1, len(self.pages)))
+        self._embed.description = self.pages[self._page] # type: ignore
+        self._embed.set_footer(text=self.footer.format(self._page + 1, len(self.pages))) # type: ignore
 
         kwargs = {"embed": self._embed}
         if self.text_message:
             kwargs["content"] = self.text_message
 
         if self._message:
-            await self._message.edit(**kwargs)
+            await self._message.edit(**kwargs) # type: ignore
         else:
-            self._message = await self.target.send(**kwargs)
+            self._message = await self.target.send(**kwargs) # type: ignore
 
     async def first_page(self):
         self._page = 0

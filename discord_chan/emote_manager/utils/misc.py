@@ -16,6 +16,7 @@
 """various utilities for use within the bot"""
 
 import asyncio
+import aiohttp
 
 import discord
 
@@ -43,8 +44,15 @@ def format_http_exception(exception: discord.HTTPException):
     Invalid Form Body
     In image: File cannot be larger than 256 kb.
     """
+
+    # why is the name different between response types?
+    if isinstance(exception.response, aiohttp.ClientResponse):
+        status_code = exception.response.status
+    else:
+        status_code = exception.response.status_code
+
     return (
-        f"{exception.response.reason} (status code: {exception.response.status}):"
+        f"{exception.response.reason} (status code: {status_code}):"
         f"\n{exception.text}"
     )
 

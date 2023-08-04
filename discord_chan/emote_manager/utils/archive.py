@@ -14,19 +14,23 @@
 # along with Emote Manager. If not, see <https://www.gnu.org/licenses/>.
 
 import asyncio
-import collections
 import tarfile
 import zipfile
-from typing import Iterable, Optional, Tuple
+from typing import Iterable, Optional, Tuple, NamedTuple
+from collections.abc import AsyncGenerator, Generator
 
 from . import errors
 
-ArchiveInfo = collections.namedtuple("ArchiveInfo", "filename content error")
+
+class ArchiveInfo(NamedTuple):
+    filename: str
+    content: bytes | None
+    error: Exception | None
 
 
 def extract(
     archive, *, size_limit=None
-) -> Iterable[Tuple[str, Optional[bytes], Optional[BaseException]]]:
+) -> Iterable[ArchiveInfo]:
     """
     extract a binary file-like object representing a zip or uncompressed tar archive, yielding filenames and contents.
 
@@ -51,7 +55,7 @@ def extract(
         archive.seek(0)
 
 
-def extract_zip(archive, *, size_limit=None):
+def extract_zip(archive, *, size_limit=None) -> Generator[ArchiveInfo, object, None]:
     with zipfile.ZipFile(archive) as zip:
         members = [m for m in zip.infolist() if not m.is_dir()]
         for member in members:
@@ -71,7 +75,7 @@ def extract_zip(archive, *, size_limit=None):
                 yield ArchiveInfo(filename=member.filename, content=content, error=None)
 
 
-def extract_tar(archive, *, size_limit=None):
+def extract_tar(archive, *, size_limit=None) -> Generator[ArchiveInfo, object, None]:
     with tarfile.open(fileobj=archive) as tar:
         members = [f for f in tar.getmembers() if f.isfile()]
         for member in members:
@@ -83,30 +87,12 @@ def extract_tar(archive, *, size_limit=None):
                 )
                 continue
 
+            # type can be ignored here because the member is garenteed to be within the tar
             yield ArchiveInfo(
-                member.name, content=tar.extractfile(member).read(), error=None
+                member.name, content=tar.extractfile(member).read(), error=None # type: ignore
             )
 
 
-async def extract_async(archive, size_limit=None):
+async def extract_async(archive, size_limit=None) -> AsyncGenerator[ArchiveInfo, None]:
     for x in extract(archive, size_limit=size_limit):
         yield await asyncio.sleep(0, x)
-
-
-def main():
-    import io
-    import sys
-
-    import humanize
-
-    arc = io.BytesIO(sys.stdin.detach().read())
-    for name, data, error in extract(arc):
-        if error is not None:
-            print(f"{name}: {error}")
-            continue
-
-        print(f"{name}: {humanize.naturalsize(len(data)):>10}")
-
-
-if __name__ == "__main__":
-    main()
