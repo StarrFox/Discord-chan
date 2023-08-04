@@ -187,19 +187,15 @@ class Gambling(commands.Cog):
         if stake is None:
             return ctx.send("You have no staked coins")
 
-        # new_price = await self.get_btc_price()
-
-        # ratio = new_price / stake.bitcoin_price
-        # withdrawn = floor(stake.coins * ratio)
-        # display_change = round((ratio - 1.0) * 100.0, 2)
-
         exit_coins = floor(await self._adjust_coins(stake.bitcoin_price, stake.coins))
-
         change = round(((exit_coins / stake.coins) - 1) * 100, 2)
 
         await self.bot.database.add_coins(ctx.author.id, exit_coins)
         await self.bot.database.clear_coin_stake(ctx.author.id)
-        await ctx.send(f"{change}% change resulting in {exit_coins} coins")
+
+        singular = "" if exit_coins == 1 else "s"
+
+        await ctx.send(f"{change}% change resulting in {exit_coins} coin{singular}")
 
     async def _adjust_coins(self, old_price, coin_amount) -> float:
         new_price = await self.get_btc_price()
@@ -228,7 +224,10 @@ class Gambling(commands.Cog):
             status = "lost"
 
         await self.bot.database.add_coins(ctx.author.id, gain)
-        await ctx.send(f"You {status} {bet} coins")
+
+        singular = "" if bet == 1 else "s"
+
+        await ctx.send(f"You {status} {bet} coin{singular}")
 
 
 async def setup(bot):
