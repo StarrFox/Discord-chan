@@ -26,6 +26,11 @@ class CoinsEntry(NamedTuple):
     coins: int
 
 
+class CoinStake(NamedTuple):
+    bitcoin_price: float
+    coins: float
+
+
 DBSCHEMA = """
 CREATE TABLE IF NOT EXISTS snipes (
     id BIGINT,
@@ -46,6 +51,12 @@ CREATE TABLE IF NOT EXISTS enabled_features (
     guild_id BIGINT,
     feature_name TEXT,
     PRIMARY KEY (guild_id, feature_name)
+);
+
+CREATE TABLE IF NOT EXISTS stakes (
+    user_id BIGINT PRIMARY KEY,
+    amount FLOAT,
+    bitcoin_price FLOAT
 );
 """.strip()
 
@@ -165,7 +176,7 @@ class Database:
                 amount,
             )
 
-        logger.info(f"Set coin account {user_id} to {amount}.")
+        logger.info(f"Set coin account {user_id} to {amount}")
 
     async def add_coins(self, user_id: int, amount: int):
         current = await self.get_coin_balance(user_id)
@@ -185,6 +196,71 @@ class Database:
                 "New balance would be over int64, are you sure you need that many coins?"
             )
         await self.set_coins(user_id, new_balance)
+        return new_balance
+
+    async def get_coin_stake(self, user_id: int) -> CoinStake | None:
+        pool = await self.connect()
+
+        async with pool.acquire() as connection:
+            connection: asyncpg.Connection
+            row = await connection.fetchrow(
+                "SELECT * FROM stakes WHERE user_id = $1;", user_id
+            )
+
+            if row is not None:
+                return CoinStake(bitcoin_price=row["bitcoin_price"], coins=row["amount"])
+
+            # explict None for non-existing account
+            return None
+
+    async def set_coin_stake(self, user_id: int, amount: float, bitcoin_price: float):
+        pool = await self.connect()
+
+        async with pool.acquire() as connection:
+            connection: asyncpg.Connection
+            await connection.execute(
+                "INSERT INTO stakes (user_id, amount, bitcoin_price) VALUES ($1, $2, $3) ON CONFLICT (user_id) DO UPDATE SET amount = EXCLUDED.amount, bitcoin_price = EXCLUDED.bitcoin_price;",
+                user_id,
+                amount,
+                bitcoin_price,
+            )
+
+        logger.info(f"Set coin stake for {user_id}: {amount=} {bitcoin_price=}")
+
+    async def clear_coin_stake(self, user_id: int):
+        pool = await self.connect()
+
+        async with pool.acquire() as connection:
+            connection: asyncpg.Connection
+            await connection.execute(
+                "DELETE FROM stakes WHERE user_id = $1;",
+                user_id,
+            )
+
+        logger.info(f"Cleared coin stake for {user_id}")
+
+    async def add_coin_stake(self, user_id: int, amount: float, bitcoin_price: float):
+        current = await self.get_coin_stake(user_id)
+
+        if current is None:
+            new_balance = amount
+        else:
+            new_balance = current.coins + amount
+
+        # TODO: are python floats bit limited?
+
+        await self.set_coin_stake(user_id, new_balance, bitcoin_price)
+        return new_balance
+
+    async def remove_coin_stakes(self, user_id: int, amount: float, bitcoin_price: float):
+        current = await self.get_coin_stake(user_id)
+
+        if current is None:
+            new_balance = amount
+        else:
+            new_balance = current.coins - amount
+
+        await self.set_coin_stake(user_id, new_balance, bitcoin_price)
         return new_balance
 
     async def add_snipe(self, snipe: Snipe):

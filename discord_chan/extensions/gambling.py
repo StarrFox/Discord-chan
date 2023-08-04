@@ -1,7 +1,10 @@
 import random
 import typing
 from typing import TYPE_CHECKING, Literal, Optional
+from math import floor
 
+import asyncio
+import aiohttp
 import discord
 from discord.ext import commands
 from loguru import logger
@@ -14,14 +17,45 @@ if TYPE_CHECKING:
     from discord_chan import DiscordChan, SubContext
 
 
+BITCOIN_PRICE_URL = "https://api.binance.us/api/v3/ticker/price?symbol=BTCUSDT"
+
+
 class Gambling(commands.Cog):
     def __init__(self, bot: "DiscordChan") -> None:
         super().__init__()
         self.bot = bot
 
+        self._btcprice: float | None = None
+        self._btc_cooldown_task: asyncio.Task | None = None
+        self._btc_price_lock = asyncio.Lock()
+
     async def has_amount(self, user_id: int, amount: int) -> bool:
         balance = await self.bot.database.get_coin_balance(user_id)
         return balance >= amount
+
+    async def get_btc_price(self) -> float:
+        async with self._btc_price_lock:
+            if self._btc_cooldown_task is not None:
+                if self._btcprice is None:
+                    raise RuntimeError("btc price unset while cooldown task is ticking")
+                
+                return self._btcprice
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.get(BITCOIN_PRICE_URL) as response:
+                    response.raise_for_status()
+                    response_json = await response.json()
+                    price = float(response_json["price"])
+
+            self._btcprice = price
+
+            async def _cooldown_task():
+                await asyncio.sleep(60)
+                # is this ok?
+                self._btc_cooldown_task = None
+
+            self._btc_cooldown_task = asyncio.create_task(_cooldown_task())
+            return self._btcprice
 
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
@@ -103,6 +137,75 @@ class Gambling(commands.Cog):
         source = NormalPageSource(entries, per_page=10)
         menu = DCMenuPages(source)
         await menu.start(ctx)
+
+    @coins.group()
+    async def stake(self, ctx: "SubContext", amount: int | None = None):
+        """
+        Stake some coins against the price of btc
+        use stake exit to then exit
+        """
+        if amount is None:
+            stake = await self.bot.database.get_coin_stake(ctx.author.id)
+
+            if stake is None:
+                return await ctx.send("You don't have any coins staked")
+
+            adjusted = round(await self._adjust_coins(stake.bitcoin_price, stake.coins), 2)
+
+            return await ctx.send(f"Current stake is {adjusted}")
+
+        if amount < 1:
+            return await ctx.send("Stake must be positive")
+
+        if not await self.has_amount(ctx.author.id, amount):
+            return await ctx.send(f"You don't have enough coins to stake {amount}")
+
+        bitcoin_price = await self.get_btc_price()
+
+        stake = await self.bot.database.get_coin_stake(ctx.author.id)
+
+        singular = "" if amount == 1 else "s"
+
+        if stake is None:
+            await self.bot.database.add_coin_stake(ctx.author.id, amount, bitcoin_price)
+            await self.bot.database.remove_coins(ctx.author.id, amount)
+            await ctx.send(f"Staked {amount} coin{singular} at {bitcoin_price}$ BTC")
+        
+        else:
+            adjusted = await self._adjust_coins(stake.bitcoin_price, stake.coins)
+            total = adjusted + amount
+            await self.bot.database.set_coin_stake(ctx.author.id, total, bitcoin_price)
+            await ctx.send(f"Staked {amount} more coin{singular} for a total of {round(total, 2)}; now at {bitcoin_price}$ BTC")
+
+    @coins.command()
+    async def exit(self, ctx: "SubContext"):
+        """
+        Exit from your stake
+        """
+        stake = await self.bot.database.get_coin_stake(ctx.author.id)
+
+        if stake is None:
+            return ctx.send("You have no staked coins")
+
+        # new_price = await self.get_btc_price()
+
+        # ratio = new_price / stake.bitcoin_price
+        # withdrawn = floor(stake.coins * ratio)
+        # display_change = round((ratio - 1.0) * 100.0, 2)
+
+        exit_coins = floor(await self._adjust_coins(stake.bitcoin_price, stake.coins))
+
+        change = round(((exit_coins / stake.coins) - 1) * 100, 2)
+
+        await self.bot.database.add_coins(ctx.author.id, exit_coins)
+        await self.bot.database.clear_coin_stake(ctx.author.id)
+        await ctx.send(f"{change}% change resulting in {exit_coins} coins")
+
+    async def _adjust_coins(self, old_price, coin_amount) -> float:
+        new_price = await self.get_btc_price()
+
+        ratio = new_price / old_price
+        return coin_amount * ratio
 
     @commands.command(aliases=["cf"])
     async def coinflip(self, ctx: "SubContext", guess: Literal["h", "t"], bet: int):
