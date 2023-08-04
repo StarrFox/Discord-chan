@@ -208,7 +208,9 @@ class Database:
             )
 
             if row is not None:
-                return CoinStake(bitcoin_price=row["bitcoin_price"], coins=row["amount"])
+                return CoinStake(
+                    bitcoin_price=row["bitcoin_price"], coins=row["amount"]
+                )
 
             # explict None for non-existing account
             return None
@@ -252,7 +254,9 @@ class Database:
         await self.set_coin_stake(user_id, new_balance, bitcoin_price)
         return new_balance
 
-    async def remove_coin_stakes(self, user_id: int, amount: float, bitcoin_price: float):
+    async def remove_coin_stakes(
+        self, user_id: int, amount: float, bitcoin_price: float
+    ):
         current = await self.get_coin_stake(user_id)
 
         if current is None:

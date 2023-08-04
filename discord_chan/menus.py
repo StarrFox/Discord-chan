@@ -34,15 +34,15 @@ class ConfirmationMenu(menus.Menu):
 
     def reaction_check(self, payload):
         # these types can be ignored because this function is only run after .start has been called
-        if payload.message_id != self.message.id: # type: ignore
+        if payload.message_id != self.message.id:  # type: ignore
             return False
 
         if self.owner_id is not None:
-            if payload.user_id not in (self.owner_id, self.bot.owner_id): # type: ignore
+            if payload.user_id not in (self.owner_id, self.bot.owner_id):  # type: ignore
                 return False
 
         else:
-            if payload.user_id not in (self.bot.owner_id, self._author_id): # type: ignore
+            if payload.user_id not in (self.bot.owner_id, self._author_id):  # type: ignore
                 return False
 
         return payload.emoji in self.buttons
@@ -106,12 +106,12 @@ class DCMenuPages(menus.MenuPages):
     async def go_to_last_page(self, payload):
         """go to the last page"""
         # The call here is safe because it's guarded by skip_if
-        await self.show_page(self._source.get_max_pages() - 1) # type: ignore
+        await self.show_page(self._source.get_max_pages() - 1)  # type: ignore
 
     @menus.button("\N{BLACK SQUARE FOR STOP}\ufe0f", skip_if=skip_only_one_page)
     async def stop_pages(self, payload):
         """stops the pagination session."""
-        await self.message.delete() # type: ignore
+        await self.message.delete()  # type: ignore
         self.stop()
 
 

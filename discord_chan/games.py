@@ -62,13 +62,13 @@ class Connect4(menus.Menu):
 
             self.current_player = next(self.player_cycle)
             await self.message.edit(
-                content=self.discord_message, allowed_mentions=self.bot.allowed_mentions # type: ignore
+                content=self.discord_message, allowed_mentions=self.bot.allowed_mentions  # type: ignore
             )
 
     @menus.button("\N{BLACK DOWN-POINTING DOUBLE TRIANGLE}", position=menus.Last())
     async def do_resend(self, _):
         await self.message.delete()
-        self.message = msg = await self.send_initial_message(self.ctx, self.ctx.channel) # type: ignore
+        self.message = msg = await self.send_initial_message(self.ctx, self.ctx.channel)  # type: ignore
         for emoji in self.buttons:
             await msg.add_reaction(emoji)
 
@@ -167,7 +167,9 @@ class Connect4(menus.Menu):
             if check(diagonal):
                 return True
 
-    async def run(self, ctx) -> Optional[Union[discord.Member, Tuple[discord.Member, discord.Member]]]:
+    async def run(
+        self, ctx
+    ) -> Optional[Union[discord.Member, Tuple[discord.Member, discord.Member]]]:
         """
         Run the game and return the winner(s)
         returns None if the first player never made a move
@@ -232,14 +234,14 @@ class MasterMindMenu(menus.Menu):
 
     async def do_entry_button(self, payload):
         if self.position == 5:
-            return await self.ctx.send( # type: ignore
-                f"{self.ctx.author.mention}, Max entry reached.", # type: ignore
+            return await self.ctx.send(  # type: ignore
+                f"{self.ctx.author.mention}, Max entry reached.",  # type: ignore
                 delete_after=5,
             )
 
         if str(payload.emoji) in self.entry:
-            return await self.ctx.send( # type: ignore
-                f"{self.ctx.author.mention}, No duplicate emojis.", # type: ignore
+            return await self.ctx.send(  # type: ignore
+                f"{self.ctx.author.mention}, No duplicate emojis.",  # type: ignore
                 delete_after=5,
             )
 
@@ -250,7 +252,7 @@ class MasterMindMenu(menus.Menu):
     @menus.button(RESEND_ARROW, position=menus.Last())
     async def do_resend(self, _):
         await self.message.delete()
-        self.message = msg = await self.ctx.send(self.console) # type: ignore
+        self.message = msg = await self.ctx.send(self.console)  # type: ignore
         for emoji in self.buttons:
             await msg.add_reaction(emoji)
 
@@ -266,8 +268,8 @@ class MasterMindMenu(menus.Menu):
     @menus.button(RETURN_ARROW, position=menus.Last(2))
     async def do_enter(self, _):
         if self.position != 5:
-            return await self.ctx.send( # type: ignore
-                f"{self.ctx.author.mention}, Entry not full.", # type: ignore
+            return await self.ctx.send(  # type: ignore
+                f"{self.ctx.author.mention}, Entry not full.",  # type: ignore
                 delete_after=5,
             )
 
@@ -288,8 +290,8 @@ class MasterMindMenu(menus.Menu):
         if self.tries == 0:
             self.value = 0
 
-            await self.ctx.send( # type: ignore
-                f'Sorry {self.ctx.author.mention}, out of tries. The code was\n{" ".join(self.code)}.', # type: ignore
+            await self.ctx.send(  # type: ignore
+                f'Sorry {self.ctx.author.mention}, out of tries. The code was\n{" ".join(self.code)}.',  # type: ignore
             )
 
             self.stop()
@@ -385,7 +387,7 @@ class SliderGame(menus.Menu):
             for emoji_index, emoji in enumerate(row):
                 if emoji == self.SPACER:
                     return row_index, emoji_index
-        
+
         raise RuntimeError("Couldn't find spacer somehow")
 
     @property
@@ -414,7 +416,7 @@ class SliderGame(menus.Menu):
     @menus.button(RESEND_ARROW, position=menus.Last())
     async def do_resend(self, _):
         await self.message.delete()
-        self.message = msg = await self.ctx.send(self.discord_message) # type: ignore
+        self.message = msg = await self.ctx.send(self.discord_message)  # type: ignore
         for emoji in self.buttons:
             await msg.add_reaction(emoji)
 
@@ -438,8 +440,8 @@ class SliderGame(menus.Menu):
                 raise ValueError(f"{emoji} is not a valid arrow emoji")
 
         if not 0 <= new_position[0] <= 3 or not 0 <= new_position[1] <= 3:
-            return await self.ctx.send( # type: ignore
-                f"{self.ctx.author.mention}, that move is invalid.", # type: ignore
+            return await self.ctx.send(  # type: ignore
+                f"{self.ctx.author.mention}, that move is invalid.",  # type: ignore
                 allowed_mentions=discord.AllowedMentions(users=True),
                 delete_after=5,
             )

@@ -64,7 +64,7 @@ class Paginator:
         if reaction.user_id != self.author.id:
             return False
 
-        if reaction.message_id != self._message.id: # type: ignore
+        if reaction.message_id != self._message.id:  # type: ignore
             return False
 
         target_emoji = str(reaction.emoji)
@@ -78,7 +78,7 @@ class Paginator:
         self._embed = discord.Embed()
         await self.first_page()
         for button in self.navigation:
-            await self._message.add_reaction(button) # type: ignore
+            await self._message.add_reaction(button)  # type: ignore
         while not self._stopped:
             try:
                 reaction: RawReactionActionEvent = await self._client.wait_for(
@@ -92,7 +92,7 @@ class Paginator:
 
             await asyncio.sleep(0.2)
             with contextlib.suppress(discord.HTTPException):
-                await self._message.remove_reaction( # type: ignore
+                await self._message.remove_reaction(  # type: ignore
                     reaction.emoji, discord.Object(reaction.user_id)
                 )
 
@@ -103,33 +103,33 @@ class Paginator:
 
         if delete:
             with contextlib.suppress(discord.HTTPException):
-                await self._message.delete() # type: ignore
+                await self._message.delete()  # type: ignore
         else:
             await self._clear_reactions()
         self._stopped = True
 
     async def _clear_reactions(self):
         try:
-            await self._message.clear_reactions() # type: ignore
+            await self._message.clear_reactions()  # type: ignore
         except discord.Forbidden:
             for button in self.navigation:
                 with contextlib.suppress(discord.HTTPException):
-                    await self._message.remove_reaction(button, self._message.author) # type: ignore
+                    await self._message.remove_reaction(button, self._message.author)  # type: ignore
         except discord.HTTPException:
             pass
 
     async def format_page(self):
-        self._embed.description = self.pages[self._page] # type: ignore
-        self._embed.set_footer(text=self.footer.format(self._page + 1, len(self.pages))) # type: ignore
+        self._embed.description = self.pages[self._page]  # type: ignore
+        self._embed.set_footer(text=self.footer.format(self._page + 1, len(self.pages)))  # type: ignore
 
         kwargs = {"embed": self._embed}
         if self.text_message:
             kwargs["content"] = self.text_message
 
         if self._message:
-            await self._message.edit(**kwargs) # type: ignore
+            await self._message.edit(**kwargs)  # type: ignore
         else:
-            self._message = await self.target.send(**kwargs) # type: ignore
+            self._message = await self.target.send(**kwargs)  # type: ignore
 
     async def first_page(self):
         self._page = 0

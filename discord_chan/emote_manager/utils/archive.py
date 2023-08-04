@@ -16,8 +16,8 @@
 import asyncio
 import tarfile
 import zipfile
-from typing import Iterable, Optional, Tuple, NamedTuple
 from collections.abc import AsyncGenerator, Generator
+from typing import Iterable, NamedTuple, Optional, Tuple
 
 from . import errors
 
@@ -28,9 +28,7 @@ class ArchiveInfo(NamedTuple):
     error: Exception | None
 
 
-def extract(
-    archive, *, size_limit=None
-) -> Iterable[ArchiveInfo]:
+def extract(archive, *, size_limit=None) -> Iterable[ArchiveInfo]:
     """
     extract a binary file-like object representing a zip or uncompressed tar archive, yielding filenames and contents.
 
@@ -89,7 +87,7 @@ def extract_tar(archive, *, size_limit=None) -> Generator[ArchiveInfo, object, N
 
             # type can be ignored here because the member is garenteed to be within the tar
             yield ArchiveInfo(
-                member.name, content=tar.extractfile(member).read(), error=None # type: ignore
+                member.name, content=tar.extractfile(member).read(), error=None  # type: ignore
             )
 
 

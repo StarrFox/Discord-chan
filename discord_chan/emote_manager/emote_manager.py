@@ -237,7 +237,7 @@ class EmoteManager(commands.Cog):
         """
         # TODO: remove the weird emote_type_filter_default thing
         # noinspection PyTypeChecker
-        emotes = list(filter(image_type, context.guild.emojis)) # type: ignore
+        emotes = list(filter(image_type, context.guild.emojis))  # type: ignore
         if not emotes:
             raise commands.BadArgument(
                 "No emotes of that type were found in this server."
@@ -248,7 +248,7 @@ class EmoteManager(commands.Cog):
                 await context.send(file=zip_file)
 
     async def archive_emotes(self, context: commands.Context, emotes):
-        filesize_limit = context.guild.filesize_limit # type: ignore
+        filesize_limit = context.guild.filesize_limit  # type: ignore
         discrims = collections.defaultdict(int)
         downloaded = collections.deque()
 
@@ -309,7 +309,7 @@ class EmoteManager(commands.Cog):
                     break
 
             out.seek(0)
-            yield discord.File(out, f"emotes-{context.guild.id}-{count}.zip") # type: ignore
+            yield discord.File(out, f"emotes-{context.guild.id}-{count}.zip")  # type: ignore
             count += 1
 
     @em.command(
@@ -359,7 +359,7 @@ class EmoteManager(commands.Cog):
                 async with context.typing():
                     # we can ignore the type here because content should be set if error is None
                     message = await self.add_safe_bytes(
-                        context, name, context.author.id, img # type: ignore
+                        context, name, context.author.id, img  # type: ignore
                     )
                 await context.send(message)
                 continue
@@ -374,7 +374,9 @@ class EmoteManager(commands.Cog):
 
             await context.send(f"{name}: {error}")
 
-    async def add_safe(self, context: commands.Context, name, url, author_id, *, reason=None):
+    async def add_safe(
+        self, context: commands.Context, name, url, author_id, *, reason=None
+    ):
         """Try to add an emote. Returns a string that should be sent to the user."""
         try:
             image_data = await self.fetch_safe(url)
@@ -401,26 +403,32 @@ class EmoteManager(commands.Cog):
             raise errors.HTTPException(exc.status)
 
     async def add_safe_bytes(
-        self, context: commands.Context, name, author_id, image_data: bytes, *, reason=None
+        self,
+        context: commands.Context,
+        name,
+        author_id,
+        image_data: bytes,
+        *,
+        reason=None,
     ):
         """Try to add an emote from bytes. On error, return a string that should be sent to the user.
 
         If the image is static and there are not enough free static slots, convert the image to a gif instead.
         """
         counts = collections.Counter(
-            map(operator.attrgetter("animated"), context.guild.emojis) # type: ignore
+            map(operator.attrgetter("animated"), context.guild.emojis)  # type: ignore
         )
         # >= rather than == because there are sneaky ways to exceed the limit
         if (
-            counts[False] >= context.guild.emoji_limit # type: ignore
-            and counts[True] >= context.guild.emoji_limit # type: ignore
+            counts[False] >= context.guild.emoji_limit  # type: ignore
+            and counts[True] >= context.guild.emoji_limit  # type: ignore
         ):
             # we raise instead of returning a string in order to abort commands that run this function in a loop
             raise commands.UserInputError("This server is out of emote slots.")
 
         static = utils_image.mime_type_for_image(image_data) != "image/gif"
         converted = False
-        if static and counts[False] >= context.guild.emoji_limit: # type: ignore
+        if static and counts[False] >= context.guild.emoji_limit:  # type: ignore
             image_data = await utils_image.convert_to_gif(image_data)
             converted = True
 
@@ -540,7 +548,7 @@ class EmoteManager(commands.Cog):
         # TODO: another emote_type_filter_default usage
         # noinspection PyTypeChecker
         emotes = sorted(
-            filter(image_type, context.guild.emojis), key=lambda e: e.name.lower() # type: ignore
+            filter(image_type, context.guild.emojis), key=lambda e: e.name.lower()  # type: ignore
         )
 
         processed = []
@@ -591,7 +599,7 @@ class EmoteManager(commands.Cog):
         match = utils.emote.RE_CUSTOM_EMOTE.match(name_or_emote)
         if match:
             id = int(match.group("id"))
-            emote = discord.utils.get(context.guild.emojis, id=id) # type: ignore
+            emote = discord.utils.get(context.guild.emojis, id=id)  # type: ignore
             if emote:
                 return emote
         name = name_or_emote
@@ -601,7 +609,7 @@ class EmoteManager(commands.Cog):
         name = name.strip(":")  # in case the user tries :foo: and foo is animated
         candidates = [
             e
-            for e in context.guild.emojis # type: ignore
+            for e in context.guild.emojis  # type: ignore
             if e.name.lower() == name.lower() and e.require_colons
         ]
         if not candidates:

@@ -16,8 +16,8 @@
 """various utilities for use within the bot"""
 
 import asyncio
-import aiohttp
 
+import aiohttp
 import discord
 
 

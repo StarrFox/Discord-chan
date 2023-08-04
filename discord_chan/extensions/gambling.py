@@ -1,9 +1,9 @@
+import asyncio
 import random
 import typing
-from typing import TYPE_CHECKING, Literal, Optional
 from math import floor
+from typing import TYPE_CHECKING, Literal, Optional
 
-import asyncio
 import aiohttp
 import discord
 from discord.ext import commands
@@ -38,9 +38,9 @@ class Gambling(commands.Cog):
             if self._btc_cooldown_task is not None:
                 if self._btcprice is None:
                     raise RuntimeError("btc price unset while cooldown task is ticking")
-                
+
                 return self._btcprice
-            
+
             async with aiohttp.ClientSession() as session:
                 async with session.get(BITCOIN_PRICE_URL) as response:
                     response.raise_for_status()
@@ -150,7 +150,9 @@ class Gambling(commands.Cog):
             if stake is None:
                 return await ctx.send("You don't have any coins staked")
 
-            adjusted = round(await self._adjust_coins(stake.bitcoin_price, stake.coins), 2)
+            adjusted = round(
+                await self._adjust_coins(stake.bitcoin_price, stake.coins), 2
+            )
 
             return await ctx.send(f"Current stake is {adjusted}")
 
@@ -170,12 +172,14 @@ class Gambling(commands.Cog):
             await self.bot.database.add_coin_stake(ctx.author.id, amount, bitcoin_price)
             await self.bot.database.remove_coins(ctx.author.id, amount)
             await ctx.send(f"Staked {amount} coin{singular} at {bitcoin_price}$ BTC")
-        
+
         else:
             adjusted = await self._adjust_coins(stake.bitcoin_price, stake.coins)
             total = adjusted + amount
             await self.bot.database.set_coin_stake(ctx.author.id, total, bitcoin_price)
-            await ctx.send(f"Staked {amount} more coin{singular} for a total of {round(total, 2)}; now at {bitcoin_price}$ BTC")
+            await ctx.send(
+                f"Staked {amount} more coin{singular} for a total of {round(total, 2)}; now at {bitcoin_price}$ BTC"
+            )
 
     @coins.command()
     async def exit(self, ctx: "SubContext"):
