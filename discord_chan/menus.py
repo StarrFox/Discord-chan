@@ -11,9 +11,9 @@ EmbedFieldProxy = namedtuple("EmbedFieldProxy", "name value inline")
 class ConfirmationMenu(menus.Menu):
     def __init__(
         self,
-        to_confirm: str = None,
+        to_confirm: str | None = None,
         *,
-        owner_id: int = None,
+        owner_id: int | None = None,
         send_kwargs=None,
         **kwargs,
     ):
@@ -33,15 +33,16 @@ class ConfirmationMenu(menus.Menu):
         return await ctx.send(self.to_confirm or "\u200b", **self.send_kwargs)
 
     def reaction_check(self, payload):
-        if payload.message_id != self.message.id:
+        # these types can be ignored because this function is only run after .start has been called
+        if payload.message_id != self.message.id: # type: ignore
             return False
 
         if self.owner_id is not None:
-            if payload.user_id not in (self.owner_id, self.bot.owner_id):
+            if payload.user_id not in (self.owner_id, self.bot.owner_id): # type: ignore
                 return False
 
         else:
-            if payload.user_id not in (self.bot.owner_id, self._author_id):
+            if payload.user_id not in (self.bot.owner_id, self._author_id): # type: ignore
                 return False
 
         return payload.emoji in self.buttons
@@ -105,12 +106,12 @@ class DCMenuPages(menus.MenuPages):
     async def go_to_last_page(self, payload):
         """go to the last page"""
         # The call here is safe because it's guarded by skip_if
-        await self.show_page(self._source.get_max_pages() - 1)
+        await self.show_page(self._source.get_max_pages() - 1) # type: ignore
 
     @menus.button("\N{BLACK SQUARE FOR STOP}\ufe0f", skip_if=skip_only_one_page)
     async def stop_pages(self, payload):
         """stops the pagination session."""
-        await self.message.delete()
+        await self.message.delete() # type: ignore
         self.stop()
 
 
@@ -171,8 +172,6 @@ class EmbedFieldsPageSource(menus.ListPageSource):
             return base
 
 
-# I should probably pr these changes but idk if this property thing
-# is the correct way to do it so /shrug also the None thing looks dumb
 class FixedNonePaginator(commands.Paginator):
     @property
     def _max_size_factor(self):
@@ -270,7 +269,7 @@ class PartitionPaginator(FixedNonePaginator):
             super().add_line(line, empty=empty)
 
 
-# Todo: replace this with a group-by subclass
+# TODO: replace this with a group-by subclass
 class PrologPaginator(FixedNonePaginator):
     def __init__(
         self,

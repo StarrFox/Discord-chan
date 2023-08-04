@@ -29,7 +29,8 @@ class Snipe:
     content: str
     server: int
     channel: int
-    time: pendulum.DateTime
+    # TODO: remove ignore in pendulum 3 (currently 2)
+    time: pendulum.DateTime # type: ignore 
 
     @property
     def discord_timestamp(self) -> str:

@@ -39,7 +39,7 @@ def prepare_safebooru_tags(
     return "+".join([urllib.parse.quote(x) for x in tags])
 
 
-async def request_safebooru(**params) -> ElementTree.ElementTree | None:
+async def request_safebooru(**params) -> ElementTree.Element:
     if "tags" in params:
         params["tags"] = prepare_safebooru_tags(params["tags"])
 
@@ -51,10 +51,9 @@ async def request_safebooru(**params) -> ElementTree.ElementTree | None:
         request_url = SAFEBOORU_BASE_URL + "&" + "&".join(param_strings)
 
         async with session.get(request_url) as resp:
-            if resp.status == 200:
-                return ElementTree.fromstring(await resp.content.read())
+            resp.raise_for_status()
 
-    return None
+            return ElementTree.fromstring(await resp.content.read())
 
 
 async def get_safebooru_post_count(tags: List[str]) -> int | None:

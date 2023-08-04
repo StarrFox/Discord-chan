@@ -102,6 +102,7 @@
             python311.pkgs.isort
             python311.pkgs.vulture
             python311.pkgs.python-lsp-server
+            python311.pkgs.mypy
           ];
         };
       };
