@@ -15,10 +15,13 @@ push:
 commit-push: commit push
 
 # bump version
-bump:
-    cz bump
-    git push
-    git push --tags
+bump type: && create-tag
+    poetry version {{type}}
+
+# creates a new tag for the current version
+create-tag:
+    git fetch --tags
+    poetry version | awk '{print $2}' | xargs git tag
 
 # update deps
 update:
