@@ -2,15 +2,6 @@
 default:
     just --list
 
-# commit
-commit:
-    git add .
-    cz commit
-
-# push
-push:
-    git push
-
 # commit then push
 commit-push: commit push
 

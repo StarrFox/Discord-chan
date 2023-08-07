@@ -70,34 +70,7 @@
       "inputs": {
         "flake-parts": "flake-parts",
         "nix-systems": "nix-systems",
-        "nixpkgs": "nixpkgs",
-        "starrpkgs": "starrpkgs"
-      }
-    },
-    "starrpkgs": {
-      "inputs": {
-        "flake-parts": [
-          "flake-parts"
-        ],
-        "nix-systems": [
-          "nix-systems"
-        ],
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1690907668,
-        "narHash": "sha256-vEWp0alPk3+VhzeEm4s+BNtdMHFSJQWEb3c4HRMBugI=",
-        "owner": "StarrFox",
-        "repo": "packages",
-        "rev": "27d7246890064563fe96ab2c17c621910898e7ca",
-        "type": "github"
-      },
-      "original": {
-        "owner": "StarrFox",
-        "repo": "packages",
-        "type": "github"
+        "nixpkgs": "nixpkgs"
       }
     }
   },

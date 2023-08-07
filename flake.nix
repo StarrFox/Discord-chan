@@ -5,21 +5,12 @@
     nixpkgs.url = "github:NixOS/nixpkgs";
     flake-parts.url = "github:hercules-ci/flake-parts/";
     nix-systems.url = "github:nix-systems/default";
-    starrpkgs = {
-      url = "github:StarrFox/packages";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        flake-parts.follows = "flake-parts";
-        nix-systems.follows = "nix-systems";
-      };
-    };
   };
 
   outputs = inputs @ {
     self,
     flake-parts,
     nix-systems,
-    starrpkgs,
     ...
   }:
     flake-parts.lib.mkFlake {inherit inputs;} {
@@ -31,8 +22,6 @@
         self',
         ...
       }: let
-        spkgs = starrpkgs.packages.${system};
-
         # python311Optimized = pkgs.python311.override {
         #     enableOptimizations = true;
         #     reproducibleBuild = false;
@@ -95,7 +84,6 @@
           packages = with pkgs; [
             (poetry.withPlugins (ps: with ps; [poetry-plugin-up]))
             python311
-            spkgs.commitizen
             just
             alejandra
             python311.pkgs.black
