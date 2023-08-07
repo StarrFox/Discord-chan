@@ -1,7 +1,5 @@
 import pathlib
-from collections import defaultdict
 from datetime import datetime
-from typing import Optional, Type, Union
 
 import discord
 from discord.ext import commands
@@ -16,7 +14,7 @@ ROOT = pathlib.Path(__file__).parent
 
 
 class DiscordChan(commands.AutoShardedBot):
-    def __init__(self, *, context: Type[commands.Context] = SubContext, **kwargs):
+    def __init__(self, *, context: type[commands.Context] = SubContext, **kwargs):
         self.debug_mode: bool = kwargs.pop("debug_mode", False)
         super().__init__(
             command_prefix=kwargs.pop("command_prefix", self.get_command_prefix),
@@ -65,7 +63,7 @@ class DiscordChan(commands.AutoShardedBot):
             guild_id
         ] = await self.database.get_guild_enabled_features(guild_id)
 
-    def get_message(self, message_id: int) -> Optional[discord.Message]:
+    def get_message(self, message_id: int) -> discord.Message | None:
         """
         Gets a message from cache
         :param message_id: The message id to get
@@ -104,7 +102,7 @@ class DiscordChan(commands.AutoShardedBot):
         logger.info(f"Logged in as {self.user}.")
         logger.info(f"Bot ready with {len(self.extensions.keys())} extensions.")
 
-    async def load_extensions_from_dir(self, path: Union[str, pathlib.Path]) -> int:
+    async def load_extensions_from_dir(self, path: str | pathlib.Path) -> int:
         """
         Loads any python files in a directory and it's children
         as extensions

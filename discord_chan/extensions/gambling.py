@@ -2,7 +2,7 @@ import asyncio
 import random
 import typing
 from math import floor
-from typing import TYPE_CHECKING, Literal, Optional
+from typing import Literal, Optional
 
 import aiohttp
 import discord
@@ -12,9 +12,7 @@ from loguru import logger
 import discord_chan
 from discord_chan.converters import OverConverter
 from discord_chan.menus import DCMenuPages, NormalPageSource
-
-if TYPE_CHECKING:
-    from discord_chan import DiscordChan, SubContext
+from discord_chan import DiscordChan, SubContext
 
 
 BITCOIN_PRICE_URL = "https://api.binance.us/api/v3/ticker/price?symbol=BTCUSDT"

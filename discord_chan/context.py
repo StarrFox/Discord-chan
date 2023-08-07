@@ -1,13 +1,13 @@
 from datetime import datetime
-from typing import Optional
 
 from discord import HTTPException, Message
 from discord.ext.commands import Context
 
+from .bot import DiscordChan
 from .menus import ConfirmationMenu, DCMenuPages, NormalPageSource, PartitionPaginator
 
 
-class SubContext(Context):
+class SubContext(Context[DiscordChan]):
     async def send(self, content=None, **kwargs) -> Message:
         if content:
             content = str(content)
@@ -36,7 +36,7 @@ class SubContext(Context):
         """
         return self.message.created_at
 
-    async def confirm(self, message: str | None = None) -> Optional[Message]:
+    async def confirm(self, message: str | None = None) -> Message | None:
         """
         Adds a checkmark to ctx.message.
         If unable to sends <message>
@@ -47,7 +47,7 @@ class SubContext(Context):
             message = message or "\N{WHITE HEAVY CHECK MARK}"
             return await self.send(message)
 
-    async def deny(self, message: str | None = None) -> Optional[Message]:
+    async def deny(self, message: str | None = None) -> Message | None:
         """
         Adds a cross to ctx.message.
         If unable to sends <message>

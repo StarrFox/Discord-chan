@@ -3,7 +3,7 @@ import functools
 from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 from tarfile import TarFile, TarInfo
-from typing import Callable, List, NamedTuple, Optional, Tuple
+from typing import Callable, NamedTuple
 
 import aiohttp
 from discord import File
@@ -122,10 +122,10 @@ async def url_to_image(link: str) -> Image.Image:
 def tarball_images(
     images: list[Image.Image] | list[list[Image.Image]],
     *,
-    name: Optional[str] = None,
+    name: str | None = None,
     animated: bool = False,
     format: str = "png",
-    extras: List[Tuple[str, BytesIO]],
+    extras: list[tuple[str, BytesIO]],
 ) -> BytesIO:
     fp = BytesIO()
     tar = TarFile(mode="w", fileobj=fp)
@@ -158,7 +158,7 @@ def tarball_images(
 
 @executor_function
 def image_to_file(
-    image: Image.Image, filename: Optional[str] = None, format: str = "png"
+    image: Image.Image, filename: str | None = None, format: str = "png"
 ) -> File:
     """
     Saves an image into a :class:discord.File
@@ -176,13 +176,13 @@ def image_to_file(
 
 
 class WallifyFactors(NamedTuple):
-    image_size: Tuple[int, int]
-    wall_size: Tuple[int, int]
-    emoji_size: Tuple[int, int]
+    image_size: tuple[int, int]
+    wall_size: tuple[int, int]
+    emoji_size: tuple[int, int]
 
 
 def get_wallify_factors(
-    image_size: Tuple[int, int], wall_size: Tuple[int, int]
+    image_size: tuple[int, int], wall_size: tuple[int, int]
 ) -> WallifyFactors:
     img_width, img_height = image_size
     wall_width, wall_height = wall_size
@@ -204,7 +204,7 @@ def get_wallify_factors(
 
 
 def get_wallify_example_file(
-    wall_size: Tuple[int, int], name: Optional[str] = None
+    wall_size: tuple[int, int], name: str | None = None
 ) -> BytesIO:
     num_of_rows, num_of_columns = wall_size
 
@@ -293,7 +293,7 @@ def wallify_gif_image(
     return images
 
 
-def equalize_images(*images) -> List[Image.Image]:
+def equalize_images(*images) -> list[Image.Image]:
     sorted_by_area = sorted(
         ((i, i.size[0] * i.size[1]) for i in images), key=lambda t: t[1]
     )

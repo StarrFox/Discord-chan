@@ -1,6 +1,6 @@
 from collections import namedtuple
 from string import capwords
-from typing import Optional, Sequence
+from typing import Sequence
 
 import discord
 from discord.ext import commands, menus
@@ -132,7 +132,7 @@ class CodeblockPageSource(menus.ListPageSource):
         entries: Sequence[str],
         *,
         per_page: int = 1,
-        language: Optional[str] = None,
+        language: str | None = None,
     ):
         super().__init__(entries, per_page=per_page)
         self.language = language or ""
@@ -153,8 +153,8 @@ class EmbedFieldsPageSource(menus.ListPageSource):
         entries: Sequence[EmbedFieldProxy],
         *,
         per_page: int = 1,
-        title: Optional[str] = None,
-        description: Optional[str] = None,
+        title: str | None = None,
+        description: str | None = None,
     ):
         super().__init__(entries, per_page=per_page)
         self.title = title

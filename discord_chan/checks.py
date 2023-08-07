@@ -1,5 +1,3 @@
-from typing import List
-
 from discord.ext import commands
 
 
@@ -18,7 +16,7 @@ def cog_loaded(cog_name: str):
     return commands.check(_pred)
 
 
-def some_guilds(guilds: List[int]):
+def some_guilds(guilds: list[int]):
     def _pred(ctx):
         return ctx.guild.id in guilds
 

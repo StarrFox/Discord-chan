@@ -1,9 +1,8 @@
 import logging
 from collections import OrderedDict
-from typing import Union
 
-import discord
 from loguru import logger
+
 
 bool_dict = {
     "true": True,
@@ -13,6 +12,7 @@ bool_dict = {
     "off": False,
     "0": False,
 }
+
 
 # from: https://urlregex.com/
 link_regex = (
@@ -60,7 +60,7 @@ class InterceptHandler(logging.Handler):
         )
 
 
-def detailed_human_time(input_seconds: Union[float, int]):
+def detailed_human_time(input_seconds: float | int):
     # drop rest
     input_seconds = int(input_seconds)
     minutes, seconds = divmod(input_seconds, 60)

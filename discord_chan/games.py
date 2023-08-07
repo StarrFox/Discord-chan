@@ -1,6 +1,5 @@
 from itertools import cycle
 from random import choice, randint, shuffle
-from typing import Optional, Tuple, Union
 
 import discord
 import numpy
@@ -169,7 +168,7 @@ class Connect4(menus.Menu):
 
     async def run(
         self, ctx
-    ) -> Optional[Union[discord.Member, Tuple[discord.Member, discord.Member]]]:
+    ) -> discord.Member | tuple[discord.Member, discord.Member] | None:
         """
         Run the game and return the winner(s)
         returns None if the first player never made a move
@@ -296,7 +295,7 @@ class MasterMindMenu(menus.Menu):
 
             self.stop()
 
-    async def run(self, ctx) -> Optional[int]:
+    async def run(self, ctx) -> int | None:
         await self.start(ctx, wait=True)
         return self.value
 
@@ -469,7 +468,7 @@ class SliderGame(menus.Menu):
     def left(self):
         return self.positon[0], self.positon[1] - 1
 
-    def move(self, new_position: Tuple[int, int]):
+    def move(self, new_position: tuple[int, int]):
         emoji = self.board[new_position[0]][new_position[1]]
 
         self.board[new_position[0]][new_position[1]] = self.SPACER

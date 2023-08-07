@@ -2,7 +2,7 @@ import asyncio
 import os
 import pwd
 from itertools import count
-from typing import NamedTuple, Optional
+from typing import NamedTuple
 
 import asyncpg
 import pendulum
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS stakes (
 
 class Database:
     def __init__(self):
-        self._connection: Optional[asyncpg.Pool] = None
+        self._connection: asyncpg.Pool | None = None
         self._ensured: bool = False
         self._connection_lock = asyncio.Lock()
 
@@ -286,11 +286,11 @@ class Database:
     async def get_snipes(
         self,
         *,
-        server: Optional[int] = None,
-        author: Optional[int] = None,
-        channel: Optional[int] = None,
-        mode: Optional[SnipeMode] = None,
-        limit: Optional[int] = None,
+        server: int | None = None,
+        author: int | None = None,
+        channel: int | None = None,
+        mode: SnipeMode | None = None,
+        limit: int | None = None,
         negative: bool = False,
     ) -> tuple[list[Snipe], int]:
         pool = await self.connect()

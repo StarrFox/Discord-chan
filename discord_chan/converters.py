@@ -1,5 +1,4 @@
 import re
-from typing import Optional
 
 import discord
 from discord.ext import commands
@@ -170,7 +169,7 @@ class ImageUrlConverter(commands.Converter):
     4. Url regex
     """
 
-    def __init__(self, force_format: Optional[str] = None):
+    def __init__(self, force_format: str | None = None):
         self.force_format = force_format
 
     async def convert(self, ctx: commands.Context, argument: str) -> str:

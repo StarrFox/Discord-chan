@@ -3,9 +3,9 @@ import re
 import urllib.parse
 import xml.etree.ElementTree as ElementTree
 from dataclasses import dataclass
-from typing import List, Optional
 
 import aiohttp
+
 
 SAFEBOORU_BASE_URL = "https://safebooru.org/index.php?page=dapi&s=post&q=index"
 # SUBTRACTIVE_NSFW_TAGS = ["-panties", "-underwear", "-bra", "-bikini", "-ass", "-exercise", "-sweat",
@@ -27,7 +27,7 @@ class SafebooruPost:
 
 
 def prepare_safebooru_tags(
-    tags: List[str],
+    tags: list[str],
     *,
     replace_spaces: bool = True,
 ) -> str:
@@ -56,7 +56,7 @@ async def request_safebooru(**params) -> ElementTree.Element:
             return ElementTree.fromstring(await resp.content.read())
 
 
-async def get_safebooru_post_count(tags: List[str]) -> int | None:
+async def get_safebooru_post_count(tags: list[str]) -> int | None:
     tree = await request_safebooru(tags=tags, limit=0)
     if amount := tree.get("count"):
         return int(amount)
@@ -64,7 +64,7 @@ async def get_safebooru_post_count(tags: List[str]) -> int | None:
     return None
 
 
-async def get_safebooru_posts(tags: List[str], page: int = 0) -> List[str]:
+async def get_safebooru_posts(tags: list[str], page: int = 0) -> list[str]:
     result = []
     tree = await request_safebooru(tags=tags, pid=page)
 
@@ -75,7 +75,7 @@ async def get_safebooru_posts(tags: List[str], page: int = 0) -> List[str]:
     return result
 
 
-async def get_random_safebooru_post(tags: List[str]) -> Optional[SafebooruPost]:
+async def get_random_safebooru_post(tags: list[str]) -> SafebooruPost | None:
     if total_post_count := await get_safebooru_post_count(tags):
         page = random.randint(0, int(total_post_count / 100))
 
