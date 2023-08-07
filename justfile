@@ -2,9 +2,6 @@
 default:
     just --list
 
-# commit then push
-commit-push: commit push
-
 # bump version
 bump type: && create-tag
     poetry version {{type}}

@@ -73,8 +73,6 @@
             customOverrides
           ];
           groups = ["images"];
-          # I can't figure out how to give it a dictonary
-          #buildInputs = with pkgs; [hunspell hunspellDicts.en_US];
         };
 
         packages.default = self'.packages.discord_chan;
