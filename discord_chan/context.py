@@ -3,11 +3,10 @@ from datetime import datetime
 from discord import HTTPException, Message
 from discord.ext.commands import Context
 
-from .bot import DiscordChan
 from .menus import ConfirmationMenu, DCMenuPages, NormalPageSource, PartitionPaginator
 
 
-class SubContext(Context[DiscordChan]):
+class SubContext(Context):
     async def send(self, content=None, **kwargs) -> Message:
         if content:
             content = str(content)
