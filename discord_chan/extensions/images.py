@@ -23,6 +23,9 @@ class Images(commands.Cog, name="images"):
         Make some emojis from an image,
         Width and height must be between 1 and 10
         """
+        if image.format is None:
+            return await ctx.send("Image format is somehow None")
+
         gif = image.format == "GIF"
         format = image.format
 
