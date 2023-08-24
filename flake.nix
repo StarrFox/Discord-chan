@@ -22,11 +22,7 @@
         self',
         ...
       }: let
-        # python311Optimized = pkgs.python311.override {
-        #     enableOptimizations = true;
-        #     reproducibleBuild = false;
-        #     self = python311Optimized;
-        # };
+        python = pkgs.python311;
 
         customOverrides = self: super: {
           uwuify = super.uwuify.overridePythonAttrs (
@@ -55,19 +51,15 @@
               buildInputs = (old.buildInputs or []) ++ [super.setuptools];
             }
           );
-          "discord-py" = super."discord-py".overridePythonAttrs (
-            old: {
-              buildInputs = (old.buildInputs or []) ++ [super.setuptools];
-            }
-          );
+          "discord-py" = python.pkgs.discordpy;
           # this wand version patched the imageMagick library path
-          wand = pkgs.python311.pkgs.wand;
+          wand = python.pkgs.wand;
         };
       in {
         packages.discord_chan = pkgs.poetry2nix.mkPoetryApplication {
           projectDir = ./.;
           preferWheels = true;
-          python = pkgs.python311;
+          python = python;
           overrides = [
             pkgs.poetry2nix.defaultPoetryOverrides
             customOverrides
