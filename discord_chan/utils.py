@@ -81,6 +81,6 @@ def detailed_human_time(input_seconds: float | int):
         msgs.append(f"{seconds} second(s)")
 
     if not msgs:
-        msgs.append(f"0 second(s)")
+        msgs.append("0 second(s)")
 
     return ", ".join(msgs)

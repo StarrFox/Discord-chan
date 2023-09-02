@@ -18,7 +18,6 @@ import base64
 import contextlib
 import functools
 import io
-import logging
 import typing
 from concurrent.futures.thread import ThreadPoolExecutor
 
