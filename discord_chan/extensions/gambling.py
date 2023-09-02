@@ -175,6 +175,7 @@ class Gambling(commands.Cog):
             adjusted = await self._adjust_coins(stake.bitcoin_price, stake.coins)
             total = adjusted + amount
             await self.bot.database.set_coin_stake(ctx.author.id, total, bitcoin_price)
+            await self.bot.database.remove_coins(ctx.author.id, amount)
             await ctx.send(
                 f"Staked {amount} more coin{singular} for a total of {round(total, 2)}; now at {bitcoin_price}$ BTC"
             )
