@@ -36,7 +36,7 @@
           };
           pythonImportsCheck = ["discord.ext.menus"];
           nativeBuildInputs = with python.pkgs; [pip];
-          buildInputs = with python.pkgs; [discordpy];
+          propagatedBuildInputs = with python.pkgs; [discordpy];
         };
 
         uwuify = python.pkgs.buildPythonPackage rec {
@@ -49,7 +49,7 @@
           };
           pythonImportsCheck = [pname];
           nativeBuildInputs = with python.pkgs; [poetry-core];
-          buildInputs = with python.pkgs; [click];
+          propagatedBuildInputs = with python.pkgs; [click];
         };
 
         import_expression = python.pkgs.buildPythonPackage rec {
@@ -83,7 +83,11 @@
             astunparse
             youtube-dl
           ];
-          buildInputs = with python.pkgs; [discordpy braceexpand import_expression];
+          propagatedBuildInputs = with python.pkgs; [
+            discordpy
+            braceexpand
+            import_expression
+          ];
         };
       in {
         packages.discord_chan = python.pkgs.buildPythonPackage rec {
