@@ -22,7 +22,7 @@
         self',
         ...
       }: let
-        python = pkgs.python311;
+        python = pkgs.python312;
 
         discord-ext-menus = python.pkgs.buildPythonPackage {
           pname = "discord-ext-menus";
@@ -110,7 +110,8 @@
             pendulum
             numpy
             uwuify
-            parsedatetime
+            # currently broken on 3.12
+            #parsedatetime
             jishaku
             unidecode
             uvloop
