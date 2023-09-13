@@ -31,6 +31,6 @@ run:
 # format
 format:
     # TODO: treefmt?
-    isort .
+    isort . --skip-gitignore
     black .
     alejandra .
