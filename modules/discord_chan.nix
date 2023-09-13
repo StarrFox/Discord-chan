@@ -50,7 +50,7 @@ in {
         User = cfg.user;
         Group = cfg.group;
         Restart = "always";
-        ExecStart = "${spkgs.discord_chan}/bin/discord-chan --secret ${cfg.tokenFile}";
+        ExecStart = "${spkgs.discord_chan}/bin/discord_chan --secret ${cfg.tokenFile}";
       };
     };
 
