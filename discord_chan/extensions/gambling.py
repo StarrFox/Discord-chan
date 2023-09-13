@@ -10,10 +10,9 @@ from discord.ext import commands
 from loguru import logger
 
 import discord_chan
+from discord_chan import DiscordChan, SubContext
 from discord_chan.converters import OverConverter
 from discord_chan.menus import DCMenuPages, NormalPageSource
-from discord_chan import DiscordChan, SubContext
-
 
 BITCOIN_PRICE_URL = "https://api.binance.us/api/v3/ticker/price?symbol=BTCUSDT"
 
