@@ -10,7 +10,7 @@ FEATURE_NAME = "cope"
 
 
 BIG_COPE = 301790265725943808
-COPE_MAX = 750
+COPE_MAX = 100
 
 
 class Cope(commands.Cog, name="cope"):
