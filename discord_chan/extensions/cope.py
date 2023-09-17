@@ -39,7 +39,7 @@ class Cope(commands.Cog, name="cope"):
 
         num = random.randrange(0, range)
         if num == 1:
-            return await message.channel.send("Cope")
+            return await message.channel.send("cope")
 
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
