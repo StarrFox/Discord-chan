@@ -23,6 +23,9 @@ class Cope(commands.Cog, name="cope"):
         self,
         message: discord.Message
     ):
+        if message.author.bot:
+            return
+
         if message.guild is None:
             return
 
