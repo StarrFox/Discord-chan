@@ -177,10 +177,12 @@ class Mod(commands.Cog, name="mod"):
                 if differences:
                     difference_message = self.format_perm_names(differences)
 
+                    role_message = f"{role.mention}: " + difference_message
+
                     if role.managed:
-                        managed_role_parts.append(f"{role.name}: " + difference_message)
+                        managed_role_parts.append(role_message)
                     else:
-                        normal_role_parts.append(f"{role.name}: " + difference_message)
+                        normal_role_parts.append(role_message)
 
         if normal_role_parts or managed_role_parts:
             message = ""
