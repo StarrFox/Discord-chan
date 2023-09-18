@@ -143,7 +143,7 @@ class Mod(commands.Cog, name="mod"):
                     )
                     message_parts.append(f"{role.name}: " + difference_message)
 
-        return await ctx.send("\n".join(message_parts))
+        return await ctx.send("\n".join(reversed(message_parts)))
 
     # @role.command(name="list")
     # async def _list(self, ctx: SubContext):
