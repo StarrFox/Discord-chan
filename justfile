@@ -6,6 +6,12 @@ default:
 bump type: && create-tag
     poetry version {{type}}
 
+# does a version bump commit
+bump-commit type: && create-tag
+    poetry version {{type}}
+    poetry version | awk '{print $2}' | xargs echo "bump to" | xargs git commit -am
+    git push
+
 # creates a new tag for the current version
 create-tag:
     git fetch --tags
