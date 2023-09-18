@@ -11,8 +11,8 @@ def is_above(invoker: discord.Member, user: discord.Member):
     return invoker.top_role > user.top_role
 
 
-# class RolePermFlags(commands.FlagConverter, delimiter="", prefix="--"):
-#     _list: bool = commands.flag(name="list")
+class PermForFlags(commands.FlagConverter, prefix="--", delimiter=""):
+    channel: typing.Optional[discord.abc.GuildChannel] = None
 
 
 class Mod(commands.Cog, name="mod"):
@@ -81,22 +81,13 @@ class Mod(commands.Cog, name="mod"):
 
         await ctx.send("Member is currently in this guild.")
 
-    @commands.group(invoke_without_command=True)
+    @commands.group(invoke_without_command=True, aliases=["permission", "perms", "perm"])
     @commands.guild_only()
-    async def role(self, ctx: SubContext):
+    async def permissions(self, ctx: SubContext):
         """
-        Base command for role commands
+        Base command for permission commands
         """
-        await ctx.send_help("role")
-
-    # @role.command()
-    # @commands.bot_has_guild_permissions(manage_roles=True)
-    # @commands.has_guild_permissions(manage_roles=True)
-    # async def new(self, ctx: SubContext):
-    #     """
-    #     Create a new role
-    #     """
-    #     pass
+        await ctx.send_help("perm")
 
     @staticmethod
     def get_perm_diff(
@@ -111,26 +102,72 @@ class Mod(commands.Cog, name="mod"):
 
         return differences
 
-    @role.group(invoke_without_command=True, aliases=["perms", "perm"])
-    async def permissions(self, ctx: SubContext, role: discord.Role):
+    def get_perm_overwrite_messages(self, overwrites: discord.PermissionOverwrite) -> tuple[str | None, str | None]:
+        allowed: list[str] = []
+        denied: list[str] = []
+
+        # True = allowed, False = denied, None = unchanged
+        for name, value in overwrites:
+            if value is True:
+                allowed.append(name)
+            elif value is False:
+                denied.append(name)
+
+        allowed_message = self.format_perm_names(allowed) if allowed else None
+        denied_message = self.format_perm_names(denied) if denied else None
+
+        return allowed_message, denied_message 
+
+    @staticmethod
+    def format_perm_names(perm_names: list[str]) -> str:
+        return ", ".join(map(lambda perm: "`" + perm + "`", perm_names))
+
+    # TODO: add channel support
+    @permissions.command(name="for")
+    async def permissions_for(self, ctx: SubContext, target: discord.Member | discord.Role, *, flags: PermForFlags):
         """
-        Manage role permissions
+        Get permissions for a user or role
         """
         assert ctx.guild is not None
-        differences = self.get_perm_diff(
-            ctx.guild.default_role.permissions, role.permissions
-        )
-        difference_message = ", ".join(map(lambda perm: "`" + perm + "`", differences))
-        return await ctx.send(f"Enabled permissions: {difference_message}")
 
-    @permissions.command(name="list")
-    async def permissions_list(self, ctx: SubContext):
+        default_perms = ctx.guild.default_role.permissions
+
+        if isinstance(target, discord.Role):
+            target_perms = target.permissions
+        else:
+            target_perms = target.guild_permissions
+
+        if differences := self.get_perm_diff(default_perms, target_perms):
+            difference_message = self.format_perm_names(differences)
+
+            singular = "s" if len(differences) > 1 else ""
+
+            message = f"{target.mention}'s extra permission{singular}: {difference_message}"
+        else:
+            message = f"{target.mention} has no extra permissions beyond the default"
+
+        if flags.channel is not None:
+            overwrites = flags.channel.overwrites_for(target)
+            allowed, denied = self.get_perm_overwrite_messages(overwrites)
+
+            if allowed is not None or denied is not None:
+                message += f"\n\nOverwrites in {flags.channel.mention}:\n"
+                if allowed is not None:
+                    message += f"- Allowed: {allowed}\n"
+                if denied is not None:
+                    message += f"- Denied: {denied}\n"
+
+        return await ctx.send(message)
+
+    @permissions.command(name="roles")
+    async def role_permissions_list(self, ctx: SubContext):
         """
         List all role permissions
         """
         assert ctx.guild is not None
 
-        message_parts: list[str] = []
+        normal_role_parts: list[str] = []
+        managed_role_parts: list[str] = []
 
         for role in ctx.guild.roles:
             if role != ctx.guild.default_role:
@@ -138,19 +175,29 @@ class Mod(commands.Cog, name="mod"):
                     ctx.guild.default_role.permissions, role.permissions
                 )
                 if differences:
-                    difference_message = ", ".join(
-                        map(lambda perm: "`" + perm + "`", differences)
-                    )
-                    message_parts.append(f"{role.name}: " + difference_message)
+                    difference_message = self.format_perm_names(differences)
 
-        return await ctx.send("\n".join(reversed(message_parts)))
+                    if role.managed:
+                        managed_role_parts.append(f"{role.name}: " + difference_message)
+                    else:
+                        normal_role_parts.append(f"{role.name}: " + difference_message)
 
-    # @role.command(name="list")
-    # async def _list(self, ctx: SubContext):
-    #     """
-    #     List current roles
-    #     """
-    #     pass
+        if normal_role_parts or managed_role_parts:
+            message = ""
+
+            if normal_role_parts:
+                message += "\n".join(reversed(normal_role_parts))
+
+            if managed_role_parts:
+                singular = "s" if len(managed_role_parts) > 1 else ""
+
+                message += f"\n\nManaged role{singular}:\n"
+                message += "\n".join(reversed(managed_role_parts))
+
+        else:
+            message = "No roles enable extra permissions"
+        
+        return await ctx.send(message)
 
 
 async def setup(bot):
