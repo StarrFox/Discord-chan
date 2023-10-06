@@ -13,6 +13,7 @@ class SnipeQueryFlags(commands.FlagConverter, delimiter=" ", prefix="--"):
     channel: Optional[discord.TextChannel]
     mode: Optional[SnipeMode]
     author: Optional[discord.Member]
+    contains: Optional[str]
 
 
 class Snipe(commands.Cog, name="snipe"):
@@ -92,6 +93,7 @@ class Snipe(commands.Cog, name="snipe"):
         snipes, snipe_count = await self.bot.database.get_snipes(
             server=ctx.guild.id if ctx.guild else 0,
             channel=snipe_channel.id,
+            contains=query_flags.contains,
             limit=abs(index) + 1,
             negative=negative,
             author=query_flags.author.id if query_flags.author else None,

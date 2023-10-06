@@ -307,6 +307,7 @@ class Database:
         server: int | None = None,
         author: int | None = None,
         channel: int | None = None,
+        contains: str | None = None,
         mode: SnipeMode | None = None,
         limit: int | None = None,
         negative: bool = False,
@@ -329,6 +330,11 @@ class Database:
         if channel is not None:
             query_parts.append(f"channel = ${next(counter)}")
             args.append(channel)
+
+        if contains is not None:
+            # the position function returns 1 or above in the substring is within content
+            query_parts.append(f"position(${next(counter)} in content) > 0")
+            args.append(contains)
 
         if mode is not None:
             query_parts.append(f"mode = ${next(counter)}")
