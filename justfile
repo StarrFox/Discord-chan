@@ -2,10 +2,6 @@
 default:
     just --list
 
-# bump version
-bump type: && create-tag
-    poetry version {{type}}
-
 # does a version bump commit
 bump-commit type: && create-tag
     poetry version {{type}}
