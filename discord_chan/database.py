@@ -300,7 +300,6 @@ class Database:
                 snipe.content,
             )
 
-    # TODO: add contains
     async def get_snipes(
         self,
         *,
@@ -377,7 +376,7 @@ class Database:
             else:
                 snipe_count: int = snipe_count_record["count"]
 
-            snipes = []
+            snipes: list[Snipe] = []
             for snipe_record in snipe_records:
                 snipes.append(
                     Snipe(

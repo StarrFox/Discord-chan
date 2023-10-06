@@ -1,11 +1,14 @@
-from collections import namedtuple
 from string import capwords
-from typing import Sequence
+from typing import Sequence, NamedTuple
 
 import discord
 from discord.ext import commands, menus
 
-EmbedFieldProxy = namedtuple("EmbedFieldProxy", "name value inline")
+
+class EmbedFieldProxy(NamedTuple):
+    name: str
+    value: str
+    inline: bool
 
 
 class ConfirmationMenu(menus.Menu):
@@ -155,13 +158,21 @@ class EmbedFieldsPageSource(menus.ListPageSource):
         per_page: int = 1,
         title: str | None = None,
         description: str | None = None,
+        show_footer: bool = True,
     ):
         super().__init__(entries, per_page=per_page)
         self.title = title
         self.description = description
+        self.show_footer = show_footer
 
-    async def format_page(self, menu, page):
+    async def format_page(self, menu: menus.MenuPages, page):
         base = discord.Embed(title=self.title, description=self.description)
+
+        if self.show_footer:
+            max_pages = self.get_max_pages()
+            current_page = menu.current_page
+
+            base.set_footer(text=f"page {current_page + 1}/{max_pages}")
 
         if isinstance(page, EmbedFieldProxy):
             return base.add_field(name=page.name, value=page.value, inline=page.inline)

@@ -113,7 +113,7 @@ class Gambling(commands.Cog):
         if not lb:
             return await ctx.send("No one has any coins right now")
 
-        entries = []
+        entries: list[str] = []
         for user_id, coins in lb:
             assert ctx.guild is not None
             # attempt cache pull first
