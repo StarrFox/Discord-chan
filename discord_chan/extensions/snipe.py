@@ -5,8 +5,9 @@ import pendulum
 from discord.ext import commands
 
 from discord_chan import DiscordChan
-from discord_chan.snipe import Snipe as Snipe_obj, SnipeMode
-from discord_chan.menus import DCMenuPages, EmbedFieldsPageSource, EmbedFieldProxy
+from discord_chan.menus import DCMenuPages, EmbedFieldProxy, EmbedFieldsPageSource
+from discord_chan.snipe import Snipe as Snipe_obj
+from discord_chan.snipe import SnipeMode
 
 
 class SnipeQueryFlags(commands.FlagConverter, delimiter=" ", prefix="--"):
@@ -134,7 +135,9 @@ class Snipe(commands.Cog, name="snipe"):
         await ctx.send(embed=embed)
 
     @snipe_command.command(name="list")
-    async def snipe_command_list(self, ctx: commands.Context, *, query_flags: SnipeQueryFlags):
+    async def snipe_command_list(
+        self, ctx: commands.Context, *, query_flags: SnipeQueryFlags
+    ):
         if query_flags.channel is not None:
             assert isinstance(ctx.channel, discord.TextChannel)
 
@@ -158,7 +161,7 @@ class Snipe(commands.Cog, name="snipe"):
 
         if total_snipes == 0:
             return await ctx.send("0 Snipes found for this query")
-        
+
         field_proxies: list[EmbedFieldProxy] = []
 
         for snipe in snipes:

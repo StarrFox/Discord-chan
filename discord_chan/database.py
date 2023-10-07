@@ -1,7 +1,7 @@
 import asyncio
-from collections import defaultdict
 import os
 import pwd
+from collections import defaultdict
 from itertools import count
 from typing import NamedTuple
 
@@ -115,13 +115,13 @@ class Database:
 
             records: list[asyncpg.Record] = await connection.fetch(
                 "SELECT guild_id, feature_name FROM enabled_features;"
-                )
-            
+            )
+
             result: dict[int, list[str]] = defaultdict(list)
 
             for record in records:
                 result[record["guild_id"]].append(record["feature_name"])
-        
+
         return result
 
     async def enable_guild_enabled_feature(self, guild_id: int, feature_name: str):

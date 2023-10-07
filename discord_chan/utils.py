@@ -3,7 +3,6 @@ from collections import OrderedDict
 
 from loguru import logger
 
-
 bool_dict = {
     "true": True,
     "on": True,

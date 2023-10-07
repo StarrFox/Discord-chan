@@ -81,7 +81,9 @@ class Mod(commands.Cog, name="mod"):
 
         await ctx.send("Member is currently in this guild.")
 
-    @commands.group(invoke_without_command=True, aliases=["permission", "perms", "perm"])
+    @commands.group(
+        invoke_without_command=True, aliases=["permission", "perms", "perm"]
+    )
     @commands.guild_only()
     async def permissions(self, ctx: SubContext):
         """
@@ -102,7 +104,9 @@ class Mod(commands.Cog, name="mod"):
 
         return differences
 
-    def get_perm_overwrite_messages(self, overwrites: discord.PermissionOverwrite) -> tuple[str | None, str | None]:
+    def get_perm_overwrite_messages(
+        self, overwrites: discord.PermissionOverwrite
+    ) -> tuple[str | None, str | None]:
         allowed: list[str] = []
         denied: list[str] = []
 
@@ -116,7 +120,7 @@ class Mod(commands.Cog, name="mod"):
         allowed_message = self.format_perm_names(allowed) if allowed else None
         denied_message = self.format_perm_names(denied) if denied else None
 
-        return allowed_message, denied_message 
+        return allowed_message, denied_message
 
     @staticmethod
     def format_perm_names(perm_names: list[str]) -> str:
@@ -124,7 +128,13 @@ class Mod(commands.Cog, name="mod"):
 
     # TODO: add channel support
     @permissions.command(name="for")
-    async def permissions_for(self, ctx: SubContext, target: discord.Member | discord.Role, *, flags: PermForFlags):
+    async def permissions_for(
+        self,
+        ctx: SubContext,
+        target: discord.Member | discord.Role,
+        *,
+        flags: PermForFlags,
+    ):
         """
         Get permissions for a user or role
         """
@@ -142,7 +152,9 @@ class Mod(commands.Cog, name="mod"):
 
             singular = "s" if len(differences) > 1 else ""
 
-            message = f"{target.mention}'s extra permission{singular}: {difference_message}"
+            message = (
+                f"{target.mention}'s extra permission{singular}: {difference_message}"
+            )
         else:
             message = f"{target.mention} has no extra permissions beyond the default"
 
@@ -198,7 +210,7 @@ class Mod(commands.Cog, name="mod"):
 
         else:
             message = "No roles enable extra permissions"
-        
+
         return await ctx.send(message)
 
 

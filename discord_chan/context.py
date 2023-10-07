@@ -7,14 +7,13 @@ from .menus import ConfirmationMenu, DCMenuPages, NormalPageSource, PartitionPag
 
 
 class SubContext(Context):
-    async def send(self, content=None, **kwargs) -> Message:
-        if content:
-            content = str(content)
+    async def send(self, content: str | None = None, **kwargs) -> Message:
+        if content and len(content) > 2000:
+            if kwargs:
+                raise RuntimeError(
+                    "content over 2000 but kwargs were provided and wont be respected"
+                )
 
-        # TODO: handle more args than just content
-        # If there was more than just content ex: embeds they don't get sent
-        # but this should never really be used, so this is ok?
-        if content and len(str(content)) > 2000:
             paginator = PartitionPaginator(prefix=None, suffix=None, max_size=1985)
             paginator.add_line(content)
 

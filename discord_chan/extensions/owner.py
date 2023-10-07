@@ -66,7 +66,7 @@ class Owner(commands.Cog, name="owner"):
             guild = await self.bot.fetch_guild(guild_id)
 
             result += f"{guild.name}: {' '.join(guild_features[guild_id])}\n"
-        
+
         await ctx.send(result or "no enabled features")
 
 
