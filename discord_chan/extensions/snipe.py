@@ -1,3 +1,4 @@
+import textwrap
 from typing import Optional
 
 import discord
@@ -177,10 +178,16 @@ class Snipe(commands.Cog, name="snipe"):
                 except discord.NotFound:
                     target_author = "[User unreadable]"
 
+            # embed field value's max at 1024 characters
+            if len(snipe.content) >= 1024:
+                content = textwrap.wrap(snipe.content, 1024 - 3)[0] + "..."
+            else:
+                content = snipe.content
+
             field_proxies.append(
                 EmbedFieldProxy(
                     name=f"[{snipe.mode.name}] {target_author} {snipe.discord_timestamp}",
-                    value=snipe.content,
+                    value=content,
                     inline=False,
                 )
             )
