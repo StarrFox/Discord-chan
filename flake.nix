@@ -125,7 +125,7 @@
           name = "discord-chan";
           packages = with pkgs; [
             (poetry.withPlugins (ps: with ps; [poetry-plugin-up]))
-            python311
+            python
             just
             alejandra
             python311.pkgs.black
