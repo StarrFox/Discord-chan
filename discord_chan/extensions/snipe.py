@@ -103,7 +103,7 @@ class Snipe(commands.Cog, name="snipe"):
         total_snipes = len(snipes)
 
         if total_snipes == 0:
-            return await ctx.send("0 Snipes found for this query")
+            return await ctx.send("No snipes found for this query")
 
         if negative and abs(index) > (total_snipes + 1):
             return await ctx.send(f"Only {total_snipes} snipes found for this query")
@@ -151,7 +151,7 @@ class Snipe(commands.Cog, name="snipe"):
         else:
             snipe_channel = ctx.channel
 
-        snipes, snipe_count = await self.bot.database.get_snipes(
+        snipes, _ = await self.bot.database.get_snipes(
             server=ctx.guild.id if ctx.guild else 0,
             channel=snipe_channel.id,
             contains=query_flags.contains,
@@ -161,7 +161,7 @@ class Snipe(commands.Cog, name="snipe"):
         total_snipes = len(snipes)
 
         if total_snipes == 0:
-            return await ctx.send("0 Snipes found for this query")
+            return await ctx.send("No snipes found for this query")
 
         field_proxies: list[EmbedFieldProxy] = []
 
