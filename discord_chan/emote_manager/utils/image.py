@@ -29,6 +29,7 @@ try:
     import wand.exceptions
     import wand.image
 except (ImportError, OSError):
+    wand = None
     logger.warning(
         "Failed to import wand.image. Image manipulation functions will be unavailable."
     )
@@ -70,13 +71,16 @@ def executor_function(sync_function: typing.Callable):
 
 
 @executor_function
-def resize_until_small(image_data: bytes) -> bytes:
+def resize_until_small(raw_image_data: bytes) -> bytes:
     """If the image_data is bigger than 256KB, resize it until it's not."""
+    if wand is None:
+        raise RuntimeError("Attempted to use image function without wand")
+
     # It's important that we only attempt to resize the image when we have to,
     # ie when it exceeds the Discord limit of 256KiB.
     # Apparently some <256KiB images become larger when we attempt to resize them,
     # so resizing sometimes does more harm than good.
-    image_data = io.BytesIO(image_data)
+    image_data = io.BytesIO(raw_image_data)
     max_resolution = 128  # pixels
     image_size = size(image_data)
     if image_size <= 256 * 2**10:
@@ -94,7 +98,12 @@ def resize_until_small(image_data: bytes) -> bytes:
 
                 with original_image.clone() as resized:
                     resized.transform(resize=f"{max_resolution}x{max_resolution}")
-                    image_size = len(resized.make_blob())
+                    blob = resized.make_blob()
+
+                    if blob is None:
+                        raise RuntimeError("blob was somehow None")
+
+                    image_size = len(blob)
                     if (
                         image_size <= 256 * 2**10 or max_resolution < 32
                     ):  # don't resize past 256KiB or 32×32
@@ -112,15 +121,18 @@ def resize_until_small(image_data: bytes) -> bytes:
 
 
 @executor_function
-def convert_to_gif(image_data: bytes) -> bytes:
-    image_data = io.BytesIO(image_data)
+def convert_to_gif(raw_image_data: bytes) -> bytes:
+    if wand is None:
+        raise RuntimeError("Attempted to use image function without wand")
+
+    image_data = io.BytesIO(raw_image_data)
     try:
         with wand.image.Image(blob=image_data) as orig, orig.convert(
             "gif"
         ) as converted:
             # discord tries to stop us from abusing animated gif slots by detecting single frame gifs
             # so make it two frames
-            converted.sequence[0].delay = 0  # show the first frame forever
+            converted.sequence[0].delay = 0  # show the first frame forever # type: ignore
             converted.sequence.append(wand.image.Image(width=1, height=1))
 
             image_data.truncate(0)
