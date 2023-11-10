@@ -2,7 +2,7 @@ import asyncio
 import random
 import typing
 from math import floor
-from typing import Literal, Optional
+from typing import Literal
 
 import aiohttp
 import discord
