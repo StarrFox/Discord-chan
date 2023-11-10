@@ -1,5 +1,6 @@
 from string import capwords
-from typing import NamedTuple, Sequence
+from typing import NamedTuple
+from collections.abc import Sequence
 
 import discord
 from discord.ext import commands, menus

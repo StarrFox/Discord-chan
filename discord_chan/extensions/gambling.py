@@ -56,7 +56,7 @@ class Gambling(commands.Cog):
 
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
-    async def coins(self, ctx: "SubContext", member: Optional[discord.Member] = None):
+    async def coins(self, ctx: "SubContext", member: discord.Member | None = None):
         """
         View another member or your aacoin amount.
         """

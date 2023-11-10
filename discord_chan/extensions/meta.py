@@ -26,7 +26,7 @@ class Meta(commands.Cog, name="meta"):
         self,
         ctx: commands.Context,
         target_bot: Annotated[
-            Optional[discord.Member | discord.User | discord.ClientUser], BotConverter
+            discord.Member | discord.User | discord.ClientUser | None, BotConverter
         ] = None,
     ):
         """

@@ -12,10 +12,10 @@ from discord_chan.snipe import SnipeMode
 
 
 class SnipeQueryFlags(commands.FlagConverter, delimiter=" ", prefix="--"):
-    channel: Optional[discord.TextChannel]
-    mode: Optional[SnipeMode]
-    author: Optional[discord.Member]
-    contains: Optional[str]
+    channel: discord.TextChannel | None
+    mode: SnipeMode | None
+    author: discord.Member | None
+    contains: str | None
 
 
 class Snipe(commands.Cog, name="snipe"):
@@ -55,7 +55,7 @@ class Snipe(commands.Cog, name="snipe"):
     async def snipe_command(
         self,
         ctx: commands.Context,
-        index: Optional[int] = 0,
+        index: int | None = 0,
         *,
         query_flags: SnipeQueryFlags,
     ):

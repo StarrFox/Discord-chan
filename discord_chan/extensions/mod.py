@@ -12,7 +12,7 @@ def is_above(invoker: discord.Member, user: discord.Member):
 
 
 class PermForFlags(commands.FlagConverter, prefix="--", delimiter=""):
-    channel: typing.Optional[discord.abc.GuildChannel] = None
+    channel: discord.abc.GuildChannel | None = None
 
 
 class Mod(commands.Cog, name="mod"):
@@ -30,9 +30,9 @@ class Mod(commands.Cog, name="mod"):
         self,
         ctx: SubContext,
         number: typing.Annotated[int, BetweenConverter(0, 1000)],
-        user: typing.Optional[FetchedMember] = None,
+        user: FetchedMember | None = None,
         *,
-        text: typing.Optional[str] = None,
+        text: str | None = None,
     ):
         """
         Purges messages from certain user and/or (with) certain text
