@@ -71,9 +71,7 @@ class ImageFormatConverter(commands.Converter):
         if argument in ("png", "gif", "jpeg", "webp"):
             return argument
         else:
-            raise commands.BadArgument(
-                f"{argument} is not a valid image format."
-            )
+            raise commands.BadArgument(f"{argument} is not a valid image format.")
 
 
 class BetweenConverter(commands.Converter):

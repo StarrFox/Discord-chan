@@ -34,7 +34,7 @@ class Paginator:
         timeout=300,
         delete_message=False,
         delete_message_on_timeout=False,
-        text_message=None
+        text_message=None,
     ):
         self.pages = list(pages)
         self.timeout = timeout

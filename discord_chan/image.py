@@ -1,10 +1,10 @@
 import asyncio
 import functools
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 from tarfile import TarFile, TarInfo
 from typing import NamedTuple, ParamSpec, TypeVar
-from collections.abc import Callable
 
 import aiohttp
 from discord import File

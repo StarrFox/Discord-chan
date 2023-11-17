@@ -5,7 +5,12 @@ import pendulum
 from discord.ext import commands
 
 from discord_chan import DiscordChan
-from discord_chan.menus import DCMenuPages, EmbedFieldProxy, EmbedFieldsPageSource, NormalPageSource
+from discord_chan.menus import (
+    DCMenuPages,
+    EmbedFieldProxy,
+    EmbedFieldsPageSource,
+    NormalPageSource,
+)
 from discord_chan.snipe import Snipe as Snipe_obj
 from discord_chan.snipe import SnipeMode
 
@@ -208,9 +213,7 @@ class Snipe(commands.Cog, name="snipe"):
         # guild_only check should ensure this is true
         assert ctx.guild is not None
 
-        leaderboard = await self.bot.database.get_snipe_leaderboard(
-            ctx.guild.id
-        )
+        leaderboard = await self.bot.database.get_snipe_leaderboard(ctx.guild.id)
 
         entries: list[str] = []
 
