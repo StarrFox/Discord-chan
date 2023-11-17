@@ -143,11 +143,8 @@ class CodeblockPageSource(menus.ListPageSource):
 
     async def format_page(self, menu, page):
         base = "```" + self.language + "\n"
-
         base += "\n".join(page)
-
         base += "\n```"
-
         return base
 
 
