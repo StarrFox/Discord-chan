@@ -1,4 +1,5 @@
 import asyncio
+from http import server
 import os
 import pwd
 from collections import defaultdict
@@ -391,3 +392,27 @@ class Database:
                 )
 
             return snipes, snipe_count
+
+    async def get_snipe_leaderboard(self, server_id: int | None = None) -> dict[int, int]:
+        pool = await self.connect()
+
+        if server_id:
+            where = "where server = $1"
+            params = [server_id]
+        else:
+            where = ""
+            params = []
+
+        async with pool.acquire() as connection:
+            connection: asyncpg.Connection
+            records: list[asyncpg.Record] = await connection.fetch(
+                f"SELECT author, count(author) from snipes {where} group by author order by count desc;",
+                *params
+            )
+
+            result: dict[int, int] = {}
+
+            for record in records:
+                result[record["author"]] = record["count"]
+
+        return result

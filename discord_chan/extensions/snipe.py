@@ -5,7 +5,7 @@ import pendulum
 from discord.ext import commands
 
 from discord_chan import DiscordChan
-from discord_chan.menus import DCMenuPages, EmbedFieldProxy, EmbedFieldsPageSource
+from discord_chan.menus import DCMenuPages, EmbedFieldProxy, EmbedFieldsPageSource, NormalPageSource
 from discord_chan.snipe import Snipe as Snipe_obj
 from discord_chan.snipe import SnipeMode
 
@@ -138,6 +138,9 @@ class Snipe(commands.Cog, name="snipe"):
     async def snipe_command_list(
         self, ctx: commands.Context, *, query_flags: SnipeQueryFlags
     ):
+        """
+        List snipes instead of just one
+        """
         if query_flags.channel is not None:
             assert isinstance(ctx.channel, discord.TextChannel)
 
@@ -192,6 +195,38 @@ class Snipe(commands.Cog, name="snipe"):
             )
 
         source = EmbedFieldsPageSource(field_proxies, per_page=4)
+        menu = DCMenuPages(source)
+
+        await menu.start(ctx)
+
+    @snipe_command.command(name="stat")
+    @commands.guild_only()
+    async def snipe_command_stat(self, ctx: commands.Context):
+        """
+        Get stats on who has the most snipes
+        """
+        # guild_only check should ensure this is true
+        assert ctx.guild is not None
+
+        leaderboard = await self.bot.database.get_snipe_leaderboard(
+            ctx.guild.id
+        )
+
+        entries: list[str] = []
+
+        for author_id, count in leaderboard.items():
+            author = ctx.guild.get_member(author_id)
+
+            if author is None:
+                author = await self.bot.fetch_user(author_id)
+
+            entries.append(f"- {author.display_name}: {count}")
+
+        _, total = await self.bot.database.get_snipes(server=ctx.guild.id)
+
+        entries = [f"total = {total}", ""] + entries
+
+        source = NormalPageSource(entries, per_page=10)
         menu = DCMenuPages(source)
 
         await menu.start(ctx)
