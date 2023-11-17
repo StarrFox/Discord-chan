@@ -107,6 +107,10 @@ class WordTrack(commands.Cog):
         for word, count in leaderboard.items():
             entries.append(f"- {word}: {count}")
 
+        total = len(entries)
+
+        entries = [f"total = {total}", ""] + entries
+
         source = NormalPageSource(entries, per_page=10)
         menu = DCMenuPages(source)
 
