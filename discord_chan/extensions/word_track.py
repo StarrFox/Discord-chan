@@ -40,7 +40,7 @@ class WordTrack(commands.Cog):
 
     @staticmethod
     def split_words(entry: str) -> list[str]:
-        entry = re.sub(r"[^a-zA-Z _]", " ", entry.lower())
+        entry = re.sub(r"[^a-zA-Z _']", " ", entry.lower())
         return [e for e in entry.split(" ") if len(e) > 0]
 
     # TODO: make a better solution using bot.wait_for
