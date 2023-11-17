@@ -12,6 +12,8 @@ FEATURE_NAME = "word_track"
 # number of seconds to wait for edits to messages before consuming
 EDIT_GRACE_TIME = 15
 
+WORD_SIZE_LIMIT = 15
+
 
 class WordTrack(commands.Cog):
     def __init__(self, bot: DiscordChan):
@@ -31,6 +33,10 @@ class WordTrack(commands.Cog):
         assert message.guild is not None
 
         for word in set(words):
+            # most words are under 15 characters
+            if len(word) > WORD_SIZE_LIMIT:
+                continue
+
             await self.bot.database.update_word_track_word(
                 server_id=message.guild.id,
                 author_id=message.author.id,
