@@ -4,12 +4,14 @@ on:
         - "flake.*"
         - "discord_chan/**"
         - ".github/workflows/flake_check.yml"
+        - "pyproject.toml"
     push:
         branches: [master]
         paths:
           - "flake.*"
           - "discord_chan/**"
           - ".github/workflows/flake_check.yml"
+          - "pyproject.toml"
   
 jobs:
     check:
