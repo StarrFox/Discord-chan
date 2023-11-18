@@ -1,4 +1,5 @@
 import asyncio
+import contextlib
 import re
 
 import discord
@@ -12,18 +13,14 @@ FEATURE_NAME = "word_track"
 # number of seconds to wait for edits to messages before consuming
 EDIT_GRACE_TIME = 15
 
-WORD_SIZE_LIMIT = 15
+WORD_SIZE_LIMIT = 20
 
 
 class WordTrack(commands.Cog):
     def __init__(self, bot: DiscordChan):
         self.bot = bot
 
-        self.pending_messages: dict[int, discord.Message] = {}
-
-    async def consume_message(self, message_id: int):
-        message = self.pending_messages.pop(message_id)
-
+    async def consume_message(self, message: discord.Message):
         words = self.split_words(message.content)
 
         # if their message was just "?" we'd get an empty list
@@ -49,7 +46,6 @@ class WordTrack(commands.Cog):
         entry = re.sub(r"[^a-zA-Z _']", " ", entry.lower())
         return [e for e in entry.split(" ") if len(e) > 0]
 
-    # TODO: make a better solution using bot.wait_for
     @commands.Cog.listener("on_message")
     async def message_event(self, message: discord.Message):
         if message.author.bot:
@@ -64,24 +60,19 @@ class WordTrack(commands.Cog):
         ):
             return
 
-        self.pending_messages[message.id] = message
-        await asyncio.sleep(EDIT_GRACE_TIME)
-        await self.consume_message(message.id)
+        async def _wait_for_edits():
+            edited_message = message
 
-    @commands.Cog.listener("on_message_edit")
-    async def message_edit_event(self, old: discord.Message, new: discord.Message):
-        if old.author.bot:
-            return
+            with contextlib.suppress(asyncio.CancelledError):
+                while True:
+                    edited_message = await self.bot.wait_for(
+                        "message", check=lambda m: m.id == message.id
+                    )
 
-        # dms
-        if old.channel.guild is None:
-            return
+            return edited_message
 
-        if not await self.bot.is_feature_enabled(old.channel.guild.id, FEATURE_NAME):
-            return
-
-        if self.pending_messages.get(old.id):
-            self.pending_messages[old.id] = new
+        message = await asyncio.wait_for(_wait_for_edits(), timeout=EDIT_GRACE_TIME)
+        await self.consume_message(message)
 
     @commands.command(name="word_count")
     @commands.guild_only()
