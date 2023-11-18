@@ -26,7 +26,7 @@ class Minimal(commands.MinimalHelpCommand):
             return
 
         self.paginator.add_line(
-            "**%s** %s" % (self.aliases_heading, ", ".join(aliases)), empty=True
+            "**{}** {}".format(self.aliases_heading, ", ".join(aliases)), empty=True
         )
 
     def add_command_formatting(self, command):
@@ -90,7 +90,7 @@ class Minimal(commands.MinimalHelpCommand):
         )
         if filtered:
             self.paginator.add_line(
-                "**%s %s**" % (cog.qualified_name, self.commands_heading.lower())
+                f"**{cog.qualified_name} {self.commands_heading.lower()}**"
             )
 
             for command in filtered:

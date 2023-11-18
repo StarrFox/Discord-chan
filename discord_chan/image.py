@@ -1,9 +1,10 @@
 import asyncio
 import functools
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 from tarfile import TarFile, TarInfo
-from typing import Callable, NamedTuple, ParamSpec, TypeVar
+from typing import NamedTuple, ParamSpec, TypeVar
 
 import aiohttp
 from discord import File
@@ -115,7 +116,7 @@ async def url_to_image(link: str) -> Image.Image:
 
     try:
         image = await open_image(file_obj)
-    except IOError:
+    except OSError:
         # This should never get here
         raise InvalidImageType(f"{content_type.lower()} is not a valid image type.")
 

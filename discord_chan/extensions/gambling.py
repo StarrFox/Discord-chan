@@ -2,7 +2,7 @@ import asyncio
 import random
 import typing
 from math import floor
-from typing import Literal, Optional
+from typing import Literal
 
 import aiohttp
 import discord
@@ -56,7 +56,7 @@ class Gambling(commands.Cog):
 
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
-    async def coins(self, ctx: "SubContext", member: Optional[discord.Member] = None):
+    async def coins(self, ctx: "SubContext", member: discord.Member | None = None):
         """
         View another member or your aacoin amount.
         """
@@ -98,7 +98,7 @@ class Gambling(commands.Cog):
         ):
             await self.bot.database.remove_coins(ctx.author.id, amount)
             await self.bot.database.add_coins(member.id, amount)
-            await ctx.send("sent")
+            await ctx.send("Sent")
         else:
             await ctx.send("Sending canceled")
 
@@ -112,7 +112,7 @@ class Gambling(commands.Cog):
         if not lb:
             return await ctx.send("No one has any coins right now")
 
-        entries = []
+        entries: list[str] = []
         for user_id, coins in lb:
             assert ctx.guild is not None
             # attempt cache pull first
