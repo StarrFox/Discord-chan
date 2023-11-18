@@ -24,6 +24,8 @@
       }: let
         python = pkgs.python311;
 
+        pyproject = builtins.fromTOML (builtins.readFile ./pyproject.toml);
+
         discord-ext-menus = python.pkgs.buildPythonPackage {
           pname = "discord-ext-menus";
           version = "1.0.0a0";
@@ -90,12 +92,10 @@
           ];
         };
       in {
-        # TODO: set meta.mainProgram to remove a warning with lib.getExe
-        # should be discord_chan after the poetry2nix removal pr is merged
         packages.discord_chan = python.pkgs.buildPythonPackage rec {
           src = ./.;
           pname = "discord_chan";
-          version = "2.4.6";
+          version = pyproject.tool.poetry.version;
           format = "pyproject";
           pythonImportsCheck = [pname];
           nativeBuildInputs = [
@@ -118,6 +118,8 @@
             uvloop
             psutil
           ];
+
+          meta.mainProgram = "discord_chan";
         };
 
         packages.default = self'.packages.discord_chan;
