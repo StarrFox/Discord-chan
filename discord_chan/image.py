@@ -1,9 +1,10 @@
 import asyncio
 import functools
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 from tarfile import TarFile, TarInfo
-from typing import Callable, NamedTuple, TypeVar, ParamSpec
+from typing import NamedTuple, ParamSpec, TypeVar
 
 import aiohttp
 from discord import File
@@ -24,6 +25,7 @@ class InvalidImageType(ImageError):
 
 T = TypeVar("T")
 P = ParamSpec("P")
+
 
 # Modified from https://github.com/Gorialis/jishaku/blob/bf26bea3c1f86993fd75744de48bf52d4925521a/jishaku/functools.py#L22
 # This license covers the below function
@@ -48,7 +50,7 @@ P = ParamSpec("P")
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-def executor_function(sync_function: Callable[P, T]): # type: ignore
+def executor_function(sync_function: Callable[P, T]):  # type: ignore
     @functools.wraps(sync_function)
     async def sync_wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
         loop = asyncio.get_event_loop()
@@ -114,7 +116,7 @@ async def url_to_image(link: str) -> Image.Image:
 
     try:
         image = await open_image(file_obj)
-    except IOError:
+    except OSError:
         # This should never get here
         raise InvalidImageType(f"{content_type.lower()} is not a valid image type.")
 

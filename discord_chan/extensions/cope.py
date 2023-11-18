@@ -5,7 +5,6 @@ from discord.ext import commands
 
 import discord_chan
 
-
 FEATURE_NAME = "cope"
 
 
@@ -19,10 +18,7 @@ class Cope(commands.Cog, name="cope"):
         self.bot = bot
 
     @commands.Cog.listener("on_message")
-    async def on_message(
-        self,
-        message: discord.Message
-    ):
+    async def on_message(self, message: discord.Message):
         if message.author.bot:
             return
 

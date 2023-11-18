@@ -6,7 +6,6 @@ from dataclasses import dataclass
 
 import aiohttp
 
-
 SAFEBOORU_BASE_URL = "https://safebooru.org/index.php?page=dapi&s=post&q=index"
 # SUBTRACTIVE_NSFW_TAGS = ["-panties", "-underwear", "-bra", "-bikini", "-ass", "-exercise", "-sweat",
 #                          "-topless", "-bare_back", "-mind_control", "-clothes_lift", "-squatting",

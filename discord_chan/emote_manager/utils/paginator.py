@@ -34,7 +34,7 @@ class Paginator:
         timeout=300,
         delete_message=False,
         delete_message_on_timeout=False,
-        text_message=None
+        text_message=None,
     ):
         self.pages = list(pages)
         self.timeout = timeout
@@ -164,11 +164,11 @@ class ListPaginator(Paginator):
             if c % per_page == 0 and page:
                 pages.append(page.strip())
                 page = ""
-            page += "{}. {}\n".format(c + 1, i)
+            page += f"{c + 1}. {i}\n"
 
             c += 1
         pages.append(page.strip())
         # shut up, IDEA
         # noinspection PyArgumentList
         super().__init__(ctx, pages, **kwargs)
-        self.footer += " ({} entries)".format(l)
+        self.footer += f" ({l} entries)"

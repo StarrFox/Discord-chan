@@ -1,7 +1,16 @@
 name: "build"
 on:
     pull_request:
+        paths:
+            - "discord_chan/**"
+            - "flake.*"
+            - ".github/workflows/build.yml"
     push:
+        branches: ["master"]
+        paths:
+            - "discord_chan/**"
+            - "flake.*"
+            - ".github/workflows/build.yml"
 
 jobs:
     build:

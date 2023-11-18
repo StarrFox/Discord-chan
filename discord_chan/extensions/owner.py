@@ -53,6 +53,22 @@ class Owner(commands.Cog, name="owner"):
 
         await ctx.send(file=discord.File(BytesIO(data), filename))
 
+    @commands.command()
+    async def features(self, ctx: SubContext):
+        """
+        Show what features are enabled
+        """
+        guild_features = await self.bot.database.get_all_guild_enabled_features()
+
+        result = ""
+
+        for guild_id in guild_features.keys():
+            guild = await self.bot.fetch_guild(guild_id)
+
+            result += f"{guild.name}: {' '.join(guild_features[guild_id])}\n"
+
+        await ctx.send(result or "no enabled features")
+
 
 async def setup(bot):
     await bot.add_cog(Owner(bot))

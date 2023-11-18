@@ -1,7 +1,15 @@
 on:
     pull_request:
+      paths:
+        - "flake.*"
+        - "discord_chan/**"
+        - ".github/workflows/flake_check.yml"
     push:
         branches: [master]
+        paths:
+          - "flake.*"
+          - "discord_chan/**"
+          - ".github/workflows/flake_check.yml"
   
 jobs:
     check:

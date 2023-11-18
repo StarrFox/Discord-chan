@@ -63,7 +63,7 @@ class FetchedMember(commands.Converter):
         if members:
             return members[0]
 
-        raise commands.BadArgument('Member "{}" not found'.format(argument))
+        raise commands.BadArgument(f'Member "{argument}" not found')
 
 
 class ImageFormatConverter(commands.Converter):
@@ -71,9 +71,7 @@ class ImageFormatConverter(commands.Converter):
         if argument in ("png", "gif", "jpeg", "webp"):
             return argument
         else:
-            raise commands.BadArgument(
-                "{} is not a valid image format.".format(argument)
-            )
+            raise commands.BadArgument(f"{argument} is not a valid image format.")
 
 
 class BetweenConverter(commands.Converter):
@@ -85,12 +83,12 @@ class BetweenConverter(commands.Converter):
         try:
             converted_argument = int(argument)
         except ValueError:
-            raise commands.BadArgument("{} is not a valid number.".format(argument))
+            raise commands.BadArgument(f"{argument} is not a valid number.")
         if self.num1 <= converted_argument <= self.num2:
             return converted_argument
 
         raise commands.BadArgument(
-            "{} is not between {} and {}".format(argument, self.num1, self.num2)
+            f"{argument} is not between {self.num1} and {self.num2}"
         )
 
 
@@ -134,7 +132,7 @@ class MaxLengthConverter(commands.Converter):
         if len(argument) <= self.max_size:
             return argument
 
-        raise commands.BadArgument("Argument over max size of {}".format(self.max_size))
+        raise commands.BadArgument(f"Argument over max size of {self.max_size}")
 
 
 class WeekdayConverter(commands.Converter):
@@ -147,7 +145,7 @@ class WeekdayConverter(commands.Converter):
         if converted in WEEKDAY_ABBRS:
             return WEEKDAY_ABBRS[converted]
 
-        raise commands.BadArgument("{} is not a valid weekday.".format(argument))
+        raise commands.BadArgument(f"{argument} is not a valid weekday.")
 
 
 class BotConverter(commands.Converter):
@@ -232,7 +230,7 @@ class ImageUrlConverter(commands.Converter):
             return url_regex.string
 
         raise commands.BadArgument(
-            '"{}" is not a member, message, custom emoji, or url.'.format(argument)
+            f'"{argument}" is not a member, message, custom emoji, or url.'
         )
 
 

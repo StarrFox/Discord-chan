@@ -16,8 +16,8 @@
 import asyncio
 import tarfile
 import zipfile
-from collections.abc import AsyncGenerator, Generator
-from typing import Iterable, NamedTuple, Optional, Tuple
+from collections.abc import AsyncGenerator, Generator, Iterable
+from typing import NamedTuple
 
 from . import errors
 
