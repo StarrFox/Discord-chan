@@ -5,12 +5,14 @@ on:
             - "discord_chan/**"
             - "flake.*"
             - ".github/workflows/build.yml"
+            - "pyproject.toml"
     push:
         branches: ["master"]
         paths:
             - "discord_chan/**"
             - "flake.*"
             - ".github/workflows/build.yml"
+            - "pyproject.toml"
 
 jobs:
     build:
