@@ -965,13 +965,13 @@ click = ">=8.0.1,<9.0.0"
 
 [[package]]
 name = "wand"
-version = "0.6.11"
+version = "0.6.13"
 description = "Ctypes-based simple MagickWand API binding for Python"
 optional = false
 python-versions = "*"
 files = [
-    {file = "Wand-0.6.11-py2.py3-none-any.whl", hash = "sha256:1b77e25439ace57f665d1ccc6cff2766fad0834005b89ae3e7aaf3ba12b124b0"},
-    {file = "Wand-0.6.11.tar.gz", hash = "sha256:b661700da9f8f1e931e52726e4fc643a565b9514f5883d41b773e3c37c9fa995"},
+    {file = "Wand-0.6.13-py2.py3-none-any.whl", hash = "sha256:e5dda0ac2204a40c29ef5c4cb310770c95d3d05c37b1379e69c94ea79d7d19c0"},
+    {file = "Wand-0.6.13.tar.gz", hash = "sha256:f5013484eaf7a20eb22d1821aaefe60b50cc329722372b5f8565d46d4aaafcca"},
 ]
 
 [package.extras]
