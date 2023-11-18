@@ -90,6 +90,8 @@
           ];
         };
       in {
+        # TODO: set meta.mainProgram to remove a warning with lib.getExe
+        # should be discord_chan after the poetry2nix removal pr is merged
         packages.discord_chan = python.pkgs.buildPythonPackage rec {
           src = ./.;
           pname = "discord_chan";
@@ -121,7 +123,7 @@
         packages.default = self'.packages.discord_chan;
 
         devShells.default = pkgs.mkShell {
-          name = "discord-chan";
+          name = "discord_chan";
           packages = with pkgs; [
             (poetry.withPlugins (ps: with ps; [poetry-plugin-up]))
             python311

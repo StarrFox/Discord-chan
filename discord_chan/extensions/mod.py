@@ -126,7 +126,6 @@ class Mod(commands.Cog, name="mod"):
     def format_perm_names(perm_names: list[str]) -> str:
         return ", ".join(map(lambda perm: "`" + perm + "`", perm_names))
 
-    # TODO: add channel support
     @permissions.command(name="for")
     async def permissions_for(
         self,
