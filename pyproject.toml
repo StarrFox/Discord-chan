@@ -13,7 +13,7 @@ click = "^8.1.7"
 loguru = "^0.7.0"
 humanize = "^4.8.0"
 psutil = "^5.9.5"
-uvloop = {version = "^0.17.0", markers = "platform_system == 'Linux'"}
+uvloop = {version = "^0.19.0", markers = "platform_system == 'Linux'"}
 Unidecode = "^1.3.6"
 "discord.py" = "^2.3.2"
 jishaku = "^2.5.1"
