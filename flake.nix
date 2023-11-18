@@ -22,7 +22,7 @@
         self',
         ...
       }: let
-        python = pkgs.python311;
+        python = pkgs.python312;
 
         discord-ext-menus = python.pkgs.buildPythonPackage {
           pname = "discord-ext-menus";
@@ -126,14 +126,14 @@
           name = "discord_chan";
           packages = with pkgs; [
             (poetry.withPlugins (ps: with ps; [poetry-plugin-up]))
-            python311
+            python
             just
             alejandra
-            python311.pkgs.black
-            python311.pkgs.isort
-            python311.pkgs.vulture
-            python311.pkgs.python-lsp-server
-            python311.pkgs.mypy
+            python.pkgs.black
+            python.pkgs.isort
+            python.pkgs.vulture
+            python.pkgs.python-lsp-server
+            python.pkgs.mypy
           ];
         };
       };
