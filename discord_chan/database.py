@@ -1,6 +1,7 @@
 import asyncio
 import os
 import pwd
+from collections import defaultdict
 from itertools import count
 from typing import NamedTuple
 
@@ -58,6 +59,14 @@ CREATE TABLE IF NOT EXISTS stakes (
     amount FLOAT,
     bitcoin_price FLOAT
 );
+
+CREATE TABLE IF NOT EXISTS word_track (
+    server BIGINT,
+    author BIGINT,
+    word TEXT,
+    count INT,
+    PRIMARY KEY (server, author, word)
+);
 """.strip()
 
 
@@ -89,6 +98,49 @@ class Database:
             await self._ensure_tables(self._connection)
             return self._connection
 
+    async def update_word_track_word(
+        self, *, server_id: int, author_id: int, word: str, amount: int
+    ):
+        pool = await self.connect()
+
+        async with pool.acquire() as connection:
+            connection: asyncpg.Connection
+            await connection.execute(
+                f"INSERT INTO word_track (server, author, word, count) VALUES ($1, $2, $3, $4) ON CONFLICT (server, author, word) DO UPDATE SET count = EXCLUDED.count + word_track.count;",
+                server_id,
+                author_id,
+                word,
+                amount,
+            )
+
+    async def get_server_word_track_leaderboard(
+        self, *, server_id: int, author_id: int | None = None
+    ) -> dict[str, int]:
+        pool = await self.connect()
+
+        params = [server_id]
+
+        if author_id is not None:
+            author_condition = "and author = $2"
+            params.append(author_id)
+
+        else:
+            author_condition = ""
+
+        async with pool.acquire() as connection:
+            connection: asyncpg.Connection
+            records: list[asyncpg.Record] = await connection.fetch(
+                f"SELECT word, sum(count) FROM word_track WHERE server = $1 {author_condition} GROUP BY word ORDER BY sum DESC;",
+                *params,
+            )
+
+            result: dict[str, int] = {}
+
+            for record in records:
+                result[record["word"]] = record["sum"]
+
+        return result
+
     async def get_guild_enabled_features(self, guild_id: int) -> list[str]:
         pool = await self.connect()
 
@@ -103,6 +155,23 @@ class Database:
 
             for record in records:
                 result.append(record["feature_name"])
+
+        return result
+
+    async def get_all_guild_enabled_features(self) -> dict[int, list[str]]:
+        pool = await self.connect()
+
+        async with pool.acquire() as connection:
+            connection: asyncpg.Connection
+
+            records: list[asyncpg.Record] = await connection.fetch(
+                "SELECT guild_id, feature_name FROM enabled_features;"
+            )
+
+            result: dict[int, list[str]] = defaultdict(list)
+
+            for record in records:
+                result[record["guild_id"]].append(record["feature_name"])
 
         return result
 
@@ -282,13 +351,13 @@ class Database:
                 snipe.content,
             )
 
-    # TODO: add contains
     async def get_snipes(
         self,
         *,
         server: int | None = None,
         author: int | None = None,
         channel: int | None = None,
+        contains: str | None = None,
         mode: SnipeMode | None = None,
         limit: int | None = None,
         negative: bool = False,
@@ -311,6 +380,11 @@ class Database:
         if channel is not None:
             query_parts.append(f"channel = ${next(counter)}")
             args.append(channel)
+
+        if contains is not None:
+            # the position function returns 1 or above in the substring is within content
+            query_parts.append(f"position(${next(counter)} in content) > 0")
+            args.append(contains)
 
         if mode is not None:
             query_parts.append(f"mode = ${next(counter)}")
@@ -353,7 +427,7 @@ class Database:
             else:
                 snipe_count: int = snipe_count_record["count"]
 
-            snipes = []
+            snipes: list[Snipe] = []
             for snipe_record in snipe_records:
                 snipes.append(
                     Snipe(
@@ -368,3 +442,29 @@ class Database:
                 )
 
             return snipes, snipe_count
+
+    async def get_snipe_leaderboard(
+        self, server_id: int | None = None
+    ) -> dict[int, int]:
+        pool = await self.connect()
+
+        if server_id:
+            where = "where server = $1"
+            params = [server_id]
+        else:
+            where = ""
+            params = []
+
+        async with pool.acquire() as connection:
+            connection: asyncpg.Connection
+            records: list[asyncpg.Record] = await connection.fetch(
+                f"SELECT author, count(author) from snipes {where} group by author order by count desc;",
+                *params,
+            )
+
+            result: dict[int, int] = {}
+
+            for record in records:
+                result[record["author"]] = record["count"]
+
+        return result

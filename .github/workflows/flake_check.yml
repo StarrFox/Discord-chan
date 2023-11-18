@@ -1,14 +1,22 @@
 on:
     pull_request:
+      paths:
+        - "flake.*"
+        - "discord_chan/**"
+        - ".github/workflows/flake_check.yml"
     push:
         branches: [master]
+        paths:
+          - "flake.*"
+          - "discord_chan/**"
+          - ".github/workflows/flake_check.yml"
   
 jobs:
     check:
         name: Check
         runs-on: ubuntu-latest
         steps:
-        - uses: actions/checkout@v3
+        - uses: actions/checkout@v4
         - name: Install Nix
           uses: DeterminateSystems/nix-installer-action@main
         - name: check flake

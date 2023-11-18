@@ -66,6 +66,48 @@
           doCheck = false;
         };
 
+        discord-ext-menus = python.pkgs.buildPythonPackage {
+          pname = "discord-ext-menus";
+          version = "1.0.0a0";
+          format = "setuptools";
+          src = pkgs.fetchFromGitHub {
+            owner = "Rapptz";
+            repo = "discord-ext-menus";
+            rev = "8686b5d1bbc1d3c862292eb436ab630d6e9c9b53";
+            hash = "sha256-WsPK+KyBezpKoHZUqOnhRLpMDOpmuIa6JLvqBLFRkXc=";
+          };
+          pythonImportsCheck = ["discord.ext.menus"];
+          nativeBuildInputs = with python.pkgs; [pip];
+          propagatedBuildInputs = with python.pkgs; [discordpy];
+        };
+
+        uwuify = python.pkgs.buildPythonPackage rec {
+          pname = "uwuify";
+          version = "1.3.0";
+          format = "pyproject";
+          src = python.pkgs.fetchPypi {
+            inherit pname version;
+            hash = "sha256-t/PduCEJMgPEdCuP1rWh+X68r3RjTQdgu9MH1sGOjI4=";
+          };
+          pythonImportsCheck = [pname];
+          nativeBuildInputs = with python.pkgs; [poetry-core];
+          propagatedBuildInputs = with python.pkgs; [click];
+        };
+
+        import_expression = python.pkgs.buildPythonPackage rec {
+          pname = "import_expression";
+          version = "1.1.4";
+          format = "setuptools";
+          src = python.pkgs.fetchPypi {
+            inherit pname version;
+            hash = "sha256-BghqarO/pSixxHjmM9at8rOpkOMUQPZAGw8+oSsGWak=";
+          };
+          pythonImportsCheck = [pname];
+          nativeBuildInputs = with python.pkgs; [pip];
+          # tests file not included with release
+          doCheck = false;
+        };
+
         jishaku = python.pkgs.buildPythonPackage rec {
           pname = "jishaku";
           version = "2.5.1";
@@ -90,6 +132,8 @@
           ];
         };
       in {
+        # TODO: set meta.mainProgram to remove a warning with lib.getExe
+        # should be discord_chan after the poetry2nix removal pr is merged
         packages.discord_chan = python.pkgs.buildPythonPackage rec {
           src = ./.;
           pname = "discord_chan";
@@ -110,8 +154,7 @@
             pendulum
             numpy
             uwuify
-            # currently broken on 3.12
-            #parsedatetime
+            parsedatetime
             jishaku
             unidecode
             uvloop
@@ -122,7 +165,7 @@
         packages.default = self'.packages.discord_chan;
 
         devShells.default = pkgs.mkShell {
-          name = "discord-chan";
+          name = "discord_chan";
           packages = with pkgs; [
             (poetry.withPlugins (ps: with ps; [poetry-plugin-up]))
             python

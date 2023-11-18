@@ -122,11 +122,8 @@ class General(commands.Cog, name="general"):
         }
 
         paginator = PrologPaginator()
-
         paginator.recursively_add_dictonary({member.name: data})
-
         source = NormalPageSource(paginator.pages)
-
         menu = DCMenuPages(source)
 
         await menu.start(ctx)
