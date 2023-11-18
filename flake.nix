@@ -3,6 +3,10 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    poetry2nix = {
+      url = "github:nix-community/poetry2nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     flake-parts.url = "github:hercules-ci/flake-parts/";
     nix-systems.url = "github:nix-systems/default";
   };
@@ -11,6 +15,7 @@
     self,
     flake-parts,
     nix-systems,
+    poetry2nix,
     ...
   }:
     flake-parts.lib.mkFlake {inherit inputs;} {
@@ -23,6 +28,8 @@
         ...
       }: let
         python = pkgs.python311;
+
+        poetry2nix' = poetry2nix.lib.mkPoetry2Nix {inherit pkgs;};
 
         customOverrides = self: super: {
           uwuify = super.uwuify.overridePythonAttrs (
@@ -56,12 +63,12 @@
           wand = python.pkgs.wand;
         };
       in {
-        packages.discord_chan = pkgs.poetry2nix.mkPoetryApplication {
+        packages.discord_chan = poetry2nix'.mkPoetryApplication {
           projectDir = ./.;
           preferWheels = true;
           python = python;
           overrides = [
-            pkgs.poetry2nix.defaultPoetryOverrides
+            poetry2nix'.defaultPoetryOverrides
             customOverrides
           ];
           groups = ["images"];
@@ -73,14 +80,14 @@
           name = "discord-chan";
           packages = with pkgs; [
             (poetry.withPlugins (ps: with ps; [poetry-plugin-up]))
-            python311
+            python
             just
             alejandra
-            python311.pkgs.black
-            python311.pkgs.isort
-            python311.pkgs.vulture
-            python311.pkgs.python-lsp-server
-            python311.pkgs.mypy
+            python.pkgs.black
+            python.pkgs.isort
+            python.pkgs.vulture
+            python.pkgs.python-lsp-server
+            python.pkgs.mypy
           ];
         };
       };
