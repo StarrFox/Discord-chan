@@ -24,49 +24,100 @@
       }: let
         python = pkgs.python311;
 
-        customOverrides = self: super: {
-          uwuify = super.uwuify.overridePythonAttrs (
-            old: {
-              buildInputs = (old.buildInputs or []) ++ [super.poetry];
-            }
-          );
-          attrs = super.attrs.overridePythonAttrs (
-            old: {
-              buildInputs = (old.buildInputs or []) ++ [super.hatchling super.hatch-fancy-pypi-readme super.hatch-vcs];
-            }
-          );
-          import-expression = super."import-expression".overridePythonAttrs (
-            old: {
-              buildInputs = (old.buildInputs or []) ++ [super.setuptools];
-            }
-          );
-          jishaku = super.jishaku.overridePythonAttrs (
-            old: {
-              buildInputs = (old.buildInputs or []) ++ [super.setuptools];
-              propagatedBuildInputs = (old.propagatedBuildInputs or []) ++ [super.setuptools];
-            }
-          );
-          discord-ext-menus = super.discord-ext-menus.overridePythonAttrs (
-            old: {
-              buildInputs = (old.buildInputs or []) ++ [super.setuptools];
-            }
-          );
-          "discord-py" = python.pkgs.discordpy;
-          # this wand version patched the imageMagick library path
-          wand = python.pkgs.wand;
+        discord-ext-menus = python.pkgs.buildPythonPackage {
+          pname = "discord-ext-menus";
+          version = "1.0.0a0";
+          format = "setuptools";
+          src = pkgs.fetchFromGitHub {
+            owner = "Rapptz";
+            repo = "discord-ext-menus";
+            rev = "8686b5d1bbc1d3c862292eb436ab630d6e9c9b53";
+            hash = "sha256-WsPK+KyBezpKoHZUqOnhRLpMDOpmuIa6JLvqBLFRkXc=";
+          };
+          pythonImportsCheck = ["discord.ext.menus"];
+          nativeBuildInputs = with python.pkgs; [pip];
+          propagatedBuildInputs = with python.pkgs; [discordpy];
+        };
+
+        uwuify = python.pkgs.buildPythonPackage rec {
+          pname = "uwuify";
+          version = "1.3.0";
+          format = "pyproject";
+          src = python.pkgs.fetchPypi {
+            inherit pname version;
+            hash = "sha256-t/PduCEJMgPEdCuP1rWh+X68r3RjTQdgu9MH1sGOjI4=";
+          };
+          pythonImportsCheck = [pname];
+          nativeBuildInputs = with python.pkgs; [poetry-core];
+          propagatedBuildInputs = with python.pkgs; [click];
+        };
+
+        import_expression = python.pkgs.buildPythonPackage rec {
+          pname = "import_expression";
+          version = "1.1.4";
+          format = "setuptools";
+          src = python.pkgs.fetchPypi {
+            inherit pname version;
+            hash = "sha256-BghqarO/pSixxHjmM9at8rOpkOMUQPZAGw8+oSsGWak=";
+          };
+          pythonImportsCheck = [pname];
+          nativeBuildInputs = with python.pkgs; [pip];
+          # tests file not included with release
+          doCheck = false;
+        };
+
+        jishaku = python.pkgs.buildPythonPackage rec {
+          pname = "jishaku";
+          version = "2.5.1";
+          format = "setuptools";
+          src = python.pkgs.fetchPypi {
+            inherit pname version;
+            hash = "sha256-cQUxC7TgjT5nyEolx7+0YZ+kXKPb0TSuIZ+W9ftFENs=";
+          };
+          pythonImportsCheck = [pname];
+          nativeBuildInputs = with python.pkgs; [
+            pip
+            # testing inputs
+            line_profiler
+            click
+            astunparse
+            youtube-dl
+          ];
+          propagatedBuildInputs = with python.pkgs; [
+            discordpy
+            braceexpand
+            import_expression
+          ];
         };
       in {
         # TODO: set meta.mainProgram to remove a warning with lib.getExe
         # should be discord_chan after the poetry2nix removal pr is merged
-        packages.discord_chan = pkgs.poetry2nix.mkPoetryApplication {
-          projectDir = ./.;
-          preferWheels = true;
-          python = python;
-          overrides = [
-            pkgs.poetry2nix.defaultPoetryOverrides
-            customOverrides
+        packages.discord_chan = python.pkgs.buildPythonPackage rec {
+          src = ./.;
+          pname = "discord_chan";
+          version = "2.4.6";
+          format = "pyproject";
+          pythonImportsCheck = [pname];
+          nativeBuildInputs = [
+            python.pkgs.poetry-core
           ];
-          groups = ["images"];
+          propagatedBuildInputs = with python.pkgs; [
+            loguru
+            discordpy
+            wand
+            humanize
+            pillow
+            discord-ext-menus
+            asyncpg
+            pendulum
+            numpy
+            uwuify
+            parsedatetime
+            jishaku
+            unidecode
+            uvloop
+            psutil
+          ];
         };
 
         packages.default = self'.packages.discord_chan;
