@@ -1,5 +1,6 @@
 from discord.ext import commands
 
+import discord_chan
 
 class CogNotLoaded(commands.CheckFailure):
     def __init__(self, cog_name: str):
@@ -16,7 +17,7 @@ def cog_loaded(cog_name: str):
     return commands.check(_pred)
 
 
-def some_guilds(guilds: list[int]):
+def some_guilds(*guilds: int):
     def _pred(ctx):
         return ctx.guild.id in guilds
 
@@ -33,11 +34,11 @@ def guild_owner():
     return commands.check(_pred)
 
 
-def feature_enabled(feature: str):
-    async def _pred(ctx: commands.Context):
+def feature_enabled(feature: discord_chan.Feature):
+    async def _pred(ctx: commands.Context[discord_chan.DiscordChan]):
         if ctx.guild is None:
             return False
 
-        return await ctx.bot.is_feature_enabled(ctx.guild.id, feature)
+        return await ctx.bot.feature_manager.is_enabled(feature, ctx.guild.id)
 
     return commands.check(_pred)

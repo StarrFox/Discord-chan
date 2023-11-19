@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 from datetime import datetime
 
 from discord import HTTPException, Message
@@ -5,8 +7,11 @@ from discord.ext.commands import Context
 
 from .menus import ConfirmationMenu, DCMenuPages, NormalPageSource, PartitionPaginator
 
+if TYPE_CHECKING:
+    from discord_chan import DiscordChan
 
-class SubContext(Context):
+
+class SubContext(Context["DiscordChan"]):
     async def send(self, content: str | None = None, **kwargs) -> Message:
         if content and len(content) > 2000:
             if kwargs:

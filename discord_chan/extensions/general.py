@@ -97,7 +97,7 @@ class General(commands.Cog, name="general"):
         """
         Get a member's avatar
         """
-        await ctx.send(str(member.display_avatar.url))
+        await ctx.send(member.display_avatar.url)
 
     @commands.command(aliases=["mi", "userinfo", "ui"])
     @commands.guild_only()
