@@ -54,7 +54,9 @@ class WordTrack(commands.Cog):
         if message.guild is None:
             return
 
-        if not await self.bot.feature_manager.is_enabled(discord_chan.Feature.word_track, message.guild.id):
+        if not await self.bot.feature_manager.is_enabled(
+            discord_chan.Feature.word_track, message.guild.id
+        ):
             return
 
         async def _wait_for_edits():

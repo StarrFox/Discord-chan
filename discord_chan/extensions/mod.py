@@ -5,8 +5,8 @@ from operator import attrgetter
 import discord
 from discord.ext import commands
 
-from discord_chan import BetweenConverter, FetchedMember, SubContext
 import discord_chan
+from discord_chan import BetweenConverter, FetchedMember, SubContext
 
 
 def is_above(invoker: discord.Member, user: discord.Member):
@@ -32,7 +32,7 @@ class Mod(commands.Cog, name="mod"):
         assert ctx.guild is not None
         enabled, disabled = await self.bot.feature_manager.get_status(ctx.guild.id)
         await ctx.send(
-            f"enabled: {', '.join(map(attrgetter('name'), enabled))}" \
+            f"enabled: {', '.join(map(attrgetter('name'), enabled))}"
             f"\ndisabled: {', '.join(map(attrgetter('name'), disabled))}"
         )
 
@@ -48,7 +48,7 @@ class Mod(commands.Cog, name="mod"):
             feature = discord_chan.Feature[feature_name]
         except KeyError:
             return await ctx.send(f"{feature_name} is not a valid feature name")
-        
+
         enabled = await self.bot.feature_manager.toggle(feature, ctx.guild.id)
 
         if enabled:

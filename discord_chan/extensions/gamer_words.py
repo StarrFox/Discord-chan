@@ -711,7 +711,9 @@ class GamerWords(commands.Cog):
         return (
             message.author.bot
             or not message.guild
-            or not await self.bot.feature_manager.is_enabled(discord_chan.Feature.gamer_words, message.guild.id)
+            or not await self.bot.feature_manager.is_enabled(
+                discord_chan.Feature.gamer_words, message.guild.id
+            )
         )
 
     async def handle_new_gamer_message(self, message):

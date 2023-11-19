@@ -18,9 +18,7 @@ class FeatureManager:
 
     async def _refresh_cache(self, guild_id: int):
         # note: empty list is accepted
-        self.cache[
-            guild_id
-        ] = await self.database.get_guild_enabled_features(guild_id)
+        self.cache[guild_id] = await self.database.get_guild_enabled_features(guild_id)
 
     async def is_enabled(self, feature: Feature, guild_id: int) -> bool:
         feature_string = feature.name
