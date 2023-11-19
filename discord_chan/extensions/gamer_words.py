@@ -51,8 +51,9 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
 # THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+# TODO: add type hints to file
+
 import asyncio
-from faulthandler import is_enabled
 import random
 import re
 from string import ascii_letters
@@ -761,7 +762,7 @@ class GamerWords(commands.Cog):
             await webhook.send(
                 content=GamerReplacer(message.content).replace(),
                 username=author.display_name,
-                avatar_url=str(author.avatar),
+                avatar_url=str(author.display_avatar),
                 files=files,
                 allowed_mentions=allowed_mentions,
             )
