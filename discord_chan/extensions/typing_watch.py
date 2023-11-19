@@ -7,8 +7,6 @@ from discord.ext import commands
 
 import discord_chan
 
-FEATURE_NAME = "typing_watch"
-
 
 class TypingWatch(commands.Cog, name="typing_watch"):
     def __init__(self, bot: discord_chan.DiscordChan) -> None:
@@ -30,7 +28,7 @@ class TypingWatch(commands.Cog, name="typing_watch"):
 
         assert isinstance(user, discord.Member)
 
-        if not await self.bot.is_feature_enabled(channel.guild.id, FEATURE_NAME):
+        if not await self.bot.feature_manager.is_enabled(discord_chan.Feature.typing_watch, channel.guild.id):
             return
 
         if not self.typing_watchers[channel.id].get(user.id):
@@ -56,32 +54,6 @@ class TypingWatch(commands.Cog, name="typing_watch"):
             await channel.send(f"{user.display_name} typed without sending a message")
         else:
             del self.typing_watchers[channel.id][user.id]
-
-    @commands.group(name="typing_watch", invoke_without_command=True, aliases=["tw"])
-    @commands.guild_only()
-    async def tw(self, ctx: commands.Context):
-        # commands.guild_only prevents this
-        assert ctx.guild is not None
-        enabled = await self.bot.is_feature_enabled(ctx.guild.id, FEATURE_NAME)
-
-        if enabled:
-            return await ctx.send("Typing watch is enabled for this guild")
-        else:
-            return await ctx.send("Typing watch is not enabled for this guild")
-
-    @tw.command()
-    @discord_chan.checks.guild_owner()
-    async def toggle(self, ctx: discord_chan.SubContext):
-        """Toggle typing watch status"""
-        assert ctx.guild is not None
-
-        if await self.bot.is_feature_enabled(ctx.guild.id, FEATURE_NAME):
-            await self.bot.set_feature_disabled(ctx.guild.id, FEATURE_NAME)
-            return await ctx.confirm("Typing watch disabled")
-
-        await self.bot.set_feature_enabled(ctx.guild.id, FEATURE_NAME)
-        return await ctx.confirm("Typing watch enabled")
-
 
 async def setup(bot: discord_chan.DiscordChan):
     await bot.add_cog(TypingWatch(bot))

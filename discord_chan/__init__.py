@@ -10,5 +10,6 @@ from .help import *
 from .menus import *
 from .safebooru_api import *
 from .snipe import Snipe, SnipeMode
+from .features import Feature, FeatureManager
 
 logger.disable("discord_chan")
