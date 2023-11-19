@@ -8,6 +8,7 @@ from loguru import logger
 from .context import SubContext
 from .database import Database
 from .help import Minimal
+from .features import FeatureManager
 
 DEFAULT_PREFIXES = ["sf/", "SF/", "dc/", "DC/"]
 ROOT = pathlib.Path(__file__).parent
@@ -36,32 +37,9 @@ class DiscordChan(commands.AutoShardedBot):
         self.ready_once = False
         self.uptime = datetime.now()
         self.database = Database()
-
-        self._enabled_features_cache: dict[int, list[str]] = {}
+        self.feature_manager = FeatureManager(self.database)
 
         self.add_check(self.direct_message_check)
-
-    async def is_feature_enabled(self, guild_id: int, feature: str) -> bool:
-        if self._enabled_features_cache.get(guild_id):
-            return feature in self._enabled_features_cache[guild_id]
-
-        # note: empty list is accepted
-        self._enabled_features_cache[
-            guild_id
-        ] = await self.database.get_guild_enabled_features(guild_id)
-        return feature in self._enabled_features_cache[guild_id]
-
-    async def set_feature_enabled(self, guild_id: int, feature: str):
-        await self.database.enable_guild_enabled_feature(guild_id, feature)
-        self._enabled_features_cache[
-            guild_id
-        ] = await self.database.get_guild_enabled_features(guild_id)
-
-    async def set_feature_disabled(self, guild_id: int, feature: str):
-        await self.database.disable_guild_enabled_feature(guild_id, feature)
-        self._enabled_features_cache[
-            guild_id
-        ] = await self.database.get_guild_enabled_features(guild_id)
 
     def get_message(self, message_id: int) -> discord.Message | None:
         """
