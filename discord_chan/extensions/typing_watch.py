@@ -28,7 +28,9 @@ class TypingWatch(commands.Cog, name="typing_watch"):
 
         assert isinstance(user, discord.Member)
 
-        if not await self.bot.feature_manager.is_enabled(discord_chan.Feature.typing_watch, channel.guild.id):
+        if not await self.bot.feature_manager.is_enabled(
+            discord_chan.Feature.typing_watch, channel.guild.id
+        ):
             return
 
         if not self.typing_watchers[channel.id].get(user.id):
@@ -54,6 +56,7 @@ class TypingWatch(commands.Cog, name="typing_watch"):
             await channel.send(f"{user.display_name} typed without sending a message")
         else:
             del self.typing_watchers[channel.id][user.id]
+
 
 async def setup(bot: discord_chan.DiscordChan):
     await bot.add_cog(TypingWatch(bot))

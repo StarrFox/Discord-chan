@@ -7,8 +7,8 @@ from loguru import logger
 
 from .context import SubContext
 from .database import Database
-from .help import Minimal
 from .features import FeatureManager
+from .help import Minimal
 
 DEFAULT_PREFIXES = ["sf/", "SF/", "dc/", "DC/"]
 ROOT = pathlib.Path(__file__).parent

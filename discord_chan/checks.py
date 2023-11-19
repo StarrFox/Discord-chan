@@ -3,7 +3,8 @@ from typing import TYPE_CHECKING
 from discord.ext import commands
 
 if TYPE_CHECKING:
-    from discord_chan import Feature, DiscordChan
+    from discord_chan import DiscordChan, Feature
+
 
 class CogNotLoaded(commands.CheckFailure):
     def __init__(self, cog_name: str):

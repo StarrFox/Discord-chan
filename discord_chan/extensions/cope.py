@@ -5,7 +5,6 @@ from discord.ext import commands
 
 import discord_chan
 
-
 BIG_COPE = 301790265725943808
 COPE_MAX = 100
 
@@ -23,7 +22,9 @@ class Cope(commands.Cog, name="cope"):
         if message.guild is None:
             return
 
-        if not await self.bot.feature_manager.is_enabled(discord_chan.Feature.cope, message.guild.id):
+        if not await self.bot.feature_manager.is_enabled(
+            discord_chan.Feature.cope, message.guild.id
+        ):
             return
 
         if message.author.id == BIG_COPE:
