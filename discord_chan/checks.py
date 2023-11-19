@@ -1,6 +1,9 @@
+from typing import TYPE_CHECKING
+
 from discord.ext import commands
 
-import discord_chan
+if TYPE_CHECKING:
+    from discord_chan import Feature, DiscordChan
 
 class CogNotLoaded(commands.CheckFailure):
     def __init__(self, cog_name: str):
@@ -34,8 +37,8 @@ def guild_owner():
     return commands.check(_pred)
 
 
-def feature_enabled(feature: discord_chan.Feature):
-    async def _pred(ctx: commands.Context[discord_chan.DiscordChan]):
+def feature_enabled(feature: "Feature"):
+    async def _pred(ctx: commands.Context["DiscordChan"]):
         if ctx.guild is None:
             return False
 
