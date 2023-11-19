@@ -52,6 +52,7 @@
 # THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import asyncio
+from faulthandler import is_enabled
 import random
 import re
 from string import ascii_letters
@@ -62,7 +63,6 @@ from discord.ext import commands
 
 import discord_chan
 
-FEATURENAME = "gamer_words"
 GAMER_REGEX = r"(b+\s*r+\s*u+\s*h+)"
 # noinspection SpellCheckingInspection
 CATCHPHRASES = [
@@ -674,35 +674,6 @@ class GamerWords(commands.Cog):
         bot.loop.create_task(self.clear_usernames())
         self._webhook_lock = asyncio.Lock()
 
-    @commands.group(invoke_without_command=True, aliases=["gamerwords"])
-    @commands.guild_only()
-    async def gw(self, context: commands.Context):
-        """
-        Base command for gamerwords commands
-        """
-        assert context.guild is not None
-
-        if await self.bot.is_feature_enabled(context.guild.id, FEATURENAME):
-            return await context.send("Gamer words is enabled for this guild")
-
-        return await context.send("Gamer words is disabled for this guild")
-
-    @gw.command()
-    @discord_chan.checks.guild_owner()
-    @commands.guild_only()
-    async def toggle(self, context: discord_chan.SubContext):
-        """
-        Toggle the replacer for this server
-        """
-        assert context.guild is not None
-
-        if await self.bot.is_feature_enabled(context.guild.id, FEATURENAME):
-            await self.bot.set_feature_disabled(context.guild.id, FEATURENAME)
-            return await context.confirm("Gamer words disabled")
-
-        await self.bot.set_feature_enabled(context.guild.id, FEATURENAME)
-        return await context.confirm("Gamer words enabled")
-
     @staticmethod
     def has_gamer_words(string):
         string = unidecode.unidecode(string)
@@ -739,7 +710,7 @@ class GamerWords(commands.Cog):
         return (
             message.author.bot
             or not message.guild
-            or not await self.bot.is_feature_enabled(message.guild.id, FEATURENAME)
+            or not await self.bot.feature_manager.is_enabled(discord_chan.Feature.gamer_words, message.guild.id)
         )
 
     async def handle_new_gamer_message(self, message):

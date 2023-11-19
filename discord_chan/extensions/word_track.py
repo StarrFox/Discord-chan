@@ -9,7 +9,6 @@ import discord_chan
 from discord_chan import DiscordChan
 from discord_chan.menus import DCMenuPages, NormalPageSource
 
-FEATURE_NAME = "word_track"
 # number of seconds to wait for edits to messages before consuming
 EDIT_GRACE_TIME = 15
 
@@ -52,12 +51,10 @@ class WordTrack(commands.Cog):
             return
 
         # dms
-        if message.channel.guild is None:
+        if message.guild is None:
             return
 
-        if not await self.bot.is_feature_enabled(
-            message.channel.guild.id, FEATURE_NAME
-        ):
+        if not await self.bot.feature_manager.is_enabled(discord_chan.Feature.word_track, message.guild.id):
             return
 
         async def _wait_for_edits():
@@ -106,31 +103,6 @@ class WordTrack(commands.Cog):
         menu = DCMenuPages(source)
 
         await menu.start(ctx)
-
-    @commands.group(name=FEATURE_NAME, invoke_without_command=True, aliases=["wt"])
-    @commands.guild_only()
-    async def wt(self, ctx: commands.Context):
-        # commands.guild_only prevents this
-        assert ctx.guild is not None
-        enabled = await self.bot.is_feature_enabled(ctx.guild.id, FEATURE_NAME)
-
-        if enabled:
-            return await ctx.send("Word track is enabled for this guild")
-        else:
-            return await ctx.send("Word track is not enabled for this guild")
-
-    @wt.command()
-    @discord_chan.checks.guild_owner()
-    async def toggle(self, ctx: discord_chan.SubContext):
-        """Toggle word track status"""
-        assert ctx.guild is not None
-
-        if await self.bot.is_feature_enabled(ctx.guild.id, FEATURE_NAME):
-            await self.bot.set_feature_disabled(ctx.guild.id, FEATURE_NAME)
-            return await ctx.confirm("Word track disabled")
-
-        await self.bot.set_feature_enabled(ctx.guild.id, FEATURE_NAME)
-        return await ctx.confirm("Word track enabled")
 
 
 async def setup(bot: DiscordChan):

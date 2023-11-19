@@ -1,10 +1,12 @@
 import typing
 from contextlib import suppress
+from operator import attrgetter
 
 import discord
 from discord.ext import commands
 
 from discord_chan import BetweenConverter, FetchedMember, SubContext
+import discord_chan
 
 
 def is_above(invoker: discord.Member, user: discord.Member):
@@ -18,8 +20,41 @@ class PermForFlags(commands.FlagConverter, prefix="--", delimiter=""):
 class Mod(commands.Cog, name="mod"):
     """Moderation commands"""
 
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: discord_chan.DiscordChan):
         self.bot = bot
+
+    @commands.group(aliases=["feature"], invoke_without_command=True)
+    @commands.guild_only()
+    async def features(self, ctx: SubContext):
+        """
+        Get current feature status
+        """
+        assert ctx.guild is not None
+        enabled, disabled = await self.bot.feature_manager.get_status(ctx.guild.id)
+        await ctx.send(
+            f"enabled: {', '.join(map(attrgetter('name'), enabled))}" \
+            f"\ndisabled: {', '.join(map(attrgetter('name'), disabled))}"
+        )
+
+    @features.command(name="toggle")
+    @discord_chan.checks.guild_owner()
+    async def features_toggle(self, ctx: SubContext, feature_name: str):
+        """
+        Toggle a feature
+        """
+        assert ctx.guild is not None
+
+        try:
+            feature = discord_chan.Feature[feature_name]
+        except KeyError:
+            return await ctx.send(f"{feature_name} is not a valid feature name")
+        
+        enabled = await self.bot.feature_manager.toggle(feature, ctx.guild.id)
+
+        if enabled:
+            return await ctx.confirm(f"{feature} enabled")
+        else:
+            return await ctx.confirm(f"{feature} disabled")
 
     # this one is has_permissions because channel overrides should be allowed
     @commands.command()
