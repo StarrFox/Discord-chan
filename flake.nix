@@ -70,11 +70,11 @@
 
         jishaku = python.pkgs.buildPythonPackage rec {
           pname = "jishaku";
-          version = "2.5.1";
+          version = "2.5.2";
           format = "setuptools";
           src = python.pkgs.fetchPypi {
             inherit pname version;
-            hash = "sha256-cQUxC7TgjT5nyEolx7+0YZ+kXKPb0TSuIZ+W9ftFENs=";
+            hash = "sha256-VtOMMzA243SB3148noHWAztQl3OPDRcageJ1ISTw31w=";
           };
           pythonImportsCheck = [pname];
           nativeBuildInputs = with python.pkgs; [
