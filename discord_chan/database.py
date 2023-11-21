@@ -1,7 +1,6 @@
 import asyncio
 import os
 import pwd
-from collections import defaultdict
 from itertools import count
 from typing import NamedTuple
 
@@ -451,3 +450,8 @@ class Database:
                 result[record["author"]] = record["count"]
 
         return result
+
+
+class DataManager:
+    def __init__(self, database: Database):
+        self.database = database
