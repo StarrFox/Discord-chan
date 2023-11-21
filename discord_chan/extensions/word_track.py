@@ -7,6 +7,7 @@ from discord.ext import commands
 
 import discord_chan
 from discord_chan import DiscordChan
+from discord_chan.context import SubContext
 from discord_chan.menus import DCMenuPages, NormalPageSource
 
 # number of seconds to wait for edits to messages before consuming
@@ -73,20 +74,40 @@ class WordTrack(commands.Cog):
         message = await asyncio.wait_for(_wait_for_edits(), timeout=EDIT_GRACE_TIME)
         await self.consume_message(message)
 
-    @commands.command(name="word_count")
+    @commands.group(name="words", invoke_without_command=True, aliases=["word"])
     @commands.guild_only()
-    async def word_count_command(
-        self, ctx: commands.Context, target_member: discord.Member | None = None
-    ):
+    async def words_command(self, ctx: commands.Context):
         """
-        Get word count leaderboard for the server or a member
+        Get word count leaderboard for the server
         """
         # guild_only check should ensure this is true
         assert ctx.guild is not None
 
+        leaderboard = await self.bot.database.get_server_word_track_leaderboard(server_id=ctx.guild.id)
+
+        if not leaderboard:
+            return await ctx.send("No results found")
+
+        entries: list[str] = []
+
+        for word, count in leaderboard.items():
+            entries.append(f"- {word}: {count}")
+
+        source = NormalPageSource(entries, per_page=10)
+        menu = DCMenuPages(source)
+
+        await menu.start(ctx)
+
+    @words_command.command(name="user", aliases=["member"])
+    async def words_user(self, ctx: SubContext, member: discord.Member = commands.Author):
+        """
+        Get word count leaderboard for a member
+        """
+        assert ctx.guild is not None
+
         leaderboard = await self.bot.database.get_server_word_track_leaderboard(
             server_id=ctx.guild.id,
-            author_id=target_member.id if target_member is not None else None,
+            author_id=member.id,
         )
 
         if not leaderboard:
@@ -97,14 +118,88 @@ class WordTrack(commands.Cog):
         for word, count in leaderboard.items():
             entries.append(f"- {word}: {count}")
 
-        total = len(entries)
-
-        entries = [f"total = {total}", ""] + entries
-
         source = NormalPageSource(entries, per_page=10)
         menu = DCMenuPages(source)
 
         await menu.start(ctx)
+
+    @words_command.command(name="stat", aliases=["stats"])
+    async def words_stats(
+        self,
+        ctx: SubContext,
+        member: discord.Member = commands.Author
+    ):
+        """
+        Get word count stats for a member
+        """
+        assert ctx.guild is not None
+
+        leaderboard = await self.bot.database.get_server_word_track_leaderboard(
+            server_id=ctx.guild.id,
+            author_id=member.id,
+        )
+
+        if not leaderboard:
+            return await ctx.send("No results found")
+
+        unique_words = len(leaderboard.keys())
+        total_words = sum(leaderboard.values())
+
+        word_density = unique_words / total_words
+
+        await ctx.reply(
+            f"unique words: {unique_words}\ntotal words: {total_words}\n"
+            f"word density: {round(word_density, 2)}",
+            mention_author=False
+        )
+
+    @words_command.command(name="rank")
+    async def words_rank(self, ctx: SubContext, word: str):
+        """
+        Get rank info on a word
+        """
+        assert ctx.guild is not None
+
+        # we only store lowercase versions of words
+        word = word.lower()
+
+        server_leaderboard = await self.bot.database.get_server_word_track_leaderboard(server_id=ctx.guild.id)
+
+        if not server_leaderboard:
+            return await ctx.send("word has not been used in server")
+    
+        try:
+            server_count = server_leaderboard[word]
+        except KeyError:
+            return await ctx.send("word has not been used in server")
+
+        server_rank = list(server_leaderboard.keys()).index(word) + 1
+
+        member_loaderboard = await self.bot.database.get_member_bound_word_rank(server_id=ctx.guild.id, word=word)
+
+        # this shouldn't be possible
+        if not member_loaderboard:
+            raise RuntimeError("somehow word was not found for member lookup")
+
+        message_parts = [f"server count: {server_count}", f"server rank: {server_rank}", ""]
+
+        for user_id, count in member_loaderboard[:5]:
+            member = ctx.guild.get_member(user_id)
+
+            if member is None:
+                try:
+                    user = await ctx.bot.fetch_user(user_id)
+                except discord.NotFound:
+                    # deleted account
+                    user_name = str(user_id)
+                else:
+                    user_name = user.display_name
+            else:
+                user_name = member.display_name
+
+            message_parts.append(f"{user_name}: {count}")
+
+        await ctx.send("\n".join(message_parts))
 
 
 async def setup(bot: DiscordChan):

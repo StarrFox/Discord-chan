@@ -29,6 +29,10 @@ class SubContext(Context["DiscordChan"]):
             assert menu.message is not None
             return menu.message
 
+        # # replies
+        # kwargs["reference"] = kwargs.get("reference", self.message)
+        # kwargs["mention_author"] = kwargs.get("mention_author", False)
+
         return await super().send(content=content, **kwargs)
 
     @property
