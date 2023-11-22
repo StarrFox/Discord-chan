@@ -4,7 +4,6 @@ import unicodedata
 from operator import attrgetter
 
 import discord
-import humanize
 import uwuify
 from discord.ext import commands
 
@@ -16,9 +15,10 @@ from discord_chan import (
     FetchedUser,
     NormalPageSource,
     PartitionPaginator,
-    PrologPaginator,
     SubContext,
 )
+
+from discord_chan.utils import to_discord_timestamp
 
 
 class General(commands.Cog, name="general"):
@@ -75,17 +75,15 @@ class General(commands.Cog, name="general"):
         Delete's the bot's last <amount> message(s)
         amount must be between 1 and 100, defaulting to 10
         """
-
-        def check(message):
-            return message.author == ctx.me
-
         assert isinstance(ctx.me, discord.Member)
+
         can_mass_delete = ctx.channel.permissions_for(ctx.me).manage_messages
 
         assert isinstance(ctx.channel, discord.abc.Messageable) and isinstance(
             ctx.channel, discord.abc.GuildChannel
         )
-        await ctx.channel.purge(limit=amount, check=check, bulk=can_mass_delete)
+
+        await ctx.channel.purge(limit=amount, check=lambda m: m.author.id == ctx.me.id, bulk=can_mass_delete)
         await ctx.confirm("Messages cleaned.")
 
     @commands.command(aliases=["avy", "pfp"])
@@ -99,78 +97,58 @@ class General(commands.Cog, name="general"):
         """
         await ctx.send(member.display_avatar.url)
 
-    @commands.command(aliases=["mi", "userinfo", "ui"])
+    @commands.group(name="info", invoke_without_command=True)
+    async def info_command(self, ctx: commands.Context):
+        """
+        Info base command
+        """
+        await ctx.send_help("info")
+
+    @info_command.command(name="member", aliases=["user"])
     @commands.guild_only()
-    async def memberinfo(
-        self,
-        ctx: commands.Context,
-        member: typing.Annotated[discord.Member, FetchedMember] = commands.Author,
-    ):
+    async def info_user(self, ctx: commands.Context, member: discord.Member = commands.Author):
         """
         Get info on a guild member
         """
-        if member.joined_at is not None:
-            joined = humanize.naturaldate(member.joined_at)
+        message_parts = [
+            f"id: {member.id}",
+            f"top role: {member.top_role.mention}",
+            f"account created: {to_discord_timestamp(member.created_at, both=True)}"
+        ]
+
+        if member.joined_at is None:
+            joined_at = "[unreadable]"
         else:
-            joined = "[Joined at unreadable]"
+            joined_at = to_discord_timestamp(member.joined_at, both=True)
 
-        data = {
-            "id": member.id,
-            "top role": member.top_role.name,
-            "joined guild": joined,
-            "joined discord": humanize.naturaldate(member.created_at),
-        }
+        message_parts.append(f"joined: {joined_at}")
 
-        paginator = PrologPaginator()
-        paginator.recursively_add_dictonary({member.name: data})
-        source = NormalPageSource(paginator.pages)
-        menu = DCMenuPages(source)
+        await ctx.send("\n".join(message_parts))
 
-        await menu.start(ctx)
-
-    @commands.command(aliases=["si", "gi", "serverinfo"])
+    @info_command.command(name="guild", aliases=["server"])
     @commands.guild_only()
-    async def guildinfo(self, ctx: commands.Context):
+    async def info_guild(self, ctx: commands.Context):
         """
-        Get info on a guild
+        Get info about this guild
         """
         assert ctx.guild is not None
-        guild = await self.bot.fetch_guild(ctx.guild.id)
 
-        # I don't have guild.channels
-        channels = await guild.fetch_channels()
+        guild = ctx.guild
 
         if guild.owner_id is not None:
-            owner = str(await self.bot.fetch_user(guild.owner_id))
+            owner = (await self.bot.fetch_user(guild.owner_id)).mention
         else:
-            owner = "[Owner unreadable]"
+            owner = "[owner unreadable]"
 
-        data = {
-            "id": guild.id,
-            "owner": owner,
-            "created": humanize.naturaltime(guild.created_at),
-            "# of roles": len(guild.roles),
-            "members": guild.approximate_member_count,
-            "channels": {
-                "categories": len(
-                    [c for c in channels if isinstance(c, discord.CategoryChannel)]
-                ),
-                "text": len(
-                    [c for c in channels if isinstance(c, discord.TextChannel)]
-                ),
-                "voice": len(
-                    [c for c in channels if isinstance(c, discord.VoiceChannel)]
-                ),
-                "total": len(channels),
-            },
-        }
+        message_parts = [
+            f"id: {guild.id}",
+            f"owner: {owner}",
+            f"created: {to_discord_timestamp(guild.created_at, both=True)}",
+            f"members: {guild.member_count}",
+            f"channels: {len(guild.channels)}"
+        ]
 
-        paginator = PrologPaginator()
-        paginator.recursively_add_dictonary({guild.name: data})
-        source = NormalPageSource(paginator.pages)
-        menu = DCMenuPages(source)
-
-        await menu.start(ctx)
+        await ctx.send("\n".join(message_parts))
 
     @commands.group(invoke_without_command=True)
     async def raw(self, ctx: commands.Context):

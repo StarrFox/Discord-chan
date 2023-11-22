@@ -70,6 +70,11 @@ class DCMenuPages(menus.MenuPages):
     def __init__(self, source, **kwargs):
         super().__init__(source, **kwargs)
 
+    async def send_initial_message(self, ctx, _):
+        page = await self._source.get_page(0)
+        kwargs = await self._get_kwargs_from_page(page)
+        return await ctx.send(**kwargs)
+
     def skip_two_or_less(self):
         max_pages = self._source.get_max_pages()
         if max_pages is None:

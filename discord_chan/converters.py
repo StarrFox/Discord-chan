@@ -52,9 +52,8 @@ class FetchedMember(commands.Converter):
                 member = await ctx.guild.fetch_member(user_id)
             except discord.HTTPException:
                 # see lower commit on why we don't raise
-                member = None
-
-            if member:
+                pass
+            else:
                 return member
 
         # someone could be named 15-21 numbers

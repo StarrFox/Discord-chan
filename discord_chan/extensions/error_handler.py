@@ -1,8 +1,10 @@
-from datetime import timedelta
+import asyncio
 
-import humanize
 from discord.ext import commands
 from loguru import logger
+import pendulum
+
+from discord_chan.utils import to_discord_timestamp
 
 
 async def on_command_error(ctx: commands.Context, error: Exception):
@@ -28,9 +30,18 @@ async def on_command_error(ctx: commands.Context, error: Exception):
         return await ctx.send(str(error))
 
     elif isinstance(error, commands.CommandOnCooldown):
-        delta = timedelta(seconds=error.retry_after)
-        natural = humanize.naturaldelta(delta)
-        return await ctx.send(f"Command on cooldown, retry in {natural}.")
+        now = pendulum.now()
+        cooldown_over = now.add(seconds=int(error.retry_after))
+
+        cooldown_message = await ctx.reply(
+            f"Command on cooldown, retry in {to_discord_timestamp(cooldown_over)}",
+            mention_author=False
+        )
+
+        await asyncio.sleep(error.retry_after)
+        await cooldown_message.edit(content="Cooldown over")
+
+        return
 
     # TODO: find out why this doesn't work
     logger.opt(exception=(type(error), error, error.__traceback__)).error(
