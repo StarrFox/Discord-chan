@@ -71,7 +71,6 @@ The rest of the source code is also there.
 """
 
 
-# noinspection PyShadowingBuiltins
 class EmoteManager(commands.Cog):
     IMAGE_MIMETYPES = {"image/png", "image/jpeg", "image/gif", "image/webp"}
     TAR_MIMETYPES = {"application/x-tar"}
@@ -95,24 +94,20 @@ class EmoteManager(commands.Cog):
         # keep track of paginators so we can end them when the cog is unloaded
         self.paginators = weakref.WeakSet()
 
-    def cog_unload(self):
-        async def close():
-            await self.http.close()
+    async def cog_unload(self):
+        await self.http.close()
 
-            for paginator in self.paginators:
-                await paginator.stop()
-
-        self.bot.loop.create_task(close())
+        for paginator in self.paginators:
+            await paginator.stop()
 
     async def cog_check(self, context):
         # only allow in guilds
-        if not context.guild:
-            raise commands.NoPrivateMessage
+        if context.guild is None:
+            raise commands.NoPrivateMessage()
 
         return True
 
-    @commands.Cog.listener()
-    async def on_command_error(self, context: commands.Context, error):
+    async def cog_command_error(self, context: commands.Context, error: commands.CommandError):
         if isinstance(error, errors.EmoteManagerError):
             await context.send(str(error))
 
