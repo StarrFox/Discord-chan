@@ -24,7 +24,7 @@ class DiscordChan(commands.AutoShardedBot):
             help_command=kwargs.pop("help_command", Minimal()),
             allowed_mentions=kwargs.pop(
                 "allowed_mentions",
-                discord.AllowedMentions(everyone=False, roles=False, users=False),
+                discord.AllowedMentions.none(),
             ),
             activity=discord.Activity(
                 type=discord.ActivityType.listening,

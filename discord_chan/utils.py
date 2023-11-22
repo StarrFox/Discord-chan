@@ -1,6 +1,8 @@
 import logging
 from collections import OrderedDict
+from datetime import datetime as python_datetime
 
+from pendulum.datetime import DateTime
 from loguru import logger
 
 bool_dict = {
@@ -83,3 +85,20 @@ def detailed_human_time(input_seconds: float | int):
         msgs.append("0 second(s)")
 
     return ", ".join(msgs)
+
+
+def to_discord_timestamp(
+        datetime: DateTime | python_datetime,
+        *,
+        relative: bool = True,
+        both: bool = False,
+    ) -> str:
+    timestamp: float = datetime.timestamp()
+
+    if both:
+        full_time = f"<t:{int(timestamp)}>"
+        relative_time = f"<t:{int(timestamp)}:R>"
+
+        return f"{full_time} ({relative_time})"
+    else:
+        return f"<t:{int(timestamp)}{':R' if relative else ''}>"

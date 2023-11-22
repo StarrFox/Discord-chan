@@ -3,6 +3,7 @@ from typing import Annotated
 import discord
 from discord.ext import commands
 
+from discord_chan.checks import cog_loaded
 from discord_chan import BotConverter
 
 
@@ -40,11 +41,22 @@ class Meta(commands.Cog, name="meta"):
         await ctx.send(url)
 
     @commands.command()
-    async def source(self, ctx: commands.Context):
+    @cog_loaded("Jishaku")
+    async def source(self, ctx: commands.Context, *, command_name: str):
         """
-        Links to the bot's source url
+        Get a command's source code
         """
-        await ctx.send("https://github.com/StarrFox/Discord-chan")
+        jsk_source = self.bot.get_command("jishaku source")
+
+        jsk = self.bot.get_cog("Jishaku")
+
+        if jsk is None:
+            raise RuntimeError("Jishaku cog somehow unloaded even with check")
+
+        if jsk_source is None:
+            return await ctx.send("Missing source command")
+
+        await jsk_source.callback(jsk, ctx, command_name=command_name) # type: ignore
 
 
 async def setup(bot):

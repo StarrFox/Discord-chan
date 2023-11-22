@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 from enum import Enum
 
-import pendulum
+from pendulum.datetime import DateTime
 from discord.ext import commands
+
+from discord_chan.utils import to_discord_timestamp
 
 
 class SnipeMode(Enum):
@@ -29,9 +31,8 @@ class Snipe:
     content: str
     server: int
     channel: int
-    # TODO: remove ignore in pendulum 3 (currently 2)
-    time: pendulum.DateTime  # type: ignore
+    time: DateTime 
 
     @property
     def discord_timestamp(self) -> str:
-        return f"<t:{int(self.time.timestamp())}:R>"
+        return to_discord_timestamp(self.time)
