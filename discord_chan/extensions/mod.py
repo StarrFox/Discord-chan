@@ -56,6 +56,21 @@ class Mod(commands.Cog, name="mod"):
         else:
             return await ctx.confirm(f"{feature} disabled")
 
+    # NOTE: create_expressions for creating manage_expressions for editing/deleting
+    @commands.group(name="asset", invoke_without_command=True)
+    @commands.guild_only()
+    async def asset_command(self, ctx: SubContext):
+        """
+        Asset base command
+        """
+        # maybe show current asset stats here?
+        await ctx.send_help("asset")
+    
+    @asset_command.group(name="create")
+    @commands.has_guild_permissions(create_expressions=True)
+    async def asset_create(self, ctx: SubContext):
+        ...
+
     # this one is has_permissions because channel overrides should be allowed
     @commands.command()
     @commands.bot_has_permissions(manage_messages=True)

@@ -45,9 +45,7 @@ class General(commands.Cog, name="general"):
                 final += f"\\U{ord(char):0>8x}\n"
 
         paginator.add_line(final)
-
         source = NormalPageSource(paginator.pages)
-
         menu = DCMenuPages(source)
 
         await menu.start(ctx)
