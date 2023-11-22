@@ -109,6 +109,8 @@ class EmoteManager(commands.Cog):
         if not context.guild:
             raise commands.NoPrivateMessage
 
+        return True
+
     @commands.Cog.listener()
     async def on_command_error(self, context: commands.Context, error):
         if isinstance(error, errors.EmoteManagerError):
