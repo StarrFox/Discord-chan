@@ -68,6 +68,8 @@ class ConfirmationMenu(menus.Menu):
 
 class DCMenuPages(menus.MenuPages):
     def __init__(self, source, **kwargs):
+        kwargs["clear_reactions_after"] = kwargs.get("clear_reactions_after", True)
+
         super().__init__(source, **kwargs)
 
     async def send_initial_message(self, ctx, _):
