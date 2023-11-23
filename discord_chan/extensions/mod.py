@@ -29,7 +29,6 @@ class Mod(commands.Cog, name="mod"):
         """
         Get current feature status
         """
-        assert ctx.guild is not None
         enabled, disabled = await self.bot.feature_manager.get_status(ctx.guild.id)
         await ctx.send(
             f"enabled: {', '.join(map(attrgetter('name'), enabled))}"
@@ -42,8 +41,6 @@ class Mod(commands.Cog, name="mod"):
         """
         Toggle a feature
         """
-        assert ctx.guild is not None
-
         try:
             feature = discord_chan.Feature[feature_name]
         except KeyError:
@@ -90,10 +87,6 @@ class Mod(commands.Cog, name="mod"):
             else:
                 return True
 
-        # these are the only places the command can be invoked from
-        assert isinstance(ctx.channel, discord.abc.Messageable) and isinstance(
-            ctx.channel, discord.abc.GuildChannel
-        )
         deleted = await ctx.channel.purge(limit=number, check=msgcheck)
         with suppress(discord.Forbidden, discord.NotFound):
             await ctx.send(f"Deleted {len(deleted)} message(s)", delete_after=5)
@@ -106,8 +99,6 @@ class Mod(commands.Cog, name="mod"):
         """
         Bans using an id, must not be a current member
         """
-        # guild_only ensures this
-        assert ctx.guild is not None
         try:
             await ctx.guild.fetch_member(member_id)
         except (discord.Forbidden, discord.HTTPException):
@@ -172,8 +163,6 @@ class Mod(commands.Cog, name="mod"):
         """
         Get permissions for a user or role
         """
-        assert ctx.guild is not None
-
         default_perms = ctx.guild.default_role.permissions
 
         if isinstance(target, discord.Role):
@@ -210,8 +199,6 @@ class Mod(commands.Cog, name="mod"):
         """
         List all role permissions
         """
-        assert ctx.guild is not None
-
         normal_role_parts: list[str] = []
         managed_role_parts: list[str] = []
 
