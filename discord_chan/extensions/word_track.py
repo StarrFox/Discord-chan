@@ -195,7 +195,7 @@ class WordTrack(commands.Cog):
                 else:
                     user_name = user.display_name
             else:
-                user_name = member.display_name
+                user_name = member.mention
 
             message_parts.append(f"{user_name}: {count}")
 
