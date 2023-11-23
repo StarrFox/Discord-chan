@@ -76,13 +76,10 @@ class WordTrack(commands.Cog):
 
     @commands.group(name="words", invoke_without_command=True, aliases=["word"])
     @commands.guild_only()
-    async def words_command(self, ctx: commands.Context):
+    async def words_command(self, ctx: SubContext):
         """
         Get word count leaderboard for the server
         """
-        # guild_only check should ensure this is true
-        assert ctx.guild is not None
-
         leaderboard = await self.bot.database.get_server_word_track_leaderboard(server_id=ctx.guild.id)
 
         if not leaderboard:
@@ -103,8 +100,6 @@ class WordTrack(commands.Cog):
         """
         Get word count leaderboard for a member
         """
-        assert ctx.guild is not None
-
         leaderboard = await self.bot.database.get_server_word_track_leaderboard(
             server_id=ctx.guild.id,
             author_id=member.id,
@@ -132,8 +127,6 @@ class WordTrack(commands.Cog):
         """
         Get word count stats for a member
         """
-        assert ctx.guild is not None
-
         leaderboard = await self.bot.database.get_server_word_track_leaderboard(
             server_id=ctx.guild.id,
             author_id=member.id,
@@ -158,8 +151,6 @@ class WordTrack(commands.Cog):
         """
         Get rank info on a word
         """
-        assert ctx.guild is not None
-
         # we only store lowercase versions of words
         word = word.lower()
 
