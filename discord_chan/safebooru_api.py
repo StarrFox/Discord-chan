@@ -3,6 +3,7 @@ import re
 import urllib.parse
 import xml.etree.ElementTree as ElementTree
 from dataclasses import dataclass
+from typing import TypedDict, Unpack
 
 import aiohttp
 
@@ -38,12 +39,14 @@ def prepare_safebooru_tags(
     return "+".join([urllib.parse.quote(x) for x in tags])
 
 
-async def request_safebooru(**params) -> ElementTree.Element:
-    if "tags" in params:
-        params["tags"] = prepare_safebooru_tags(params["tags"])
+class _SafebooruParams(TypedDict, total=False):
+    limit: int
+    pid: int
 
+
+async def request_safebooru(*, tags: list[str], **params: Unpack[_SafebooruParams]) -> ElementTree.Element:
     async with aiohttp.ClientSession() as session:
-        param_strings = []
+        param_strings: list[str] = [f"tags={tags}"]
         for name, value in params.items():
             param_strings.append(f"{name}={value}")
 
@@ -64,7 +67,7 @@ async def get_safebooru_post_count(tags: list[str]) -> int | None:
 
 
 async def get_safebooru_posts(tags: list[str], page: int = 0) -> list[str]:
-    result = []
+    result: list[str] = []
     tree = await request_safebooru(tags=tags, pid=page)
 
     for post in tree:

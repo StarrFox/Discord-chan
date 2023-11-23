@@ -1,9 +1,12 @@
 from collections.abc import Sequence
 from string import capwords
-from typing import NamedTuple
+from typing import NamedTuple, TYPE_CHECKING
 
 import discord
 from discord.ext import commands, menus
+
+if TYPE_CHECKING:
+    from discord_chan import SubContext
 
 
 class EmbedFieldProxy(NamedTuple):
@@ -18,10 +21,10 @@ class ConfirmationMenu(menus.Menu):
         to_confirm: str | None = None,
         *,
         owner_id: int | None = None,
-        send_kwargs=None,
-        **kwargs,
+        send_kwargs: dict[object, object] | None =None,
+        **kwargs: dict[object, object],
     ):
-        super().__init__(**kwargs)
+        super().__init__(**kwargs) # type: ignore (currently not typeable)
 
         if send_kwargs is None:
             send_kwargs = {}
@@ -32,11 +35,11 @@ class ConfirmationMenu(menus.Menu):
         self.response = False
 
     async def send_initial_message(
-        self, ctx: commands.Context, channel: discord.TextChannel
-    ):
-        return await ctx.send(self.to_confirm or "\u200b", **self.send_kwargs)
+        self, ctx: SubContext, channel: discord.TextChannel
+    ) -> discord.Message:
+        return await ctx.send(self.to_confirm or "\u200b", **self.send_kwargs) # type: ignore
 
-    def reaction_check(self, payload):
+    def reaction_check(self, payload: discord.RawReactionActionEvent):
         # these types can be ignored because this function is only run after .start has been called
         if payload.message_id != self.message.id:  # type: ignore
             return False
