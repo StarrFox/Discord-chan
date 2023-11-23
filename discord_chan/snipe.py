@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from enum import Enum
 
-from pendulum.datetime import DateTime
 from discord.ext import commands
+from pendulum.datetime import DateTime
 
 from discord_chan.utils import to_discord_timestamp
 
@@ -31,7 +31,7 @@ class Snipe:
     content: str
     server: int
     channel: int
-    time: DateTime 
+    time: DateTime
 
     @property
     def discord_timestamp(self) -> str:

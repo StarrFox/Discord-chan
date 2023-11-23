@@ -17,7 +17,6 @@ from discord_chan import (
     PartitionPaginator,
     SubContext,
 )
-
 from discord_chan.utils import to_discord_timestamp
 
 
@@ -83,7 +82,9 @@ class General(commands.Cog, name="general"):
             ctx.channel, discord.abc.GuildChannel
         )
 
-        await ctx.channel.purge(limit=amount, check=lambda m: m.author.id == ctx.me.id, bulk=can_mass_delete)
+        await ctx.channel.purge(
+            limit=amount, check=lambda m: m.author.id == ctx.me.id, bulk=can_mass_delete
+        )
         await ctx.confirm("Messages cleaned.")
 
     @commands.command(aliases=["avy", "pfp"])
@@ -106,14 +107,16 @@ class General(commands.Cog, name="general"):
 
     @info_command.command(name="member", aliases=["user"])
     @commands.guild_only()
-    async def info_user(self, ctx: commands.Context, member: discord.Member = commands.Author):
+    async def info_user(
+        self, ctx: commands.Context, member: discord.Member = commands.Author
+    ):
         """
         Get info on a guild member
         """
         message_parts = [
             f"id: {member.id}",
             f"top role: {member.top_role.mention}",
-            f"account created: {to_discord_timestamp(member.created_at, both=True)}"
+            f"account created: {to_discord_timestamp(member.created_at, both=True)}",
         ]
 
         if member.joined_at is None:
@@ -145,7 +148,7 @@ class General(commands.Cog, name="general"):
             f"owner: {owner}",
             f"created: {to_discord_timestamp(guild.created_at, both=True)}",
             f"members: {guild.member_count}",
-            f"channels: {len(guild.channels)}"
+            f"channels: {len(guild.channels)}",
         ]
 
         await ctx.send("\n".join(message_parts))

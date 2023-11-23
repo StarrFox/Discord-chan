@@ -1,9 +1,10 @@
 import logging
 from collections import OrderedDict
 from datetime import datetime as python_datetime
+from typing import overload
 
-from pendulum.datetime import DateTime
 from loguru import logger
+from pendulum.datetime import DateTime
 
 bool_dict = {
     "true": True,
@@ -87,18 +88,32 @@ def detailed_human_time(input_seconds: float | int):
     return ", ".join(msgs)
 
 
+@overload
+def to_discord_timestamp(datetime: DateTime | python_datetime) -> str: ...
+
+@overload
 def to_discord_timestamp(
-        datetime: DateTime | python_datetime,
-        *,
-        relative: bool = True,
-        both: bool = False,
-    ) -> str:
-    timestamp: float = datetime.timestamp()
+    datetime: DateTime | python_datetime, *, relative: bool = ...
+) -> str:
+    ...
+
+
+@overload
+def to_discord_timestamp(
+    datetime: DateTime | python_datetime, *, both: bool = ...
+) -> str:
+    ...
+
+
+def to_discord_timestamp(
+    datetime: DateTime | python_datetime,
+    *,
+    relative: bool = True,
+    both: bool = False,
+) -> str:
+    timestamp = int(datetime.timestamp())
 
     if both:
-        full_time = f"<t:{int(timestamp)}>"
-        relative_time = f"<t:{int(timestamp)}:R>"
-
-        return f"{full_time} ({relative_time})"
+        return f"<t:{timestamp}> (<t:{timestamp}:R>)"
     else:
-        return f"<t:{int(timestamp)}{':R' if relative else ''}>"
+        return f"<t:{timestamp}{':R' if relative else ''}>"
