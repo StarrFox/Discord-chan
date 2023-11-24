@@ -56,15 +56,10 @@ class Gambling(commands.Cog):
 
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
-    async def coins(self, ctx: "SubContext", member: discord.Member | None = None):
+    async def coins(self, ctx: "SubContext", member: discord.Member = commands.Author):
         """
         View another member or your aacoin amount.
         """
-        if member is None:
-            # the guild_only check should make this always true
-            assert isinstance(ctx.author, discord.Member)
-            member = ctx.author
-
         amount = await self.bot.database.get_coin_balance(member.id)
         plural = amount != 1
         await ctx.send(f"{member} has {amount} coin{'s' if plural else ''}")
@@ -114,7 +109,6 @@ class Gambling(commands.Cog):
 
         entries: list[str] = []
         for user_id, coins in lb:
-            assert ctx.guild is not None
             # attempt cache pull first
             if (member := ctx.guild.get_member(user_id)) is not None:
                 entries.append(f"{member}: {coins}")

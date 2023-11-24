@@ -51,18 +51,20 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
 # THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-# TODO: add type hints to file
-
 import asyncio
 import random
 import re
 from string import ascii_letters
+from typing import TypeVar
+from collections.abc import Awaitable
 
 import discord
 import unidecode
 from discord.ext import commands
 
 import discord_chan
+
+T = TypeVar("T")
 
 GAMER_REGEX = r"(b+\s*r+\s*u+\s*h+)"
 # noinspection SpellCheckingInspection
@@ -529,7 +531,8 @@ CATCHPHRASES = [
 ]
 
 
-async def gather_or_cancel(*awaitables):
+# TODO: 3.12 gather_or_cancel[T](*awaitables: Awaitable[T]) -> list[T]
+async def gather_or_cancel(*awaitables: Awaitable[T]) -> list[T]:
     """run the awaitables in the sequence concurrently. If any of them raise an exception,
     propagate the first exception raised and cancel all other awaitables.
     """
@@ -547,7 +550,7 @@ async def gather_or_cancel(*awaitables):
 class GamerReplacer:
     GAMER_WORD_PARTS = frozenset("ruh")
 
-    def __init__(self, text):
+    def __init__(self, text: str):
         self.start_index = -1
         self.letter_check = [False] * 4
         self.match_length = 0
@@ -676,10 +679,14 @@ class GamerWords(commands.Cog):
         self._webhook_lock = asyncio.Lock()
 
     @staticmethod
-    def has_gamer_words(string):
+    def has_gamer_words(string: str):
         string = unidecode.unidecode(string)
         match = re.search(GAMER_REGEX, string, flags=re.IGNORECASE)
         return match
+
+    @staticmethod
+    def replace_gamer_words(string: str) -> str:
+        return GamerReplacer(string).replace()
 
     async def get_webhook(self, channel: discord.TextChannel):
         # this prevents us creating 2 webhooks at the same time
@@ -694,20 +701,20 @@ class GamerWords(commands.Cog):
                 return None
 
     @commands.Cog.listener()
-    async def on_message(self, message):
+    async def on_message(self, message: discord.Message):
         if await self.skip_if(message):
             return
 
         await self.handle_new_gamer_message(message)
 
     @commands.Cog.listener()
-    async def on_message_edit(self, old_message, new_message):
+    async def on_message_edit(self, old_message: discord.Message, new_message: discord.Message):
         if await self.skip_if(old_message):
             return
 
         await self.handle_new_gamer_message(new_message)
 
-    async def skip_if(self, message) -> bool:
+    async def skip_if(self, message: discord.Message) -> bool:
         return (
             message.author.bot
             or not message.guild
@@ -716,7 +723,7 @@ class GamerWords(commands.Cog):
             )
         )
 
-    async def handle_new_gamer_message(self, message):
+    async def handle_new_gamer_message(self, message: discord.Message):
         text_match = self.has_gamer_words(message.content)
         file_match = any(
             self.has_gamer_words(attachment.filename)
@@ -730,10 +737,10 @@ class GamerWords(commands.Cog):
                     await message.delete(delay=0.2)
                     return
 
-            async def dl_attach(_attach):
+            async def dl_attach(_attach: discord.Attachment):
                 file = await _attach.to_file()
                 if self.has_gamer_words(file.filename):
-                    file.filename = GamerReplacer(file.filename).replace()
+                    file.filename = self.replace_gamer_words(file.filename)
 
                 return file
 
@@ -747,22 +754,23 @@ class GamerWords(commands.Cog):
             except discord.HTTPException:
                 return
 
-            if not message.channel.permissions_for(message.guild.me).manage_webhooks:
+            if not message.channel.permissions_for(message.guild.me).manage_webhooks: # type: ignore (I know these are safe)
                 return
 
-            webhook = await self.get_webhook(message.channel)
-            if not webhook:
+            webhook = await self.get_webhook(message.channel) # type: ignore
+
+            if webhook is None:
                 return
 
             author = message.author
 
-            if message.channel.permissions_for(author).mention_everyone:
+            if message.channel.permissions_for(author).mention_everyone: # type: ignore
                 allowed_mentions = discord.AllowedMentions(everyone=True, roles=True)
             else:
                 allowed_mentions = discord.AllowedMentions(everyone=False, roles=False)
 
             await webhook.send(
-                content=GamerReplacer(message.content).replace(),
+                content=self.replace_gamer_words(message.content),
                 username=author.display_name,
                 avatar_url=str(author.display_avatar),
                 files=files,
@@ -772,6 +780,12 @@ class GamerWords(commands.Cog):
     async def clear_usernames(self):
         await self.bot.wait_until_ready()
         for guild in self.bot.guilds:
+            if not await self.bot.feature_manager.is_enabled(
+                discord_chan.Feature.gamer_words,
+                guild.id
+            ):
+                continue
+
             if guild.me is None:
                 continue
 
@@ -784,7 +798,7 @@ class GamerWords(commands.Cog):
 
                 match = self.has_gamer_words(member.display_name)
                 if match:
-                    new_content = GamerReplacer(member.display_name).replace()
+                    new_content = self.replace_gamer_words(member.display_name)
                     try:
                         await member.edit(nick=new_content)
                     except discord.Forbidden:
@@ -792,9 +806,16 @@ class GamerWords(commands.Cog):
                         continue
 
     @commands.Cog.listener()
-    async def on_member_update(self, old_member, new_member):
+    async def on_member_update(self, old_member: discord.Member, new_member: discord.Member):
         if old_member.display_name == new_member.display_name:
             return
+
+        if not await self.bot.feature_manager.is_enabled(
+            discord_chan.Feature.gamer_words,
+            new_member.guild.id
+        ):
+            return   
+
         if old_member.top_role > old_member.guild.me.top_role:
             return
         guild = old_member.guild
@@ -803,7 +824,7 @@ class GamerWords(commands.Cog):
 
         match = self.has_gamer_words(new_member.display_name)
         if match:
-            new_content = GamerReplacer(new_member.display_name).replace()
+            new_content = self.replace_gamer_words(new_member.display_name)
             await new_member.edit(nick=new_content)
 
 

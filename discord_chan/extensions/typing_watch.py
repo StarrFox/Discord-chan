@@ -26,6 +26,7 @@ class TypingWatch(commands.Cog, name="typing_watch"):
             # return if not in a guild
             return
 
+        # should only have members in a TextChannel
         assert isinstance(user, discord.Member)
 
         if not await self.bot.feature_manager.is_enabled(

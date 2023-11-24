@@ -75,13 +75,7 @@ class General(commands.Cog, name="general"):
         Delete's the bot's last <amount> message(s)
         amount must be between 1 and 100, defaulting to 10
         """
-        assert isinstance(ctx.me, discord.Member)
-
         can_mass_delete = ctx.channel.permissions_for(ctx.me).manage_messages
-
-        assert isinstance(ctx.channel, discord.abc.Messageable) and isinstance(
-            ctx.channel, discord.abc.GuildChannel
-        )
 
         await ctx.channel.purge(limit=amount, check=lambda m: m.author.id == ctx.me.id, bulk=can_mass_delete)
         await ctx.confirm("Messages cleaned.")
@@ -127,12 +121,10 @@ class General(commands.Cog, name="general"):
 
     @info_command.command(name="guild", aliases=["server"])
     @commands.guild_only()
-    async def info_guild(self, ctx: commands.Context):
+    async def info_guild(self, ctx: SubContext):
         """
         Get info about this guild
         """
-        assert ctx.guild is not None
-
         guild = ctx.guild
 
         if guild.owner_id is not None:
@@ -230,11 +222,10 @@ class General(commands.Cog, name="general"):
 
     @raw.command(aliases=["server"])
     @commands.guild_only()
-    async def guild(self, ctx: commands.Context):
+    async def guild(self, ctx: SubContext):
         """
         Raw guild object
         """
-        assert ctx.guild is not None
         data = await self.bot.http.get_guild(ctx.guild.id)
         await self.send_raw(ctx, data)
 

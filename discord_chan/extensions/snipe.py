@@ -5,6 +5,7 @@ import pendulum
 from discord.ext import commands
 
 from discord_chan import DiscordChan
+from discord_chan.context import SubContext
 from discord_chan.menus import (
     DCMenuPages,
     EmbedFieldProxy,
@@ -59,7 +60,7 @@ class Snipe(commands.Cog, name="snipe"):
     async def snipe_command(
         self,
         ctx: commands.Context,
-        index: int | None = 0,
+        index: int = 0,
         *,
         query_flags: SnipeQueryFlags,
     ):
@@ -71,9 +72,6 @@ class Snipe(commands.Cog, name="snipe"):
             --author: the author
             --mode: the snipe mode (edited/purged/deleted)
         """
-        # the Optional on index is just so discord.py allows invocation like `dc/snipe --mode edited`
-        assert index is not None
-
         negative = index < 0
 
         if abs(index) > 10_000_000:
@@ -82,9 +80,7 @@ class Snipe(commands.Cog, name="snipe"):
             )
 
         if query_flags.channel is not None:
-            assert isinstance(ctx.channel, discord.TextChannel)
-
-            if query_flags.channel.nsfw and not ctx.channel.nsfw:
+            if query_flags.channel.nsfw and not getattr(ctx.channel, "nsfw", False):
                 raise commands.BadArgument(
                     "Cannot snipe a nsfw channel from a non-nsfw channel"
                 )
@@ -147,9 +143,7 @@ class Snipe(commands.Cog, name="snipe"):
         List snipes instead of just one
         """
         if query_flags.channel is not None:
-            assert isinstance(ctx.channel, discord.TextChannel)
-
-            if query_flags.channel.nsfw and not ctx.channel.nsfw:
+            if query_flags.channel.nsfw and not getattr(ctx.channel, "nsfw", False):
                 raise commands.BadArgument(
                     "Cannot snipe a nsfw channel from a non-nsfw channel"
                 )
@@ -206,13 +200,10 @@ class Snipe(commands.Cog, name="snipe"):
 
     @snipe_command.command(name="stat")
     @commands.guild_only()
-    async def snipe_command_stat(self, ctx: commands.Context):
+    async def snipe_command_stat(self, ctx: SubContext):
         """
         Get stats on who has the most snipes
         """
-        # guild_only check should ensure this is true
-        assert ctx.guild is not None
-
         leaderboard = await self.bot.database.get_snipe_leaderboard(ctx.guild.id)
 
         entries: list[str] = []
