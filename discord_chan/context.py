@@ -73,5 +73,5 @@ class SubContext(GuildContext["DiscordChan"]):
         """
         message = message or "confirm?"
         owner_id = owner_id or self.author.id
-        menu = ConfirmationMenu(message, owner_id=owner_id, send_kwargs=send_kwargs)
+        menu = ConfirmationMenu(message, owner_id=owner_id, send_kwargs=send_kwargs) # type: ignore
         return await menu.get_response(self)

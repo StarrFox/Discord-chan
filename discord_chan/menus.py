@@ -21,7 +21,7 @@ class ConfirmationMenu(menus.Menu):
         to_confirm: str | None = None,
         *,
         owner_id: int | None = None,
-        send_kwargs: dict[object, object] | None =None,
+        send_kwargs: dict[object, object] | None = None,
         **kwargs: dict[object, object],
     ):
         super().__init__(**kwargs) # type: ignore (currently not typeable)

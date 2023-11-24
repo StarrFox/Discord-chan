@@ -6,14 +6,15 @@ from PIL.Image import Image
 
 from . import utils
 from .image import FileTooLarge, InvalidImageType, url_to_image
+from discord_chan import DiscordChan
 
 WEEKDAYS = ["monday", "tuesday", "wendsday", "thursday", "friday", "saturday", "sunday"]
 
 WEEKDAY_ABBRS = {d.replace("day", ""): d for d in WEEKDAYS}
 
 
-class FetchedUser(commands.Converter):
-    async def convert(self, ctx: commands.Context, argument: str):
+class FetchedUser(commands.Converter[discord.User | discord.Member]):
+    async def convert(self, ctx: commands.Context[DiscordChan], argument: str):
         id_match = re.match(r"<@!?(\d+)>$", argument) or re.match(
             r"(\d{15,21})$", argument
         )
@@ -181,7 +182,7 @@ class ImageUrlConverter(commands.Converter):
                 return member.display_avatar.with_static_format("png").url
 
             else:
-                # I couldn't get the type checking for this to work
+                # this uses literals for typing
                 return member.display_avatar.with_static_format(self.force_format).url  # type: ignore
 
         try:

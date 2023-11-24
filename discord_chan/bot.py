@@ -15,7 +15,7 @@ ROOT = pathlib.Path(__file__).parent
 
 
 class DiscordChan(commands.AutoShardedBot):
-    def __init__(self, *, context: type[commands.Context] = SubContext, **kwargs):
+    def __init__(self, *, context: type[commands.Context] = SubContext, **kwargs: dict[object, object]):
         self.debug_mode: bool = kwargs.pop("debug_mode", False)
         super().__init__(
             command_prefix=kwargs.pop("command_prefix", self.get_command_prefix),
@@ -124,7 +124,7 @@ class DiscordChan(commands.AutoShardedBot):
         return commands.when_mentioned_or(*prefixes)(self, message)
 
     @staticmethod
-    def direct_message_check(ctx: commands.Context):
+    def direct_message_check(ctx: commands.Context["DiscordChan"]) -> bool:
         if isinstance(ctx.channel, discord.DMChannel):
             raise commands.NoPrivateMessage()
 
