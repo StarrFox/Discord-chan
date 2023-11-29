@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands
 
 import discord_chan
-from discord_chan import BetweenConverter, FetchedMember, SubContext
+from discord_chan import BetweenConverter, SubContext
 
 
 def is_above(invoker: discord.Member, user: discord.Member):
@@ -62,7 +62,7 @@ class Mod(commands.Cog, name="mod"):
         self,
         ctx: SubContext,
         number: typing.Annotated[int, BetweenConverter(0, 1000)],
-        user: FetchedMember | None = None,
+        user: discord.Member | None = None,
         *,
         text: str | None = None,
     ):

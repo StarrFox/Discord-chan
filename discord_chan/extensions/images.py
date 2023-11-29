@@ -14,17 +14,16 @@ class Images(commands.Cog, name="images"):
     async def wallemoji(
         self,
         ctx: SubContext,
-        name: str,
-        width: Annotated[int, BetweenConverter(1, 10)],
-        height: Annotated[int, BetweenConverter(1, 10)],
+        name: str = commands.parameter(description="name prefix of the emojis"),
+        width: Annotated[int, BetweenConverter(1, 10)] = commands.parameter(description="width (in emojis); must be between 1 and 10"),
+        height: Annotated[int, BetweenConverter(1, 10)] = commands.parameter(description="height (in emojis); must be between 1 and 10"),
         image: Annotated[PilImage, ImageConverter] = LastImage,
     ):
         """
-        Make some emojis from an image,
-        Width and height must be between 1 and 10
+        Make some emojis from an image
         """
         if image.format is None:
-            return await ctx.send("Image format is somehow None")
+            return await ctx.send("Image format could not be read")
 
         gif = image.format == "GIF"
         format = image.format

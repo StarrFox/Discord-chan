@@ -11,8 +11,6 @@ from discord_chan import (
     BetweenConverter,
     DCMenuPages,
     DiscordChan,
-    FetchedMember,
-    FetchedUser,
     NormalPageSource,
     PartitionPaginator,
     SubContext,
@@ -84,7 +82,7 @@ class General(commands.Cog, name="general"):
     async def avatar(
         self,
         ctx: commands.Context,
-        member: typing.Annotated[discord.User, FetchedUser] = commands.Author,
+        member: discord.User = commands.Author,
     ):
         """
         Get a member's avatar
@@ -194,7 +192,7 @@ class General(commands.Cog, name="general"):
     async def member(
         self,
         ctx: commands.Context,
-        member: typing.Annotated[discord.Member, FetchedMember] = commands.Author,
+        member: discord.Member = commands.Author,
     ):
         """
         Raw member object
