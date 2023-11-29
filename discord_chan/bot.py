@@ -28,7 +28,7 @@ class DiscordChan(commands.AutoShardedBot):
             ),
             activity=discord.Activity(
                 type=discord.ActivityType.listening,
-                name="sf/help",
+                name="dc/help",
             ),
             intents=kwargs.pop("intents", discord.Intents.all()),
             **kwargs,

@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    starrpkgs.url = "github:StarrFox/packages/main";
     flake-parts.url = "github:hercules-ci/flake-parts/";
     nix-systems.url = "github:nix-systems/default";
   };
@@ -11,6 +12,7 @@
     self,
     flake-parts,
     nix-systems,
+    starrpkgs,
     ...
   }:
     flake-parts.lib.mkFlake {inherit inputs;} {
@@ -22,7 +24,7 @@
         self',
         ...
       }: let
-        python = pkgs.python311;
+        python = starrpkgs.packages.${system}.python311;
 
         pyproject = builtins.fromTOML (builtins.readFile ./pyproject.toml);
 
