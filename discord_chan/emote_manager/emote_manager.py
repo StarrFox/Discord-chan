@@ -22,6 +22,7 @@ import logging
 import operator
 import posixpath
 import re
+from typing import Literal
 import warnings
 import weakref
 import zipfile
@@ -34,7 +35,6 @@ from discord.ext import commands
 import discord_chan.emote_manager.utils as utils
 import discord_chan.emote_manager.utils.image as utils_image
 from discord_chan.emote_manager.utils import errors
-from discord_chan.emote_manager.utils.converter import emote_type_filter_default
 from discord_chan.emote_manager.utils.paginator import ListPaginator
 
 logger = logging.getLogger(__name__)
@@ -220,10 +220,9 @@ class EmoteManager(commands.Cog):
         left, sep, right = posixpath.splitext(filename)[0].rpartition("-")
         return (left or right).replace(" ", "")
 
-    @emote_type_filter_default
     @em.command()
     @commands.bot_has_permissions(attach_files=True)
-    async def export(self, context: commands.Context, image_type="all"):
+    async def export(self, context: commands.Context, image_type: Literal["all", "static", "animated"] = "all"):
         """Export all emotes from this server to a zip file, suitable for use with the import command.
 
         If “animated” is provided, only include animated emotes.
@@ -232,9 +231,16 @@ class EmoteManager(commands.Cog):
 
         This command requires the “attach files” permission.
         """
-        # TODO: remove the weird emote_type_filter_default thing
-        # noinspection PyTypeChecker
-        emotes = list(filter(image_type, context.guild.emojis))  # type: ignore
+        match image_type:
+            case "all":
+                emote_filter = lambda _: True
+            case "static":
+                emote_filter = lambda e: not e.animated
+            case "animated":
+                emote_filter = lambda e: e.animated
+
+        emotes = list(filter(emote_filter, context.guild.emojis)) # type: ignore
+
         if not emotes:
             raise commands.BadArgument(
                 "No emotes of that type were found in this server."
@@ -531,9 +537,8 @@ class EmoteManager(commands.Cog):
 
         await context.send(rf"Emote successfully renamed to \:{new_name}:")
 
-    @emote_type_filter_default
     @em.command(aliases=("ls", "dir"))
-    async def list(self, context: commands.Context, image_type="all"):
+    async def list(self, context: commands.Context, image_type: Literal["all", "static", "animated"] = "all"):
         """A list of all emotes on this server.
 
         The list shows each emote and its raw form.
@@ -542,10 +547,16 @@ class EmoteManager(commands.Cog):
         If "static" is provided, only show static emotes.
         If “all” is provided, show all emotes.
         """
-        # TODO: another emote_type_filter_default usage
-        # noinspection PyTypeChecker
+        match image_type:
+            case "all":
+                emote_filter = lambda _: True
+            case "static":
+                emote_filter = lambda e: not e.animated
+            case "animated":
+                emote_filter = lambda e: e.animated
+
         emotes = sorted(
-            filter(image_type, context.guild.emojis), key=lambda e: e.name.lower()  # type: ignore
+            filter(emote_filter, context.guild.emojis), key=lambda e: e.name.lower()  # type: ignore
         )
 
         processed = []
