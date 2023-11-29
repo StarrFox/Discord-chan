@@ -1,3 +1,5 @@
+name: "check flake"
+
 on:
     pull_request:
       paths:
@@ -12,7 +14,7 @@ on:
           - "discord_chan/**"
           - ".github/workflows/flake_check.yml"
           - "pyproject.toml"
-  
+
 jobs:
     check:
         name: Check
