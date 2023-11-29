@@ -1,8 +1,8 @@
 import asyncio
 
+import pendulum
 from discord.ext import commands
 from loguru import logger
-import pendulum
 
 from discord_chan.utils import to_discord_timestamp
 
@@ -35,7 +35,7 @@ async def on_command_error(ctx: commands.Context, error: Exception):
 
         cooldown_message = await ctx.reply(
             f"Command on cooldown, retry in {to_discord_timestamp(cooldown_over)}",
-            mention_author=False
+            mention_author=False,
         )
 
         await asyncio.sleep(error.retry_after)

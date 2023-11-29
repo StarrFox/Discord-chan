@@ -140,7 +140,9 @@ class Database:
 
         return result
 
-    async def get_member_bound_word_rank(self, *, server_id: int, word: str) -> list[tuple[int, int]]:
+    async def get_member_bound_word_rank(
+        self, *, server_id: int, word: str
+    ) -> list[tuple[int, int]]:
         pool = await self.connect()
 
         # return member_id: usages of word
@@ -150,13 +152,14 @@ class Database:
 
             records: list[asyncpg.Record] = await connection.fetch(
                 "SELECT author, count FROM word_track WHERE server = $1 AND word = $2 ORDER BY count DESC;",
-                server_id, word
+                server_id,
+                word,
             )
 
         result: list[tuple[int, int]] = []
 
         for record in records:
-            result.append((record["author"],  record["count"]))
+            result.append((record["author"], record["count"]))
 
         return result
 

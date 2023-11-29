@@ -1,7 +1,7 @@
-from collections.abc import Sequence
-import itertools
-from typing import Any, Literal, Union
 import inspect
+import itertools
+from collections.abc import Sequence
+from typing import Any, Literal, Union
 
 import discord
 from discord.ext import commands
@@ -22,7 +22,9 @@ class Minimal(commands.MinimalHelpCommand):
         # command_name = self.context.invoked_with
         # return f"Use `dc/{command_name} <command/cog>` for more info on a command/cog."
 
-    def add_bot_commands_formatting(self, cmds: Sequence[commands.Command[Any, ..., Any]], heading: str):
+    def add_bot_commands_formatting(
+        self, cmds: Sequence[commands.Command[Any, ..., Any]], heading: str
+    ):
         if cmds:
             joined = ", ".join(c.name for c in cmds)
             self.paginator.add_line(f"{heading}: {joined}", empty=False)
@@ -47,10 +49,12 @@ class Minimal(commands.MinimalHelpCommand):
             name = f"{parents}[{command.name}|{aliases}]"
         else:
             name = command.qualified_name
-        
+
         return f"{self.context.clean_prefix}{name}"
 
-    def format_command_param(self, param: commands.Parameter, require_var_positional: bool = False) -> str:
+    def format_command_param(
+        self, param: commands.Parameter, require_var_positional: bool = False
+    ) -> str:
         """
         member [Member]=<you> the member to get words of
         words [str...] only show these words if provided
@@ -71,14 +75,14 @@ class Minimal(commands.MinimalHelpCommand):
             description = ""
 
         annotation: Any = param.converter.converter if greedy else param.converter
-        origin = getattr(annotation, '__origin__', None)
+        origin = getattr(annotation, "__origin__", None)
         if not greedy and origin is Union:
             none_cls = type(None)
             union_args = annotation.__args__
             optional = union_args[-1] is none_cls
             if len(union_args) == 2 and optional:
-                #annotation = union_args[0]
-                origin = getattr(annotation, '__origin__', None)
+                # annotation = union_args[0]
+                origin = getattr(annotation, "__origin__", None)
 
         if annotation is discord.Attachment:
             if optional:
@@ -89,7 +93,9 @@ class Minimal(commands.MinimalHelpCommand):
                 return f"{name} <Attachment>{default}{description}"
 
         if origin is Literal:
-            literal_options = '|'.join(f'{v}' if isinstance(v, str) else str(v) for v in annotation.__args__)
+            literal_options = "|".join(
+                f"{v}" if isinstance(v, str) else str(v) for v in annotation.__args__
+            )
             return f"{name} [{literal_options}]{default}{description}"
 
         try:
@@ -98,6 +104,7 @@ class Minimal(commands.MinimalHelpCommand):
             is_flag = False
 
         if not is_flag:
+
             def _get_converter_name(converter) -> str:
                 if inspect.isclass(converter):
                     return converter.__name__
@@ -107,7 +114,9 @@ class Minimal(commands.MinimalHelpCommand):
 
             if origin is Union:
                 converter_type = "|".join(
-                    _get_converter_name(arg) for arg in annotation.__args__ if arg is not None
+                    _get_converter_name(arg)
+                    for arg in annotation.__args__
+                    if arg is not None
                 )
             else:
                 converter_type = _get_converter_name(annotation)
@@ -141,8 +150,7 @@ class Minimal(commands.MinimalHelpCommand):
 
         for argument in arguments:
             formatted_argument = self.format_command_param(
-                argument,
-                command.require_var_positional
+                argument, command.require_var_positional
             )
 
             self.paginator.add_line(formatted_argument)
@@ -160,12 +168,14 @@ class Minimal(commands.MinimalHelpCommand):
                         description = f": {flag.description}"
                     else:
                         description = ""
-                    
+
                     self.paginator.add_line(f"    --{flag_name}{description}")
 
         self.paginator.add_line()
 
-    def add_command_formatting(self, command: commands.Command[Any, ..., Any], *, in_group: bool = False):
+    def add_command_formatting(
+        self, command: commands.Command[Any, ..., Any], *, in_group: bool = False
+    ):
         if not in_group:
             self.paginator.add_line("```")
 
@@ -256,9 +266,11 @@ class Minimal(commands.MinimalHelpCommand):
         if note:
             self.paginator.add_line(note, empty=True)
 
-        no_category = f'\u200b{self.no_category}'
+        no_category = f"\u200b{self.no_category}"
 
-        def get_category(command: commands.Command[Any, ..., Any], *, no_category: str = no_category) -> str:
+        def get_category(
+            command: commands.Command[Any, ..., Any], *, no_category: str = no_category
+        ) -> str:
             cog = command.cog
             return cog.qualified_name if cog is not None else no_category
 
@@ -266,7 +278,9 @@ class Minimal(commands.MinimalHelpCommand):
         to_iterate = itertools.groupby(filtered, key=get_category)
 
         for category, cmds in to_iterate:
-            cmds = sorted(cmds, key=lambda c: c.name) if self.sort_commands else list(cmds)
+            cmds = (
+                sorted(cmds, key=lambda c: c.name) if self.sort_commands else list(cmds)
+            )
             self.add_bot_commands_formatting(cmds, category)
 
         note = self.get_ending_note()
@@ -281,7 +295,9 @@ class Minimal(commands.MinimalHelpCommand):
     # Todo: find better answer
     # I overwrite this to have command > cog rather than the default
     # also to ignore cogs with no commands (see #L142)
-    async def command_callback(self, ctx: commands.Context, *, command: str | None = None):
+    async def command_callback(
+        self, ctx: commands.Context, *, command: str | None = None
+    ):
         await self.prepare_help_command(ctx, command)
         bot = ctx.bot
 

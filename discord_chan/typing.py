@@ -7,6 +7,7 @@ BotT = TypeVar("BotT", bound=commands.Bot | commands.AutoShardedBot)
 
 MessageableGuildChannel = discord.TextChannel | discord.Thread
 
+
 # Message where guild is not None
 class GuildMessage(discord.Message):
     guild: discord.Guild
