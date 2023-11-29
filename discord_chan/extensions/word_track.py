@@ -96,7 +96,7 @@ class WordTrack(commands.Cog):
         await menu.start(ctx)
 
     @words_command.command(name="user", aliases=["member"])
-    async def words_user(self, ctx: SubContext, member: discord.Member = commands.Author):
+    async def words_user(self, ctx: SubContext, member: discord.Member = commands.Author, *words: str):
         """
         Get word count leaderboard for a member
         """
@@ -111,6 +111,9 @@ class WordTrack(commands.Cog):
         entries: list[str] = []
 
         for word, count in leaderboard.items():
+            if words and word not in words:
+                continue
+
             entries.append(f"- {word}: {count}")
 
         source = NormalPageSource(entries, per_page=10)
