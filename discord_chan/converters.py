@@ -12,59 +12,6 @@ WEEKDAYS = ["monday", "tuesday", "wendsday", "thursday", "friday", "saturday", "
 WEEKDAY_ABBRS = {d.replace("day", ""): d for d in WEEKDAYS}
 
 
-class FetchedUser(commands.Converter):
-    async def convert(self, ctx: commands.Context, argument: str):
-        id_match = re.match(r"<@!?(\d+)>$", argument) or re.match(
-            r"(\d{15,21})$", argument
-        )
-
-        if id_match:
-            user_id = int(id_match.group(1))
-            for mention in ctx.message.mentions:
-                if mention.id == id_match:
-                    return mention
-
-            try:
-                user = await ctx.bot.fetch_user(user_id)
-            except (discord.NotFound, discord.HTTPException):
-                user = None
-
-            if user:
-                return user
-
-            raise commands.BadArgument(f'User "{user_id}" not found.')
-
-        return await FetchedMember().convert(ctx, argument)
-
-
-class FetchedMember(commands.Converter):
-    async def convert(self, ctx: commands.Context, argument: str) -> discord.Member:
-        if ctx.guild is None:
-            raise commands.BadArgument("Cannot fetch members from dms")
-
-        id_match = re.match(r"<@!?([0-9]+)>$", argument) or re.match(
-            r"([0-9]{15,21})$", argument
-        )
-
-        if id_match:
-            user_id = int(id_match.group(1))
-            try:
-                member = await ctx.guild.fetch_member(user_id)
-            except discord.HTTPException:
-                # see lower commit on why we don't raise
-                pass
-            else:
-                return member
-
-        # someone could be named 15-21 numbers
-        members = await ctx.guild.query_members(argument, cache=False)
-
-        if members:
-            return members[0]
-
-        raise commands.BadArgument(f'Member "{argument}" not found')
-
-
 class ImageFormatConverter(commands.Converter):
     async def convert(self, ctx: commands.Context, argument: str) -> str:
         if argument in ("png", "gif", "jpeg", "webp"):
@@ -149,7 +96,7 @@ class WeekdayConverter(commands.Converter):
 
 class BotConverter(commands.Converter):
     async def convert(self, ctx: commands.Context, argument: str) -> discord.Member:
-        member = await FetchedMember().convert(ctx, argument)
+        member = await commands.MemberConverter().convert(ctx, argument)
 
         if member.bot:
             return member
@@ -171,7 +118,7 @@ class ImageUrlConverter(commands.Converter):
 
     async def convert(self, ctx: commands.Context, argument: str) -> str:
         try:
-            member = await FetchedMember().convert(ctx, argument)
+            member = await commands.MemberConverter().convert(ctx, argument)
 
         except commands.BadArgument:
             member = None
