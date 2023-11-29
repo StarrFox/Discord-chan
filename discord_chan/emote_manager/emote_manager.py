@@ -22,10 +22,10 @@ import logging
 import operator
 import posixpath
 import re
-from typing import Literal
 import warnings
 import weakref
 import zipfile
+from typing import Literal
 
 import aiohttp
 import discord
@@ -107,7 +107,9 @@ class EmoteManager(commands.Cog):
 
         return True
 
-    async def cog_command_error(self, context: commands.Context, error: commands.CommandError):
+    async def cog_command_error(
+        self, context: commands.Context, error: commands.CommandError
+    ):
         if isinstance(error, errors.EmoteManagerError):
             await context.send(str(error))
 
@@ -222,7 +224,11 @@ class EmoteManager(commands.Cog):
 
     @em.command()
     @commands.bot_has_permissions(attach_files=True)
-    async def export(self, context: commands.Context, image_type: Literal["all", "static", "animated"] = "all"):
+    async def export(
+        self,
+        context: commands.Context,
+        image_type: Literal["all", "static", "animated"] = "all",
+    ):
         """Export all emotes from this server to a zip file, suitable for use with the import command.
 
         If “animated” is provided, only include animated emotes.
@@ -239,7 +245,7 @@ class EmoteManager(commands.Cog):
             case "animated":
                 emote_filter = lambda e: e.animated
 
-        emotes = list(filter(emote_filter, context.guild.emojis)) # type: ignore
+        emotes = list(filter(emote_filter, context.guild.emojis))  # type: ignore
 
         if not emotes:
             raise commands.BadArgument(
@@ -538,7 +544,11 @@ class EmoteManager(commands.Cog):
         await context.send(rf"Emote successfully renamed to \:{new_name}:")
 
     @em.command(aliases=("ls", "dir"))
-    async def list(self, context: commands.Context, image_type: Literal["all", "static", "animated"] = "all"):
+    async def list(
+        self,
+        context: commands.Context,
+        image_type: Literal["all", "static", "animated"] = "all",
+    ):
         """A list of all emotes on this server.
 
         The list shows each emote and its raw form.

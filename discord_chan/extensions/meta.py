@@ -3,8 +3,8 @@ from typing import Annotated
 import discord
 from discord.ext import commands
 
-from discord_chan.checks import cog_loaded
 from discord_chan import BotConverter
+from discord_chan.checks import cog_loaded
 
 
 class Meta(commands.Cog, name="meta"):
@@ -56,7 +56,7 @@ class Meta(commands.Cog, name="meta"):
         if jsk_source is None:
             return await ctx.send("Missing source command")
 
-        await jsk_source.callback(jsk, ctx, command_name=command_name) # type: ignore
+        await jsk_source.callback(jsk, ctx, command_name=command_name)  # type: ignore
 
 
 async def setup(bot):

@@ -54,9 +54,9 @@
 import asyncio
 import random
 import re
+from collections.abc import Awaitable
 from string import ascii_letters
 from typing import TypeVar
-from collections.abc import Awaitable
 
 import discord
 import unidecode
@@ -708,7 +708,9 @@ class GamerWords(commands.Cog):
         await self.handle_new_gamer_message(message)
 
     @commands.Cog.listener()
-    async def on_message_edit(self, old_message: discord.Message, new_message: discord.Message):
+    async def on_message_edit(
+        self, old_message: discord.Message, new_message: discord.Message
+    ):
         if await self.skip_if(old_message):
             return
 
@@ -754,17 +756,17 @@ class GamerWords(commands.Cog):
             except discord.HTTPException:
                 return
 
-            if not message.channel.permissions_for(message.guild.me).manage_webhooks: # type: ignore (I know these are safe)
+            if not message.channel.permissions_for(message.guild.me).manage_webhooks:  # type: ignore (I know these are safe)
                 return
 
-            webhook = await self.get_webhook(message.channel) # type: ignore
+            webhook = await self.get_webhook(message.channel)  # type: ignore
 
             if webhook is None:
                 return
 
             author = message.author
 
-            if message.channel.permissions_for(author).mention_everyone: # type: ignore
+            if message.channel.permissions_for(author).mention_everyone:  # type: ignore
                 allowed_mentions = discord.AllowedMentions(everyone=True, roles=True)
             else:
                 allowed_mentions = discord.AllowedMentions(everyone=False, roles=False)
@@ -781,8 +783,7 @@ class GamerWords(commands.Cog):
         await self.bot.wait_until_ready()
         for guild in self.bot.guilds:
             if not await self.bot.feature_manager.is_enabled(
-                discord_chan.Feature.gamer_words,
-                guild.id
+                discord_chan.Feature.gamer_words, guild.id
             ):
                 continue
 
@@ -806,15 +807,16 @@ class GamerWords(commands.Cog):
                         continue
 
     @commands.Cog.listener()
-    async def on_member_update(self, old_member: discord.Member, new_member: discord.Member):
+    async def on_member_update(
+        self, old_member: discord.Member, new_member: discord.Member
+    ):
         if old_member.display_name == new_member.display_name:
             return
 
         if not await self.bot.feature_manager.is_enabled(
-            discord_chan.Feature.gamer_words,
-            new_member.guild.id
+            discord_chan.Feature.gamer_words, new_member.guild.id
         ):
-            return   
+            return
 
         if old_member.top_role > old_member.guild.me.top_role:
             return

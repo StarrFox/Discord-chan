@@ -80,7 +80,9 @@ class WordTrack(commands.Cog):
         """
         Get word count leaderboard for the server
         """
-        leaderboard = await self.bot.database.get_server_word_track_leaderboard(server_id=ctx.guild.id)
+        leaderboard = await self.bot.database.get_server_word_track_leaderboard(
+            server_id=ctx.guild.id
+        )
 
         if not leaderboard:
             return await ctx.send("No results found")
@@ -96,7 +98,9 @@ class WordTrack(commands.Cog):
         await menu.start(ctx)
 
     @words_command.command(name="user", aliases=["member"])
-    async def words_user(self, ctx: SubContext, member: discord.Member = commands.Author, *words: str):
+    async def words_user(
+        self, ctx: SubContext, member: discord.Member = commands.Author, *words: str
+    ):
         """
         Get word count leaderboard for a member
         """
@@ -123,9 +127,7 @@ class WordTrack(commands.Cog):
 
     @words_command.command(name="stat", aliases=["stats"])
     async def words_stats(
-        self,
-        ctx: SubContext,
-        member: discord.Member = commands.Author
+        self, ctx: SubContext, member: discord.Member = commands.Author
     ):
         """
         Get word count stats for a member
@@ -146,7 +148,7 @@ class WordTrack(commands.Cog):
         await ctx.reply(
             f"unique words: {unique_words}\ntotal words: {total_words}\n"
             f"word density: {round(word_density, 2)}",
-            mention_author=False
+            mention_author=False,
         )
 
     @words_command.command(name="rank")
@@ -157,11 +159,13 @@ class WordTrack(commands.Cog):
         # we only store lowercase versions of words
         word = word.lower()
 
-        server_leaderboard = await self.bot.database.get_server_word_track_leaderboard(server_id=ctx.guild.id)
+        server_leaderboard = await self.bot.database.get_server_word_track_leaderboard(
+            server_id=ctx.guild.id
+        )
 
         if not server_leaderboard:
             return await ctx.send("word has not been used in server")
-    
+
         try:
             server_count = server_leaderboard[word]
         except KeyError:
@@ -169,13 +173,19 @@ class WordTrack(commands.Cog):
 
         server_rank = list(server_leaderboard.keys()).index(word) + 1
 
-        member_loaderboard = await self.bot.database.get_member_bound_word_rank(server_id=ctx.guild.id, word=word)
+        member_loaderboard = await self.bot.database.get_member_bound_word_rank(
+            server_id=ctx.guild.id, word=word
+        )
 
         # this shouldn't be possible
         if not member_loaderboard:
             raise RuntimeError("somehow word was not found for member lookup")
 
-        message_parts = [f"server count: {server_count}", f"server rank: {server_rank}", ""]
+        message_parts = [
+            f"server count: {server_count}",
+            f"server rank: {server_rank}",
+            "",
+        ]
 
         for user_id, count in member_loaderboard[:5]:
             member = ctx.guild.get_member(user_id)

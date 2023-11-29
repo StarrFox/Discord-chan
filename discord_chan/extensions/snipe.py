@@ -17,8 +17,12 @@ from discord_chan.snipe import SnipeMode
 
 
 class SnipeQueryFlags(commands.FlagConverter, delimiter=" ", prefix="--"):
-    channel: discord.TextChannel | None = commands.flag(description="channel snipes be from")
-    mode: SnipeMode | None = commands.flag(description="mode (edited/purged/deleted) snipes must have")
+    channel: discord.TextChannel | None = commands.flag(
+        description="channel snipes be from"
+    )
+    mode: SnipeMode | None = commands.flag(
+        description="mode (edited/purged/deleted) snipes must have"
+    )
     author: discord.Member | None = commands.flag(description="author snipes must have")
     contains: str | None = commands.flag(description="content snipes must have")
 
@@ -60,9 +64,13 @@ class Snipe(commands.Cog, name="snipe"):
     async def snipe_command(
         self,
         ctx: commands.Context,
-        index: int = commands.parameter(default=0, description="the index to snipe from"),
+        index: int = commands.parameter(
+            default=0, description="the index to snipe from"
+        ),
         *,
-        query_flags: SnipeQueryFlags = commands.parameter(description="flags to filter the query"),
+        query_flags: SnipeQueryFlags = commands.parameter(
+            description="flags to filter the query"
+        ),
     ):
         """Snipe messages"""
         negative = index < 0

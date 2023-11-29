@@ -2,8 +2,8 @@ import logging
 from collections import OrderedDict
 from datetime import datetime as python_datetime
 
-from pendulum.datetime import DateTime
 from loguru import logger
+from pendulum.datetime import DateTime
 
 bool_dict = {
     "true": True,
@@ -88,11 +88,11 @@ def detailed_human_time(input_seconds: float | int):
 
 
 def to_discord_timestamp(
-        datetime: DateTime | python_datetime,
-        *,
-        relative: bool = True,
-        both: bool = False,
-    ) -> str:
+    datetime: DateTime | python_datetime,
+    *,
+    relative: bool = True,
+    both: bool = False,
+) -> str:
     timestamp: float = datetime.timestamp()
 
     if both:

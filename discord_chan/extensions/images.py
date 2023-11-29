@@ -15,8 +15,12 @@ class Images(commands.Cog, name="images"):
         self,
         ctx: SubContext,
         name: str = commands.parameter(description="name prefix of the emojis"),
-        width: Annotated[int, BetweenConverter(1, 10)] = commands.parameter(description="width (in emojis); must be between 1 and 10"),
-        height: Annotated[int, BetweenConverter(1, 10)] = commands.parameter(description="height (in emojis); must be between 1 and 10"),
+        width: Annotated[int, BetweenConverter(1, 10)] = commands.parameter(
+            description="width (in emojis); must be between 1 and 10"
+        ),
+        height: Annotated[int, BetweenConverter(1, 10)] = commands.parameter(
+            description="height (in emojis); must be between 1 and 10"
+        ),
         image: Annotated[PilImage, ImageConverter] = LastImage,
     ):
         """
