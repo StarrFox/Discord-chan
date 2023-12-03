@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from discord import HTTPException, Message
+from typing_extensions import override
 
 from .menus import ConfirmationMenu, DCMenuPages, NormalPageSource, PartitionPaginator
 from .typing import GuildContext
@@ -12,6 +13,7 @@ if TYPE_CHECKING:
 
 # we disallow dm commands globally so we should never be in a dm context
 class SubContext(GuildContext["DiscordChan"]):
+    @override
     async def send(self, content: str | None = None, **kwargs) -> Message:
         if content and len(content) > 2000:
             if kwargs:

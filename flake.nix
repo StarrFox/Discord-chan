@@ -117,6 +117,7 @@
             unidecode
             uvloop
             psutil
+            typing-extensions
           ];
 
           meta.mainProgram = "discord_chan";

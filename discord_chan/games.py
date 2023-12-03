@@ -20,7 +20,6 @@ class Connect4(menus.Menu):
         self.current_player = next(self.player_cycle)
         self.last_move = None
         self.winner = None
-        # noinspection PyTypeChecker
         self.board = numpy.full((6, 7), self.filler)
         for button in [
             menus.Button(num, self.do_number_button) for num in self.numbers
@@ -91,23 +90,6 @@ class Connect4(menus.Menu):
         msg += "\n"
         msg += "".join(self.numbers)
         return msg
-
-    # @property
-    # def embed(self):
-    #     """
-    #     The embed to send to discord
-    #     """
-    #     board_embed = discord.Embed(description=self.board_message)
-    #
-    #     if self.last_move is not None:
-    #         board_embed.add_field(name="Last move", value=self.last_move, inline=False)
-    #
-    #     if self._running:
-    #         board_embed.add_field(
-    #             name="Current turn", value=self.current_player.mention
-    #         )
-    #
-    #     return board_embed
 
     @property
     def discord_message(self):
