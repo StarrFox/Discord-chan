@@ -500,7 +500,7 @@ class EmoteManager(commands.Cog):
             name=name, image=image_data, reason=reason
         )
 
-    @em.command(aliases=("delete", "delet", "rm"))
+    @em.command(aliases=("delete", "rm"))
     @commands.has_permissions(manage_expressions=True)
     @commands.bot_has_permissions(manage_expressions=True)
     async def remove(self, context: commands.Context, emote, *emotes):

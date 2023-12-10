@@ -7,7 +7,15 @@ from PIL.Image import Image
 from . import utils
 from .image import FileTooLarge, InvalidImageType, url_to_image
 
-WEEKDAYS = ["monday", "tuesday", "wendsday", "thursday", "friday", "saturday", "sunday"]
+WEEKDAYS = [
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+    "sunday",
+]
 
 WEEKDAY_ABBRS = {d.replace("day", ""): d for d in WEEKDAYS}
 

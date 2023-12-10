@@ -95,9 +95,9 @@
         };
       in {
         packages.discord_chan = python.pkgs.buildPythonPackage rec {
+          inherit (pyproject.tool.poetry) version;
           src = ./.;
           pname = "discord_chan";
-          version = pyproject.tool.poetry.version;
           format = "pyproject";
           pythonImportsCheck = [pname];
           nativeBuildInputs = [
@@ -132,6 +132,9 @@
             src = ./.;
             hooks = {
               black.enable = true;
+              alejandra.enable = true;
+              statix.enable = true;
+              typos.enable = true;
             };
           };
         };

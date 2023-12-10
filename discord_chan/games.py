@@ -333,7 +333,7 @@ class SliderGame(menus.Menu):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.board = self.get_board()
-        self.positon = self._find_spacer()
+        self.position = self._find_spacer()
         self._randomize_board()
 
         self.moves = 0
@@ -436,26 +436,26 @@ class SliderGame(menus.Menu):
 
     @property
     def up(self):
-        return self.positon[0] - 1, self.positon[1]
+        return self.position[0] - 1, self.position[1]
 
     @property
     def down(self):
-        return self.positon[0] + 1, self.positon[1]
+        return self.position[0] + 1, self.position[1]
 
     @property
     def right(self):
-        return self.positon[0], self.positon[1] + 1
+        return self.position[0], self.position[1] + 1
 
     @property
     def left(self):
-        return self.positon[0], self.positon[1] - 1
+        return self.position[0], self.position[1] - 1
 
     def move(self, new_position: tuple[int, int]):
         emoji = self.board[new_position[0]][new_position[1]]
 
         self.board[new_position[0]][new_position[1]] = self.SPACER
-        self.board[self.positon[0]][self.positon[1]] = emoji
-        self.positon = new_position
+        self.board[self.position[0]][self.position[1]] = emoji
+        self.position = new_position
 
     def random_move(self):
         new_position = choice([self.up, self.down, self.right, self.left])
