@@ -297,7 +297,7 @@ class PrologPaginator(FixedNonePaginator):
     ):
         """
         :param align_option: How the options should be aligned, uses same
-        symboles as f-strings (<, ^, >). Defaults to >
+        symbols as f-strings (<, ^, >). Defaults to >
         :param align_places: To how many places the header and options should be aligned,
         defaults to 16
         """
@@ -305,11 +305,11 @@ class PrologPaginator(FixedNonePaginator):
         self.align_option = align_option
         self.align_places = align_places
 
-    def recursively_add_dictonary(self, dictonary: dict):
-        for key, value in dictonary.items():
+    def recursively_add_dictionary(self, dictionary: dict):
+        for key, value in dictionary.items():
             if isinstance(value, dict):
                 self.add_header(str(key))
-                self.recursively_add_dictonary(value)
+                self.recursively_add_dictionary(value)
             else:
                 self.add_key_value_pair(str(key), str(value))
 

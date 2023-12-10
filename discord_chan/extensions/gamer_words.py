@@ -654,21 +654,21 @@ class GamerReplacer:
 
         indexes = sorted(indexes, key=lambda l: l[1])
 
-        seperated = list(self.text)
+        separated = list(self.text)
         offset = 0
         for length, start, end in indexes:
             start += offset
             end += offset - 1
 
             replacement = random.choice(CATCHPHRASES)
-            seperated[start : end + 1] = replacement
+            separated[start : end + 1] = replacement
 
             replaced_len = len(replacement)
             offset += replaced_len - length
 
         self.closed = True
 
-        return "".join(seperated)
+        return "".join(separated)
 
 
 class GamerWords(commands.Cog):

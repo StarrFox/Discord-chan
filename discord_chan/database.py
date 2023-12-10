@@ -16,7 +16,7 @@ def get_current_username() -> str:
     return pwd.getpwuid(os.getuid()).pw_name
 
 
-# TODO: add enviorment variables for these
+# TODO: add environment variables for these
 DATABASE_user = get_current_username()
 DATABASE_name = "discord_chan"
 
@@ -286,7 +286,7 @@ class Database:
                     bitcoin_price=row["bitcoin_price"], coins=row["amount"]
                 )
 
-            # explict None for non-existing account
+            # explicit None for non-existing account
             return None
 
     async def set_coin_stake(self, user_id: int, amount: float, bitcoin_price: float):
