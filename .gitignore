@@ -113,3 +113,5 @@ discord_chan.db
 # nix
 result
 .direnv
+
+.pre-commit-config.yaml
