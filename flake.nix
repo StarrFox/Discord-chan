@@ -133,7 +133,6 @@
             hooks = {
               ruff = {
                 enable = true;
-                files = "**/*.py";
               };
             };
           };
