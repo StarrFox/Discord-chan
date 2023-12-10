@@ -5,12 +5,14 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts/";
     nix-systems.url = "github:nix-systems/default";
+    pre-commit-hooks.url = "github:cachix/pre-commit-hooks.nix";
   };
 
   outputs = inputs @ {
     self,
     flake-parts,
     nix-systems,
+    pre-commit-hooks,
     ...
   }:
     flake-parts.lib.mkFlake {inherit inputs;} {
@@ -125,8 +127,18 @@
 
         packages.default = self'.packages.discord_chan;
 
+        checks = {
+          pre-commit-check = pre-commit-hooks.lib.${system}.run {
+            src = ./.;
+            hooks = {
+              ruff.enable = true;
+            };
+          };
+        };
+
         devShells.default = pkgs.mkShell {
           name = "discord_chan";
+          inherit (self'.checks.pre-commit-check) shellHook;
           packages = with pkgs; [
             (poetry.withPlugins (ps: with ps; [poetry-plugin-up]))
             python311
