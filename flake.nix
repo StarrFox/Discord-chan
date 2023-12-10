@@ -24,7 +24,7 @@
         self',
         ...
       }: let
-        python = pkgs.python311;
+        python = pkgs.python312;
 
         pyproject = builtins.fromTOML (builtins.readFile ./pyproject.toml);
 
