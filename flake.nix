@@ -79,9 +79,7 @@
             hash = "sha256-VtOMMzA243SB3148noHWAztQl3OPDRcageJ1ISTw31w=";
           };
           pythonImportsCheck = [pname];
-          nativeBuildInputs = with python.pkgs; [
-            pip
-            # testing inputs
+          nativeCheckInputs = with python.pkgs; [
             line_profiler
             click
             astunparse
@@ -96,6 +94,7 @@
       in {
         packages.discord_chan = python.pkgs.buildPythonPackage rec {
           inherit (pyproject.tool.poetry) version;
+
           src = ./.;
           pname = "discord_chan";
           format = "pyproject";
