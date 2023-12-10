@@ -131,7 +131,6 @@
           pre-commit-check = pre-commit-hooks.lib.${system}.run {
             src = ./.;
             hooks = {
-              ruff.enable = true;
               black.enable = true;
               pyright.enable = true;
             };
