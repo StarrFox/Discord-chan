@@ -132,7 +132,6 @@
             src = ./.;
             hooks = {
               black.enable = true;
-              pyright.enable = true;
             };
           };
         };
