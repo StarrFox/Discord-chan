@@ -92,7 +92,7 @@ async def get_bytes(link: str, *, max_length: int = 100) -> TypedBytes:
 
         if response.content_length > max_length:
             raise FileTooLarge(
-                f"{(response.content_length / 1000) / 1000}mb is over max size of {(max_length / 1000 / 1000)}mb."
+                f"{round((response.content_length / 1000) / 1000, 2)}mb is over max size of {(max_length / 1000 / 1000)}mb."
             )
 
         return TypedBytes(
@@ -107,7 +107,7 @@ async def url_to_image(link: str) -> Image.Image:
     :return: Image representing the image
     :raises InvalidImage, FileTooLarge: PIL could not open the file
     """
-    image_bytes, content_type = await get_bytes(link, max_length=5)
+    image_bytes, content_type = await get_bytes(link, max_length=10)
 
     # TODO: get the exact formats the running PIL supports
     # Check before to try and save some memory
