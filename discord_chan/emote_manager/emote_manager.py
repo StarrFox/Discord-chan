@@ -107,15 +107,6 @@ class EmoteManager(commands.Cog):
 
         return True
 
-    async def cog_command_error(
-        self, context: commands.Context, error: commands.CommandError
-    ):
-        if isinstance(error, errors.EmoteManagerError):
-            await context.send(str(error))
-
-        if isinstance(error, commands.NoPrivateMessage):
-            await context.send("❌ Sorry, this command may only be used in a server.")
-
     @commands.group(invoke_without_command=True)
     async def em(self, context):
         """
