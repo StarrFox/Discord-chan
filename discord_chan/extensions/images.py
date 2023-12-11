@@ -1,4 +1,5 @@
-from typing import Annotated
+from io import BytesIO
+from typing import Annotated, Literal
 
 import discord
 from discord.ext import commands
@@ -76,6 +77,51 @@ class Images(commands.Cog, name="images"):
             file = await discord_chan.image.image_to_file(
                 difference_image, "difference.png"
             )
+
+        await ctx.send(ctx.author.mention, file=file)
+
+    @commands.command(aliases=["gray"])
+    @commands.cooldown(1, 1, commands.cooldowns.BucketType.user)
+    async def grayscale(
+        self,
+        ctx: SubContext,
+        image: Annotated[PilImage, ImageConverter("png")] = LastImage,
+    ):
+        """
+        Make an image grayscale
+        """
+        async with ctx.typing():
+            grayscale_image = await discord_chan.image.grayscale_image(image)
+
+            file = await discord_chan.image.image_to_file(
+                grayscale_image, "grayscale.png"
+            )
+
+        await ctx.send(ctx.author.mention, file=file)
+
+    @commands.command(aliases=["mono"])
+    @commands.cooldown(1, 1, commands.cooldowns.BucketType.user)
+    async def monochromatic(
+        self,
+        ctx: SubContext,
+        image: Annotated[PilImage, ImageConverter("png")] = LastImage,
+        method: Literal["kapur", "otsu", "triangle"] = "kapur",
+    ):
+        """
+        Make an image monochromatic
+        """
+        async with ctx.typing():
+            # TODO: make allow ImageConverter to return wand images
+            buffer = BytesIO()
+            image.save(buffer, "png")
+            buffer.seek(0)
+
+            monochromatic_image = await discord_chan.image.monochomize_image(
+                buffer.read(),
+                method,
+            )
+
+            file = discord.File(monochromatic_image, "monochromatic.png")
 
         await ctx.send(ctx.author.mention, file=file)
 
