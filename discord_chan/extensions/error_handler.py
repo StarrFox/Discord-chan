@@ -3,6 +3,7 @@ import asyncio
 import pendulum
 from discord.ext import commands
 from loguru import logger
+from discord_chan.emote_manager.utils.errors import EmoteManagerError
 
 from discord_chan.utils import to_discord_timestamp
 
@@ -40,8 +41,10 @@ async def on_command_error(ctx: commands.Context, error: Exception):
 
         await asyncio.sleep(error.retry_after)
         await cooldown_message.edit(content="Cooldown over")
-
         return
+
+    elif isinstance(error, EmoteManagerError):
+        return await ctx.send(str(error))
 
     # TODO: find out why this doesn't work
     logger.opt(exception=(type(error), error, error.__traceback__)).error(
