@@ -99,7 +99,8 @@ class Images(commands.Cog, name="images"):
 
         await ctx.send(ctx.author.mention, file=file)
 
-    @commands.command(aliases=["mono"])
+    # TODO: add gif support
+    @commands.group(aliases=["mono"], invoke_without_command=True)
     @commands.cooldown(1, 1, commands.cooldowns.BucketType.user)
     async def monochromatic(
         self,
@@ -124,6 +125,34 @@ class Images(commands.Cog, name="images"):
             file = discord.File(monochromatic_image, "monochromatic.png")
 
         await ctx.send(ctx.author.mention, file=file)
+
+    @monochromatic.command(name="all")
+    @commands.cooldown(1, 10, commands.cooldowns.BucketType.user)
+    async def monochromatic_all(
+        self,
+        ctx: SubContext,
+        image: Annotated[PilImage, ImageConverter("png")] = LastImage,
+    ):
+        """
+        Make an image monochromatic in all methods
+        """
+        async with ctx.typing():
+            files: list[discord.File] = []
+
+            for method in ("kapur", "otsu", "triangle"):
+                # TODO: make allow ImageConverter to return wand images
+                buffer = BytesIO()
+                image.save(buffer, "png")
+                buffer.seek(0)
+
+                monochromatic_image = await discord_chan.image.monochomize_image(
+                    buffer.read(),
+                    method,
+                )
+
+                files.append(discord.File(monochromatic_image, f"{method}.png"))
+
+        await ctx.send(ctx.author.mention, files=files)
 
 
 async def setup(bot: commands.Bot):
