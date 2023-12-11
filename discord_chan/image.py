@@ -11,6 +11,12 @@ from discord import File
 from PIL import Image, ImageChops, ImageSequence
 
 
+try:
+    import wand.image
+except ImportError:
+    wand = None
+
+
 class ImageError(Exception):
     pass
 
@@ -341,3 +347,43 @@ def difference_image(image1: Image.Image, image2: Image.Image) -> Image.Image:
     equalized = equalize_images(*images)
 
     return ImageChops.difference(*equalized)
+
+
+@executor_function
+def grayscale_image(image: Image.Image) -> Image.Image:
+    """Make an Image grayscale
+
+    Args:
+        image: The Image to convert
+
+    Returns:
+        The converted Image
+    """
+    return image.convert("L")
+
+
+@executor_function
+def monochomize_image(image: bytes, method: str = "kapur") -> BytesIO:
+    """Make an image black and white
+
+    Args:
+        image: The Image to convert
+        method: The method to use; one of kapur, otsu, or triangle. Defaults to "kapur".
+
+    Raises:
+        RuntimeError: If wand is not installed
+
+    Returns:
+        The converted Image
+    """
+    if wand is None:
+        raise RuntimeError(
+            "Attempted calling wand using function without wand installed"
+        )
+
+    with wand.image.Image(blob=image) as img:
+        img.auto_threshold(method)  # otsu kapur triangle
+        buffer = BytesIO()
+        img.save(buffer)
+        buffer.seek(0)
+        return buffer
