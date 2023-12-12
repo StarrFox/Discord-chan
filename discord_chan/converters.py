@@ -29,21 +29,24 @@ class ImageFormatConverter(commands.Converter):
 
 
 class BetweenConverter(commands.Converter):
-    def __init__(self, num1: int, num2: int):
-        self.num1 = num1
-        self.num2 = num2
+    def __init__(self, lower_limit: int, upper_limit: int):
+        self.lower_limit = lower_limit
+        self.upper_limit = upper_limit
 
     async def convert(self, ctx: commands.Context, argument: str) -> int:
         try:
             converted_argument = int(argument)
         except ValueError:
             raise commands.BadArgument(f"{argument} is not a valid number.")
-        if self.num1 <= converted_argument <= self.num2:
+        if self.lower_limit <= converted_argument <= self.upper_limit:
             return converted_argument
 
         raise commands.BadArgument(
-            f"{argument} is not between {self.num1} and {self.num2}"
+            f"{argument} is not between {self.lower_limit} and {self.upper_limit}"
         )
+
+    def display(self) -> str:
+        return f"{self.lower_limit}-{self.upper_limit}"
 
 
 class UnderConverter(commands.Converter):
@@ -61,6 +64,9 @@ class UnderConverter(commands.Converter):
 
         raise commands.BadArgument(f"{argument} is not under {self.under}")
 
+    def display(self) -> str:
+        return f"<{self.under}"
+
 
 class OverConverter(commands.Converter):
     def __init__(self, over: int):
@@ -77,6 +83,9 @@ class OverConverter(commands.Converter):
 
         raise commands.BadArgument(f"{argument} is not over {self.over}")
 
+    def display(self) -> str:
+        return f">{self.over}"
+
 
 class MaxLengthConverter(commands.Converter):
     def __init__(self, max_size: int = 2000):
@@ -88,7 +97,11 @@ class MaxLengthConverter(commands.Converter):
 
         raise commands.BadArgument(f"Argument over max size of {self.max_size}")
 
+    def display(self) -> str:
+        return f"<={self.max_size}"
 
+
+# TODO: replace usages with EnumConverter with a weekday enum
 class WeekdayConverter(commands.Converter):
     async def convert(self, ctx: commands.Context, argument: str) -> str:
         converted = str(argument).lower()
@@ -247,6 +260,6 @@ class EmbedConverter(commands.MessageConverter):
         message = await super().convert(ctx, argument)
 
         if not message.embeds:
-            raise commands.BadArgument("Message had no embed.")
+            raise commands.BadArgument("Message had no embed")
 
         return message.embeds[0]
