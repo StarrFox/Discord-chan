@@ -148,7 +148,6 @@
             alejandra
             python.pkgs.black
             python.pkgs.isort
-            python.pkgs.vulture
             python.pkgs.python-lsp-server
             python.pkgs.mypy
           ];
