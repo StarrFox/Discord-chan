@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands
 
 import discord_chan
-from discord_chan import BetweenConverter, SubContext
+from discord_chan import BetweenConverter, SubContext, EnumConverter
 
 
 def is_above(invoker: discord.Member, user: discord.Member):
@@ -37,15 +37,16 @@ class Mod(commands.Cog, name="mod"):
 
     @features.command(name="toggle")
     @discord_chan.checks.guild_owner()
-    async def features_toggle(self, ctx: SubContext, feature_name: str):
+    async def features_toggle(
+        self,
+        ctx: SubContext,
+        feature: typing.Annotated[
+            discord_chan.Feature, EnumConverter(discord_chan.Feature)
+        ],
+    ):
         """
         Toggle a feature
         """
-        try:
-            feature = discord_chan.Feature[feature_name]
-        except KeyError:
-            return await ctx.send(f"{feature_name} is not a valid feature name")
-
         enabled = await self.bot.feature_manager.toggle(feature, ctx.guild.id)
 
         if enabled:
