@@ -1,4 +1,5 @@
 import re
+from enum import Enum
 
 import discord
 from discord.ext import commands
@@ -20,6 +21,22 @@ WEEKDAYS = [
 WEEKDAY_ABBRS = {d.replace("day", ""): d for d in WEEKDAYS}
 
 
+class EnumConverter(commands.Converter):
+    def __init__(self, enum: type[Enum]):
+        self.enum = enum
+        self.names = list(map(lambda variant: variant.name, list(enum)))
+
+    async def convert(self, ctx: commands.Context, argument: str):
+        try:
+            return self.enum[argument]
+        except KeyError:
+            raise commands.BadArgument(f"{argument} is not in {', '.join(self.names)}")
+
+    def display(self) -> str:
+        return ",".join(self.names)
+
+
+# TODO: replace with EnumConverter
 class ImageFormatConverter(commands.Converter):
     async def convert(self, ctx: commands.Context, argument: str) -> str:
         if argument in ("png", "gif", "jpeg", "webp"):
