@@ -26,7 +26,7 @@ os.environ["JISHAKU_RETAIN"] = "true"
 
 
 @click.command()
-@click.option("--debug", is_flag=True, help="Run in debug mode.")
+@click.option("--debug", is_flag=True, help="Run in debug mode")
 @click.option(
     "--secret",
     help="Path to secret file",

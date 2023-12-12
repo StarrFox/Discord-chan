@@ -76,7 +76,7 @@ class General(commands.Cog, name="general"):
         await ctx.channel.purge(
             limit=amount, check=lambda m: m.author.id == ctx.me.id, bulk=can_mass_delete
         )
-        await ctx.confirm("Messages cleaned.")
+        await ctx.confirm("Messages cleaned")
 
     @commands.command(aliases=["avy", "pfp"])
     async def avatar(
@@ -238,7 +238,7 @@ class General(commands.Cog, name="general"):
         try:
             data = await self.bot.http.get_invite(invite.split("/")[-1])
         except discord.errors.NotFound:
-            await ctx.send("Invalid invite.")
+            await ctx.send("Invalid invite")
         else:
             await self.send_raw(ctx, data)
 

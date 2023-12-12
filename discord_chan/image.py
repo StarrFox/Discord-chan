@@ -92,7 +92,7 @@ async def get_bytes(link: str, *, max_length: int = 100) -> TypedBytes:
 
         if response.content_length > max_length:
             raise FileTooLarge(
-                f"{round((response.content_length / 1000) / 1000, 2)}mb is over max size of {(max_length / 1000 / 1000)}mb."
+                f"{round((response.content_length / 1000) / 1000, 2)}mb is over max size of {(max_length / 1000 / 1000)}mb"
             )
 
         return TypedBytes(
@@ -112,7 +112,7 @@ async def url_to_image(link: str) -> Image.Image:
     # TODO: get the exact formats the running PIL supports
     # Check before to try and save some memory
     if "image" not in content_type.lower():
-        raise InvalidImageType(f"{content_type.lower()} is not a valid image type.")
+        raise InvalidImageType(f"{content_type.lower()} is not a valid image type")
 
     file_obj = BytesIO(image_bytes)
 
@@ -124,7 +124,7 @@ async def url_to_image(link: str) -> Image.Image:
         image = await open_image(file_obj)
     except OSError:
         # This should never get here
-        raise InvalidImageType(f"{content_type.lower()} is not a valid image type.")
+        raise InvalidImageType(f"{content_type.lower()} is not a valid image type")
 
     return image
 

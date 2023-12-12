@@ -103,9 +103,9 @@ class Mod(commands.Cog, name="mod"):
             await ctx.guild.fetch_member(member_id)
         except (discord.Forbidden, discord.HTTPException):
             await ctx.guild.ban(discord.Object(id=member_id), reason=reason)
-            return await ctx.confirm("Id hackbanned.")
+            return await ctx.confirm("Id hackbanned")
 
-        await ctx.send("Member is currently in this guild.")
+        await ctx.send("Member is currently in this guild")
 
     @commands.group(
         invoke_without_command=True, aliases=["permission", "perms", "perm"]

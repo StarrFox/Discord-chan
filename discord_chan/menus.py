@@ -121,7 +121,7 @@ class DCMenuPages(menus.MenuPages):
 
     @menus.button("\N{BLACK SQUARE FOR STOP}\ufe0f", skip_if=skip_only_one_page)
     async def stop_pages(self, payload):
-        """stops the pagination session."""
+        """stops the pagination session"""
         await self.message.delete()  # type: ignore
         self.stop()
 

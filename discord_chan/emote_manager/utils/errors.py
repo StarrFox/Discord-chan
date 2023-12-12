@@ -19,17 +19,17 @@ from discord.ext import commands
 
 
 class MissingManageEmojisPermission(commands.MissingPermissions):
-    """The invoker or the bot doesn't have permissions to manage server emojis."""
+    """The invoker or the bot doesn't have permissions to manage server emojis"""
 
     def __init__(self):
         super(Exception, self).__init__(
             "Sorry, you don't have enough permissions to run this command. "
-            "You and I both need the Manage Emojis permission."
+            "You and I both need the Manage Emojis permission"
         )
 
 
 class EmoteManagerError(commands.CommandError):
-    """Generic error with the bot. This can be used to catch all bot errors."""
+    """Generic error with the bot. This can be used to catch all bot errors"""
 
     pass
 
@@ -39,19 +39,19 @@ class ImageProcessingTimeoutError(EmoteManagerError, asyncio.TimeoutError):
 
 
 class ImageResizeTimeoutError(ImageProcessingTimeoutError):
-    """Resizing the image took too long."""
+    """Resizing the image took too long"""
 
     def __init__(self):
-        super().__init__("Error: resizing the image took too long.")
+        super().__init__("Error: resizing the image took too long")
 
 
 class ImageConversionTimeoutError(ImageProcessingTimeoutError):
     def __init__(self):
-        super().__init__("Error: converting the image to a GIF took too long.")
+        super().__init__("Error: converting the image to a GIF took too long")
 
 
 class HTTPException(EmoteManagerError):
-    """The server did not respond with an OK status code."""
+    """The server did not respond with an OK status code"""
 
     def __init__(self, status):
         super().__init__(f"URL error: server returned error code {status}")
@@ -61,7 +61,7 @@ class EmoteNotFoundError(EmoteManagerError):
     """An emote with that name was not found"""
 
     def __init__(self, name):
-        super().__init__(f"An emote called `{name}` does not exist in this server.")
+        super().__init__(f"An emote called `{name}` does not exist in this server")
 
 
 class FileTooBigError(EmoteManagerError):
@@ -71,10 +71,10 @@ class FileTooBigError(EmoteManagerError):
 
 
 class InvalidFileError(EmoteManagerError):
-    """The file is not a zip, tar, GIF, PNG, JPG, or WEBP file."""
+    """The file is not a zip, tar, GIF, PNG, JPG, or WEBP file"""
 
     def __init__(self):
-        super().__init__("Invalid file given.")
+        super().__init__("Invalid file given")
 
 
 class InvalidImageError(InvalidFileError):
@@ -82,7 +82,7 @@ class InvalidImageError(InvalidFileError):
 
     def __init__(self):
         super(Exception, self).__init__(
-            "The image supplied was not a GIF, PNG, JPG, or WEBP file."
+            "The image supplied was not a GIF, PNG, JPG, or WEBP file"
         )
 
 
@@ -90,7 +90,7 @@ class PermissionDeniedError(EmoteManagerError):
     """Raised when a user tries to modify an emote without the Manage Emojis permission"""
 
     def __init__(self, name):
-        super().__init__(f"You're not authorized to modify `{name}`.")
+        super().__init__(f"You're not authorized to modify `{name}`")
 
 
 class DiscordError(Exception):
@@ -98,5 +98,5 @@ class DiscordError(Exception):
 
     def __init__(self):
         super().__init__(
-            "Discord seems to be having issues right now, please try again later."
+            "Discord seems to be having issues right now, please try again later"
         )

@@ -31,7 +31,7 @@ try:
 except (ImportError, OSError):
     wand = None
     logger.warning(
-        "Failed to import wand.image. Image manipulation functions will be unavailable."
+        "Failed to import wand.image. Image manipulation functions will be unavailable"
     )
 
 
@@ -72,7 +72,7 @@ def executor_function(sync_function: typing.Callable):
 
 @executor_function
 def resize_until_small(raw_image_data: bytes) -> bytes:
-    """If the image_data is bigger than 256KB, resize it until it's not."""
+    """If the image_data is bigger than 256KB, resize it until it's not"""
     if wand is None:
         raise RuntimeError("Attempted to use image function without wand")
 

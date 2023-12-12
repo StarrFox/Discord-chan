@@ -25,20 +25,20 @@ class Owner(commands.Cog, name="owner"):
         command = self.bot.get_command(cmd)
 
         if command is None:
-            return await ctx.send("Command not found.")
+            return await ctx.send("Command not found")
 
         command.enabled = True
-        await ctx.confirm("Command enabled.")
+        await ctx.confirm("Command enabled")
 
     @commands.command()
     async def disable(self, ctx: SubContext, *, cmd):
         command = self.bot.get_command(cmd)
 
         if command is None:
-            return await ctx.send("Command not found.")
+            return await ctx.send("Command not found")
 
         command.enabled = False
-        await ctx.confirm("Command disabled.")
+        await ctx.confirm("Command disabled")
 
     @commands.command()
     async def resend_file(self, ctx: SubContext, url: str):

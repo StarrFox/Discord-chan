@@ -30,7 +30,7 @@ class Accessibility(commands.Cog, name="accessibility"):
             )
 
         if not emojis:
-            return await ctx.send("No custom emojis found in message.")
+            return await ctx.send("No custom emojis found in message")
 
         await ctx.send("\n".join([f"{e.name}: <{e.url!s}>" for e in emojis]))
 
