@@ -77,8 +77,8 @@ class DiscordChan(commands.AutoShardedBot):
         extensions_path = root / "extensions"
         await self.load_extensions_from_dir(extensions_path)
 
-        logger.info(f"Logged in as {self.user}.")
-        logger.info(f"Bot ready with {len(self.extensions.keys())} extensions.")
+        logger.info(f"Logged in as {self.user}")
+        logger.info(f"Bot ready with {len(self.extensions.keys())} extensions")
 
     async def load_extensions_from_dir(self, path: str | pathlib.Path) -> int:
         """

@@ -22,7 +22,7 @@ import discord
 
 
 def format_user(bot, id, *, mention=False):
-    """Format a user ID for human readable display."""
+    """Format a user ID for human readable display"""
     user = bot.get_user(id)
     if user is None:
         return f"Unknown user with ID {id}"

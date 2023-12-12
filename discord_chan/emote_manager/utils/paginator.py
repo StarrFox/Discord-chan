@@ -97,7 +97,7 @@ class Paginator:
                 )
 
     async def stop(self, *, delete=None):
-        """Aborts pagination."""
+        """Aborts pagination"""
         if delete is None:
             delete = self.delete_msg
 

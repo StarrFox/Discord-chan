@@ -192,15 +192,15 @@ class MasterMindMenu(menus.Menu):
 
     async def send_initial_message(self, ctx, channel):
         return await ctx.send(
-            f"\n{self.YELLOW_CIRCLE} means the emoji is used in the code but in a different position."
-            f"\n{self.GREEN_CIRCLE} means the emoji is correct and in the correct position."
+            f"\n{self.YELLOW_CIRCLE} means the emoji is used in the code but in a different position"
+            f"\n{self.GREEN_CIRCLE} means the emoji is correct and in the correct position"
             f"\n**Circles are not ordered.**"
-            f"\nCode is 5 emojis."
+            f"\nCode is 5 emojis"
             f"\n\nControls:"
-            f"\n<emoji> enter that emoji in the entry box."
-            f"\n{self.RESEND_ARROW} resend message interface."
-            f"\n{self.LEFT_ARROW} backspace last emoji in entry box."
-            f"\n{self.RETURN_ARROW} enters guess.",
+            f"\n<emoji> enter that emoji in the entry box"
+            f"\n{self.RESEND_ARROW} resend message interface"
+            f"\n{self.LEFT_ARROW} backspace last emoji in entry box"
+            f"\n{self.RETURN_ARROW} enters guess",
         )
 
     @property
@@ -216,13 +216,13 @@ class MasterMindMenu(menus.Menu):
     async def do_entry_button(self, payload):
         if self.position == 5:
             return await self.ctx.send(  # type: ignore
-                f"{self.ctx.author.mention}, Max entry reached.",  # type: ignore
+                f"{self.ctx.author.mention}, Max entry reached",  # type: ignore
                 delete_after=5,
             )
 
         if str(payload.emoji) in self.entry:
             return await self.ctx.send(  # type: ignore
-                f"{self.ctx.author.mention}, No duplicate emojis.",  # type: ignore
+                f"{self.ctx.author.mention}, No duplicate emojis",  # type: ignore
                 delete_after=5,
             )
 
@@ -250,7 +250,7 @@ class MasterMindMenu(menus.Menu):
     async def do_enter(self, _):
         if self.position != 5:
             return await self.ctx.send(  # type: ignore
-                f"{self.ctx.author.mention}, Entry not full.",  # type: ignore
+                f"{self.ctx.author.mention}, Entry not full",  # type: ignore
                 delete_after=5,
             )
 
@@ -422,7 +422,7 @@ class SliderGame(menus.Menu):
 
         if not 0 <= new_position[0] <= 3 or not 0 <= new_position[1] <= 3:
             return await self.ctx.send(  # type: ignore
-                f"{self.ctx.author.mention}, that move is invalid.",  # type: ignore
+                f"{self.ctx.author.mention}, that move is invalid",  # type: ignore
                 allowed_mentions=discord.AllowedMentions(users=True),
                 delete_after=5,
             )

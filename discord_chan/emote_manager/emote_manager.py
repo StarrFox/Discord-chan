@@ -146,7 +146,7 @@ class EmoteManager(commands.Cog):
     @commands.has_permissions(manage_expressions=True)
     @commands.bot_has_permissions(manage_expressions=True)
     async def add_these(self, context: commands.Context, *emotes):
-        """Add a bunch of custom emotes."""
+        """Add a bunch of custom emotes"""
 
         ran = False
         # we could use *emotes: discord.PartialEmoji here but that would require spaces between each emote.
@@ -162,7 +162,7 @@ class EmoteManager(commands.Cog):
                 await context.send(message)
 
         if not ran:
-            return await context.send("Error: no custom emotes were provided.")
+            return await context.send("Error: no custom emotes were provided")
 
         await context.message.add_reaction("✅")
 
@@ -240,7 +240,7 @@ class EmoteManager(commands.Cog):
 
         if not emotes:
             raise commands.BadArgument(
-                "No emotes of that type were found in this server."
+                "No emotes of that type were found in this server"
             )
 
         async with context.typing():
@@ -275,7 +275,7 @@ class EmoteManager(commands.Cog):
             if est_size_in_zip >= filesize_limit:
                 self.bot.loop.create_task(
                     context.send(
-                        f"{emote} could not be added because it alone would exceed the file size limit."
+                        f"{emote} could not be added because it alone would exceed the file size limit"
                     )
                 )
                 return
@@ -326,10 +326,10 @@ class EmoteManager(commands.Cog):
         """
         if url and context.message.attachments:
             raise commands.BadArgument(
-                "Either a URL or an attachment must be given, not both."
+                "Either a URL or an attachment must be given, not both"
             )
         if not url and not context.message.attachments:
-            raise commands.BadArgument("A URL or attachment must be given.")
+            raise commands.BadArgument("A URL or attachment must be given")
 
         url = url or context.message.attachments[0].url
         async with context.typing():
@@ -368,7 +368,7 @@ class EmoteManager(commands.Cog):
                 await context.send(
                     f"{name}: file too big. "
                     f"The limit is {humanize.naturalsize(error.limit)} "
-                    f"but this file is {humanize.naturalsize(error.size)}."
+                    f"but this file is {humanize.naturalsize(error.size)}"
                 )
                 continue
 
@@ -377,7 +377,7 @@ class EmoteManager(commands.Cog):
     async def add_safe(
         self, context: commands.Context, name, url, author_id, *, reason=None
     ):
-        """Try to add an emote. Returns a string that should be sent to the user."""
+        """Try to add an emote. Returns a string that should be sent to the user"""
         try:
             image_data = await self.fetch_safe(url)
         except errors.InvalidFileError:
@@ -390,15 +390,15 @@ class EmoteManager(commands.Cog):
         )
 
     async def fetch_safe(self, url, valid_mimetypes=None, *, validate_headers=False):
-        """Try to fetch a URL. On error return a string that should be sent to the user."""
+        """Try to fetch a URL. On error return a string that should be sent to the user"""
         try:
             return await self.fetch(
                 url, valid_mimetypes=valid_mimetypes, validate_headers=validate_headers
             )
         except asyncio.TimeoutError:
-            return "Error: retrieving the image took too long."
+            return "Error: retrieving the image took too long"
         except ValueError:
-            return "Error: Invalid URL."
+            return "Error: Invalid URL"
         except aiohttp.ClientResponseError as exc:
             raise errors.HTTPException(exc.status)
 
@@ -424,7 +424,7 @@ class EmoteManager(commands.Cog):
             and counts[True] >= context.guild.emoji_limit  # type: ignore
         ):
             # we raise instead of returning a string in order to abort commands that run this function in a loop
-            raise commands.UserInputError("This server is out of emote slots.")
+            raise commands.UserInputError("This server is out of emote slots")
 
         static = utils_image.mime_type_for_image(image_data) != "image/gif"
         converted = False
@@ -440,7 +440,7 @@ class EmoteManager(commands.Cog):
         # I can't be bothered to figure out which it should be
         except (TypeError, ValueError):
             return discord.utils.escape_mentions(
-                f"{name}: The file supplied was not a valid GIF, PNG, JPEG, or WEBP file."
+                f"{name}: The file supplied was not a valid GIF, PNG, JPEG, or WEBP file"
             )
         except discord.HTTPException as ex:
             return discord.utils.escape_mentions(
@@ -448,7 +448,7 @@ class EmoteManager(commands.Cog):
                 + utils.format_http_exception(ex)
             )
         s = f"Emote {emote} successfully created"
-        return s + " as a GIF." if converted else s + "."
+        return s + " as a GIF" if converted else s
 
     # noinspection PyDefaultArgument
     async def fetch(
@@ -504,7 +504,7 @@ class EmoteManager(commands.Cog):
             await emote.delete(
                 reason=f"Removed by {utils.format_user(self.bot, context.author.id)}"
             )
-            await context.send(rf"Emote \:{emote.name}: successfully removed.")
+            await context.send(rf"Emote \:{emote.name}: successfully removed")
         else:
             for emote in (emote,) + emotes:
                 await context.invoke(self.remove, emote)
@@ -571,7 +571,7 @@ class EmoteManager(commands.Cog):
 
     @em.command(aliases=["status"])
     async def stats(self, context):
-        """The current number of animated and static emotes relative to the limits."""
+        """The current number of animated and static emotes relative to the limits"""
         emote_limit = context.guild.emoji_limit
 
         static_emotes = animated_emotes = total_emotes = 0
@@ -599,7 +599,7 @@ class EmoteManager(commands.Cog):
     async def big(self, context: commands.Context, emote):
         """Shows the original image for the given emote.
 
-        emote: the emote to embiggen.
+        emote: the emote to embiggen
         """
         emote = await self.parse_emote(context, emote)
         await context.send(f"{emote.name}: {emote.url}")
@@ -645,7 +645,7 @@ class EmoteManager(commands.Cog):
         try:
             message = await self.bot.wait_for("message", check=check, timeout=30)
         except asyncio.TimeoutError:
-            raise commands.UserInputError("Sorry, you took too long. Try again.")
+            raise commands.UserInputError("Sorry, you took too long. Try again")
 
         return candidates[int(message.content) - 1]
 

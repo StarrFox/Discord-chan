@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 class CogNotLoaded(commands.CheckFailure):
     def __init__(self, cog_name: str):
-        super().__init__(f"{cog_name} is not loaded.")
+        super().__init__(f"{cog_name} is not loaded")
 
 
 def cog_loaded(cog_name: str):
