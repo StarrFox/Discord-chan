@@ -21,7 +21,7 @@ discord-ext-menus = {git = "https://github.com/Rapptz/discord-ext-menus"}
 pendulum = "^2.1.2"
 asyncpg = "^0.29.0"
 parsedatetime = "^2.6"
-typing-extensions = "^4.8.0"
+typing-extensions = "^4.9.0"
 
 [tool.poetry.scripts]
 discord_chan = "discord_chan.__main__:main"
