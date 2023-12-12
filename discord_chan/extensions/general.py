@@ -70,7 +70,6 @@ class General(commands.Cog, name="general"):
     ):
         """
         Delete's the bot's last <amount> message(s)
-        amount must be between 1 and 100, defaulting to 10
         """
         can_mass_delete = ctx.channel.permissions_for(ctx.me).manage_messages
 

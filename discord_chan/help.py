@@ -105,21 +105,26 @@ class Minimal(commands.MinimalHelpCommand):
 
         if not is_flag:
 
-            def _get_converter_name(converter) -> str:
+            def _get_converter_display(converter) -> str:
                 if inspect.isclass(converter):
                     return converter.__name__
                 else:
                     # instance
+                    if hasattr(converter, "display"):
+                        if callable(converter.display):
+                            return converter.display()
+
                     return converter.__class__.__name__
 
             if origin is Union:
                 converter_type = "|".join(
-                    _get_converter_name(arg)
+                    _get_converter_display(arg)
                     for arg in annotation.__args__
                     if arg is not None
                 )
+
             else:
-                converter_type = _get_converter_name(annotation)
+                converter_type = _get_converter_display(annotation)
         else:
             converter_type = "Flags"
 
