@@ -1,5 +1,5 @@
 import re
-from enum import Enum
+from enum import Enum, StrEnum
 
 import discord
 from discord.ext import commands
@@ -8,17 +8,29 @@ from PIL.Image import Image
 from . import utils
 from .image import FileTooLarge, InvalidImageType, url_to_image
 
-WEEKDAYS = [
-    "monday",
-    "tuesday",
-    "wednesday",
-    "thursday",
-    "friday",
-    "saturday",
-    "sunday",
-]
 
-WEEKDAY_ABBRS = {d.replace("day", ""): d for d in WEEKDAYS}
+class Weekday(StrEnum):
+    monday = "monday"
+    tuesday = "tuesday"
+    wednesday = "wednesday"
+    thursday = "thursday"
+    friday = "friday"
+    saturday = "saturday"
+    sunday = "sunday"
+
+    mon = monday
+    tues = tuesday
+    wed = wednesday
+    thurs = thursday
+    sat = saturday
+    sun = sunday
+
+
+class ImageFormat(StrEnum):
+    png = "png"
+    gif = "gif"
+    jpeg = "jpeg"
+    webp = "webp"
 
 
 class EnumConverter(commands.Converter):
@@ -36,13 +48,8 @@ class EnumConverter(commands.Converter):
         return ",".join(self.names)
 
 
-# TODO: replace with EnumConverter
-class ImageFormatConverter(commands.Converter):
-    async def convert(self, ctx: commands.Context, argument: str) -> str:
-        if argument in ("png", "gif", "jpeg", "webp"):
-            return argument
-        else:
-            raise commands.BadArgument(f"{argument} is not a valid image format.")
+WeekdayConverter = EnumConverter(Weekday)
+ImageFormatConverter = EnumConverter(ImageFormat)
 
 
 class BetweenConverter(commands.Converter):
@@ -54,7 +61,7 @@ class BetweenConverter(commands.Converter):
         try:
             converted_argument = int(argument)
         except ValueError:
-            raise commands.BadArgument(f"{argument} is not a valid number.")
+            raise commands.BadArgument(f"{argument} is not a valid number")
         if self.lower_limit <= converted_argument <= self.upper_limit:
             return converted_argument
 
@@ -118,20 +125,6 @@ class MaxLengthConverter(commands.Converter):
         return f"<={self.max_size}"
 
 
-# TODO: replace usages with EnumConverter with a weekday enum
-class WeekdayConverter(commands.Converter):
-    async def convert(self, ctx: commands.Context, argument: str) -> str:
-        converted = str(argument).lower()
-
-        if converted in WEEKDAYS:
-            return converted
-
-        if converted in WEEKDAY_ABBRS:
-            return WEEKDAY_ABBRS[converted]
-
-        raise commands.BadArgument(f"{argument} is not a valid weekday.")
-
-
 class BotConverter(commands.Converter):
     async def convert(self, ctx: commands.Context, argument: str) -> discord.Member:
         member = await commands.MemberConverter().convert(ctx, argument)
@@ -139,7 +132,7 @@ class BotConverter(commands.Converter):
         if member.bot:
             return member
 
-        raise commands.BadArgument("That is not a bot.")
+        raise commands.BadArgument("That member is not a bot")
 
 
 class ImageUrlConverter(commands.Converter):
@@ -190,7 +183,7 @@ class ImageUrlConverter(commands.Converter):
                     # .url should always be set in this case
                     return embed.image.url  # type: ignore
 
-            raise commands.BadArgument("Message has no attachments/embed images.")
+            raise commands.BadArgument("Message has no attachments/embed images")
 
         try:
             emoji = await commands.PartialEmojiConverter().convert(ctx, argument)
@@ -246,6 +239,7 @@ LastImageUrl = commands.parameter(
 )
 
 
+# TODO: add support for wand images
 class ImageConverter(ImageUrlConverter):
     async def convert(self, ctx: commands.Context, argument: str) -> Image:
         url = await super().convert(ctx, argument)
