@@ -5,10 +5,12 @@ from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 from tarfile import TarFile, TarInfo
 from typing import NamedTuple, ParamSpec, TypeVar
+import operator
+import random
 
 import aiohttp
 from discord import File
-from PIL import Image, ImageChops, ImageSequence
+from PIL import Image, ImageChops, ImageSequence, ImagePalette
 
 
 try:
@@ -27,6 +29,18 @@ class FileTooLarge(ImageError):
 
 class InvalidImageType(ImageError):
     pass
+
+
+SIMPLE_COLORS: dict[str, tuple[int, int, int]] = {
+    "red": (0xFF, 0, 0),
+    "green": (0, 0xFF, 0),
+    "blue": (0, 0, 0xFF),
+    "orange": (0xFF, 0xA5, 0),
+    "brown": (0x96, 0x4B, 0),
+    "yellow": (0xFF, 0xFF, 0),
+    "purple": (0xA0, 0x20, 0xF0),
+    "pink": (0xFF, 0xC0, 0xCB),
+}
 
 
 T = TypeVar("T")
@@ -387,3 +401,68 @@ def monochomize_image(image: bytes, method: str = "kapur") -> BytesIO:
         img.save(buffer)
         buffer.seek(0)
         return buffer
+
+
+@executor_function
+def get_image_colors(image: Image.Image) -> dict[float, tuple[int, int, int, int]]:
+    # TODO: is this ever rgb?
+    if image.mode != "RGBA":
+        raise ValueError("Non-rgb image passed to get colors")
+
+    image = image.quantize()
+
+    # palette_index: RGBA
+    palette: dict[int, tuple[int, int, int, int]] = {
+        v: k for k, v in image.palette.colors.items()
+    }
+
+    colors: list[tuple[int, int, int]] | None = image.getcolors()  # type: ignore (we have the correct type)
+
+    if colors is None:
+        # This shouldn't happen because of the quantize
+        raise RuntimeError("Colors was somehow None")
+
+    total_pixels: int = operator.mul(*image.size)
+
+    percented_colors = map(lambda color: (color[0] / total_pixels, *color[1:]), colors)
+    sorted_colors = sorted(percented_colors, key=lambda x: x[0], reverse=True)
+
+    # percent: RGBA
+    color_map: dict[float, tuple[int, int, int, int]] = {
+        k: palette[v] for k, v in sorted_colors
+    }
+
+    return color_map
+
+
+# def _get_random_color() -> tuple[int, int, int]:
+#     return (
+#         random.randrange(0, 255),
+#         random.randrange(0, 255),
+#         random.randrange(0, 255)
+#     )
+
+
+# @executor_function
+# def randomize_image_colors(image: Image.Image):
+#     if image.mode == "RGBA":
+#         image = image.quantize()
+
+#     if image.mode != "P":
+#         raise RuntimeError("Non-P image in randomize colors")
+
+#     colors = image.palette.colors
+
+#     new_colors: dict[tuple[int, int, int, int], int] = {}
+#     for index in range(len(colors)):
+#         new_colors[(*_get_random_color(), 255)] = index
+
+#     image.palette.colors = new_colors
+
+#     #print(image.palette.getdata())
+
+#     image.putpalette(ImagePalette.random("P"))
+
+#     image.show()
+
+#     return image

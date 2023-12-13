@@ -7,6 +7,7 @@ from PIL.Image import Image as PilImage
 
 import discord_chan
 from discord_chan import BetweenConverter, ImageConverter, LastImage, SubContext
+from discord_chan.menus import DCMenuPages, NormalPageSource
 
 
 class Images(commands.Cog, name="images"):
@@ -153,6 +154,27 @@ class Images(commands.Cog, name="images"):
                 files.append(discord.File(monochromatic_image, f"{method}.png"))
 
         await ctx.send(ctx.author.mention, files=files)
+
+    @commands.group(invoke_without_command=True)
+    async def colors(
+        self,
+        ctx: SubContext,
+        image: Annotated[PilImage, ImageConverter("png")] = LastImage,
+    ):
+        """
+        View the colors of an image
+        """
+        colors = await discord_chan.image.get_image_colors(image)
+
+        entries: list[str] = []
+
+        for percent, color in colors.items():
+            entries.append(f"{round(percent * 100, 3)}%: RGBA{color}")
+
+        source = NormalPageSource(entries, per_page=10)
+        menu = DCMenuPages(source)
+
+        await menu.start(ctx)
 
 
 async def setup(bot: commands.Bot):
