@@ -6,7 +6,7 @@ from io import BytesIO
 from tarfile import TarFile, TarInfo
 from typing import NamedTuple, ParamSpec, TypeVar
 import operator
-import random
+import re
 
 import aiohttp
 from discord import File
@@ -114,6 +114,24 @@ async def get_bytes(link: str, *, max_length: int = 100) -> TypedBytes:
         )
 
 
+_tenor_regex = re.compile(r'class="Gif"[^<]+<img src="([^"]+)"')
+
+
+async def _get_inner_tenor_gif(link: str) -> str:
+    async with aiohttp.ClientSession() as session:
+        async with session.get(link) as response:
+            response.raise_for_status()
+
+            text = await response.text()
+
+    regex_match = _tenor_regex.search(text)
+
+    if regex_match is None:
+        raise InvalidImageType("Could not find any gifs in tenor link")
+
+    return regex_match.group(1)
+
+
 async def url_to_image(link: str) -> Image.Image:
     """
     Convence function to convert a link to a PIL Image
@@ -121,6 +139,9 @@ async def url_to_image(link: str) -> Image.Image:
     :return: Image representing the image
     :raises InvalidImage, FileTooLarge: PIL could not open the file
     """
+    if link.startswith("https://tenor.com/"):
+        link = await _get_inner_tenor_gif(link)
+
     image_bytes, content_type = await get_bytes(link, max_length=10)
 
     # TODO: get the exact formats the running PIL supports
