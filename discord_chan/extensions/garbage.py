@@ -19,11 +19,44 @@ class Garbage(commands.Cog):
         if message.guild is None:
             return
 
+        # wizspoil
         if message.guild.id != 1015677559020724264:
             return
 
+        # anti-olaf
         if len(list(loli_filter.finditer(message.content))) > 0:
-            await message.delete()
+            return await message.delete()
+
+        content = message.content.lower()
+
+        # anti-vale
+        if any(
+            [
+                "starr" in content and "furry" in content,
+                "fox" in content and "furry" in content,
+            ]
+        ):
+            if content == "starr is not a furry":
+                return
+
+            owner_check: bool = (message.author.id == self.bot.owner_id) if self.bot.owner_id is not None else (message.author.id in self.bot.owner_ids)  # type: ignore
+
+            if owner_check:
+                return
+
+            if not isinstance(message.channel, discord.TextChannel):
+                return
+
+            try:
+                hook = (await message.channel.webhooks())[0]
+            except IndexError:
+                hook = await message.channel.create_webhook(name="GamerHook")
+
+            return await hook.send(
+                f"I'm a furry",
+                avatar_url=message.author.display_avatar.url,
+                username=message.author.display_name,
+            )
 
 
 async def setup(bot: discord_chan.DiscordChan):
