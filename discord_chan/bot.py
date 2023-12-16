@@ -1,4 +1,5 @@
 import pathlib
+import typing
 from datetime import datetime
 
 import discord
@@ -28,7 +29,7 @@ class DiscordChan(commands.AutoShardedBot):
             ),
             activity=discord.Activity(
                 type=discord.ActivityType.listening,
-                name="sf/help",
+                name=f"{DEFAULT_PREFIXES[0]}help",
             ),
             intents=kwargs.pop("intents", discord.Intents.all()),
             **kwargs,
@@ -40,6 +41,44 @@ class DiscordChan(commands.AutoShardedBot):
         self.feature_manager = FeatureManager(self.database)
 
         self.add_check(self.direct_message_check)
+
+    @property
+    def owners_mention(self) -> str:
+        if self.owner_ids is not None:
+            return " ".join(f"<@{id_}>" for id_ in self.owner_ids)
+
+        if self.owner_id is not None:
+            return f"<@{self.owner_id}>"
+
+        raise ValueError("No owner to mention")
+
+    @typing.overload
+    def owners(self, as_users: typing.Literal[False]) -> typing.Iterable[int]:
+        ...
+
+    @typing.overload
+    def owners(self, as_users: typing.Literal[True]) -> typing.Iterable[discord.User]:
+        ...
+
+    @typing.overload
+    def owners(self) -> typing.Iterable[int]:
+        ...
+
+    def owners(self, as_users: bool = False) -> typing.Iterable:
+        if self.owner_ids is not None:
+            owners = self.owner_ids
+
+        else:
+            assert (
+                self.owner_id is not None
+            ), "owner_id somehow None when missing owner_ids"
+            owners = [self.owner_id]
+
+        if not as_users:
+            return owners
+
+        # this should work even without intents
+        return [self.get_user(id_) for id_ in owners]
 
     def get_message(self, message_id: int) -> discord.Message | None:
         """
@@ -119,7 +158,7 @@ class DiscordChan(commands.AutoShardedBot):
         prefixes = DEFAULT_PREFIXES
 
         if self.debug_mode:
-            prefixes.append("dg/")
+            prefixes = ["dg/"]
 
         return commands.when_mentioned_or(*prefixes)(self, message)
 
