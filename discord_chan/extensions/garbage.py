@@ -39,9 +39,7 @@ class Garbage(commands.Cog):
             if content == "starr is not a furry":
                 return
 
-            owner_check: bool = (message.author.id == self.bot.owner_id) if self.bot.owner_id is not None else (message.author.id in self.bot.owner_ids)  # type: ignore
-
-            if owner_check:
+            if await self.bot.is_owner(message.author):
                 return
 
             if not isinstance(message.channel, discord.TextChannel):
