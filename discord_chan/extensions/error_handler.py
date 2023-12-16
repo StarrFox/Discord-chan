@@ -1,14 +1,16 @@
 import asyncio
 
+import discord
 import pendulum
 from discord.ext import commands
 from loguru import logger
-from discord_chan.emote_manager.utils.errors import EmoteManagerError
 
+from discord_chan import DiscordChan, SubContext
+from discord_chan.emote_manager.utils.errors import EmoteManagerError
 from discord_chan.utils import to_discord_timestamp
 
 
-async def on_command_error(ctx: commands.Context, error: Exception):
+async def on_command_error(ctx: SubContext, error: Exception):
     error = getattr(error, "original", error)
 
     if isinstance(error, commands.CommandNotFound):
@@ -46,17 +48,19 @@ async def on_command_error(ctx: commands.Context, error: Exception):
     elif isinstance(error, EmoteManagerError):
         return await ctx.send(str(error))
 
-    # TODO: find out why this doesn't work
     logger.opt(exception=(type(error), error, error.__traceback__)).error(
         f"Unhandled error in command {ctx.command} Invoke message: {ctx.message.content}"
     )
 
-    await ctx.send(f"Unknown error while executing {ctx.command}: {error}")
+    await ctx.send(
+        f"{ctx.bot.owners_mention} Unknown error while executing {ctx.command}: {error}",
+        allowed_mentions=discord.AllowedMentions(users=ctx.bot.owners(as_users=True)),  # type: ignore (User has .id)
+    )
 
 
-async def setup(bot: commands.Bot):
+async def setup(bot: DiscordChan):
     bot.add_listener(on_command_error)
 
 
-async def teardown(bot: commands.Bot):
+async def teardown(bot: DiscordChan):
     bot.remove_listener(on_command_error)

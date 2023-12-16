@@ -21,6 +21,10 @@ class Owner(commands.Cog, name="owner"):
         return True
 
     @commands.command()
+    async def error(self, ctx: SubContext):
+        raise Exception("test error")
+
+    @commands.command()
     async def enable(self, ctx: SubContext, *, cmd):
         command = self.bot.get_command(cmd)
 
