@@ -44,45 +44,54 @@ class DiscordChan(commands.AutoShardedBot):
         self.database = Database()
         self.feature_manager = FeatureManager(self.database)
 
+        self._owners_cache: int | list[int] | None = None
+
         self.add_check(self.direct_message_check)
 
-    @property
-    def owners_mention(self) -> str:
-        if self.owner_ids is not None:
-            return " ".join(f"<@{id_}>" for id_ in self.owner_ids)
+    async def _get_owners(self) -> int | list[int]:
+        if self._owners_cache is not None:
+            return self._owners_cache
 
-        if self.owner_id is not None:
-            return f"<@{self.owner_id}>"
+        application_info = await self.application_info()
 
-        raise ValueError("No owner to mention")
-
-    @typing.overload
-    def owners(self, as_users: typing.Literal[False]) -> typing.Iterable[int]:
-        ...
-
-    @typing.overload
-    def owners(self, as_users: typing.Literal[True]) -> typing.Iterable[discord.User]:
-        ...
-
-    @typing.overload
-    def owners(self) -> typing.Iterable[int]:
-        ...
-
-    def owners(self, as_users: bool = False) -> typing.Iterable:
-        if self.owner_ids is not None:
-            owners = self.owner_ids
-
+        if application_info.team:
+            self._owners_cache = [m.id for m in application_info.team.members]
         else:
-            assert (
-                self.owner_id is not None
-            ), "owner_id somehow None when missing owner_ids"
-            owners = [self.owner_id]
+            self._owners_cache = application_info.owner.id
 
-        if not as_users:
-            return owners
+        return self._owners_cache
 
-        # this should work even without intents
-        return [self.get_user(id_) for id_ in owners]
+    async def owners_mention(self) -> str:
+        owners = await self.owners(as_users=True)
+        return " ".join(o.mention for o in owners)
+
+    @typing.overload
+    async def owners(self, as_users: typing.Literal[False]) -> typing.Iterable[int]:
+        ...
+
+    @typing.overload
+    async def owners(
+        self, as_users: typing.Literal[True]
+    ) -> typing.Iterable[discord.User]:
+        ...
+
+    @typing.overload
+    async def owners(self) -> typing.Iterable[int]:
+        ...
+
+    async def owners(self, as_users: bool = False) -> typing.Iterable:
+        owners_or_owner = await self._get_owners()
+
+        if isinstance(owners_or_owner, int):
+            owners = [owners_or_owner]
+        else:
+            owners = owners_or_owner
+
+        if as_users:
+            # this should work even without intents
+            return [self.get_user(id_) for id_ in owners]
+
+        return owners
 
     def get_message(self, message_id: int) -> discord.Message | None:
         """

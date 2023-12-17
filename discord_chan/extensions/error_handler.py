@@ -53,8 +53,8 @@ async def on_command_error(ctx: SubContext, error: Exception):
     )
 
     await ctx.send(
-        f"{ctx.bot.owners_mention} Unknown error while executing {ctx.command}: {error}",
-        allowed_mentions=discord.AllowedMentions(users=ctx.bot.owners(as_users=True)),  # type: ignore (User has .id)
+        f"{await ctx.bot.owners_mention()} Unknown error while executing {ctx.command}: {error}",
+        allowed_mentions=discord.AllowedMentions(users=await ctx.bot.owners(as_users=True)),  # type: ignore (User has .id)
     )
 
 
