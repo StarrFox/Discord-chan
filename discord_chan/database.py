@@ -165,7 +165,9 @@ class Database:
 
     # user_id: unique words
     async def get_word_track_unique_word_leaderboard(
-        self, *, server_id: int | None = None
+        self,
+        *,
+        server_id: int | None = None,
     ):
         pool = await self.connect()
 
@@ -189,6 +191,37 @@ class Database:
 
         for record in records:
             result.append((record["author"], record["count"]))
+
+        return result
+
+    # user_id: total words
+    async def get_word_track_total_word_leaderboard(
+        self,
+        *,
+        server_id: int | None = None,
+    ):
+        pool = await self.connect()
+
+        params = []
+
+        if server_id is not None:
+            server_clause = "WHERE server = $1"
+            params.append(server_id)
+        else:
+            server_clause = ""
+
+        async with pool.acquire() as connection:
+            connection: asyncpg.Connection
+
+            records: list[asyncpg.Record] = await connection.fetch(
+                f"SELECT author, sum(count) FROM word_track {server_clause} GROUP BY author ORDER BY sum DESC;",
+                *params,
+            )
+
+        result: list[tuple[int, int]] = []
+
+        for record in records:
+            result.append((record["author"], record["sum"]))
 
         return result
 

@@ -232,6 +232,29 @@ class WordTrack(commands.Cog):
 
         await menu.start(ctx)
 
+    # TODO: combine this and unique
+    @words_command.command(name="total")
+    async def words_total(self, ctx: SubContext):
+        total_leaderboard = (
+            await self.bot.database.get_word_track_total_word_leaderboard(
+                server_id=ctx.guild.id
+            )
+        )
+
+        if len(total_leaderboard) == 0:
+            return await ctx.send("Total leaderboard is empty")
+
+        entries: list[str] = []
+
+        for user_id, count in total_leaderboard:
+            user_name = await self.get_member_reference(ctx, user_id)
+            entries.append(f"{user_name}: {count}")
+
+        source = NormalPageSource(entries, per_page=10)
+        menu = DCMenuPages(source)
+
+        await menu.start(ctx)
+
 
 async def setup(bot: DiscordChan):
     await bot.add_cog(WordTrack(bot))
