@@ -163,6 +163,35 @@ class Database:
 
         return result
 
+    # user_id: unique words
+    async def get_word_track_unique_word_leaderboard(
+        self, *, server_id: int | None = None
+    ):
+        pool = await self.connect()
+
+        params = []
+
+        if server_id is not None:
+            server_clause = "WHERE server = $1"
+            params.append(server_id)
+        else:
+            server_clause = ""
+
+        async with pool.acquire() as connection:
+            connection: asyncpg.Connection
+
+            records: list[asyncpg.Record] = await connection.fetch(
+                f"SELECT author, count(word) FROM word_track {server_clause} GROUP BY author ORDER BY count DESC;",
+                *params,
+            )
+
+        result: list[tuple[int, int]] = []
+
+        for record in records:
+            result.append((record["author"], record["count"]))
+
+        return result
+
     async def get_guild_enabled_features(self, guild_id: int) -> list[str]:
         pool = await self.connect()
 
