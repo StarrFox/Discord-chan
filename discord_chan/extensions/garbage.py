@@ -2,6 +2,7 @@ import re
 
 import discord
 from discord.ext import commands
+from loguru import logger
 
 import discord_chan
 
@@ -29,6 +30,8 @@ class Garbage(commands.Cog):
 
         content = message.content.lower()
 
+        logger.debug("before anti-vale")
+
         # anti-vale
         if any(
             [
@@ -45,9 +48,14 @@ class Garbage(commands.Cog):
             if not isinstance(message.channel, discord.TextChannel):
                 return
 
-            try:
-                hook = (await message.channel.webhooks())[0]
-            except IndexError:
+            hook: discord.Webhook | None = None
+
+            for maybe_hook in await message.channel.webhooks():
+                if maybe_hook.token is not None:
+                    hook = maybe_hook
+                    break
+
+            if hook is None:
                 hook = await message.channel.create_webhook(name="GamerHook")
 
             return await hook.send(
