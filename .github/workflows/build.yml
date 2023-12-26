@@ -25,4 +25,4 @@ jobs:
           with:
             name: starrfox
             authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-        - run: nix build
+        - run: nix build --print-build-logs
