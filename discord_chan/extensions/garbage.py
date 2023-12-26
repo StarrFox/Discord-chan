@@ -2,7 +2,6 @@ import re
 
 import discord
 from discord.ext import commands
-from loguru import logger
 
 import discord_chan
 
@@ -29,8 +28,6 @@ class Garbage(commands.Cog):
             return await message.delete()
 
         content = message.content.lower()
-
-        logger.debug("before anti-vale")
 
         # anti-vale
         if any(
