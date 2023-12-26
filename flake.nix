@@ -2,7 +2,7 @@
   description = "discord chan chat bot";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/staging";
     flake-parts.url = "github:hercules-ci/flake-parts/";
     nix-systems.url = "github:nix-systems/default";
     pre-commit-hooks.url = "github:cachix/pre-commit-hooks.nix";
@@ -24,7 +24,17 @@
         self',
         ...
       }: let
-        python = pkgs.python312;
+        #python = pkgs.python312;
+        python = pkgs.python312.override {
+          packageOverrides = python-self: python-super: {
+            aiohttp =
+              (python-super.aiohttp.overrideAttrs {
+                doCheck = false;
+                nativeCheckInputs = [];
+              })
+              .override {python-on-whales = null;};
+          };
+        };
 
         pyproject = builtins.fromTOML (builtins.readFile ./pyproject.toml);
 
