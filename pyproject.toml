@@ -29,7 +29,7 @@ discord_chan = "discord_chan.__main__:main"
 
 [tool.poetry.group.images.dependencies]
 wand = "^0.6.11"
-pillow = "^10.1.0"
+pillow = "^10.2.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
