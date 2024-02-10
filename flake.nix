@@ -28,6 +28,18 @@
 
         pyproject = builtins.fromTOML (builtins.readFile ./pyproject.toml);
 
+        loguru-logging-intercept = python.pkgs.buildPythonPackage rec {
+          pname = "loguru-logging-intercept";
+          version = "0.1.4";
+          format = "setuptools";
+          src = python.pkgs.fetchPypi {
+            inherit pname version;
+            hash = "sha256-ORPBqXtQdMqK0v6n+lBFbLUPR2SEpCpvj8w2KlBjAGQ=";
+          };
+          pythonImportsCheck = ["loguru_logging_intercept"];
+          propagatedBuildInputs = with python.pkgs; [loguru];
+        };
+
         discord-ext-menus = python.pkgs.buildPythonPackage {
           pname = "discord-ext-menus";
           version = "1.0.0a0";
@@ -119,6 +131,7 @@
             uvloop
             psutil
             typing-extensions
+            loguru-logging-intercept
           ];
 
           meta.mainProgram = "discord_chan";

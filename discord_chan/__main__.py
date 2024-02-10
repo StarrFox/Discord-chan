@@ -6,9 +6,9 @@ from pathlib import Path
 
 import click
 from loguru import logger
+from loguru_logging_intercept import setup_loguru_logging_intercept
 
 import discord_chan
-from discord_chan.utils import InterceptHandler
 
 # only works on linux
 try:
@@ -34,13 +34,18 @@ os.environ["JISHAKU_RETAIN"] = "true"
     default="discord_token.secret",
 )
 def main(debug: bool, secret: Path):
-    # noinspection PyArgumentList
-    logging.basicConfig(handlers=[InterceptHandler()], level=0)
+    setup_loguru_logging_intercept(
+        level=logging.DEBUG,
+        modules=("discord"),
+    )
+
+    # the logging module is so garbage
+    logging.getLogger("discord.client").setLevel(logging.WARNING)
+    logging.getLogger("discord.gateway").setLevel(logging.WARNING)
 
     logger.remove()
     logger.enable("discord_chan")
     logger.add(sys.stderr, level="INFO", filter="discord_chan")
-    logger.add(sys.stderr, level="ERROR", filter="discord")
 
     if debug:
         asyncio.get_event_loop().set_debug(True)
