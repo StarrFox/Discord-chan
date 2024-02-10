@@ -351,11 +351,14 @@ class EmoteManager(commands.Cog):
         async for name, img, error in utils.archive.extract_async(
             io.BytesIO(archive), size_limit=limit
         ):
-            try:
-                utils_image.mime_type_for_image(img)
-            except errors.InvalidImageError:
-                continue
             if error is None:
+                # img should be set if error is not set
+                assert img is not None
+                try:
+                    utils_image.mime_type_for_image(img)
+                except errors.InvalidImageError:
+                    continue
+
                 name = self.format_emote_filename(posixpath.basename(name))
                 async with context.typing():
                     # we can ignore the type here because content should be set if error is None

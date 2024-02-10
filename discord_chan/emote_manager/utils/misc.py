@@ -16,12 +16,14 @@
 """various utilities for use within the bot"""
 
 import asyncio
+from typing import Awaitable
 
 import aiohttp
 import discord
+from discord.ext import commands
 
 
-def format_user(bot, id, *, mention=False):
+def format_user(bot: commands.Bot, id: int, *, mention: bool = False):
     """Format a user ID for human readable display"""
     user = bot.get_user(id)
     if user is None:
@@ -57,7 +59,7 @@ def format_http_exception(exception: discord.HTTPException):
     )
 
 
-def strip_angle_brackets(string):
+def strip_angle_brackets(string: str):
     """Strip leading < and trailing > from a string.
     Useful if a user sends you a url like <this> to avoid embeds, or to convert emotes to reactions.
     """
@@ -66,7 +68,7 @@ def strip_angle_brackets(string):
     return string
 
 
-async def gather_or_cancel(*awaitables, loop=None):
+async def gather_or_cancel(*awaitables: Awaitable):
     """run the awaitables in the sequence concurrently. If any of them raise an exception,
     propagate the first exception raised and cancel all other awaitables.
     """

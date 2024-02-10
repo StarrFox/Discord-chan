@@ -147,7 +147,7 @@ def convert_to_gif(raw_image_data: bytes) -> bytes:
         return image_data.read()
 
 
-def mime_type_for_image(data):
+def mime_type_for_image(data: bytes):
     if data.startswith(b"\x89PNG\r\n\x1a\n"):
         return "image/png"
     if data.startswith(b"\xFF\xD8") and data.rstrip(b"\0").endswith(b"\xFF\xD9"):
@@ -159,14 +159,14 @@ def mime_type_for_image(data):
     raise errors.InvalidImageError
 
 
-def image_to_base64_url(data):
+def image_to_base64_url(data: bytes):
     fmt = "data:{mime};base64,{data}"
     mime = mime_type_for_image(data)
     b64 = base64.b64encode(data).decode("ascii")
     return fmt.format(mime=mime, data=b64)
 
 
-def size(fp):
+def size(fp: io.IOBase):
     """return the size, in bytes, of the data a file-like object represents"""
     with preserve_position(fp):
         fp.seek(0, io.SEEK_END)
@@ -174,9 +174,9 @@ def size(fp):
 
 
 class preserve_position(contextlib.AbstractContextManager):
-    def __init__(self, fp):
+    def __init__(self, fp: io.IOBase):
         self.fp = fp
         self.old_pos = fp.tell()
 
-    def __exit__(self, *excinfo):
+    def __exit__(self, *_):
         self.fp.seek(self.old_pos)

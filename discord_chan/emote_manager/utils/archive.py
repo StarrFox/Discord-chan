@@ -18,6 +18,7 @@ import tarfile
 import zipfile
 from collections.abc import AsyncGenerator, Generator, Iterable
 from typing import NamedTuple
+from io import BytesIO
 
 from . import errors
 
@@ -28,7 +29,9 @@ class ArchiveInfo(NamedTuple):
     error: Exception | None
 
 
-def extract(archive, *, size_limit=None) -> Iterable[ArchiveInfo]:
+def extract(
+    archive: BytesIO, *, size_limit: int | None = None
+) -> Iterable[ArchiveInfo]:
     """
     extract a binary file-like object representing a zip or uncompressed tar archive, yielding filenames and contents.
 
@@ -53,7 +56,9 @@ def extract(archive, *, size_limit=None) -> Iterable[ArchiveInfo]:
         archive.seek(0)
 
 
-def extract_zip(archive, *, size_limit=None) -> Generator[ArchiveInfo, object, None]:
+def extract_zip(
+    archive: BytesIO, *, size_limit: int | None = None
+) -> Generator[ArchiveInfo, object, None]:
     with zipfile.ZipFile(archive) as zip:
         members = [m for m in zip.infolist() if not m.is_dir()]
         for member in members:
@@ -73,7 +78,9 @@ def extract_zip(archive, *, size_limit=None) -> Generator[ArchiveInfo, object, N
                 yield ArchiveInfo(filename=member.filename, content=content, error=None)
 
 
-def extract_tar(archive, *, size_limit=None) -> Generator[ArchiveInfo, object, None]:
+def extract_tar(
+    archive: BytesIO, *, size_limit: int | None = None
+) -> Generator[ArchiveInfo, object, None]:
     with tarfile.open(fileobj=archive) as tar:
         members = [f for f in tar.getmembers() if f.isfile()]
         for member in members:
@@ -91,6 +98,8 @@ def extract_tar(archive, *, size_limit=None) -> Generator[ArchiveInfo, object, N
             )
 
 
-async def extract_async(archive, size_limit=None) -> AsyncGenerator[ArchiveInfo, None]:
+async def extract_async(
+    archive: BytesIO, size_limit: int | None = None
+) -> AsyncGenerator[ArchiveInfo, None]:
     for x in extract(archive, size_limit=size_limit):
         yield await asyncio.sleep(0, x)
