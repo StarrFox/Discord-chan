@@ -113,7 +113,11 @@
           pythonImportsCheck = [pname];
           nativeBuildInputs = [
             python.pkgs.poetry-core
+            python.pkgs.pythonRelaxDepsHook
           ];
+          # disable cuck mode
+          pythonRelaxDeps = true;
+          pythonRemoveDeps = ["discord-ext-menus"];
           propagatedBuildInputs = with python.pkgs; [
             loguru
             discordpy
