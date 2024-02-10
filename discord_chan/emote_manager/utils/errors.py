@@ -53,19 +53,19 @@ class ImageConversionTimeoutError(ImageProcessingTimeoutError):
 class HTTPException(EmoteManagerError):
     """The server did not respond with an OK status code"""
 
-    def __init__(self, status):
+    def __init__(self, status: int):
         super().__init__(f"URL error: server returned error code {status}")
 
 
 class EmoteNotFoundError(EmoteManagerError):
     """An emote with that name was not found"""
 
-    def __init__(self, name):
+    def __init__(self, name: str):
         super().__init__(f"An emote called `{name}` does not exist in this server")
 
 
 class FileTooBigError(EmoteManagerError):
-    def __init__(self, size, limit):
+    def __init__(self, size: int, limit: int):
         self.size = size
         self.limit = limit
 
@@ -89,7 +89,7 @@ class InvalidImageError(InvalidFileError):
 class PermissionDeniedError(EmoteManagerError):
     """Raised when a user tries to modify an emote without the Manage Emojis permission"""
 
-    def __init__(self, name):
+    def __init__(self, name: str):
         super().__init__(f"You're not authorized to modify `{name}`")
 
 

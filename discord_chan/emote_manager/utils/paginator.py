@@ -31,10 +31,10 @@ class Paginator:
         ctx: Context,
         pages: typing.Iterable,
         *,
-        timeout=300,
-        delete_message=False,
-        delete_message_on_timeout=False,
-        text_message=None,
+        timeout: int = 300,
+        delete_message: bool = False,
+        delete_message_on_timeout: bool = False,
+        text_message: str | None = None,
     ):
         self.pages = list(pages)
         self.timeout = timeout
@@ -122,7 +122,7 @@ class Paginator:
         self._embed.description = self.pages[self._page]  # type: ignore
         self._embed.set_footer(text=self.footer.format(self._page + 1, len(self.pages)))  # type: ignore
 
-        kwargs = {"embed": self._embed}
+        kwargs: dict[str, typing.Any] = {"embed": self._embed}
         if self.text_message:
             kwargs["content"] = self.text_message
 

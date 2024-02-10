@@ -28,7 +28,7 @@ RE_CUSTOM_EMOTE = re.compile(
 )
 
 
-def url(id, *, animated: bool = False):
+def url(id: str, *, animated: bool = False):
     """Convert an emote ID to the image URL for that emote"""
     extension = "gif" if animated else "png"
     return f"https://cdn.discordapp.com/emojis/{id}.{extension}?v=1"
