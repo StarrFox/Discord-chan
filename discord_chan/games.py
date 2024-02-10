@@ -21,9 +21,9 @@ class Connect4(menus.Menu):
         self.last_move = None
         self.winner = None
         self.board = numpy.full((6, 7), self.filler)
-        for button in [
+        for button in (
             menus.Button(num, self.do_number_button) for num in self.numbers
-        ]:
+        ):
             self.add_button(button)
 
     def reaction_check(self, payload):
