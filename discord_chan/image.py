@@ -97,21 +97,22 @@ async def get_bytes(link: str, *, max_length: int = 100) -> TypedBytes:
     """
     # Bytes *1000 -> kb *1000 -> MB
     max_length = round((max_length * 1000) * 1000)
-    async with aiohttp.ClientSession().get(link) as response:
-        # TODO: handle these
-        response.raise_for_status()
+    async with aiohttp.ClientSession() as session:
+        async with session.get(link) as response:
+            # TODO: handle these
+            response.raise_for_status()
 
-        if response.content_length is None:
-            raise ValueError("content_length was None")
+            if response.content_length is None:
+                raise ValueError("content_length was None")
 
-        if response.content_length > max_length:
-            raise FileTooLarge(
-                f"{round((response.content_length / 1000) / 1000, 2)}mb is over max size of {(max_length / 1000 / 1000)}mb"
+            if response.content_length > max_length:
+                raise FileTooLarge(
+                    f"{round((response.content_length / 1000) / 1000, 2)}mb is over max size of {(max_length / 1000 / 1000)}mb"
+                )
+
+            return TypedBytes(
+                file_bytes=await response.read(), content_type=response.content_type
             )
-
-        return TypedBytes(
-            file_bytes=await response.read(), content_type=response.content_type
-        )
 
 
 _tenor_regex = re.compile(r'class="Gif"[^<]+<img src="([^"]+)"')
