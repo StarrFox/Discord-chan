@@ -1,4 +1,3 @@
-import logging
 from collections import OrderedDict
 from datetime import datetime as python_datetime
 
@@ -30,35 +29,6 @@ class LRU(OrderedDict):
         super().__setitem__(key, value)
         if len(self) > self.maxsize:
             self.popitem(last=False)
-
-
-class InterceptHandler(logging.Handler):
-    def emit(self, record):
-        # Get corresponding Loguru level if it exists
-        try:
-            level = logger.level(record.levelname).name
-        except ValueError:
-            level = record.levelno
-
-        # Find caller from where originated the logged message
-        frame, depth = logging.currentframe(), 2
-        if not frame.f_code:
-            return  # Don't care
-
-        if frame is None:
-            return
-
-        while frame.f_code.co_filename == logging.__file__:
-            frame = frame.f_back
-
-            if frame is None:
-                return
-
-            depth += 1
-
-        logger.opt(depth=depth, exception=record.exc_info).log(
-            level, record.getMessage()
-        )
 
 
 def detailed_human_time(input_seconds: float | int):
