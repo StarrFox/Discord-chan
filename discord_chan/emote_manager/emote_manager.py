@@ -80,7 +80,7 @@ class EmoteManager(commands.Cog):
     ARCHIVE_MIMETYPES = TAR_MIMETYPES | ZIP_MIMETYPES
     ZIP_OVERHEAD_BYTES = 30
 
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
         self.http = aiohttp.ClientSession(
@@ -89,7 +89,7 @@ class EmoteManager(commands.Cog):
         )
 
         # keep track of paginators so we can end them when the cog is unloaded
-        self.paginators = weakref.WeakSet()
+        self.paginators: weakref.WeakSet[ListPaginator] = weakref.WeakSet()
 
     async def cog_unload(self):
         await self.http.close()
@@ -97,7 +97,7 @@ class EmoteManager(commands.Cog):
         for paginator in self.paginators:
             await paginator.stop()
 
-    async def cog_check(self, context):
+    async def cog_check(self, context: commands.Context):
         # only allow in guilds
         if context.guild is None:
             raise commands.NoPrivateMessage()
@@ -105,14 +105,14 @@ class EmoteManager(commands.Cog):
         return True
 
     @commands.group(invoke_without_command=True)
-    async def em(self, context):
+    async def em(self, context: commands.Context):
         """
         Base command for emote manager commands
         """
         await context.send_help("em")
 
     @em.command()
-    async def copyright(self, context):
+    async def copyright(self, context: commands.Context):
         """
         Tells you about the copyright license for this extension
         """
@@ -142,7 +142,7 @@ class EmoteManager(commands.Cog):
     @em.command(name="add-these")
     @commands.has_permissions(manage_expressions=True)
     @commands.bot_has_permissions(manage_expressions=True)
-    async def add_these(self, context: commands.Context, *emotes):
+    async def add_these(self, context: commands.Context, *emotes: str):
         """Add a bunch of custom emotes"""
 
         ran = False
@@ -197,7 +197,9 @@ class EmoteManager(commands.Cog):
         raise commands.BadArgument("Your message had no emotes and no name!")
 
     @classmethod
-    def parse_add_command_attachment(cls, context: commands.Context, args):
+    def parse_add_command_attachment(
+        cls, context: commands.Context, args: tuple[str, ...]
+    ):
         attachment = context.message.attachments[0]
         name = cls.format_emote_filename("".join(args) if args else attachment.filename)
         url = attachment.url
@@ -205,7 +207,7 @@ class EmoteManager(commands.Cog):
         return name, url
 
     @staticmethod
-    def format_emote_filename(filename) -> str:
+    def format_emote_filename(filename: str) -> str:
         """format a filename to an emote name as discord does when you upload an emote image"""
         left, sep, right = posixpath.splitext(filename)[0].rpartition("-")
         return (left or right).replace(" ", "")
@@ -233,7 +235,7 @@ class EmoteManager(commands.Cog):
             case "animated":
                 emote_filter = lambda e: e.animated
 
-        emotes = list(filter(emote_filter, context.guild.emojis))  # type: ignore
+        emotes: list[discord.Emoji] = list(filter(emote_filter, context.guild.emojis))  # type: ignore
 
         if not emotes:
             raise commands.BadArgument(
@@ -244,13 +246,15 @@ class EmoteManager(commands.Cog):
             async for zip_file in self.archive_emotes(context, emotes):
                 await context.send(file=zip_file)
 
-    async def archive_emotes(self, context: commands.Context, emotes):
+    async def archive_emotes(
+        self, context: commands.Context, emotes: list[discord.Emoji]
+    ):
         filesize_limit = context.guild.filesize_limit  # type: ignore
         discrims = collections.defaultdict(int)
         downloaded = collections.deque()
 
         # noinspection PyShadowingNames
-        async def download(emote):
+        async def download(emote: discord.Emoji):
             # don't put two files in the zip with the same name
             discrims[emote.name] += 1
             discrim = discrims[emote.name]
@@ -314,7 +318,7 @@ class EmoteManager(commands.Cog):
     )
     @commands.has_permissions(manage_expressions=True)
     @commands.bot_has_permissions(manage_expressions=True)
-    async def import_(self, context: commands.Context, url=None):
+    async def import_(self, context: commands.Context, url: str | None = None):
         """Add several emotes from a .zip or .tar archive.
 
         You may either pass a URL to an archive or upload one as an attachment.
@@ -331,7 +335,7 @@ class EmoteManager(commands.Cog):
         url = url or context.message.attachments[0].url
         async with context.typing():
             archive = await self.fetch_safe(url, valid_mimetypes=self.ARCHIVE_MIMETYPES)
-        if type(archive) is str:  # error case
+        if isinstance(archive, str):  # error case
             await context.send(archive)
             return
 
@@ -340,7 +344,7 @@ class EmoteManager(commands.Cog):
             # so they know when we're done
             await context.message.add_reaction("✅")
 
-    async def add_from_archive(self, context: commands.Context, archive):
+    async def add_from_archive(self, context: commands.Context, archive: bytes):
         limit = (
             50_000_000  # prevent someone from trying to make a giant compressed file
         )
@@ -372,7 +376,13 @@ class EmoteManager(commands.Cog):
             await context.send(f"{name}: {error}")
 
     async def add_safe(
-        self, context: commands.Context, name, url, author_id, *, reason=None
+        self,
+        context: commands.Context,
+        name: str,
+        url: str,
+        author_id: int,
+        *,
+        reason: str | None = None,
     ):
         """Try to add an emote. Returns a string that should be sent to the user"""
         try:
@@ -386,7 +396,13 @@ class EmoteManager(commands.Cog):
             context, name, author_id, image_data, reason=reason
         )
 
-    async def fetch_safe(self, url, valid_mimetypes=None, *, validate_headers=False):
+    async def fetch_safe(
+        self,
+        url: str,
+        valid_mimetypes: set[str] | None = None,
+        *,
+        validate_headers: bool = False,
+    ):
         """Try to fetch a URL. On error return a string that should be sent to the user"""
         try:
             return await self.fetch(
@@ -402,11 +418,11 @@ class EmoteManager(commands.Cog):
     async def add_safe_bytes(
         self,
         context: commands.Context,
-        name,
-        author_id,
+        name: str,
+        author_id: int,
         image_data: bytes,
         *,
-        reason=None,
+        reason: str | None = None,
     ):
         """Try to add an emote from bytes. On error, return a string that should be sent to the user.
 
@@ -430,6 +446,7 @@ class EmoteManager(commands.Cog):
             converted = True
 
         try:
+            assert context.guild is not None
             emote = await self.create_emote_from_bytes(
                 context.guild, name, author_id, image_data, reason=reason
             )
@@ -449,7 +466,11 @@ class EmoteManager(commands.Cog):
 
     # noinspection PyDefaultArgument
     async def fetch(
-        self, url, valid_mimetypes=IMAGE_MIMETYPES, *, validate_headers=True
+        self,
+        url,
+        valid_mimetypes: set[str] | None = IMAGE_MIMETYPES,
+        *,
+        validate_headers=True,
     ):
         valid_mimetypes = valid_mimetypes or self.IMAGE_MIMETYPES
 
@@ -481,7 +502,13 @@ class EmoteManager(commands.Cog):
         return await validate(self.http.get(url))
 
     async def create_emote_from_bytes(
-        self, guild, name, author_id, image_data: bytes, *, reason=None
+        self,
+        guild: discord.Guild,
+        name: str,
+        author_id: int,
+        image_data: bytes,
+        *,
+        reason: str | None = None,
     ):
         image_data = await utils_image.resize_until_small(image_data)
         if reason is None:
@@ -493,17 +520,17 @@ class EmoteManager(commands.Cog):
     @em.command(aliases=("delete", "rm"))
     @commands.has_permissions(manage_expressions=True)
     @commands.bot_has_permissions(manage_expressions=True)
-    async def remove(self, context: commands.Context, emote, *emotes):
+    async def remove(self, context: commands.Context, emote: str, *emotes: str):
         """Remove an emote from this server.
 
         emotes: the name of an emote or of one or more emotes you'd like to remove.
         """
         if not emotes:
-            emote = await self.parse_emote(context, emote)
-            await emote.delete(
+            emote_ = await self.parse_emote(context, emote)
+            await emote_.delete(
                 reason=f"Removed by {utils.format_user(self.bot, context.author.id)}"
             )
-            await context.send(rf"Emote \:{emote.name}: successfully removed")
+            await context.send(rf"Emote \:{emote_.name}: successfully removed")
         else:
             for emote in (emote,) + emotes:
                 await context.invoke(self.remove, emote)
@@ -513,7 +540,7 @@ class EmoteManager(commands.Cog):
     @em.command(aliases=("mv",))
     @commands.has_permissions(manage_expressions=True)
     @commands.bot_has_permissions(manage_expressions=True)
-    async def rename(self, context: commands.Context, old, new_name):
+    async def rename(self, context: commands.Context, old: str, new_name: str):
         """Rename an emote on this server.
 
         old: the name of the emote to rename, or the emote itself
@@ -569,8 +596,9 @@ class EmoteManager(commands.Cog):
         await paginator.begin()
 
     @em.command(aliases=["status"])
-    async def stats(self, context):
+    async def stats(self, context: commands.Context):
         """The current number of animated and static emotes relative to the limits"""
+        assert context.guild is not None
         emote_limit = context.guild.emoji_limit
 
         static_emotes = animated_emotes = total_emotes = 0
@@ -595,15 +623,15 @@ class EmoteManager(commands.Cog):
         )
 
     @em.command(aliases=["embiggen"])
-    async def big(self, context: commands.Context, emote):
+    async def big(self, context: commands.Context, emote: str):
         """Shows the original image for the given emote.
 
         emote: the emote to embiggen
         """
-        emote = await self.parse_emote(context, emote)
-        await context.send(f"{emote.name}: {emote.url}")
+        emote_ = await self.parse_emote(context, emote)
+        await context.send(f"{emote_.name}: {emote_.url}")
 
-    async def parse_emote(self, context: commands.Context, name_or_emote):
+    async def parse_emote(self, context: commands.Context, name_or_emote: str):
         match = utils.emote.RE_CUSTOM_EMOTE.match(name_or_emote)
         if match:
             id = int(match.group("id"))
@@ -613,7 +641,7 @@ class EmoteManager(commands.Cog):
         name = name_or_emote
         return await self.disambiguate(context, name)
 
-    async def disambiguate(self, context: commands.Context, name):
+    async def disambiguate(self, context: commands.Context, name: str):
         name = name.strip(":")  # in case the user tries :foo: and foo is animated
         candidates = [
             e
@@ -632,7 +660,6 @@ class EmoteManager(commands.Cog):
 
         await context.send("\n".join(message))
 
-        # noinspection PyShadowingNames
         def check(message):
             try:
                 int(message.content)

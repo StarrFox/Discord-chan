@@ -450,7 +450,7 @@ def get_image_colors(image: Image.Image) -> dict[float, tuple[int, int, int, int
 
     # percent: RGBA
     color_map: dict[float, tuple[int, int, int, int]] = {
-        k: palette[v] for k, v in sorted_colors
+        k: palette[v] for k, v in sorted_colors  # type: ignore (somehow type from getcolors carried over)
     }
 
     return color_map
