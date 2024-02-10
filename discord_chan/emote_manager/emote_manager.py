@@ -14,11 +14,9 @@
 # along with Emote Manager. If not, see <https://www.gnu.org/licenses/>.
 
 import asyncio
-import cgi
 import collections
 import contextlib
 import io
-import logging
 import operator
 import posixpath
 import re
@@ -37,7 +35,6 @@ import discord_chan.emote_manager.utils.image as utils_image
 from discord_chan.emote_manager.utils import errors
 from discord_chan.emote_manager.utils.paginator import ListPaginator
 
-logger = logging.getLogger(__name__)
 
 # guilds can have duplicate emotes, so let us create zips to match
 warnings.filterwarnings(
@@ -65,7 +62,7 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU Affero General Public License for more details.
 
-You may find a copy of the GNU Affero General Public License at 
+You may find a copy of the GNU Affero General Public License at
 https://github.com/EmoteBot/EmoteManager/blob/master/LICENSE.md.
 The rest of the source code is also there.
 """
@@ -88,7 +85,7 @@ class EmoteManager(commands.Cog):
 
         self.http = aiohttp.ClientSession(
             loop=self.bot.loop,
-            read_timeout=60,
+            timeout=60,
         )
 
         # keep track of paginators so we can end them when the cog is unloaded
@@ -456,12 +453,14 @@ class EmoteManager(commands.Cog):
     ):
         valid_mimetypes = valid_mimetypes or self.IMAGE_MIMETYPES
 
-        def _validate_headers(response):
+        def _validate_headers(response: aiohttp.ClientResponse):
             response.raise_for_status()
             # some dumb servers also send '; charset=UTF-8' which we should ignore
-            mimetype, options = cgi.parse_header(
-                response.headers.get("Content-Type", "")
-            )
+            # TODO: preserve this behavior with a new library (cgi was depreciated)
+            # mimetype, options = cgi.parse_header(
+            #     response.headers.get("Content-Type", "")
+            # )
+            mimetype = response.content_type
             if mimetype not in valid_mimetypes:
                 raise errors.InvalidFileError
 
