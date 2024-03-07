@@ -227,8 +227,11 @@ async def last_image_url(ctx: commands.Context) -> str:
                     return embed.url
 
             elif embed.image is not None:
-                assert embed.image.url is not None
-                return embed.image.url
+                # this can happen sometimes, just ignore those embeds
+                if embed.image.proxy_url is None:
+                    raise commands.CheckFailure("No image attached or in history")
+
+                return embed.image.proxy_url
 
     raise commands.CheckFailure("No image attached or in history")
 
