@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 
 from discord import HTTPException, Message
 from typing_extensions import override
+from loguru import logger
 
 from .menus import ConfirmationMenu, DCMenuPages, NormalPageSource, PartitionPaginator
 from .typing import GuildContext
@@ -16,6 +17,8 @@ class SubContext(GuildContext["DiscordChan"]):
     @override
     async def send(self, content: str | None = None, **kwargs) -> Message:
         if content and len(content) > 2000:
+            logger.debug("entered ctx.send auto-paginate")
+
             if kwargs:
                 raise RuntimeError(
                     "content over 2000 but kwargs were provided and wont be respected"

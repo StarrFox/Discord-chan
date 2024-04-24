@@ -90,6 +90,7 @@ class Database:
             if self._connection is not None:
                 return self._connection
 
+            # TODO: make sure connection is closed on exit
             self._connection = await asyncpg.create_pool(
                 user=DATABASE_user, database=DATABASE_name
             )
