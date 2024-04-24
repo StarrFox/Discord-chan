@@ -54,6 +54,7 @@ class Mod(commands.Cog, name="mod"):
         else:
             return await ctx.confirm(f"{feature} disabled")
 
+    # TODO: figure out what permissions are actually needed for this command
     # this one is has_permissions because channel overrides should be allowed
     @commands.command()
     @commands.bot_has_permissions(manage_messages=True)
@@ -90,7 +91,8 @@ class Mod(commands.Cog, name="mod"):
 
         deleted = await ctx.channel.purge(limit=number, check=msgcheck)
         with suppress(discord.Forbidden, discord.NotFound):
-            await ctx.send(f"Deleted {len(deleted)} message(s)", delete_after=5)
+            async with ctx.typing():
+                await ctx.send(f"Deleted {len(deleted)} message(s)", delete_after=5)
 
     @commands.command()
     @commands.bot_has_guild_permissions(ban_members=True)

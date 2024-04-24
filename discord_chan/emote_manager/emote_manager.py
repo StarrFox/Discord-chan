@@ -85,7 +85,7 @@ class EmoteManager(commands.Cog):
 
         self.http = aiohttp.ClientSession(
             loop=self.bot.loop,
-            timeout=60,
+            timeout=aiohttp.ClientTimeout(60),
         )
 
         # keep track of paginators so we can end them when the cog is unloaded

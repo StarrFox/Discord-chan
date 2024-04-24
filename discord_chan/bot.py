@@ -32,10 +32,6 @@ class DiscordChan(commands.AutoShardedBot):
                 name=f"{DEFAULT_PREFIXES[0]}help",
             ),
             intents=kwargs.pop("intents", discord.Intents.all()),
-            # NOTE: remove if a team starts being used
-            # this is to fix discord.py not using Optional correctly
-            # see: https://github.com/Rapptz/discord.py/pull/9687
-            owner_ids=kwargs.pop("owner_ids", None),
             **kwargs,
         )
         self.context = context
