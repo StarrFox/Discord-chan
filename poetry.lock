@@ -940,17 +940,17 @@ test = ["Cython (>=0.29.36,<0.30.0)", "aiohttp (==3.9.0b0)", "aiohttp (>=3.8.1)"
 
 [[package]]
 name = "uwuify"
-version = "1.3.0"
+version = "1.3.1"
 description = "uwuifys text"
 optional = false
-python-versions = ">=3.7,<4.0"
+python-versions = "<4.0,>=3.8"
 files = [
-    {file = "uwuify-1.3.0-py3-none-any.whl", hash = "sha256:cd65c0cf98011ae2ee9b8e49abec2176739adb6f2c4d117efa0ed28046c09cb8"},
-    {file = "uwuify-1.3.0.tar.gz", hash = "sha256:b7f3ddb821093203c4742b8fd6b5a1f97ebcaf74634d0760bbd307d6c18e8c8e"},
+    {file = "uwuify-1.3.1-py3-none-any.whl", hash = "sha256:4d50145b4d6cdb641ad1c4b0488f50a962f38e02dcd88e7f1f06b1525a549de0"},
+    {file = "uwuify-1.3.1.tar.gz", hash = "sha256:b906ce0c7bd605ecf6f4338e81b4da98ba2aea5d3c26ae72fe5895eb4cccc7fe"},
 ]
 
 [package.dependencies]
-click = ">=8.0.1,<9.0.0"
+click = ">=8.1.7,<9.0.0"
 
 [[package]]
 name = "wand"
