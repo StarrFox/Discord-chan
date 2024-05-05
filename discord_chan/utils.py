@@ -1,7 +1,6 @@
 from collections import OrderedDict
 from datetime import datetime as python_datetime
 
-from loguru import logger
 from pendulum.datetime import DateTime
 
 bool_dict = {

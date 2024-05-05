@@ -44,9 +44,7 @@ class General(commands.Cog, name="general"):
         paginator.add_line(final)
 
         source = NormalPageSource(paginator.pages)
-
         menu = DCMenuPages(source)
-
         await menu.start(ctx)
 
     @commands.command()
