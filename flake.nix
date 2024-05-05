@@ -24,7 +24,7 @@
         self',
         ...
       }: let
-        python = pkgs.python311;
+        python = pkgs.python312;
 
         pyproject = builtins.fromTOML (builtins.readFile ./pyproject.toml);
 
@@ -57,11 +57,11 @@
 
         uwuify = python.pkgs.buildPythonPackage rec {
           pname = "uwuify";
-          version = "1.3.0";
+          version = "1.3.1";
           format = "pyproject";
           src = python.pkgs.fetchPypi {
             inherit pname version;
-            hash = "sha256-t/PduCEJMgPEdCuP1rWh+X68r3RjTQdgu9MH1sGOjI4=";
+            hash = "sha256-uQbODHvWBez29DOOgbTamLoq6l08Jq5y/liV60zMx/4=";
           };
           pythonImportsCheck = [pname];
           nativeBuildInputs = with python.pkgs; [poetry-core];
