@@ -21,7 +21,6 @@ class Anime(commands.Cog, name="anime"):
     # TODO: fix
     @commands.group(aliases=["sb"], invoke_without_command=True)
     @checks.some_guilds(*SAFEBOORU_ALLOWED_GUILDS)
-    @commands.is_nsfw()
     async def safebooru(self, ctx: SubContext, *tags: str):
         if post := await discord_chan.get_random_safebooru_post(list(tags)):
             embed = discord.Embed(
