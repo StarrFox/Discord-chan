@@ -35,6 +35,7 @@ class SubContext(GuildContext["DiscordChan"]):
             assert menu.message is not None
             return menu.message
 
+        # TODO: better handle when target message was deleted i.e. purge
         # replies
         kwargs["reference"] = kwargs.get("reference", self.message)
         kwargs["mention_author"] = kwargs.get("mention_author", False)

@@ -5,14 +5,21 @@ import discord_chan
 from discord_chan import DiscordChan, SubContext, checks
 
 
+SAFEBOORU_ALLOWED_GUILDS = [
+    1233971885281378414,  # starrden
+    536702243119038464,  # spoil
+]
+
+
 class Anime(commands.Cog, name="anime"):
     def __init__(self, bot: DiscordChan):
         self.bot = bot
 
+    # TODO: what needed to be fixed??
     # TODO: figure out what needed to be fixed
     # TODO: fix
     @commands.command(aliases=["sb"])
-    @checks.some_guilds(536702243119038464)
+    @checks.some_guilds(*SAFEBOORU_ALLOWED_GUILDS)
     @commands.is_nsfw()
     async def safebooru(self, ctx: SubContext, *tags: str):
         if post := await discord_chan.get_random_safebooru_post(list(tags)):
