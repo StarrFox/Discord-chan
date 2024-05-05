@@ -74,6 +74,27 @@ async def get_safebooru_posts(tags: list[str], page: int = 0) -> list[str]:
     return result
 
 
+async def get_random_safebooru_posts(tags: list[str]) -> list[SafebooruPost] | None:
+    if total_post_count := await get_safebooru_post_count(tags):
+        page = random.randint(0, int(total_post_count / 100))
+
+        posts = await get_safebooru_posts(tags, page)
+        post_count = len(posts)
+        if post_count > 0:
+            result: list[SafebooruPost] = []
+
+            for index, post in enumerate(posts):
+                result.append(
+                    SafebooruPost(
+                        url=post,
+                        post_index=index,
+                        tag_post_count=total_post_count,
+                    )
+                )
+
+            return result
+
+
 async def get_random_safebooru_post(tags: list[str]) -> SafebooruPost | None:
     if total_post_count := await get_safebooru_post_count(tags):
         page = random.randint(0, int(total_post_count / 100))
@@ -92,7 +113,7 @@ async def get_random_safebooru_post(tags: list[str]) -> SafebooruPost | None:
 if __name__ == "__main__":
 
     async def main():
-        print(await get_random_safebooru_post(["god"]))
+        print(await get_random_safebooru_post(["yuri"]))
 
     import asyncio
 

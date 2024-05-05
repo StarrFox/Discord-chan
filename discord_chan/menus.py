@@ -155,6 +155,19 @@ class CodeblockPageSource(menus.ListPageSource):
         return base
 
 
+class EmbedPageSource(menus.ListPageSource):
+    def __init__(self, entries: Sequence[discord.Embed], *, per_page=1):
+        if per_page != 1:
+            raise ValueError(
+                f"EmbedPageSource does not support multipage value of {per_page}"
+            )
+
+        super().__init__(entries, per_page=per_page)
+
+    async def format_page(self, _, page: discord.Embed):
+        return page
+
+
 class EmbedFieldsPageSource(menus.ListPageSource):
     def __init__(
         self,
@@ -170,7 +183,9 @@ class EmbedFieldsPageSource(menus.ListPageSource):
         self.description = description
         self.show_footer = show_footer
 
-    async def format_page(self, menu: menus.MenuPages, page):
+    async def format_page(
+        self, menu: menus.MenuPages, page: EmbedFieldProxy | Sequence[EmbedFieldProxy]
+    ):
         base = discord.Embed(title=self.title, description=self.description)
 
         if self.show_footer:
