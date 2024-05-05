@@ -1,3 +1,4 @@
+import random
 from collections.abc import Sequence
 from string import capwords
 from typing import NamedTuple
@@ -67,10 +68,11 @@ class ConfirmationMenu(menus.Menu):
 
 
 class DCMenuPages(menus.MenuPages):
-    def __init__(self, source, **kwargs):
+    def __init__(self, source, *, show_random_button: bool = False, **kwargs):
         kwargs["clear_reactions_after"] = kwargs.get("clear_reactions_after", True)
-
         super().__init__(source, **kwargs)
+
+        self.show_random_button = show_random_button
 
     async def send_initial_message(self, ctx, _):
         page = await self._source.get_page(0)
@@ -91,6 +93,9 @@ class DCMenuPages(menus.MenuPages):
 
     def skip_one_or_two(self):
         return self.skip_only_one_page() or self.skip_two_or_less()
+
+    def skip_if_no_random(self):
+        return not self.show_random_button or self.source.get_max_pages() is None
 
     @menus.button(
         "\N{BLACK LEFT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR}\ufe0f",
@@ -124,6 +129,14 @@ class DCMenuPages(menus.MenuPages):
         """stops the pagination session"""
         await self.message.delete()  # type: ignore
         self.stop()
+
+    @menus.button("\N{GAME DIE}", skip_if=skip_if_no_random)
+    async def show_random_page(self, payload):
+        """shows a random page"""
+        # this should always be an int because of the skip_if
+        max_page: int = self.source.get_max_pages()  # type: ignore
+        selection = random.randint(1, max_page - 1)
+        await self.show_checked_page(selection)
 
 
 class NormalPageSource(menus.ListPageSource):

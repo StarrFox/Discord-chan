@@ -45,7 +45,7 @@ class Anime(commands.Cog, name="anime"):
                 embeds.append(embed)
 
             source = EmbedPageSource(embeds)
-            menu = DCMenuPages(source)
+            menu = DCMenuPages(source, show_random_button=True)
 
             await menu.start(ctx)
         else:
