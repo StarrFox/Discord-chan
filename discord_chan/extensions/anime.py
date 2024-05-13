@@ -16,11 +16,9 @@ class Anime(commands.Cog, name="anime"):
     def __init__(self, bot: DiscordChan):
         self.bot = bot
 
-    # TODO: what needed to be fixed??
-    # TODO: figure out what needed to be fixed
-    # TODO: fix
+    # TODO: add feature lock
     @commands.group(aliases=["sb"], invoke_without_command=True)
-    @checks.some_guilds(*SAFEBOORU_ALLOWED_GUILDS)
+    # @checks.some_guilds(*SAFEBOORU_ALLOWED_GUILDS)
     async def safebooru(self, ctx: SubContext, *tags: str):
         if post := await discord_chan.get_random_safebooru_post(list(tags)):
             embed = discord.Embed(
