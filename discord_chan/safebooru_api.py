@@ -57,12 +57,11 @@ async def request_safebooru(**params) -> ElementTree.Element:
             return ElementTree.fromstring(await resp.content.read())
 
 
-async def get_safebooru_post_count(tags: list[str]) -> int | None:
+async def get_safebooru_post_count(tags: list[str]) -> int:
     tree = await request_safebooru(tags=tags, limit=0)
     if amount := tree.get("count"):
         return int(amount)
-
-    return None
+    return 0
 
 
 async def get_safebooru_posts(tags: list[str], page: int = 0) -> list[str]:
@@ -78,7 +77,7 @@ async def get_safebooru_posts(tags: list[str], page: int = 0) -> list[str]:
 
 async def get_random_safebooru_posts(tags: list[str]) -> list[SafebooruPost] | None:
     if total_post_count := await get_safebooru_post_count(tags):
-        page = random.randint(0, int(total_post_count / API_MAX_POSTS))
+        page = random.randint(0, total_post_count // API_MAX_POSTS)
 
         posts = await get_safebooru_posts(tags, page)
         post_count = len(posts)
@@ -99,7 +98,7 @@ async def get_random_safebooru_posts(tags: list[str]) -> list[SafebooruPost] | N
 
 async def get_random_safebooru_post(tags: list[str]) -> SafebooruPost | None:
     if total_post_count := await get_safebooru_post_count(tags):
-        page = random.randint(0, int(total_post_count / API_MAX_POSTS))
+        page = random.randint(0, total_post_count // API_MAX_POSTS)
 
         posts = await get_safebooru_posts(tags, page)
         post_count = len(posts)
