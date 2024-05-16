@@ -366,7 +366,7 @@ class SafebooruEmbedStreamSource(menus.ListPageSource):
     def __init__(self, tags: list[str], post_count: int):
         self.tags = tags
         self.post_count = post_count
-        self._cache: dict[int, list[safebooru_api.SafebooruPost]] = {}
+        self._cache: dict[int, list[str]] = {}
         self._lock = asyncio.Lock()
 
     def is_paginating(self):
@@ -383,4 +383,4 @@ class SafebooruEmbedStreamSource(menus.ListPageSource):
         post = self._cache[cache_idx][post_idx]
         return discord.Embed(
             description=f"Post {page_number + 1}/{self.post_count}"
-        ).set_image(url=post.url)
+        ).set_image(url=post)
