@@ -66,7 +66,7 @@ async def get_safebooru_post_count(tags: list[str]) -> int:
 
 async def get_safebooru_posts(tags: list[str], page: int = 0) -> list[str]:
     result = []
-    tree = await request_safebooru(tags=tags, pid=page)
+    tree = await request_safebooru(tags=tags, pid=page, limit=100)
 
     for post in tree:
         if post_url := post.get("file_url"):
