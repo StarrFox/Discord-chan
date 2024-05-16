@@ -36,7 +36,7 @@ class Anime(commands.Cog, name="anime"):
         if post_count > 0:
             source = SafebooruEmbedStreamSource(tags=tags, post_count=post_count)
             menu = DCMenuPages(source, show_random_button=True)
-            await menu.start()
+            await menu.start(ctx)
         else:
             await ctx.deny("No posts found")
 
