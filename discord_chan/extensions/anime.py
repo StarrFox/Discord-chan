@@ -31,8 +31,9 @@ class Anime(commands.Cog, name="anime"):
             await ctx.deny("No posts found")
 
     @safebooru.command(name="list")
-    async def safebooru_list(self, ctx: SubContext, *tags: str):
-        post_count = await safebooru_api.get_safebooru_post_count(list(tags))
+    async def safebooru_list(self, ctx: SubContext, *tags_tuple: str):
+        tags = list(tags_tuple)
+        post_count = await safebooru_api.get_safebooru_post_count(tags)
         if post_count > 0:
             source = SafebooruEmbedStreamSource(tags=tags, post_count=post_count)
             menu = DCMenuPages(source, show_random_button=True)
