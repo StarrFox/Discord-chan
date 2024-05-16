@@ -17,6 +17,8 @@ SAFEBOORU_BASE_URL = "https://safebooru.org/index.php?page=dapi&s=post&q=index"
 
 SUBTRACTIVE_NSFW_TAGS = ["-blood", "-poop", "-tagme"]
 
+API_MAX_POSTS = 100
+
 
 @dataclass
 class SafebooruPost:
@@ -76,7 +78,7 @@ async def get_safebooru_posts(tags: list[str], page: int = 0) -> list[str]:
 
 async def get_random_safebooru_posts(tags: list[str]) -> list[SafebooruPost] | None:
     if total_post_count := await get_safebooru_post_count(tags):
-        page = random.randint(0, int(total_post_count / 100))
+        page = random.randint(0, int(total_post_count / API_MAX_POSTS))
 
         posts = await get_safebooru_posts(tags, page)
         post_count = len(posts)
@@ -97,7 +99,7 @@ async def get_random_safebooru_posts(tags: list[str]) -> list[SafebooruPost] | N
 
 async def get_random_safebooru_post(tags: list[str]) -> SafebooruPost | None:
     if total_post_count := await get_safebooru_post_count(tags):
-        page = random.randint(0, int(total_post_count / 100))
+        page = random.randint(0, int(total_post_count / API_MAX_POSTS))
 
         posts = await get_safebooru_posts(tags, page)
         post_count = len(posts)
@@ -105,7 +107,7 @@ async def get_random_safebooru_post(tags: list[str]) -> SafebooruPost | None:
             post_index = random.randint(0, post_count - 1)
             return SafebooruPost(
                 url=posts[post_index],
-                post_index=post_index + (page * 100),
+                post_index=post_index + (page * API_MAX_POSTS),
                 tag_post_count=total_post_count,
             )
 

@@ -6,6 +6,8 @@ from typing import NamedTuple
 import discord
 from discord.ext import commands, menus
 
+from . import safebooru_api
+
 
 class EmbedFieldProxy(NamedTuple):
     name: str
@@ -357,3 +359,25 @@ class PrologPaginator(FixedNonePaginator):
             f"{capwords(key):{self.align_option}{self.align_places}.{self.align_places}} :: "
             f"{capwords(value)}"
         )
+
+
+class SafebooruEmbedStreamSource(menus.ListPageSource):
+    def __init__(self, tags: list[str], post_count: int):
+        self.tags = tags
+        self.post_count = post_count
+        self._cache: dict[int, list[safebooru_api.SafebooruPost]] = {}
+
+    def is_paginating(self):
+        return self.post_count > 1
+
+    def get_max_pages(self):
+        return self.post_count
+
+    async def get_page(self, page_number: int) -> discord.Embed:
+        (cache_idx, post_idx) = divmod(page_number, safebooru_api.API_MAX_POSTS)
+        if cache_idx not in self._cache:
+            self._cache[cache_idx] = await safebooru_api.get_safebooru_posts(self.tags)
+        post = self._cache[cache_idx][post_idx]
+        return discord.Embed(
+            description=f"Post {page_number + 1}/{self.post_count}"
+        ).set_image(url=post.url)
