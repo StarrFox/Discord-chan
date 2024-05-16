@@ -384,3 +384,6 @@ class SafebooruEmbedStreamSource(menus.ListPageSource):
         return discord.Embed(
             description=f"Post {page_number + 1}/{self.post_count}"
         ).set_image(url=post)
+
+    async def format_page(self, _, page: discord.Embed):
+        return page
