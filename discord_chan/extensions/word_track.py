@@ -74,23 +74,6 @@ class WordTrack(commands.Cog):
         message = await asyncio.wait_for(_wait_for_edits(), timeout=EDIT_GRACE_TIME)
         await self.consume_message(message)
 
-    @staticmethod
-    async def get_member_reference(ctx: SubContext, user_id: int) -> str:
-        member = ctx.guild.get_member(user_id)
-
-        if member is None:
-            try:
-                user = await ctx.bot.fetch_user(user_id)
-            except discord.NotFound:
-                # deleted account
-                user_name = str(user_id)
-            else:
-                user_name = user.display_name
-        else:
-            user_name = member.mention
-
-        return user_name
-
     @commands.group(name="words", invoke_without_command=True, aliases=["word"])
     @commands.guild_only()
     async def words_command(self, ctx: SubContext):
@@ -205,7 +188,7 @@ class WordTrack(commands.Cog):
         ]
 
         for user_id, count in member_loaderboard[:5]:
-            user_name = await self.get_member_reference(ctx, user_id)
+            user_name = await ctx.bot.get_member_reference(ctx, user_id)
             message_parts.append(f"{user_name}: {count}")
 
         await ctx.send("\n".join(message_parts))
@@ -224,7 +207,7 @@ class WordTrack(commands.Cog):
         entries: list[str] = []
 
         for user_id, count in unique_leaderboard:
-            user_name = await self.get_member_reference(ctx, user_id)
+            user_name = await ctx.bot.get_member_reference(ctx, user_id)
             entries.append(f"{user_name}: {count}")
 
         source = NormalPageSource(entries, per_page=10)
@@ -247,7 +230,7 @@ class WordTrack(commands.Cog):
         entries: list[str] = []
 
         for user_id, count in total_leaderboard:
-            user_name = await self.get_member_reference(ctx, user_id)
+            user_name = await ctx.bot.get_member_reference(ctx, user_id)
             entries.append(f"{user_name}: {count}")
 
         source = NormalPageSource(entries, per_page=10)

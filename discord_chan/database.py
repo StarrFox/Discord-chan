@@ -66,6 +66,11 @@ CREATE TABLE IF NOT EXISTS word_track (
     count INT,
     PRIMARY KEY (server, author, word)
 );
+
+CREATE TABLE IF NOT EXISTS minecraft_usernames (
+    user_id BIGINT PRIMARY KEY,
+    username TEXT UNIQUE
+);
 """.strip()
 
 
@@ -98,6 +103,33 @@ class Database:
             await self._ensure_tables(self._connection)
             return self._connection
 
+    async def update_minecraft_username(self, *, user_id: int, username: str):
+        pool = await self.connect()
+
+        async with pool.acquire() as connection:
+            connection: asyncpg.Connection
+            await connection.execute(
+                "INSERT INTO minecraft_usernames (user_id, username) VALUES ($1, $2) ON CONFLICT (user_id) DO UPDATE SET username = EXCLUDED.username",
+                user_id,
+                username,
+            )
+
+    async def get_minecraft_usernames(self) -> dict[int, str]:
+        pool = await self.connect()
+
+        async with pool.acquire() as connection:
+            connection: asyncpg.Connection
+            records: list[asyncpg.Record] = await connection.fetch(
+                "SELECT user_id, username FROM minecraft_usernames;"
+            )
+
+        result: dict[int, str] = {}
+
+        for record in records:
+            result[record["user_id"]] = record["username"]
+
+        return result
+
     async def update_word_track_word(
         self, *, server_id: int, author_id: int, word: str, amount: int
     ):
@@ -106,7 +138,7 @@ class Database:
         async with pool.acquire() as connection:
             connection: asyncpg.Connection
             await connection.execute(
-                f"INSERT INTO word_track (server, author, word, count) VALUES ($1, $2, $3, $4) ON CONFLICT (server, author, word) DO UPDATE SET count = EXCLUDED.count + word_track.count;",
+                "INSERT INTO word_track (server, author, word, count) VALUES ($1, $2, $3, $4) ON CONFLICT (server, author, word) DO UPDATE SET count = EXCLUDED.count + word_track.count;",
                 server_id,
                 author_id,
                 word,

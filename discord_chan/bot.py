@@ -62,18 +62,15 @@ class DiscordChan(commands.AutoShardedBot):
         return " ".join(o.mention for o in owners)
 
     @typing.overload
-    async def owners(self, as_users: typing.Literal[False]) -> typing.Iterable[int]:
-        ...
+    async def owners(self, as_users: typing.Literal[False]) -> typing.Iterable[int]: ...
 
     @typing.overload
     async def owners(
         self, as_users: typing.Literal[True]
-    ) -> typing.Iterable[discord.User]:
-        ...
+    ) -> typing.Iterable[discord.User]: ...
 
     @typing.overload
-    async def owners(self) -> typing.Iterable[int]:
-        ...
+    async def owners(self) -> typing.Iterable[int]: ...
 
     async def owners(self, as_users: bool = False) -> typing.Iterable:
         owners_or_owner = await self._get_owners()
@@ -88,6 +85,23 @@ class DiscordChan(commands.AutoShardedBot):
             return [self.get_user(id_) for id_ in owners]
 
         return owners
+
+    @staticmethod
+    async def get_member_reference(ctx: SubContext, user_id: int) -> str:
+        member = ctx.guild.get_member(user_id)
+
+        if member is None:
+            try:
+                user = await ctx.bot.fetch_user(user_id)
+            except discord.NotFound:
+                # deleted account
+                user_name = str(user_id)
+            else:
+                user_name = user.display_name
+        else:
+            user_name = member.mention
+
+        return user_name
 
     def get_message(self, message_id: int) -> discord.Message | None:
         """
