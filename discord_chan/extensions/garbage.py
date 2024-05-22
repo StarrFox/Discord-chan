@@ -57,7 +57,7 @@ class Garbage(commands.Cog):
         result = ""
         for user_id, name in usernames.items():
             member_name = await ctx.bot.get_member_reference(ctx, user_id)
-            result += f"{member_name}: {name}"
+            result += f"{member_name}: {name}\n"
 
         if result == "":
             result = "No usernames stored"
