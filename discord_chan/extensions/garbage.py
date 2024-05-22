@@ -64,6 +64,27 @@ class Garbage(commands.Cog):
 
         await ctx.send(result)
 
+    @minecraft.command(name="admin_add")
+    @commands.has_permissions(administrator=True)
+    async def minecraft_admin_add(
+        self, ctx: discord_chan.SubContext, user: discord.Member, username: str
+    ):
+        """
+        Admin add a minecraft username
+        """
+        await ctx.bot.database.update_minecraft_username(
+            user_id=user.id, username=username
+        )
+        await ctx.confirm("Username updated")
+
+        mc_role = ctx.guild.get_role(1241826442501947543)
+
+        if mc_role is None:
+            return
+
+        with contextlib.suppress(discord.Forbidden):
+            await user.add_roles(mc_role, reason="minecraft")
+
 
 async def setup(bot: discord_chan.DiscordChan):
     await bot.add_cog(Garbage(bot))
