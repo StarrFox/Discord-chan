@@ -379,7 +379,7 @@ class SafebooruEmbedStreamSource(menus.ListPageSource):
         (cache_idx, post_idx) = divmod(page_number, safebooru_api.API_MAX_POSTS)
         async with self._lock:
             if cache_idx not in self._cache:
-                self._cache[cache_idx] = await safebooru_api.get_safebooru_posts(self.tags)
+                self._cache[cache_idx] = await safebooru_api.get_safebooru_posts(self.tags, page=cache_idx)
         post = self._cache[cache_idx][post_idx]
         return discord.Embed(
             description=f"Post {page_number + 1}/{self.post_count}"
