@@ -166,6 +166,9 @@ class Images(commands.Cog, name="images"):
         """
         colors = await discord_chan.image.get_image_colors(image)
 
+        if colors is None:
+            return await ctx.send("Could not discern colors of image")
+
         entries: list[str] = []
 
         for percent, color in colors.items():

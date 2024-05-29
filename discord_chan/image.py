@@ -426,12 +426,17 @@ def monochomize_image(image: bytes, method: str = "kapur") -> BytesIO:
 
 
 @executor_function
-def get_image_colors(image: Image.Image) -> dict[float, tuple[int, int, int, int]]:
+def get_image_colors(
+    image: Image.Image,
+) -> dict[float, tuple[int, int, int, int]] | None:
     # TODO: is this ever rgb?
     if image.mode != "RGBA":
         raise ValueError("Non-rgb image passed to get colors")
 
     image = image.quantize()
+
+    if image.palette is None:
+        return None
 
     # palette_index: RGBA
     palette: dict[int, tuple[int, int, int, int]] = {
