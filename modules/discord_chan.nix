@@ -46,6 +46,7 @@ in {
       description = "Discord chan bot";
       wantedBy = ["multi-user.target"];
       after = ["network-online.target"];
+      wants = ["network-online.target"];
       serviceConfig = {
         User = cfg.user;
         Group = cfg.group;
