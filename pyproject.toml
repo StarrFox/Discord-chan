@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "discord_chan"
-version = "2.24.0"
+version = "2.24.1"
 description = "General purpose Discord bot"
 authors = ["StarrFox <starrfox6312@gmail.com>"]
 license = "AGPL-3.0-or-later"
