@@ -4,7 +4,7 @@ import discord
 import pendulum
 from discord.ext import commands
 
-from discord_chan import DiscordChan
+from discord_chan import DiscordChan, checks
 from discord_chan.context import SubContext
 from discord_chan.menus import (
     DCMenuPages,
@@ -14,6 +14,7 @@ from discord_chan.menus import (
 )
 from discord_chan.snipe import Snipe as Snipe_obj
 from discord_chan.snipe import SnipeMode
+from discord_chan.features import Feature
 
 
 class SnipeQueryFlags(commands.FlagConverter, delimiter=" ", prefix="--"):
@@ -46,6 +47,14 @@ class Snipe(commands.Cog, name="snipe"):
             await self.attempt_add_snipe(before, SnipeMode.edited)
 
     async def attempt_add_snipe(self, message: discord.Message, mode: SnipeMode):
+        if message.guild is None:
+            return
+
+        if not await self.bot.feature_manager.is_enabled(
+            Feature.snipe, message.guild.id
+        ):
+            return
+
         if message.content:
             snipe = Snipe_obj(
                 id=message.id,
@@ -61,6 +70,7 @@ class Snipe(commands.Cog, name="snipe"):
 
     @commands.bot_has_permissions(embed_links=True)
     @commands.group(name="snipe", invoke_without_command=True)
+    @checks.feature_enabled(Feature.snipe)
     async def snipe_command(
         self,
         ctx: commands.Context,

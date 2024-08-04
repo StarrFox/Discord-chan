@@ -8,6 +8,7 @@ class Feature(Enum):
     typing_watch = 2
     gamer_words = 3
     cope = 4
+    snipe = 5
 
 
 class FeatureManager:
