@@ -6,6 +6,7 @@ import numpy
 from discord.ext import menus
 
 
+# TODO: allow them to set what emoji their token is, some kind of setting "dc/setting connect4 :mfw:"
 class Connect4(menus.Menu):
     filler = "\N{BLACK LARGE SQUARE}"
     red = "\N{LARGE RED CIRCLE}"
@@ -159,6 +160,7 @@ class Connect4(menus.Menu):
         return self.winner
 
 
+# TODO: pick emojis from guild (make sure there are actually 5)
 class MasterMindMenu(menus.Menu):
     VARIATION_SELECTOR = "\N{VARIATION SELECTOR-16}"
 

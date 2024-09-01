@@ -135,6 +135,7 @@ class BotConverter(commands.Converter):
         raise commands.BadArgument("That member is not a bot")
 
 
+# TODO: add sticker support
 class ImageUrlConverter(commands.Converter):
     """
     Attempts to convert an argument to an image url in the following order
