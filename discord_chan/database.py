@@ -12,6 +12,7 @@ from loguru import logger
 from discord_chan.snipe import Snipe, SnipeMode
 
 
+# TODO: this garbage doesn't work on windows
 def get_current_username() -> str:
     return pwd.getpwuid(os.getuid()).pw_name
 

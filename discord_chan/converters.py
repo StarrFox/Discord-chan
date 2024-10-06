@@ -77,7 +77,7 @@ class UnderConverter(commands.Converter):
     def __init__(self, under: int):
         self.under = under
 
-    async def convert(self, _, argument: str) -> int:
+    async def convert(self, ctx, argument: str) -> int:
         try:
             converted_argument = int(argument)
         except ValueError:
@@ -96,7 +96,7 @@ class OverConverter(commands.Converter):
     def __init__(self, over: int):
         self.over = over
 
-    async def convert(self, _, argument: str) -> int:
+    async def convert(self, ctx, argument: str) -> int:
         try:
             converted_argument = int(argument)
         except ValueError:

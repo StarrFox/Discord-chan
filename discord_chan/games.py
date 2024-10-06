@@ -36,7 +36,7 @@ class Connect4(menus.Menu):
 
         return payload.emoji in self.buttons
 
-    async def send_initial_message(self, ctx, _):
+    async def send_initial_message(self, ctx, channel):
         return await ctx.send(self.discord_message)
 
     async def do_number_button(self, payload):
@@ -347,7 +347,7 @@ class SliderGame(menus.Menu):
         ]:
             self.add_button(button)
 
-    async def send_initial_message(self, ctx, _):
+    async def send_initial_message(self, ctx, channel):
         return await ctx.send(self.discord_message)
 
     async def check_wins(self):
