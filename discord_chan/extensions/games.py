@@ -55,46 +55,6 @@ class Games(commands.Cog, name="games"):
         else:
             await ctx.send("No one made a move")
 
-    @commands.command()
-    @commands.bot_has_permissions(add_reactions=True)
-    @commands.max_concurrency(1, commands.BucketType.user)
-    @commands.guild_only()
-    @checks.some_guilds(1095560451380756541)  # tonberries only
-    async def cooked4(self, ctx: SubContext, member: discord.Member):
-        """
-        Play cooked4 with another member
-        Who goes first is random
-        """
-        # this should probably be a converter
-        if member == ctx.author or member.bot:
-            return await ctx.send("You cannot play against yourself or a bot")
-
-        # Command already requires add_reactions so don't need to check for it
-        if not await ctx.prompt(f"{member.mention} agree to play?", owner_id=member.id):
-            return await ctx.send("Game canceled")
-
-        player1 = choice([ctx.author, member])
-        player2 = member if player1 == ctx.author else ctx.author
-
-        if not isinstance(player1, discord.Member) or not isinstance(
-            player2, discord.Member
-        ):
-            return await ctx.send("connect 4 must be used from a server")
-
-        game = Connect4(player1, player2)
-
-        game.red = "\N{EGG}"
-        game.blue = "<:pan:1292618063740403844>"
-
-        winner = await game.run(ctx)
-        if winner:
-            if isinstance(winner, tuple):
-                await ctx.send(f"{player1.mention} and {player2.mention} tied")
-            else:
-                await ctx.send(f"{winner.mention} cooked {game.current_player.mention}")
-        else:
-            await ctx.send("No one made a move")
-
     @commands.command(aliases=["mm"])
     @commands.bot_has_permissions(add_reactions=True)
     @commands.max_concurrency(1, commands.BucketType.user)
