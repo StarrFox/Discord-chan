@@ -70,11 +70,11 @@
 
         import_expression = python.pkgs.buildPythonPackage rec {
           pname = "import_expression";
-          version = "1.1.4";
+          version = "2.2.1";
           format = "setuptools";
           src = python.pkgs.fetchPypi {
             inherit pname version;
-            hash = "sha256-BghqarO/pSixxHjmM9at8rOpkOMUQPZAGw8+oSsGWak=";
+            hash = "sha256-pOWuvFlxgcmOS0SboK0O58sC6vjD8H+4AWXTW+XVnlE=";
           };
           pythonImportsCheck = [pname];
           nativeBuildInputs = with python.pkgs; [pip];
@@ -84,18 +84,19 @@
 
         jishaku = python.pkgs.buildPythonPackage rec {
           pname = "jishaku";
-          version = "2.5.2";
+          version = "2.6.0";
           format = "setuptools";
           src = python.pkgs.fetchPypi {
             inherit pname version;
-            hash = "sha256-VtOMMzA243SB3148noHWAztQl3OPDRcageJ1ISTw31w=";
+            hash = "sha256-ubTQU7jL22qP16jVSdCSjC5SlARMuxRcuybfNvl84ok=";
           };
           pythonImportsCheck = [pname];
           nativeCheckInputs = with python.pkgs; [
             line_profiler
             click
             astunparse
-            youtube-dl
+            yt-dlp
+            tabulate
           ];
           propagatedBuildInputs = with python.pkgs; [
             discordpy
