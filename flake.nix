@@ -96,12 +96,12 @@
             click
             astunparse
             yt-dlp
-            tabulate
           ];
           propagatedBuildInputs = with python.pkgs; [
             discordpy
             braceexpand
             import_expression
+            tabulate
           ];
         };
       in {
