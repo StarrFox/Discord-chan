@@ -9,7 +9,7 @@ class Feature(Enum):
     word_track = 1
     typing_watch = 2
     gamer_words = 3
-    cope = 4
+    cope = 4  # removed
     snipe = 5
 
 

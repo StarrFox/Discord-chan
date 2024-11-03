@@ -36,13 +36,15 @@ async def on_command_error(ctx: SubContext, error: Exception):
         now = pendulum.now()
         cooldown_over = now.add(seconds=int(error.retry_after))
 
+        cooldown_content = f"Command on cooldown, retry in {to_discord_timestamp(cooldown_over)}"
+
         cooldown_message = await ctx.reply(
-            f"Command on cooldown, retry in {to_discord_timestamp(cooldown_over)}",
+            cooldown_content,
             mention_author=False,
         )
 
         await asyncio.sleep(error.retry_after)
-        await cooldown_message.edit(content="Cooldown over")
+        await cooldown_message.edit(content=f"~~{cooldown_content}~~ Cooldown over")
         return
 
     elif isinstance(error, EmoteManagerError):
@@ -54,7 +56,7 @@ async def on_command_error(ctx: SubContext, error: Exception):
 
     await ctx.send(
         f"{await ctx.bot.owners_mention()} Unknown error while executing {ctx.command}: {error}",
-        allowed_mentions=discord.AllowedMentions(users=await ctx.bot.owners(as_users=True)),  # type: ignore (User has .id)
+        allowed_mentions=discord.AllowedMentions(users=list(await ctx.bot.owners(as_users=True))),  # TODO: discord.py type for users should be changed to Iterable[SnowFlake] ?
     )
 
 

@@ -1,10 +1,13 @@
 from io import BytesIO
+import typing
 
 import aiohttp
 import discord
 from discord.ext import commands
 
 from discord_chan import DiscordChan, SubContext
+import discord_chan
+from discord_chan.converters import EnumConverter
 
 
 class Owner(commands.Cog, name="owner"):
@@ -20,11 +23,18 @@ class Owner(commands.Cog, name="owner"):
             raise commands.NotOwner("You do not own this bot")
         return True
 
-    @commands.command()
+    @commands.group(name="dbg")
+    async def debug_command(self, ctx: SubContext):
+        """
+        various debug commands
+        """
+        return
+
+    @debug_command.command()
     async def error(self, ctx: SubContext):
         raise Exception("test error")
 
-    @commands.command()
+    @debug_command.command()
     async def enable(self, ctx: SubContext, *, cmd):
         command = self.bot.get_command(cmd)
 
@@ -34,7 +44,7 @@ class Owner(commands.Cog, name="owner"):
         command.enabled = True
         await ctx.confirm("Command enabled")
 
-    @commands.command()
+    @debug_command.command()
     async def disable(self, ctx: SubContext, *, cmd):
         command = self.bot.get_command(cmd)
 
@@ -44,7 +54,7 @@ class Owner(commands.Cog, name="owner"):
         command.enabled = False
         await ctx.confirm("Command disabled")
 
-    @commands.command()
+    @debug_command.command()
     async def resend_file(self, ctx: SubContext, url: str):
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
@@ -56,6 +66,15 @@ class Owner(commands.Cog, name="owner"):
             filename = None
 
         await ctx.send(file=discord.File(BytesIO(data), filename))
+
+    @debug_command.command()
+    async def purge_feature(
+        self, 
+        ctx: SubContext, 
+        feature: typing.Annotated[discord_chan.Feature, EnumConverter(discord_chan.Feature)]
+    ):
+        await self.bot.feature_manager.purge_feature(feature)
+        await ctx.confirm("Feature purged")
 
 
 async def setup(bot):
