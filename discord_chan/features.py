@@ -1,5 +1,7 @@
 from enum import Enum
 
+from loguru import logger
+
 from .database import Database
 
 
@@ -9,6 +11,12 @@ class Feature(Enum):
     gamer_words = 3
     cope = 4
     snipe = 5
+
+
+# features that had their impl removed
+REMOVED_FEATURES: list[Feature] = [
+    Feature.cope
+]
 
 
 class FeatureManager:
@@ -21,7 +29,15 @@ class FeatureManager:
         # note: empty list is accepted
         self.cache[guild_id] = await self.database.get_guild_enabled_features(guild_id)
 
+    async def _drop_cache(self):
+        self.cache = {}
+
     async def is_enabled(self, feature: Feature, guild_id: int) -> bool:
+        # in theory this shouldn't pass
+        if feature in REMOVED_FEATURES:
+            logger.warning(f"removed feature \"{feature}\" requested")
+            return False
+
         feature_string = feature.name
 
         if self.cache.get(guild_id):
@@ -53,9 +69,16 @@ class FeatureManager:
         disabled: list[Feature] = []
 
         for feature in Feature:
+            if feature in REMOVED_FEATURES:
+                continue
+
             if feature.name in self.cache[guild_id]:
                 enabled.append(feature)
             else:
                 disabled.append(feature)
 
         return enabled, disabled
+
+    async def purge_feature(self, feature: Feature):
+        await self.database.purge_feature(feature.name)
+        await self._drop_cache()

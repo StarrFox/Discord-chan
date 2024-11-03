@@ -315,6 +315,16 @@ class Database:
                 feature_name,
             )
 
+    async def purge_feature(self, feature_name: str):
+        pool = await self.connect()
+
+        async with pool.acquire() as connection:
+            connection: asyncpg.Connection
+            await connection.execute(
+                "DELETE FROM enabled_features WHERE feature_name = $1;",
+                feature_name,
+            )
+
     async def delete_coin_account(self, user_id: int):
         pool = await self.connect()
 
