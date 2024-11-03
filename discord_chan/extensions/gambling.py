@@ -116,17 +116,13 @@ class Gambling(commands.Cog):
                 continue
 
             try:
-                member = (await ctx.guild.fetch_member(user_id)).mention
+                member = await ctx.guild.fetch_member(user_id)
+                entries.append(f"{member.mention}: {coins}")
             except discord.NotFound:
                 # continue if not in guild
                 continue
-                # logger.warning(f"Unbound user id {user_id} in coin db")
-                # member = str(user_id)
             except Exception as exc:
                 logger.critical(f"Unhandled exception in view all: {exc}")
-                member = str(user_id) + " [fetch error]"
-            finally:
-                entries.append(f"{member}: {coins}")
 
         source = NormalPageSource(entries, per_page=10)
         menu = DCMenuPages(source)
