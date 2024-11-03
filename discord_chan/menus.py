@@ -77,7 +77,7 @@ class DCMenuPages(menus.MenuPages):
 
         self.show_random_button = show_random_button
 
-    async def send_initial_message(self, ctx, _):
+    async def send_initial_message(self, ctx, channel):
         page = await self._source.get_page(0)
         kwargs = await self._get_kwargs_from_page(page)
         return await ctx.send(**kwargs)
@@ -180,7 +180,7 @@ class EmbedPageSource(menus.ListPageSource):
 
         super().__init__(entries, per_page=per_page)
 
-    async def format_page(self, _, page: discord.Embed):
+    async def format_page(self, menu, page: discord.Embed):
         return page
 
 
@@ -385,5 +385,5 @@ class SafebooruEmbedStreamSource(menus.ListPageSource):
             description=f"Post {page_number + 1}/{self.post_count}"
         ).set_image(url=post)
 
-    async def format_page(self, _, page: discord.Embed):
+    async def format_page(self, menu, page: discord.Embed):
         return page

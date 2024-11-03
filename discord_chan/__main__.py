@@ -12,7 +12,7 @@ import discord_chan
 
 # only works on linux
 try:
-    import uvloop
+    import uvloop  # type: ignore
 except ImportError:
     uvloop = None
 else:

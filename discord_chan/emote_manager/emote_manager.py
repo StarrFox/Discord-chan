@@ -97,7 +97,7 @@ class EmoteManager(commands.Cog):
         for paginator in self.paginators:
             await paginator.stop()
 
-    async def cog_check(self, context: commands.Context):
+    async def cog_check(self, context: commands.Context):  # type: ignore (this method is allowed to be sync and async)
         # only allow in guilds
         if context.guild is None:
             raise commands.NoPrivateMessage()
@@ -501,7 +501,7 @@ class EmoteManager(commands.Cog):
                 )
 
         if validate_headers:
-            await validate(self.http.head(url, timeout=10))
+            await validate(self.http.head(url, timeout=aiohttp.ClientTimeout(10.0)))
         return await validate(self.http.get(url))
 
     async def create_emote_from_bytes(

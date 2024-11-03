@@ -15,7 +15,7 @@ class Owner(commands.Cog, name="owner"):
     def __init__(self, bot: DiscordChan):
         self.bot = bot
 
-    async def cog_check(self, ctx: commands.Context):
+    async def cog_check(self, ctx: commands.Context) -> bool:  # type: ignore (this method is allowed to be sync and async)
         if not await self.bot.is_owner(ctx.author):
             raise commands.NotOwner("You do not own this bot")
         return True

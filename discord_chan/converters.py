@@ -245,7 +245,7 @@ LastImageUrl = commands.parameter(
 
 # TODO: add support for wand images
 class ImageConverter(ImageUrlConverter):
-    async def convert(self, ctx: commands.Context, argument: str) -> Image:
+    async def convert(self, ctx: commands.Context, argument: str) -> Image:  # type: ignore
         url = await super().convert(ctx, argument)
 
         try:
@@ -271,7 +271,7 @@ LastImage = commands.parameter(
 
 
 class EmbedConverter(commands.MessageConverter):
-    async def convert(self, ctx: commands.Context, argument: str):
+    async def convert(self, ctx: commands.Context, argument: str):  # type: ignore
         message = await super().convert(ctx, argument)
 
         if not message.embeds:

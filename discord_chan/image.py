@@ -439,7 +439,7 @@ def get_image_colors(
         return None
 
     # palette_index: RGBA
-    palette: dict[int, tuple[int, int, int, int]] = {
+    palette: dict[int, tuple[int, ...]] = {
         v: k for k, v in image.palette.colors.items()
     }
 

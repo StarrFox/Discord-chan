@@ -17,8 +17,8 @@ class Minimal(commands.MinimalHelpCommand):
         else:
             return ctx
 
-    def get_opening_note(self) -> str | None:
-        return None
+    def get_opening_note(self) -> str:
+        return ""
         # command_name = self.context.invoked_with
         # return f"Use `dc/{command_name} <command/cog>` for more info on a command/cog"
 
@@ -112,7 +112,12 @@ class Minimal(commands.MinimalHelpCommand):
                     # instance
                     if hasattr(converter, "display"):
                         if callable(converter.display):
-                            return converter.display()
+                            display = converter.display()
+
+                            if isinstance(display, str):
+                                return display
+
+                            raise ValueError("converter.display returned non-str")
 
                     return converter.__class__.__name__
 
