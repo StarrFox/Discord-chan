@@ -47,7 +47,8 @@ class Gambling(commands.Cog):
             self._btcprice = price
 
             async def _cooldown_task():
-                await asyncio.sleep(60)
+                # only allow price checks once every hour
+                await asyncio.sleep(delay=60 * 60)
                 # is this ok?
                 self._btc_cooldown_task = None
 
@@ -111,17 +112,19 @@ class Gambling(commands.Cog):
         for user_id, coins in lb:
             # attempt cache pull first
             if (member := ctx.guild.get_member(user_id)) is not None:
-                entries.append(f"{member}: {coins}")
+                entries.append(f"{member.mention}: {coins}")
                 continue
 
             try:
-                member = str(await ctx.guild.fetch_member(user_id))
+                member = (await ctx.guild.fetch_member(user_id)).mention
             except discord.NotFound:
-                logger.warning(f"Unbound user id {user_id} in coin db")
-                member = str(user_id)
+                # continue if not in guild
+                continue
+                # logger.warning(f"Unbound user id {user_id} in coin db")
+                # member = str(user_id)
             except Exception as exc:
                 logger.critical(f"Unhandled exception in view all: {exc}")
-                member = str(user_id)
+                member = str(user_id) + " [fetch error]"
             finally:
                 entries.append(f"{member}: {coins}")
 
