@@ -1,6 +1,6 @@
 import asyncio
 from datetime import datetime
-from random import choice
+from random import choice, shuffle
 
 import discord
 from discord.ext import commands
@@ -82,14 +82,8 @@ class Games(commands.Cog, name="games"):
                 return await ctx.send("Game canceled")
 
         players = [ctx.author, member, member2]
-
-        player1 = choice(players)
-        players.remove(player1)
-
-        player2 = choice(players)
-        players.remove(player2)
-
-        player3 = players[0]
+        shuffle(players)
+        player1, player2, player3 = players
 
         game = Connect4_3Player(player1, player2, player3)
         winner = await game.run(ctx)
