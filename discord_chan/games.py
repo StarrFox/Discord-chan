@@ -13,10 +13,9 @@ class Connect4(menus.Menu):
     blue = "\N{LARGE BLUE CIRCLE}"
     numbers = [str(i) + "\N{VARIATION SELECTOR-16}\u20e3" for i in range(1, 8)]
 
-    def __init__(self, player1: discord.Member, player2: discord.Member, **kwargs):
+    def __init__(self, players: tuple[discord.Member, ...], **kwargs):
         super().__init__(**kwargs)
-        self.players = (player1, player2)
-        self._player_ids = {p.id for p in self.players}
+        self.players = players
         self.player_cycle = cycle(self.players)
         self.current_player = next(self.player_cycle)
         self.last_move = None
@@ -151,41 +150,13 @@ class Connect4(menus.Menu):
 
     async def run(
         self, ctx
-    ) -> discord.Member | tuple[discord.Member, discord.Member] | None:
+    ) -> discord.Member | tuple[discord.Member, ...] | None:
         """
         Run the game and return the winner(s)
         returns None if the first player never made a move
         """
         await self.start(ctx, wait=True)
         return self.winner
-
-
-# TODO: instead of doing this make connect4 class accept any number of players
-class Connect4_3Player(Connect4):
-    yellow = "\N{LARGE YELLOW CIRCLE}"
-
-    def __init__(self, player1: discord.Member, player2: discord.Member, player3: discord.Member, **kwargs):
-        super(Connect4).__init__(**kwargs)
-        self.players = (player1, player2, player3)
-        self._player_ids = {p.id for p in self.players}
-        self.player_cycle = cycle(self.players)
-        self.current_player = next(self.player_cycle)
-        self.last_move = None
-        self.winner = None
-        self.board = numpy.full((6, 7), self.filler)
-        for button in (
-            menus.Button(num, self.do_number_button) for num in self.numbers
-        ):
-            self.add_button(button)
-
-    @property
-    def current_piece(self):
-        if self.current_player == self.players[0]:
-            return self.red
-        elif self.current_player == self.players[1]:
-            return self.blue
-        else:
-            return self.yellow
 
 
 # TODO: pick emojis from guild (make sure there are actually 5)

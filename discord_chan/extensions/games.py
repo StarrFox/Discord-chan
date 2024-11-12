@@ -7,7 +7,6 @@ from discord.ext import commands
 
 from discord_chan import (
     Connect4,
-    Connect4_3Player,
     DiscordChan,
     MasterMindMenu,
     SliderGame,
@@ -47,7 +46,7 @@ class Games(commands.Cog, name="games"):
         ):
             return await ctx.send("connect 4 must be used from a server")
 
-        game = Connect4(player1, player2)
+        game = Connect4((player1, player2))
         winner = await game.run(ctx)
         if winner:
             if isinstance(winner, tuple):
@@ -73,19 +72,22 @@ class Games(commands.Cog, name="games"):
         if member2 == ctx.author or member.bot:
             return await ctx.send("You cannot play against yourself or a bot")
 
+        if member == member2:
+            return await ctx.send("All 3 players must be unique")
+
         confirmation_tasks = [
             asyncio.create_task(ctx.prompt(f"{m.mention} agree to play?", owner_id=m.id)) for m in (member, member2)
         ]
 
-        for response in asyncio.as_completed(confirmation_tasks):
-            if response is False:
+        async for response in asyncio.as_completed(confirmation_tasks):  # type: ignore (some type stubs issue?)
+            if await response is False:
                 return await ctx.send("Game canceled")
 
         players = [ctx.author, member, member2]
         shuffle(players)
         player1, player2, player3 = players
 
-        game = Connect4_3Player(player1, player2, player3)
+        game = Connect4((player1, player2, player3))
         winner = await game.run(ctx)
         if winner:
             if isinstance(winner, tuple):
