@@ -79,7 +79,7 @@ class Games(commands.Cog, name="games"):
             asyncio.create_task(ctx.prompt(f"{m.mention} agree to play?", owner_id=m.id)) for m in (member, member2)
         ]
 
-        async for response in asyncio.as_completed(confirmation_tasks):  # type: ignore (some type stubs issue?)
+        for response in asyncio.as_completed(confirmation_tasks):
             if await response is False:
                 return await ctx.send("Game canceled")
 
