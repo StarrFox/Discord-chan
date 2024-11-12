@@ -160,11 +160,12 @@ class Connect4(menus.Menu):
         return self.winner
 
 
+# TODO: instead of doing this make connect4 class accept any number of players
 class Connect4_3Player(Connect4):
     yellow = "\N{LARGE YELLOW CIRCLE}"
 
     def __init__(self, player1: discord.Member, player2: discord.Member, player3: discord.Member, **kwargs):
-        super().__init__(**kwargs)
+        super(Connect4).__init__(**kwargs)
         self.players = (player1, player2, player3)
         self._player_ids = {p.id for p in self.players}
         self.player_cycle = cycle(self.players)
