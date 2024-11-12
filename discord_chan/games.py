@@ -11,6 +11,7 @@ class Connect4(menus.Menu):
     filler = "\N{BLACK LARGE SQUARE}"
     red = "\N{LARGE RED CIRCLE}"
     blue = "\N{LARGE BLUE CIRCLE}"
+    yellow = "\N{LARGE YELLOW CIRCLE}"
     numbers = [str(i) + "\N{VARIATION SELECTOR-16}\u20e3" for i in range(1, 8)]
 
     def __init__(self, players: tuple[discord.Member, ...], **kwargs):
@@ -76,10 +77,21 @@ class Connect4(menus.Menu):
 
     @property
     def current_piece(self):
-        if self.current_player == self.players[0]:
-            return self.red
-        else:
-            return self.blue
+        match len(self.players):
+            case 2:
+                if self.current_player == self.players[0]:
+                    return self.red
+                else:
+                    return self.blue
+            case 3:
+                if self.current_player == self.players[0]:
+                    return self.red
+                if self.current_player == self.players[1]:
+                    return self.yellow
+                else:
+                    return self.blue
+            case _:
+                raise RuntimeError(f"Unexpected player count {len(self.players)}")
 
     @property
     def board_message(self):
