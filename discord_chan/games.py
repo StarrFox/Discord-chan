@@ -160,6 +160,33 @@ class Connect4(menus.Menu):
         return self.winner
 
 
+class Connect4_3Player(Connect4):
+    yellow = "\N{LARGE YELLOW CIRCLE}"
+
+    def __init__(self, player1: discord.Member, player2: discord.Member, player3: discord.Member, **kwargs):
+        super().__init__(**kwargs)
+        self.players = (player1, player2, player3)
+        self._player_ids = {p.id for p in self.players}
+        self.player_cycle = cycle(self.players)
+        self.current_player = next(self.player_cycle)
+        self.last_move = None
+        self.winner = None
+        self.board = numpy.full((6, 7), self.filler)
+        for button in (
+            menus.Button(num, self.do_number_button) for num in self.numbers
+        ):
+            self.add_button(button)
+
+    @property
+    def current_piece(self):
+        if self.current_player == self.players[0]:
+            return self.red
+        elif self.current_player == self.players[1]:
+            return self.blue
+        else:
+            return self.yellow
+
+
 # TODO: pick emojis from guild (make sure there are actually 5)
 class MasterMindMenu(menus.Menu):
     VARIATION_SELECTOR = "\N{VARIATION SELECTOR-16}"
