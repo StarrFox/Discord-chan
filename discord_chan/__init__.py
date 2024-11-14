@@ -1,6 +1,6 @@
 from loguru import logger
 
-from . import checks, emote_manager, image, utils
+from . import checks, emote_manager, image, utils, jlank
 from .bot import DiscordChan
 from .context import SubContext
 from .converters import *

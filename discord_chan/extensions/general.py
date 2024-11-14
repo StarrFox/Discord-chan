@@ -14,6 +14,7 @@ from discord_chan import (
     NormalPageSource,
     PartitionPaginator,
     SubContext,
+    jlank as jlanker
 )
 from discord_chan.utils import to_discord_timestamp
 
@@ -23,6 +24,14 @@ class General(commands.Cog, name="general"):
 
     def __init__(self, bot: DiscordChan):
         self.bot = bot
+
+    @commands.command()
+    async def jlank(self, ctx: commands.Context, *, words: str):
+        """
+        jlank ja jord
+        """
+        return await ctx.send(jlanker.jlank_jords(words))
+
 
     @commands.command()
     async def charinfo(self, ctx: commands.Context, *, characters):
