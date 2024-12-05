@@ -92,6 +92,7 @@ CREATE TABLE IF NOT EXISTS minecraft_usernames (
 """.strip()
 
 
+# TODO: this class is dog
 class Database:
     def __init__(self):
         self._connection: asyncpg.Pool | None = None

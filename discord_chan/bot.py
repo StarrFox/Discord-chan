@@ -132,8 +132,15 @@ class DiscordChan(commands.AutoShardedBot):
 
         self.ready_once = True
 
-        await self.load_extension("jishaku")
-        await self.load_extension("discord_chan.emote_manager.emote_manager")
+        try:
+            await self.load_extension("jishaku")
+        except (commands.errors.ExtensionError, commands.errors.ExtensionFailed):
+            logger.exception("Jishaku failed to load")
+        
+        try:
+            await self.load_extension("discord_chan.emote_manager.emote_manager")
+        except (commands.errors.ExtensionError, commands.errors.ExtensionFailed):
+            logger.exception("Emote manager failed to load")
 
         root = pathlib.Path(__file__).parent
         extensions_path = root / "extensions"
