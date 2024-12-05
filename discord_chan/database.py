@@ -1,6 +1,5 @@
 import asyncio
 import os
-import pwd
 import sys
 from itertools import count
 from typing import NamedTuple
@@ -12,6 +11,11 @@ from loguru import logger
 
 from discord_chan.snipe import Snipe, SnipeMode
 
+try:
+    import pwd
+except ImportError:
+    pwd = None
+
 
 def get_current_username() -> str:
     match sys.platform:
@@ -20,7 +24,7 @@ def get_current_username() -> str:
 
             if user is not None:
                 return user
-        
+
             raise ValueError("Couldn't find username")
 
         case "linux":
@@ -28,7 +32,9 @@ def get_current_username() -> str:
 
             if user is not None:
                 return user
-            
+
+            # should be there on linux
+            assert pwd is not None
             return pwd.getpwuid(os.getuid()).pw_name  # type: ignore (.getpwuid not on windows but we check platform above)
         case _:
             raise NotImplemented()
