@@ -1,9 +1,5 @@
-from typing import TypeVar
-
 import discord
 from discord.ext import commands
-
-BotT = TypeVar("BotT", bound=commands.Bot | commands.AutoShardedBot)
 
 MessageableGuildChannel = discord.TextChannel | discord.Thread
 
@@ -15,9 +11,8 @@ class GuildMessage(discord.Message):
     channel: MessageableGuildChannel  # type: ignore
 
 
-# TODO: 3.12 GuildContext[T: commands.Bot](commands.Context[T])
 # Context where guild is not None
-class GuildContext(commands.Context[BotT]):
+class GuildContext[T: commands.Bot | commands.AutoShardedBot](commands.Context[T]):
     guild: discord.Guild  # type: ignore
     author: discord.Member  # type: ignore
     channel: MessageableGuildChannel  # type: ignore

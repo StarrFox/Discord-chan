@@ -100,10 +100,11 @@ CREATE TABLE IF NOT EXISTS minecraft_usernames (
 
 # TODO: this class is dog
 class Database:
-    def __init__(self):
+    def __init__(self, debug_mode: bool = False):
         self._connection: asyncpg.Pool | None = None
         self._ensured: bool = False
         self._connection_lock = asyncio.Lock()
+        self._debug_mode = debug_mode
 
     async def _ensure_tables(self, pool: asyncpg.Pool):
         # A lock isnt needed here because .connect is already locked
@@ -120,9 +121,11 @@ class Database:
             if self._connection is not None:
                 return self._connection
 
+            password = "a" if self._debug_mode else None
+
             # TODO: make sure connection is closed on exit
             self._connection = await asyncpg.create_pool(
-                user=DATABASE_user, database=DATABASE_name
+                user=DATABASE_user, database=DATABASE_name, password=password
             )
             assert self._connection is not None
             await self._ensure_tables(self._connection)

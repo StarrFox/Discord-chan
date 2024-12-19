@@ -5,7 +5,6 @@ from typing import Literal
 import discord
 import numpy
 from discord.ext import menus
-from numpy._core.multiarray import _Array
 
 
 # TODO: allow them to set what emoji their token is, some kind of setting "dc/setting connect4 :mfw:"

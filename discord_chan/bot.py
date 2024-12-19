@@ -37,7 +37,7 @@ class DiscordChan(commands.AutoShardedBot):
         self.context = context
         self.ready_once = False
         self.uptime = datetime.now()
-        self.database = Database()
+        self.database = Database(debug_mode=self.debug_mode)
         self.feature_manager = FeatureManager(self.database)
 
         self._owners_cache: int | list[int] | None = None
