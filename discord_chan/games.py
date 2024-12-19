@@ -1,9 +1,11 @@
 from itertools import cycle
 from random import choice, randint, shuffle
+from typing import Literal
 
 import discord
 import numpy
 from discord.ext import menus
+from numpy._core.multiarray import _Array
 
 
 # TODO: allow them to set what emoji their token is, some kind of setting "dc/setting connect4 :mfw:"
@@ -21,7 +23,7 @@ class Connect4(menus.Menu):
         self.current_player = next(self.player_cycle)
         self.last_move = None
         self.winner = None
-        self.board = numpy.full((6, 7), self.filler)
+        self.board: numpy.ndarray[tuple[Literal[6], Literal[7]], numpy.dtype[numpy.character]] = numpy.full((6, 7), self.filler)
         for button in (
             menus.Button(num, self.do_number_button) for num in self.numbers
         ):
@@ -133,7 +135,7 @@ class Connect4(menus.Menu):
         )
 
     def check_wins(self):
-        def check(array: list):
+        def check(array):
             array = list(array)
             for i in range(len(array) - 3):
                 if array[i : i + 4].count(self.current_piece) == 4:

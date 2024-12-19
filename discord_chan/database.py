@@ -37,7 +37,7 @@ def get_current_username() -> str:
             assert pwd is not None
             return pwd.getpwuid(os.getuid()).pw_name  # type: ignore (.getpwuid not on windows but we check platform above)
         case _:
-            raise NotImplemented()
+            raise NotImplementedError()
 
 
 # TODO: add environment variables for these
