@@ -467,12 +467,13 @@ dev = ["Sphinx (==7.2.5)", "colorama (==0.4.5)", "colorama (==0.4.6)", "exceptio
 
 [[package]]
 name = "loguru-logging-intercept"
-version = "0.1.4"
+version = "0.1.5"
 description = "Code to integrate Loguru with Python's standard logging module"
 optional = false
 python-versions = "*"
 files = [
-    {file = "loguru-logging-intercept-0.1.4.tar.gz", hash = "sha256:3913c1a97b5074ca8ad2fea7fa50456cb50f476484a42a6f8fcc362a50630064"},
+    {file = "loguru_logging_intercept-0.1.5-py3-none-any.whl", hash = "sha256:d0e0397fe83e4f1122cbd37bf5d73f8c878099b6fb52a236d5123654f46fc0c5"},
+    {file = "loguru_logging_intercept-0.1.5.tar.gz", hash = "sha256:581038bf1310fbb06cda48afbd373e72bbc01d51c4df058f49081ab7a7c5f984"},
 ]
 
 [package.dependencies]
