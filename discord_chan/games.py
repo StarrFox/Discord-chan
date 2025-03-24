@@ -1,5 +1,6 @@
 from itertools import cycle
 from random import choice, randint, shuffle
+from typing import Literal
 
 import discord
 import numpy
@@ -21,7 +22,7 @@ class Connect4(menus.Menu):
         self.current_player = next(self.player_cycle)
         self.last_move = None
         self.winner = None
-        self.board = numpy.full((6, 7), self.filler)
+        self.board: numpy.ndarray = numpy.full((6, 7), self.filler)
         for button in (
             menus.Button(num, self.do_number_button) for num in self.numbers
         ):
@@ -133,7 +134,7 @@ class Connect4(menus.Menu):
         )
 
     def check_wins(self):
-        def check(array: list):
+        def check(array):
             array = list(array)
             for i in range(len(array) - 3):
                 if array[i : i + 4].count(self.current_piece) == 4:
@@ -317,21 +318,21 @@ class MasterMindMenu(menus.Menu):
 class SliderGame(menus.Menu):
     SPACER = "\N{BLACK LARGE SQUARE}"
     SLIDER_EMOJIS = [
-        "<:dc_0:1180808648038027346>",
-        "<:dc_1:1180808651267641364>",
-        "<:dc_2:1180808652861481011>",
-        "<:dc_3:1180808655365480488>",
-        "<:dc_4:1180808657827549234>",
-        "<:dc_5:1180808661258489896>",
-        "<:dc_6:1180808664014131260>",
-        "<:dc_7:1180808684029345812>",
-        "<:dc_8:1180808686726287413>",
-        "<:dc_9:1180808688584368230>",
-        "<:dc_10:1180808690882850868>",
-        "<:dc_11:1180808692774481981>",
-        "<:dc_12:1180808694938738708>",
-        "<:dc_13:1180808697216253992>",
-        "<:dc_14:1180808699619577866>",
+        "<a:winkbig_0:1353456970438283447>",
+        "<a:winkbig_1:1353456972942544980>",
+        "<a:winkbig_2:1353456975282831400>",
+        "<a:winkbig_3:1353456977602154637>",
+        "<a:winkbig_4:1353456979988840448>",
+        "<a:winkbig_5:1353456982639513694>",
+        "<a:winkbig_6:1353456985307222116>",
+        "<a:winkbig_7:1353456987387465769>",
+        "<a:winkbig_8:1353457008161849476>",
+        "<a:winkbig_9:1353457010548674673>",
+        "<a:winkbig_10:1353457013023178874>",
+        "<a:winkbig_11:1353457015799939092>",
+        "<a:winkbig_12:1353457018341429381>",
+        "<a:winkbig_13:1353457026818117673>",
+        "<a:winkbig_14:1353457029670244415>",
         SPACER,
     ]
 

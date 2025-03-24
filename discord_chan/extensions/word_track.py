@@ -12,7 +12,6 @@ from discord_chan.menus import DCMenuPages, NormalPageSource
 
 # number of seconds to wait for edits to messages before consuming
 EDIT_GRACE_TIME = 15
-
 WORD_SIZE_LIMIT = 20
 
 

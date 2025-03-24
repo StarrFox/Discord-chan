@@ -28,62 +28,62 @@ class Garbage(commands.Cog):
         if len(list(loli_filter.finditer(message.content))) > 0:
             return await message.delete()
 
-    @commands.group(invoke_without_command=True, aliases=["mc"])
-    @discord_chan.checks.some_guilds(1015677559020724264)  # spoil server only
-    async def minecraft(self, ctx: discord_chan.SubContext, username: str):
-        """
-        Set your minecraft username
-        """
-        await ctx.bot.database.update_minecraft_username(
-            user_id=ctx.author.id, username=username
-        )
-        await ctx.confirm("Username updated")
+    # @commands.group(invoke_without_command=True, aliases=["mc"])
+    # @discord_chan.checks.some_guilds(1015677559020724264)  # spoil server only
+    # async def minecraft(self, ctx: discord_chan.SubContext, username: str):
+    #     """
+    #     Set your minecraft username
+    #     """
+    #     await ctx.bot.database.update_minecraft_username(
+    #         user_id=ctx.author.id, username=username
+    #     )
+    #     await ctx.confirm("Username updated")
 
-        mc_role = ctx.guild.get_role(1241826442501947543)
+    #     mc_role = ctx.guild.get_role(1241826442501947543)
 
-        if mc_role is None:
-            return
+    #     if mc_role is None:
+    #         return
 
-        with contextlib.suppress(discord.Forbidden):
-            await ctx.author.add_roles(mc_role, reason="minecraft")
+    #     with contextlib.suppress(discord.Forbidden):
+    #         await ctx.author.add_roles(mc_role, reason="minecraft")
 
-    @minecraft.command(name="list")
-    async def minecraft_list(self, ctx: discord_chan.SubContext):
-        """
-        Get minecraft usernames
-        """
-        usernames = await ctx.bot.database.get_minecraft_usernames()
+    # @minecraft.command(name="list")
+    # async def minecraft_list(self, ctx: discord_chan.SubContext):
+    #     """
+    #     Get minecraft usernames
+    #     """
+    #     usernames = await ctx.bot.database.get_minecraft_usernames()
 
-        result = ""
-        for user_id, name in usernames.items():
-            member_name = await ctx.bot.get_member_reference(ctx, user_id)
-            result += f"{member_name}: {name}\n"
+    #     result = ""
+    #     for user_id, name in usernames.items():
+    #         member_name = await ctx.bot.get_member_reference(ctx, user_id)
+    #         result += f"{member_name}: {name}\n"
 
-        if result == "":
-            result = "No usernames stored"
+    #     if result == "":
+    #         result = "No usernames stored"
 
-        await ctx.send(result)
+    #     await ctx.send(result)
 
-    @minecraft.command(name="admin_add")
-    @commands.has_permissions(administrator=True)
-    async def minecraft_admin_add(
-        self, ctx: discord_chan.SubContext, user: discord.Member, username: str
-    ):
-        """
-        Admin add a minecraft username
-        """
-        await ctx.bot.database.update_minecraft_username(
-            user_id=user.id, username=username
-        )
-        await ctx.confirm("Username updated")
+    # @minecraft.command(name="admin_add")
+    # @commands.has_permissions(administrator=True)
+    # async def minecraft_admin_add(
+    #     self, ctx: discord_chan.SubContext, user: discord.Member, username: str
+    # ):
+    #     """
+    #     Admin add a minecraft username
+    #     """
+    #     await ctx.bot.database.update_minecraft_username(
+    #         user_id=user.id, username=username
+    #     )
+    #     await ctx.confirm("Username updated")
 
-        mc_role = ctx.guild.get_role(1241826442501947543)
+    #     mc_role = ctx.guild.get_role(1241826442501947543)
 
-        if mc_role is None:
-            return
+    #     if mc_role is None:
+    #         return
 
-        with contextlib.suppress(discord.Forbidden):
-            await user.add_roles(mc_role, reason="minecraft")
+    #     with contextlib.suppress(discord.Forbidden):
+    #         await user.add_roles(mc_role, reason="minecraft")
 
 
 async def setup(bot: discord_chan.DiscordChan):

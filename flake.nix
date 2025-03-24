@@ -28,6 +28,19 @@
 
         pyproject = builtins.fromTOML (builtins.readFile ./pyproject.toml);
 
+        aexaroton = python.pkgs.buildPythonPackage rec {
+          pname = "aexaroton";
+          version = "0.1.0";
+          format = "pyproject";
+          src = python.pkgs.fetchPypi {
+            inherit pname version;
+            hash = "sha256-XH0EIyk83CCrpUSLh4aB+IIbsE0sxUWh4se6dsRecQo=";
+          };
+          pythonImportsCheck = [pname];
+          nativeBuildInputs = with python.pkgs; [poetry-core];
+          propagatedBuildInputs = with python.pkgs; [aiohttp yarl pydantic];
+        };
+
         loguru-logging-intercept = python.pkgs.buildPythonPackage rec {
           pname = "loguru-logging-intercept";
           version = "0.1.4";
@@ -137,6 +150,7 @@
             psutil
             typing-extensions
             loguru-logging-intercept
+            aexaroton
           ];
 
           meta.mainProgram = "discord_chan";

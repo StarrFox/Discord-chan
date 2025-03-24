@@ -18,6 +18,7 @@ ROOT = pathlib.Path(__file__).parent
 class DiscordChan(commands.AutoShardedBot):
     def __init__(self, *, context: type[commands.Context] = SubContext, **kwargs):
         self.debug_mode: bool = kwargs.pop("debug_mode", False)
+        self.exaroton_token: str | None = kwargs.pop("exaroton_token", None)
         super().__init__(
             command_prefix=kwargs.pop("command_prefix", self.get_command_prefix),
             case_insensitive=kwargs.pop("case_insensitive", True),
@@ -37,7 +38,7 @@ class DiscordChan(commands.AutoShardedBot):
         self.context = context
         self.ready_once = False
         self.uptime = datetime.now()
-        self.database = Database()
+        self.database = Database(debug_mode=self.debug_mode)
         self.feature_manager = FeatureManager(self.database)
 
         self._owners_cache: int | list[int] | None = None
@@ -132,8 +133,15 @@ class DiscordChan(commands.AutoShardedBot):
 
         self.ready_once = True
 
-        await self.load_extension("jishaku")
-        await self.load_extension("discord_chan.emote_manager.emote_manager")
+        try:
+            await self.load_extension("jishaku")
+        except (commands.errors.ExtensionError, commands.errors.ExtensionFailed):
+            logger.exception("Jishaku failed to load")
+        
+        try:
+            await self.load_extension("discord_chan.emote_manager.emote_manager")
+        except (commands.errors.ExtensionError, commands.errors.ExtensionFailed):
+            logger.exception("Emote manager failed to load")
 
         root = pathlib.Path(__file__).parent
         extensions_path = root / "extensions"

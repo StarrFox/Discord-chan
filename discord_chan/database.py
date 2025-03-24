@@ -1,6 +1,5 @@
 import asyncio
 import os
-import pwd
 import sys
 from itertools import count
 from typing import NamedTuple
@@ -12,6 +11,11 @@ from loguru import logger
 
 from discord_chan.snipe import Snipe, SnipeMode
 
+try:
+    import pwd
+except ImportError:
+    pwd = None
+
 
 def get_current_username() -> str:
     match sys.platform:
@@ -20,7 +24,7 @@ def get_current_username() -> str:
 
             if user is not None:
                 return user
-        
+
             raise ValueError("Couldn't find username")
 
         case "linux":
@@ -28,10 +32,12 @@ def get_current_username() -> str:
 
             if user is not None:
                 return user
-            
+
+            # should be there on linux
+            assert pwd is not None
             return pwd.getpwuid(os.getuid()).pw_name  # type: ignore (.getpwuid not on windows but we check platform above)
         case _:
-            raise NotImplemented()
+            raise NotImplementedError()
 
 
 # TODO: add environment variables for these
@@ -92,11 +98,13 @@ CREATE TABLE IF NOT EXISTS minecraft_usernames (
 """.strip()
 
 
+# TODO: this class is dog
 class Database:
-    def __init__(self):
+    def __init__(self, debug_mode: bool = False):
         self._connection: asyncpg.Pool | None = None
         self._ensured: bool = False
         self._connection_lock = asyncio.Lock()
+        self._debug_mode = debug_mode
 
     async def _ensure_tables(self, pool: asyncpg.Pool):
         # A lock isnt needed here because .connect is already locked
@@ -113,9 +121,11 @@ class Database:
             if self._connection is not None:
                 return self._connection
 
+            password = "a" if self._debug_mode else None
+
             # TODO: make sure connection is closed on exit
             self._connection = await asyncpg.create_pool(
-                user=DATABASE_user, database=DATABASE_name
+                user=DATABASE_user, database=DATABASE_name, password=password
             )
             assert self._connection is not None
             await self._ensure_tables(self._connection)
@@ -147,6 +157,22 @@ class Database:
             result[record["user_id"]] = record["username"]
 
         return result
+
+    async def get_minecraft_username(self, user_id: int) -> str | None:
+        pool = await self.connect()
+
+        async with pool.acquire() as connection:
+            connection: asyncpg.Connection
+
+            record: asyncpg.Record | None = await connection.fetchrow(
+                    "SELECT user_id, username FROM minecraft_usernames WHERE user_id = $1;",
+                    user_id
+                )
+        
+        if record is not None:
+            return record["username"]
+
+        return None
 
     async def update_word_track_word(
         self, *, server_id: int, author_id: int, word: str, amount: int

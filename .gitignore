@@ -105,7 +105,7 @@ venv.bak/
 .mypy_cache/
 
 # secrets
-discord_token.secret
+*.secret
 
 # storage
 discord_chan.db
@@ -115,3 +115,5 @@ result
 .direnv
 
 .pre-commit-config.yaml
+
+scratchpad.py
