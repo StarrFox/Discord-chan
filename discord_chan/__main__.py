@@ -33,7 +33,13 @@ os.environ["JISHAKU_RETAIN"] = "true"
     type=click.Path(exists=True, dir_okay=False, path_type=Path),
     default="discord_token.secret",
 )
-def main(debug: bool, secret: Path):
+@click.option(
+    "--exaroton",
+    help="path to exaroton token",
+    type=click.Path(dir_okay=False, path_type=Path),
+    default="exaroton.secret"
+)
+def main(debug: bool, secret: Path, exaroton: Path):
     setup_loguru_logging_intercept(
         level=logging.DEBUG,
         modules=("discord"),
@@ -51,7 +57,13 @@ def main(debug: bool, secret: Path):
         asyncio.get_event_loop().set_debug(True)
         logging.getLogger("asyncio").setLevel(logging.DEBUG)
 
-    bot = discord_chan.DiscordChan(debug_mode=debug)
+    if exaroton.exists():
+        with open(exaroton) as fp:
+            exaroton_token = fp.read().strip("\n")
+    else:
+        exaroton_token = None
+
+    bot = discord_chan.DiscordChan(debug_mode=debug, exaroton_token=exaroton_token)
 
     with open(secret) as fp:
         discord_token = fp.read().strip("\n")

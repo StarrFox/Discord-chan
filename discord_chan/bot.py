@@ -18,6 +18,7 @@ ROOT = pathlib.Path(__file__).parent
 class DiscordChan(commands.AutoShardedBot):
     def __init__(self, *, context: type[commands.Context] = SubContext, **kwargs):
         self.debug_mode: bool = kwargs.pop("debug_mode", False)
+        self.exaroton_token: str | None = kwargs.pop("exaroton_token", None)
         super().__init__(
             command_prefix=kwargs.pop("command_prefix", self.get_command_prefix),
             case_insensitive=kwargs.pop("case_insensitive", True),

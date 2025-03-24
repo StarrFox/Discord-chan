@@ -158,6 +158,22 @@ class Database:
 
         return result
 
+    async def get_minecraft_username(self, user_id: int) -> str | None:
+        pool = await self.connect()
+
+        async with pool.acquire() as connection:
+            connection: asyncpg.Connection
+
+            record: asyncpg.Record | None = await connection.fetchrow(
+                    "SELECT user_id, username FROM minecraft_usernames WHERE user_id = $1;",
+                    user_id
+                )
+        
+        if record is not None:
+            return record["username"]
+
+        return None
+
     async def update_word_track_word(
         self, *, server_id: int, author_id: int, word: str, amount: int
     ):
