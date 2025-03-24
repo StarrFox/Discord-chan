@@ -40,8 +40,18 @@ in {
         file with discord token to be used by the bot
       '';
     };
+    exarotonTokenFile = mkOption {
+      type = types.path;
+      example = literalExpression "~/exaroton_token";
+      description = lib.mdDoc ''
+        file with exaroton token to be used by the bot
+      '';
+      default = null;
+    };
   };
-  config = mkIf cfg.enable {
+  config = mkIf cfg.enable let
+    exaroton = if cfg.exarotonTokenFile == null then "" else "--exaroton ${cfg.exarotonTokenFile}"
+  in {
     systemd.services.discord_chan = {
       description = "Discord chan bot";
       wantedBy = ["multi-user.target"];
@@ -51,7 +61,7 @@ in {
         User = cfg.user;
         Group = cfg.group;
         Restart = "always";
-        ExecStart = "${lib.getExe spkgs.discord_chan} --secret ${cfg.tokenFile}";
+        ExecStart = "${lib.getExe spkgs.discord_chan} --secret ${cfg.tokenFile} ${exaroton}";
       };
     };
 
