@@ -50,7 +50,7 @@ in {
     };
   };
   config = let
-    exaroton = if cfg.exarotonTokenFile == null then "" else "--exaroton ${cfg.exarotonTokenFile}"
+    exaroton = if cfg.exarotonTokenFile == null then "" else "--exaroton ${cfg.exarotonTokenFile}";
   in mkIf cfg.enable {
     systemd.services.discord_chan = {
       description = "Discord chan bot";
