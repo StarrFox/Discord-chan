@@ -9,6 +9,8 @@ import discord_chan
 from discord_chan import DiscordChan
 from discord_chan.context import SubContext
 from discord_chan.menus import DCMenuPages, NormalPageSource
+from discord_chan.checks import feature_enabled
+from discord_chan.features import Feature
 
 # number of seconds to wait for edits to messages before consuming
 EDIT_GRACE_TIME = 15
@@ -75,6 +77,7 @@ class WordTrack(commands.Cog):
 
     @commands.group(name="words", invoke_without_command=True, aliases=["word"])
     @commands.guild_only()
+    @feature_enabled(Feature.word_track)
     async def words_command(self, ctx: SubContext):
         """
         Get word count leaderboard for the server
