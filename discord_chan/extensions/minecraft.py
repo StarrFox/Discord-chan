@@ -95,6 +95,7 @@ class Minecraft(commands.Cog):
                         break
                     else:
                         member_message_parts.append(f"{whitelist_username}: [member not in server ({user_id})]")
+                        break
             else:
                 member_message_parts.append(whitelist_username)
 

@@ -34,7 +34,7 @@ class Snipe(commands.Cog, name="snipe"):
 
     @commands.Cog.listener("on_message_delete")
     async def snipe_delete(self, message: discord.Message):
-        await self.attempt_add_snipe(message, SnipeMode.edited)
+        await self.attempt_add_snipe(message, SnipeMode.deleted)
 
     @commands.Cog.listener("on_bulk_message_delete")
     async def bulk_snipe_delete(self, messages: list[discord.Message]):
