@@ -516,8 +516,6 @@ class Database:
         limit: int | None = None,
         negative: bool = False,
     ) -> tuple[list[Snipe], int]:
-        pool = await self.connect()
-
         args = []
         query_parts = []
         row_limit = ""
@@ -536,7 +534,7 @@ class Database:
             args.append(channel)
 
         if contains is not None:
-            # the position function returns 1 or above in the substring is within content
+            # the position function returns 1 or above if the substring is within content
             query_parts.append(f"position(${next(counter)} in content) > 0")
             args.append(contains)
 
@@ -561,6 +559,8 @@ class Database:
             order = "ASC"
         else:
             order = "DESC"
+
+        pool = await self.connect()
 
         async with pool.acquire() as connection:
             connection: asyncpg.Connection
