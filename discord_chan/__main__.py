@@ -35,11 +35,17 @@ os.environ["JISHAKU_RETAIN"] = "true"
 )
 @click.option(
     "--exaroton",
-    help="path to exaroton token",
+    help="Path to exaroton token",
     type=click.Path(dir_okay=False, path_type=Path),
     default="exaroton.secret"
 )
-def main(debug: bool, secret: Path, exaroton: Path):
+@click.option(
+    "--datastore",
+    help="Path to datastore root",
+    type=click.Path(dir_okay=True, file_okay=False, path_type=Path, resolve_path=True),
+    default="store"
+)
+def main(debug: bool, secret: Path, exaroton: Path, datastore: Path):
     setup_loguru_logging_intercept(
         level=logging.DEBUG,
         modules=("discord"),
@@ -63,7 +69,7 @@ def main(debug: bool, secret: Path, exaroton: Path):
     else:
         exaroton_token = None
 
-    bot = discord_chan.DiscordChan(debug_mode=debug, exaroton_token=exaroton_token)
+    bot = discord_chan.DiscordChan(debug_mode=debug, exaroton_token=exaroton_token, datastore_root=datastore)
 
     with open(secret) as fp:
         discord_token = fp.read().strip("\n")
