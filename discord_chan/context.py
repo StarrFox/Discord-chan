@@ -6,7 +6,7 @@ from typing_extensions import override
 from loguru import logger
 
 from .menus import ConfirmationMenu, DCMenuPages, NormalPageSource, PartitionPaginator
-from .typing import GuildContext
+from .typing_helpers import GuildContext
 
 if TYPE_CHECKING:
     from discord_chan import DiscordChan
