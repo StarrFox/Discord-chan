@@ -10,15 +10,25 @@ from .context import SubContext
 from .database import Database
 from .features import FeatureManager
 from .help import Minimal
+from .datastore import DataStore
 
 DEFAULT_PREFIXES = ["sf/", "SF/", "dc/", "DC/"]
 ROOT = pathlib.Path(__file__).parent
 
 
 class DiscordChan(commands.AutoShardedBot):
-    def __init__(self, *, context: type[commands.Context] = SubContext, **kwargs):
-        self.debug_mode: bool = kwargs.pop("debug_mode", False)
-        self.exaroton_token: str | None = kwargs.pop("exaroton_token", None)
+    def __init__(
+            self,
+            *,
+            context: type[commands.Context] = SubContext,
+            debug_mode: bool = False,
+            exaroton_token: str | None = None,
+            datastore_root: pathlib.Path | None = None,
+            **kwargs
+        ):
+        self.debug_mode: bool = debug_mode
+        self.exaroton_token: str | None = exaroton_token
+        self.datastore_root: pathlib.Path | None = datastore_root
         super().__init__(
             command_prefix=kwargs.pop("command_prefix", self.get_command_prefix),
             case_insensitive=kwargs.pop("case_insensitive", True),
@@ -40,6 +50,11 @@ class DiscordChan(commands.AutoShardedBot):
         self.uptime = datetime.now()
         self.database = Database(debug_mode=self.debug_mode)
         self.feature_manager = FeatureManager(self.database)
+
+        if datastore_root is None:
+            self.discord_datastore = None
+        else:
+            self.discord_datastore = DataStore.from_root(datastore_root, name="discord")
 
         self._owners_cache: int | list[int] | None = None
 

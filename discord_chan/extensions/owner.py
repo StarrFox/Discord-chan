@@ -10,6 +10,7 @@ import discord_chan
 from discord_chan.converters import EnumConverter
 
 
+# TODO: dc/dbg purge_snipes --author 123 --channel 123 --last 10 --all --server --global
 class Owner(commands.Cog, name="owner"):
     """
     Owner commands
