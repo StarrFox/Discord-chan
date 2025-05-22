@@ -75,7 +75,7 @@ class Minecraft(commands.Cog):
 
         await ctx.send("\n".join(message_parts))
     
-    @server.group(name="whitelist", aliases=["wl"])
+    @server.group(name="whitelist", aliases=["wl"], invoke_without_command=True)
     async def server_whitelist(self, ctx: discord_chan.SubContext):
         """
         View server whitelist
@@ -83,6 +83,10 @@ class Minecraft(commands.Cog):
         server = await self.get_guild_default_server(ctx.guild.id)
 
         whitelist_usernames = await server.get_player_list("whitelist")
+
+        if len(whitelist_usernames) == 0:
+            return await ctx.send("No one on whitelist")
+
         usernames = await self.bot.database.get_minecraft_usernames()
 
         member_message_parts: list[str] = []
