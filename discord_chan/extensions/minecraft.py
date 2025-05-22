@@ -8,7 +8,7 @@ import discord_chan
 
 
 # temporary until I add a thing to set this
-glorp_server_id = "bD7ij9ZbESh0Qzb0"
+glorp_server_id = "j0KYqbV48uhsoKZi"
 
 
 class Minecraft(commands.Cog):
@@ -75,7 +75,7 @@ class Minecraft(commands.Cog):
 
         await ctx.send("\n".join(message_parts))
     
-    @server.command(name="whitelist")
+    @server.group(name="whitelist", aliases=["wl"])
     async def server_whitelist(self, ctx: discord_chan.SubContext):
         """
         View server whitelist
@@ -100,6 +100,29 @@ class Minecraft(commands.Cog):
                 member_message_parts.append(whitelist_username)
 
         await ctx.send("\n".join(member_message_parts))
+
+    @server_whitelist.command(name="sync")
+    async def server_whitelist_sync(self, ctx: discord_chan.SubContext):
+        """
+        Sync whitelist with stored usernames
+        """
+        server = await self.get_guild_default_server(ctx.guild.id)
+
+        usernames = await self.bot.database.get_minecraft_usernames()
+        current = await server.get_player_list("whitelist")
+
+        to_add = list(usernames.values())
+
+        to_remove: list[str] = []
+        for name in current:
+            if name not in to_add:
+                to_remove.append(name)
+        
+        await server.remove_from_player_list("whitelist", to_remove)
+        await server.add_to_player_list("whitelist", to_add)
+
+        await ctx.confirm("Synced")
+
 
 
 async def setup(bot: discord_chan.DiscordChan):
