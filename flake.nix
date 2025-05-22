@@ -30,11 +30,11 @@
 
         aexaroton = python.pkgs.buildPythonPackage rec {
           pname = "aexaroton";
-          version = "0.1.0";
+          version = "0.1.1";
           format = "pyproject";
           src = python.pkgs.fetchPypi {
             inherit pname version;
-            hash = "sha256-XH0EIyk83CCrpUSLh4aB+IIbsE0sxUWh4se6dsRecQo=";
+            hash = "sha256-8wnGq2dGbQVLldrnhFKdLZc1vRtFyp+Jht5qUGIbBqI=";
           };
           pythonImportsCheck = [pname];
           nativeBuildInputs = with python.pkgs; [poetry-core];
