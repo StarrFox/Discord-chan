@@ -155,6 +155,7 @@ class DataStore:
     def key_exists(self, key: int) -> bool:
         return (self.file_path / "data" / f"{key}.data").exists()
 
+    # TODO: allow storing metadata with the file {"name": "blah.png"} and also compress it
     def store(self, data: bytes) -> int:
         if not self.file_path.exists():
             logger.info(f"Datastore {self.get_qualified_name()} not found, creating")

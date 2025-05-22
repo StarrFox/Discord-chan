@@ -32,6 +32,11 @@ class Snipe(commands.Cog, name="snipe"):
     def __init__(self, bot: DiscordChan):
         self.bot = bot
 
+        if self.bot.discord_datastore is not None:
+            self.snipe_datastore = self.bot.discord_datastore.get_substore("snipe")
+        else:
+            self.snipe_datastore = None
+
     @commands.Cog.listener("on_message_delete")
     async def snipe_delete(self, message: discord.Message):
         await self.attempt_add_snipe(message, SnipeMode.deleted)
