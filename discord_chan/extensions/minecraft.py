@@ -115,7 +115,11 @@ class Minecraft(commands.Cog):
         usernames = await self.bot.database.get_minecraft_usernames()
         current = await server.get_player_list("whitelist")
 
-        to_add = list(usernames.values())
+        to_add: list[str] = []
+
+        for user_id, username in usernames.items():
+            if ctx.guild.get_member(user_id) is not None:
+                to_add.append(username)
 
         to_remove: list[str] = []
         for name in current:
