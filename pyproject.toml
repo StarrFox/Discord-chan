@@ -23,7 +23,7 @@ parsedatetime = "^2.6"
 typing-extensions = "^4.13.2"
 loguru-logging-intercept = "^0.1.5"
 audioop-lts = {version = "^0.2.1", python = "^3.13"}
-aexaroton = "^0.1.1"
+aexaroton = "^0.1.2"
 asyncpg = "^0.30.0"
 
 [tool.poetry.scripts]
