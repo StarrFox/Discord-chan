@@ -7,10 +7,6 @@ from loguru import logger
 import discord_chan
 
 
-# temporary until I add a thing to set this
-glorp_server_id = "j0KYqbV48uhsoKZi"
-
-
 class Minecraft(commands.Cog):
     def __init__(self, bot: discord_chan.DiscordChan, exaroton_token: str) -> None:
         super().__init__()
@@ -19,13 +15,15 @@ class Minecraft(commands.Cog):
         self.exaroton = aexaroton.Client(exaroton_token)
 
     async def get_guild_default_server(self, server_id: int) -> aexaroton.server.Server:
-        if server_id == 1330327277589758076:
-            return await self.exaroton.get_server(glorp_server_id)
+        mc_server_id = await self.bot.database.get_guild_default_minecraft_server(guild_id=server_id)
+
+        if mc_server_id is not None:
+            # TODO: you forgot to check what happens if a server doesn't exist 5head
+            return await self.exaroton.get_server(mc_server_id)
         
-        raise NotImplementedError("other servers not yet supported")
+        raise commands.CommandError("Use `dc/mc server default` to set the default server")
 
     @commands.group(invoke_without_command=True, aliases=["mc"])
-    @discord_chan.checks.some_guilds(1330327277589758076)  # glorp server only for testing
     async def minecraft(self, ctx: discord_chan.SubContext):
         """
         Base minecraft command
@@ -74,7 +72,20 @@ class Minecraft(commands.Cog):
         ]
 
         await ctx.send("\n".join(message_parts))
-    
+
+    # TODO: add some permission check or something
+    @server.command(name="default")
+    async def server_default(self, ctx: discord_chan.SubContext, server_id: str):
+        """
+        Set default server
+        """
+        # TODO: probably make a server converter
+        #  accept address, name and id
+        #  reuse elsewhere
+        server = await self.exaroton.get_server(server_id)
+        await self.bot.database.update_guild_default_minecraft_server(guild_id=ctx.guild.id, server_id=server_id)
+        await ctx.send(f"Setting default server to {server.data.name}")
+
     @server.group(name="whitelist", aliases=["wl"], invoke_without_command=True)
     async def server_whitelist(self, ctx: discord_chan.SubContext):
         """

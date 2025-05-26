@@ -95,6 +95,11 @@ CREATE TABLE IF NOT EXISTS minecraft_usernames (
     user_id BIGINT PRIMARY KEY,
     username TEXT UNIQUE
 );
+
+CREATE TABLE IF NOT EXISTS minecraft_default_servers (
+    guild_id BIGINT PRIMARY KEY,
+    server_id TEXT
+);
 """.strip()
 
 
@@ -131,13 +136,36 @@ class Database:
             await self._ensure_tables(self._connection)
             return self._connection
 
+    async def update_guild_default_minecraft_server(self, *, guild_id: int, server_id: str):
+        pool = await self.connect()
+
+        async with pool.acquire() as connection:
+            connection: asyncpg.Connection
+            await connection.execute(
+                "INSERT INTO minecraft_default_servers (guild_id, server_id) VALUES ($1, $2) ON CONFLICT (guild_id) DO UPDATE SET server_id = EXCLUDED.server_id;",
+                guild_id,
+                server_id
+            )
+
+    async def get_guild_default_minecraft_server(self, *, guild_id: int) -> str | None:
+        pool = await self.connect()
+
+        async with pool.acquire() as connection:
+            connection: asyncpg.Connection
+            record: asyncpg.Record | None = await connection.fetchrow("SELECT guild_id, server_id FROM minecraft_default_servers where guild_id = $1;", guild_id)
+        
+        if record is not None:
+            return record["server_id"]
+        
+        return None
+
     async def update_minecraft_username(self, *, user_id: int, username: str):
         pool = await self.connect()
 
         async with pool.acquire() as connection:
             connection: asyncpg.Connection
             await connection.execute(
-                "INSERT INTO minecraft_usernames (user_id, username) VALUES ($1, $2) ON CONFLICT (user_id) DO UPDATE SET username = EXCLUDED.username",
+                "INSERT INTO minecraft_usernames (user_id, username) VALUES ($1, $2) ON CONFLICT (user_id) DO UPDATE SET username = EXCLUDED.username;",
                 user_id,
                 username,
             )
