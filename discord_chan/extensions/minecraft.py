@@ -1,4 +1,5 @@
 import aexaroton.server
+import discord
 from discord.ext import commands
 
 import aexaroton
@@ -84,7 +85,7 @@ class Minecraft(commands.Cog):
         #  reuse elsewhere
         server = await self.exaroton.get_server(server_id)
         await self.bot.database.update_guild_default_minecraft_server(guild_id=ctx.guild.id, server_id=server_id)
-        await ctx.send(f"Setting default server to {server.data.name}")
+        await ctx.confirm(f"Set default server to {server.data.name}")
 
     @server.group(name="whitelist", aliases=["wl"], invoke_without_command=True)
     async def server_whitelist(self, ctx: discord_chan.SubContext):
@@ -117,7 +118,7 @@ class Minecraft(commands.Cog):
         await ctx.send("\n".join(member_message_parts))
 
     @server_whitelist.command(name="sync")
-    async def server_whitelist_sync(self, ctx: discord_chan.SubContext):
+    async def server_whitelist_sync(self, ctx: discord_chan.SubContext, *guilds: discord.Guild):
         """
         Sync whitelist with stored usernames
         """
@@ -128,9 +129,19 @@ class Minecraft(commands.Cog):
 
         to_add: list[str] = []
 
+        # TODO: allow passing other guilds:
+        # dc/mc server sync 123 456 789
+        # syncs any users in any of the servers
+        # dc/mc server sync link 123
+        # links two servers togehter
+
+        search_guilds = list(guilds)
+        search_guilds.append(ctx.guild)
+
         for user_id, username in usernames.items():
-            if ctx.guild.get_member(user_id) is not None:
-                to_add.append(username)
+            for guild in search_guilds:
+                if guild.get_member(user_id) is not None:
+                    to_add.append(username)
 
         to_remove: list[str] = []
         for name in current:
