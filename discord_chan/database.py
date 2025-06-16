@@ -100,6 +100,12 @@ CREATE TABLE IF NOT EXISTS minecraft_default_servers (
     guild_id BIGINT PRIMARY KEY,
     server_id TEXT
 );
+
+CREATE TABLE IF NOT EXISTS minecraft_guild_links (
+    first_guild_id BIGINT,
+    seconrd_guild_id BIGINT,
+    PRIMARY KEY (first_guild_id, seconrd_guild_id)
+);
 """.strip()
 
 
@@ -135,6 +141,9 @@ class Database:
             assert self._connection is not None
             await self._ensure_tables(self._connection)
             return self._connection
+
+    async def add_minecraft_guild_link(self, *, first_guild_id: int, seconrd_guild_id: int):
+        ... # minecraft_guild_links
 
     async def update_guild_default_minecraft_server(self, *, guild_id: int, server_id: str):
         pool = await self.connect()

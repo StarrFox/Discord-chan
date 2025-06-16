@@ -1,21 +1,23 @@
-import aexaroton.server
-import discord
-from discord.ext import commands
+from typing import Annotated
 
 import aexaroton
+import discord
+from discord.ext import commands
 from loguru import logger
+from aexaroton.server import Server as MinecraftServer
 
 import discord_chan
+from discord_chan.converters import MinecraftServerConverter, DefaultMinecraftServer
 
 
 class Minecraft(commands.Cog):
-    def __init__(self, bot: discord_chan.DiscordChan, exaroton_token: str) -> None:
+    def __init__(self, bot: discord_chan.DiscordChan, exaroton_client: aexaroton.Client) -> None:
         super().__init__()
         self.bot = bot
 
-        self.exaroton = aexaroton.Client(exaroton_token)
+        self.exaroton = exaroton_client
 
-    async def get_guild_default_server(self, server_id: int) -> aexaroton.server.Server:
+    async def get_guild_default_server(self, server_id: int) -> MinecraftServer:
         mc_server_id = await self.bot.database.get_guild_default_minecraft_server(guild_id=server_id)
 
         if mc_server_id is not None:
@@ -30,6 +32,14 @@ class Minecraft(commands.Cog):
         Base minecraft command
         """
         await ctx.send_help("mc")
+
+    @minecraft.command("test")
+    async def minecraft_test(
+        self,
+        ctx: discord_chan.SubContext,
+        server: Annotated[MinecraftServer, MinecraftServerConverter] = DefaultMinecraftServer
+    ):
+        await ctx.send(f"Found server: {server.data.name}")
 
     @minecraft.command()
     async def me(self, ctx: discord_chan.SubContext, username: str):
@@ -76,15 +86,12 @@ class Minecraft(commands.Cog):
 
     # TODO: add some permission check or something
     @server.command(name="default")
-    async def server_default(self, ctx: discord_chan.SubContext, server_id: str):
+    async def server_default(self, ctx: discord_chan.SubContext, server: Annotated[MinecraftServer, MinecraftServerConverter]):
         """
         Set default server
         """
-        # TODO: probably make a server converter
-        #  accept address, name and id
-        #  reuse elsewhere
-        server = await self.exaroton.get_server(server_id)
-        await self.bot.database.update_guild_default_minecraft_server(guild_id=ctx.guild.id, server_id=server_id)
+        # TODO: sync whitelist when default is changed
+        await self.bot.database.update_guild_default_minecraft_server(guild_id=ctx.guild.id, server_id=server.data.id)
         await ctx.confirm(f"Set default server to {server.data.name}")
 
     @server.group(name="whitelist", aliases=["wl"], invoke_without_command=True)
@@ -116,6 +123,17 @@ class Minecraft(commands.Cog):
                 member_message_parts.append(whitelist_username)
 
         await ctx.send("\n".join(member_message_parts))
+
+    @server.command(name="link")
+    async def server_link(self, ctx: discord_chan.SubContext):
+        """
+        Link two guilds together
+        """
+
+
+
+
+
 
     @server_whitelist.command(name="sync")
     async def server_whitelist_sync(self, ctx: discord_chan.SubContext, *guilds: discord.Guild):
@@ -156,7 +174,7 @@ class Minecraft(commands.Cog):
 
 
 async def setup(bot: discord_chan.DiscordChan):
-    if bot.exaroton_token is not None:
-        await bot.add_cog(Minecraft(bot, bot.exaroton_token))
+    if bot.exaroton_client  is not None:
+        await bot.add_cog(Minecraft(bot, bot.exaroton_client))
     else:
         logger.info("Exaroton token not set, not loading minecraft module")
