@@ -124,16 +124,11 @@ class Minecraft(commands.Cog):
 
         await ctx.send("\n".join(member_message_parts))
 
-    @server.command(name="link")
-    async def server_link(self, ctx: discord_chan.SubContext):
-        """
-        Link two guilds together
-        """
-
-
-
-
-
+    # @server.command(name="link")
+    # async def server_link(self, ctx: discord_chan.SubContext):
+    #     """
+    #     Link two guilds together
+    #     """
 
     @server_whitelist.command(name="sync")
     async def server_whitelist_sync(self, ctx: discord_chan.SubContext, *guilds: discord.Guild):
