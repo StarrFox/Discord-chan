@@ -147,25 +147,28 @@ class MinecraftServerConverter(commands.Converter):
             exaroton = ctx.bot.exaroton_client
         else:
             raise commands.BadArgument(f"Minecraft commands currently not enabled")
-        
+
         try:
             result = await exaroton.get_server(argument)
         except ExarotonError:
             result = None
-        
+
         if result is not None:
             return result
-        
+
         all_servers = await exaroton.get_servers()
 
         for server in all_servers:
             if server.data.name.lower() == argument.lower():
                 return server
-            
+
             if server.data.address.lower() == argument.lower():
                 return server
 
-        raise commands.BadArgument(f"Could not find server with id/name/address: {argument}")
+        raise commands.BadArgument(
+            f"Could not find server with id/name/address: {argument}"
+        )
+
 
 async def guild_default_minecraft_server(ctx: commands.Context):
     if not isinstance(ctx.bot, DiscordChan):
@@ -182,12 +185,11 @@ async def guild_default_minecraft_server(ctx: commands.Context):
     if not hasattr(minecraft_cog, "get_guild_default_server"):
         raise RuntimeError("Unexpected behavior")
 
-    return await minecraft_cog.get_guild_default_server(ctx.guild.id) # type: ignore (I don't feel like making sure this exists and everything)
+    return await minecraft_cog.get_guild_default_server(ctx.guild.id)  # type: ignore (I don't feel like making sure this exists and everything)
 
 
 DefaultMinecraftServer = commands.parameter(
-    default=guild_default_minecraft_server,
-    displayed_default="Default server"
+    default=guild_default_minecraft_server, displayed_default="Default server"
 )
 
 

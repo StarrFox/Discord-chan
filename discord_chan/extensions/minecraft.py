@@ -11,20 +11,26 @@ from discord_chan.converters import MinecraftServerConverter, DefaultMinecraftSe
 
 
 class Minecraft(commands.Cog):
-    def __init__(self, bot: discord_chan.DiscordChan, exaroton_client: aexaroton.Client) -> None:
+    def __init__(
+        self, bot: discord_chan.DiscordChan, exaroton_client: aexaroton.Client
+    ) -> None:
         super().__init__()
         self.bot = bot
 
         self.exaroton = exaroton_client
 
     async def get_guild_default_server(self, server_id: int) -> MinecraftServer:
-        mc_server_id = await self.bot.database.get_guild_default_minecraft_server(guild_id=server_id)
+        mc_server_id = await self.bot.database.get_guild_default_minecraft_server(
+            guild_id=server_id
+        )
 
         if mc_server_id is not None:
             # TODO: you forgot to check what happens if a server doesn't exist 5head
             return await self.exaroton.get_server(mc_server_id)
-        
-        raise commands.CommandError("Use `dc/mc server default` to set the default server")
+
+        raise commands.CommandError(
+            "Use `dc/mc server default` to set the default server"
+        )
 
     @commands.group(invoke_without_command=True, aliases=["mc"])
     async def minecraft(self, ctx: discord_chan.SubContext):
@@ -37,7 +43,9 @@ class Minecraft(commands.Cog):
     async def minecraft_test(
         self,
         ctx: discord_chan.SubContext,
-        server: Annotated[MinecraftServer, MinecraftServerConverter] = DefaultMinecraftServer
+        server: Annotated[
+            MinecraftServer, MinecraftServerConverter
+        ] = DefaultMinecraftServer,
     ):
         await ctx.send(f"Found server: {server.data.name}")
 
@@ -51,7 +59,9 @@ class Minecraft(commands.Cog):
         server = await self.get_guild_default_server(ctx.guild.id)
 
         if maybe_username is not None:
-            await ctx.send(f"Updating previous username ({maybe_username}) to new username ({username})")
+            await ctx.send(
+                f"Updating previous username ({maybe_username}) to new username ({username})"
+            )
             await server.remove_from_player_list("whitelist", [maybe_username])
 
         await self.bot.database.update_minecraft_username(
@@ -71,7 +81,11 @@ class Minecraft(commands.Cog):
         server = await self.get_guild_default_server(ctx.guild.id)
         data = server.data
 
-        software = f"{data.software.name} ({data.software.version})" if data.software is not None else "[no software]"
+        software = (
+            f"{data.software.name} ({data.software.version})"
+            if data.software is not None
+            else "[no software]"
+        )
         players = f"({data.players.count}) [{','.join(data.players.list[:5])}]"
 
         message_parts: list[str] = [
@@ -79,19 +93,25 @@ class Minecraft(commands.Cog):
             f"status: {data.status.name}",
             f"address: {data.address}",
             f"software: {software}",
-            f"players: {players}"
+            f"players: {players}",
         ]
 
         await ctx.send("\n".join(message_parts))
 
     # TODO: add some permission check or something
     @server.command(name="default")
-    async def server_default(self, ctx: discord_chan.SubContext, server: Annotated[MinecraftServer, MinecraftServerConverter]):
+    async def server_default(
+        self,
+        ctx: discord_chan.SubContext,
+        server: Annotated[MinecraftServer, MinecraftServerConverter],
+    ):
         """
         Set default server
         """
         # TODO: sync whitelist when default is changed
-        await self.bot.database.update_guild_default_minecraft_server(guild_id=ctx.guild.id, server_id=server.data.id)
+        await self.bot.database.update_guild_default_minecraft_server(
+            guild_id=ctx.guild.id, server_id=server.data.id
+        )
         await ctx.confirm(f"Set default server to {server.data.name}")
 
     @server.group(name="whitelist", aliases=["wl"], invoke_without_command=True)
@@ -114,10 +134,14 @@ class Minecraft(commands.Cog):
             for user_id, username in usernames.items():
                 if whitelist_username == username:
                     if (member := ctx.guild.get_member(user_id)) is not None:
-                        member_message_parts.append(f"{whitelist_username}: [{member.mention}]")
+                        member_message_parts.append(
+                            f"{whitelist_username}: [{member.mention}]"
+                        )
                         break
                     else:
-                        member_message_parts.append(f"{whitelist_username}: [member not in server ({user_id})]")
+                        member_message_parts.append(
+                            f"{whitelist_username}: [member not in server ({user_id})]"
+                        )
                         break
             else:
                 member_message_parts.append(whitelist_username)
@@ -131,7 +155,9 @@ class Minecraft(commands.Cog):
     #     """
 
     @server_whitelist.command(name="sync")
-    async def server_whitelist_sync(self, ctx: discord_chan.SubContext, *guilds: discord.Guild):
+    async def server_whitelist_sync(
+        self, ctx: discord_chan.SubContext, *guilds: discord.Guild
+    ):
         """
         Sync whitelist with stored usernames
         """
@@ -160,16 +186,15 @@ class Minecraft(commands.Cog):
         for name in current:
             if name not in to_add:
                 to_remove.append(name)
-        
+
         await server.remove_from_player_list("whitelist", to_remove)
         await server.add_to_player_list("whitelist", to_add)
 
         await ctx.confirm("Synced")
 
 
-
 async def setup(bot: discord_chan.DiscordChan):
-    if bot.exaroton_client  is not None:
+    if bot.exaroton_client is not None:
         await bot.add_cog(Minecraft(bot, bot.exaroton_client))
     else:
         logger.info("Exaroton token not set, not loading minecraft module")

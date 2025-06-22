@@ -29,7 +29,9 @@ class BackupNameGenerator:
     def __init__(self):
         self.taken_names: set[str] = set()
 
-    async def _get_random_name(self, *, recursive_tries: int = 5, total_tries: int = 0) -> str:
+    async def _get_random_name(
+        self, *, recursive_tries: int = 5, total_tries: int = 0
+    ) -> str:
         tries = recursive_tries
         while tries >= 0:
             name = str(uuid.uuid4().int)
@@ -39,7 +41,9 @@ class BackupNameGenerator:
 
         if recursive_tries > 0:
             await asyncio.sleep(1)
-            return await self._get_random_name(recursive_tries=recursive_tries-1, total_tries=total_tries+5)
+            return await self._get_random_name(
+                recursive_tries=recursive_tries - 1, total_tries=total_tries + 5
+            )
 
         raise RuntimeError(f"Couldn't generate a random name in {total_tries} tries")
 
@@ -75,13 +79,19 @@ class Owner(commands.Cog, name="owner"):
         # wait for discord to populate embeds
         await asyncio.sleep(5)
         refreshed_message = await message.channel.fetch_message(message.id)
-        logger.info(f"Post postponed message refresh: {len(refreshed_message.embeds)=} {len(message.embeds)=}")
+        logger.info(
+            f"Post postponed message refresh: {len(refreshed_message.embeds)=} {len(message.embeds)=}"
+        )
         if len(refreshed_message.embeds) > 0:
-            await message.reply(f"Found delayed embeds: {len(refreshed_message.embeds)}")
+            await message.reply(
+                f"Found delayed embeds: {len(refreshed_message.embeds)}"
+            )
             await self.backup_message_processor(refreshed_message, was_postpone=True)
 
     @commands.Cog.listener("on_message")
-    async def backup_message_processor(self, message: discord.Message, *, was_postpone: bool = False):
+    async def backup_message_processor(
+        self, message: discord.Message, *, was_postpone: bool = False
+    ):
         if self.backup_channel is None:
             return
 
@@ -93,7 +103,9 @@ class Owner(commands.Cog, name="owner"):
 
         if len(message.embeds) == 0 and not was_postpone:
             logger.info(f"Postponing message {message.id} {len(message.embeds)=}")
-            self.backup_postpone_queue.append(asyncio.create_task(self._backup_postpone_task(message)))
+            self.backup_postpone_queue.append(
+                asyncio.create_task(self._backup_postpone_task(message))
+            )
             return
 
         for embed in message.embeds:
@@ -104,7 +116,7 @@ class Owner(commands.Cog, name="owner"):
                     link = embed.video.url
                 case _:
                     return await message.reply(f"Unsupported embed type: {embed.type}")
-                
+
             if link is None:
                 return await message.reply(f"Link was None in embed")
 
@@ -148,9 +160,13 @@ class Owner(commands.Cog, name="owner"):
             self.backup_collected = []
 
             try:
-                await ctx.send("backup:", file=discord.File(backup_zip_path, filename="backup.zip"))
+                await ctx.send(
+                    "backup:", file=discord.File(backup_zip_path, filename="backup.zip")
+                )
             except Exception as e:
-                await ctx.send(f"Failure sending backup file, path is: {backup_zip_path}")
+                await ctx.send(
+                    f"Failure sending backup file, path is: {backup_zip_path}"
+                )
                 await ctx.prompt("Done?")
 
     @debug_command.command()
@@ -192,9 +208,11 @@ class Owner(commands.Cog, name="owner"):
 
     @debug_command.command()
     async def purge_feature(
-        self, 
-        ctx: SubContext, 
-        feature: typing.Annotated[discord_chan.Feature, EnumConverter(discord_chan.Feature)]
+        self,
+        ctx: SubContext,
+        feature: typing.Annotated[
+            discord_chan.Feature, EnumConverter(discord_chan.Feature)
+        ],
     ):
         await self.bot.feature_manager.purge_feature(feature)
         await ctx.confirm("Feature purged")

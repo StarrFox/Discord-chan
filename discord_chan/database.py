@@ -142,10 +142,13 @@ class Database:
             await self._ensure_tables(self._connection)
             return self._connection
 
-    async def add_minecraft_guild_link(self, *, first_guild_id: int, seconrd_guild_id: int):
-        ... # minecraft_guild_links
+    async def add_minecraft_guild_link(
+        self, *, first_guild_id: int, seconrd_guild_id: int
+    ): ...  # minecraft_guild_links
 
-    async def update_guild_default_minecraft_server(self, *, guild_id: int, server_id: str):
+    async def update_guild_default_minecraft_server(
+        self, *, guild_id: int, server_id: str
+    ):
         pool = await self.connect()
 
         async with pool.acquire() as connection:
@@ -153,7 +156,7 @@ class Database:
             await connection.execute(
                 "INSERT INTO minecraft_default_servers (guild_id, server_id) VALUES ($1, $2) ON CONFLICT (guild_id) DO UPDATE SET server_id = EXCLUDED.server_id;",
                 guild_id,
-                server_id
+                server_id,
             )
 
     async def get_guild_default_minecraft_server(self, *, guild_id: int) -> str | None:
@@ -161,11 +164,14 @@ class Database:
 
         async with pool.acquire() as connection:
             connection: asyncpg.Connection
-            record: asyncpg.Record | None = await connection.fetchrow("SELECT guild_id, server_id FROM minecraft_default_servers where guild_id = $1;", guild_id)
-        
+            record: asyncpg.Record | None = await connection.fetchrow(
+                "SELECT guild_id, server_id FROM minecraft_default_servers where guild_id = $1;",
+                guild_id,
+            )
+
         if record is not None:
             return record["server_id"]
-        
+
         return None
 
     async def update_minecraft_username(self, *, user_id: int, username: str):
@@ -202,10 +208,10 @@ class Database:
             connection: asyncpg.Connection
 
             record: asyncpg.Record | None = await connection.fetchrow(
-                    "SELECT user_id, username FROM minecraft_usernames WHERE user_id = $1;",
-                    user_id
-                )
-        
+                "SELECT user_id, username FROM minecraft_usernames WHERE user_id = $1;",
+                user_id,
+            )
+
         if record is not None:
             return record["username"]
 

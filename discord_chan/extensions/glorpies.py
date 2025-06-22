@@ -26,7 +26,15 @@ class Glorpies(commands.Cog, name="glorpies"):
         return True
 
     @commands.command(name="rename")
-    async def rename_command(self, ctx: SubContext, target: discord.Member, *, new_name: str | None = commands.parameter(default=None, description="New nickname, don't provide to reset")):
+    async def rename_command(
+        self,
+        ctx: SubContext,
+        target: discord.Member,
+        *,
+        new_name: str | None = commands.parameter(
+            default=None, description="New nickname, don't provide to reset"
+        ),
+    ):
         """
         Rename another member
         """
@@ -34,7 +42,9 @@ class Glorpies(commands.Cog, name="glorpies"):
             name_len = len(new_name)
 
             if name_len > 32:
-                return await ctx.send(f"Name must be 32 or less characters long, provided was {name_len}")
+                return await ctx.send(
+                    f"Name must be 32 or less characters long, provided was {name_len}"
+                )
 
         try:
             await target.edit(nick=new_name)
@@ -44,8 +54,11 @@ class Glorpies(commands.Cog, name="glorpies"):
                 return await ctx.deny("Couldn't rename them")
 
             if target.id == ctx.guild.owner.id:
-                await ctx.send(f"{target.mention} rename yourself :3", allowed_mentions=discord.AllowedMentions(users=[target]))
-            
+                await ctx.send(
+                    f"{target.mention} rename yourself :3",
+                    allowed_mentions=discord.AllowedMentions(users=[target]),
+                )
+
             return await ctx.deny("Couldn't rename them")
 
 

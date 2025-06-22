@@ -144,7 +144,7 @@ class DiscordChan(commands.AutoShardedBot):
             await self.load_extension("jishaku")
         except (commands.errors.ExtensionError, commands.errors.ExtensionFailed):
             logger.exception("Jishaku failed to load")
-        
+
         try:
             await self.load_extension("discord_chan.emote_manager.emote_manager")
         except (commands.errors.ExtensionError, commands.errors.ExtensionFailed):

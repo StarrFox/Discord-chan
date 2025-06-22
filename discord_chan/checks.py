@@ -35,7 +35,9 @@ def guild_owner():
             raise commands.NoPrivateMessage()
 
         if not ctx.author.id == ctx.guild.owner_id:
-            raise commands.CheckFailure("You must be the server owner to run this command")
+            raise commands.CheckFailure(
+                "You must be the server owner to run this command"
+            )
 
         return True
 
@@ -48,7 +50,9 @@ def feature_enabled(feature: "Feature"):
             raise commands.NoPrivateMessage()
 
         if not await ctx.bot.feature_manager.is_enabled(feature, ctx.guild.id):
-            raise commands.CheckFailure(f"Feature \"{feature.name}\" must be enabled to use this command")
+            raise commands.CheckFailure(
+                f'Feature "{feature.name}" must be enabled to use this command'
+            )
 
         return True
 
