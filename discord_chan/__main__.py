@@ -37,7 +37,7 @@ os.environ["JISHAKU_RETAIN"] = "true"
     "--exaroton",
     help="path to exaroton token",
     type=click.Path(dir_okay=False, path_type=Path),
-    default="exaroton.secret"
+    default="exaroton.secret",
 )
 def main(debug: bool, secret: Path, exaroton: Path):
     setup_loguru_logging_intercept(

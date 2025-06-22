@@ -36,7 +36,9 @@ async def on_command_error(ctx: SubContext, error: Exception):
         now = pendulum.now()
         cooldown_over = now.add(seconds=int(error.retry_after))
 
-        cooldown_content = f"Command on cooldown, retry in {to_discord_timestamp(cooldown_over)}"
+        cooldown_content = (
+            f"Command on cooldown, retry in {to_discord_timestamp(cooldown_over)}"
+        )
 
         cooldown_message = await ctx.reply(
             cooldown_content,
@@ -56,7 +58,9 @@ async def on_command_error(ctx: SubContext, error: Exception):
 
     await ctx.send(
         f"{await ctx.bot.owners_mention()} Unknown error while executing {ctx.command}: {error}",
-        allowed_mentions=discord.AllowedMentions(users=list(await ctx.bot.owners(as_users=True))),  # TODO: discord.py type for users should be changed to Iterable[SnowFlake] ?
+        allowed_mentions=discord.AllowedMentions(
+            users=list(await ctx.bot.owners(as_users=True))
+        ),  # TODO: discord.py type for users should be changed to Iterable[SnowFlake] ?
     )
 
 

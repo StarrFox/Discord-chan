@@ -161,9 +161,7 @@ class Connect4(menus.Menu):
             if check(diagonal):
                 return True
 
-    async def run(
-        self, ctx
-    ) -> discord.Member | tuple[discord.Member, ...] | None:
+    async def run(self, ctx) -> discord.Member | tuple[discord.Member, ...] | None:
         """
         Run the game and return the winner(s)
         returns None if the first player never made a move

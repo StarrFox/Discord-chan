@@ -14,9 +14,7 @@ class Feature(Enum):
 
 
 # features that had their impl removed
-REMOVED_FEATURES: list[Feature] = [
-    Feature.cope
-]
+REMOVED_FEATURES: list[Feature] = [Feature.cope]
 
 
 class FeatureManager:
@@ -35,7 +33,7 @@ class FeatureManager:
     async def is_enabled(self, feature: Feature, guild_id: int) -> bool:
         # in theory this shouldn't pass
         if feature in REMOVED_FEATURES:
-            logger.warning(f"removed feature \"{feature}\" requested")
+            logger.warning(f'removed feature "{feature}" requested')
             return False
 
         feature_string = feature.name

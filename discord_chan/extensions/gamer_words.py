@@ -733,9 +733,7 @@ class GamerWords(commands.Cog):
         )
         if text_match or file_match:
             for attach in message.attachments:
-                if attach.size >= getattr(
-                    message.guild, "filesize_limit", 8 * 1024**2
-                ):
+                if attach.size >= getattr(message.guild, "filesize_limit", 8 * 1024**2):
                     await message.delete(delay=0.2)
                     return
 

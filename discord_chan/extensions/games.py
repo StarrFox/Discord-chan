@@ -60,7 +60,9 @@ class Games(commands.Cog, name="games"):
     @commands.bot_has_permissions(add_reactions=True)
     @commands.max_concurrency(1, commands.BucketType.user)
     @commands.guild_only()
-    async def connect43D(self, ctx: SubContext, member: discord.Member, member2: discord.Member):
+    async def connect43D(
+        self, ctx: SubContext, member: discord.Member, member2: discord.Member
+    ):
         """
         Play connect4 with another member
         Who goes first is random
@@ -76,7 +78,10 @@ class Games(commands.Cog, name="games"):
             return await ctx.send("All 3 players must be unique")
 
         confirmation_tasks = [
-            asyncio.create_task(ctx.prompt(f"{m.mention} agree to play?", owner_id=m.id)) for m in (member, member2)
+            asyncio.create_task(
+                ctx.prompt(f"{m.mention} agree to play?", owner_id=m.id)
+            )
+            for m in (member, member2)
         ]
 
         for response in asyncio.as_completed(confirmation_tasks):
@@ -91,7 +96,9 @@ class Games(commands.Cog, name="games"):
         winner = await game.run(ctx)
         if winner:
             if isinstance(winner, tuple):
-                await ctx.send(f"{player1.mention}, {player2.mention} and {player3.mention} tied")
+                await ctx.send(
+                    f"{player1.mention}, {player2.mention} and {player3.mention} tied"
+                )
             else:
                 await ctx.send(f"{winner.mention} has won")
         else:
