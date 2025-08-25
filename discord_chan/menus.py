@@ -80,7 +80,7 @@ class DCMenuPages(menus.MenuPages):
     async def send_initial_message(self, ctx, channel):
         page = await self._source.get_page(0)
         kwargs = await self._get_kwargs_from_page(page)
-        return await ctx.send(**kwargs)
+        return await ctx.send(**kwargs) # type: ignore
 
     def skip_two_or_less(self):
         max_pages = self._source.get_max_pages()

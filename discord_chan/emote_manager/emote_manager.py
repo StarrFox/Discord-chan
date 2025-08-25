@@ -520,7 +520,7 @@ class EmoteManager(commands.Cog):
             name=name, image=image_data, reason=reason
         )
 
-    @em.command(aliases=("delete", "rm"))
+    @em.command(aliases=["delete", "rm"])
     @commands.has_permissions(manage_expressions=True)
     @commands.bot_has_permissions(manage_expressions=True)
     async def remove(self, context: commands.Context, emote: str, *emotes: str):
@@ -540,7 +540,7 @@ class EmoteManager(commands.Cog):
             with contextlib.suppress(discord.HTTPException):
                 await context.message.add_reaction("✅")
 
-    @em.command(aliases=("mv",))
+    @em.command(aliases=["mv"])
     @commands.has_permissions(manage_expressions=True)
     @commands.bot_has_permissions(manage_expressions=True)
     async def rename(self, context: commands.Context, old: str, new_name: str):
@@ -563,7 +563,7 @@ class EmoteManager(commands.Cog):
 
         await context.send(rf"Emote successfully renamed to \:{new_name}:")
 
-    @em.command(aliases=("ls", "dir"))
+    @em.command(aliases=["ls", "dir"])
     async def list(
         self,
         context: commands.Context,
