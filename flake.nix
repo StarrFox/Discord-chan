@@ -80,43 +80,6 @@
           nativeBuildInputs = with python.pkgs; [poetry-core];
           propagatedBuildInputs = with python.pkgs; [click];
         };
-
-        import_expression = python.pkgs.buildPythonPackage rec {
-          pname = "import_expression";
-          version = "2.2.1";
-          format = "setuptools";
-          src = python.pkgs.fetchPypi {
-            inherit pname version;
-            hash = "sha256-pOWuvFlxgcmOS0SboK0O58sC6vjD8H+4AWXTW+XVnlE=";
-          };
-          pythonImportsCheck = [pname];
-          nativeBuildInputs = with python.pkgs; [pip];
-          # tests file not included with release
-          doCheck = false;
-        };
-
-        jishaku = python.pkgs.buildPythonPackage rec {
-          pname = "jishaku";
-          version = "2.6.0";
-          format = "setuptools";
-          src = python.pkgs.fetchPypi {
-            inherit pname version;
-            hash = "sha256-ubTQU7jL22qP16jVSdCSjC5SlARMuxRcuybfNvl84ok=";
-          };
-          pythonImportsCheck = [pname];
-          nativeCheckInputs = with python.pkgs; [
-            line_profiler
-            click
-            astunparse
-            yt-dlp
-          ];
-          propagatedBuildInputs = with python.pkgs; [
-            discordpy
-            braceexpand
-            import_expression
-            tabulate
-          ];
-        };
       in {
         packages.discord_chan = python.pkgs.buildPythonPackage rec {
           inherit (pyproject.tool.poetry) version;
