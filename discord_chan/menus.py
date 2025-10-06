@@ -80,7 +80,7 @@ class DCMenuPages(menus.MenuPages):
     async def send_initial_message(self, ctx, channel):
         page = await self._source.get_page(0)
         kwargs = await self._get_kwargs_from_page(page)
-        return await ctx.send(**kwargs)
+        return await ctx.send(**kwargs) # type: ignore
 
     def skip_two_or_less(self):
         max_pages = self._source.get_max_pages()
@@ -379,7 +379,9 @@ class SafebooruEmbedStreamSource(menus.ListPageSource):
         (cache_idx, post_idx) = divmod(page_number, safebooru_api.API_MAX_POSTS)
         async with self._lock:
             if cache_idx not in self._cache:
-                self._cache[cache_idx] = await safebooru_api.get_safebooru_posts(self.tags, page=cache_idx)
+                self._cache[cache_idx] = await safebooru_api.get_safebooru_posts(
+                    self.tags, page=cache_idx
+                )
         post = self._cache[cache_idx][post_idx]
         return discord.Embed(
             description=f"Post {page_number + 1}/{self.post_count}"

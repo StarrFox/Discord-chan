@@ -34,7 +34,7 @@ class Snipe(commands.Cog, name="snipe"):
 
     @commands.Cog.listener("on_message_delete")
     async def snipe_delete(self, message: discord.Message):
-        await self.attempt_add_snipe(message, SnipeMode.edited)
+        await self.attempt_add_snipe(message, SnipeMode.deleted)
 
     @commands.Cog.listener("on_bulk_message_delete")
     async def bulk_snipe_delete(self, messages: list[discord.Message]):
@@ -223,9 +223,15 @@ class Snipe(commands.Cog, name="snipe"):
             author = ctx.guild.get_member(author_id)
 
             if author is None:
-                author = await self.bot.fetch_user(author_id)
+                try:
+                    author = await self.bot.fetch_user(author_id)
+                    author_name = author.display_name
+                except discord.NotFound:
+                    author_name = f"[Unresolvable ID ({author_id})]"
+            else:
+                author_name = author.display_name
 
-            entries.append(f"- {author.display_name}: {count}")
+            entries.append(f"- {author_name}: {count}")
 
         _, total = await self.bot.database.get_snipes(server=ctx.guild.id)
 

@@ -5,6 +5,7 @@ from datetime import datetime
 import discord
 from discord.ext import commands
 from loguru import logger
+from aexaroton import Client as AexarotonClient
 
 from .context import SubContext
 from .database import Database
@@ -18,7 +19,10 @@ ROOT = pathlib.Path(__file__).parent
 class DiscordChan(commands.AutoShardedBot):
     def __init__(self, *, context: type[commands.Context] = SubContext, **kwargs):
         self.debug_mode: bool = kwargs.pop("debug_mode", False)
+
         self.exaroton_token: str | None = kwargs.pop("exaroton_token", None)
+        self.exaroton_client = None
+
         super().__init__(
             command_prefix=kwargs.pop("command_prefix", self.get_command_prefix),
             case_insensitive=kwargs.pop("case_insensitive", True),
@@ -133,11 +137,14 @@ class DiscordChan(commands.AutoShardedBot):
 
         self.ready_once = True
 
+        if self.exaroton_token is not None:
+            self.exaroton_client = AexarotonClient(self.exaroton_token)
+
         try:
             await self.load_extension("jishaku")
         except (commands.errors.ExtensionError, commands.errors.ExtensionFailed):
             logger.exception("Jishaku failed to load")
-        
+
         try:
             await self.load_extension("discord_chan.emote_manager.emote_manager")
         except (commands.errors.ExtensionError, commands.errors.ExtensionFailed):

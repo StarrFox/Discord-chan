@@ -95,6 +95,17 @@ CREATE TABLE IF NOT EXISTS minecraft_usernames (
     user_id BIGINT PRIMARY KEY,
     username TEXT UNIQUE
 );
+
+CREATE TABLE IF NOT EXISTS minecraft_default_servers (
+    guild_id BIGINT PRIMARY KEY,
+    server_id TEXT
+);
+
+CREATE TABLE IF NOT EXISTS minecraft_guild_links (
+    first_guild_id BIGINT,
+    seconrd_guild_id BIGINT,
+    PRIMARY KEY (first_guild_id, seconrd_guild_id)
+);
 """.strip()
 
 
@@ -131,13 +142,45 @@ class Database:
             await self._ensure_tables(self._connection)
             return self._connection
 
+    async def add_minecraft_guild_link(
+        self, *, first_guild_id: int, seconrd_guild_id: int
+    ): ...  # minecraft_guild_links
+
+    async def update_guild_default_minecraft_server(
+        self, *, guild_id: int, server_id: str
+    ):
+        pool = await self.connect()
+
+        async with pool.acquire() as connection:
+            connection: asyncpg.Connection
+            await connection.execute(
+                "INSERT INTO minecraft_default_servers (guild_id, server_id) VALUES ($1, $2) ON CONFLICT (guild_id) DO UPDATE SET server_id = EXCLUDED.server_id;",
+                guild_id,
+                server_id,
+            )
+
+    async def get_guild_default_minecraft_server(self, *, guild_id: int) -> str | None:
+        pool = await self.connect()
+
+        async with pool.acquire() as connection:
+            connection: asyncpg.Connection
+            record: asyncpg.Record | None = await connection.fetchrow(
+                "SELECT guild_id, server_id FROM minecraft_default_servers where guild_id = $1;",
+                guild_id,
+            )
+
+        if record is not None:
+            return record["server_id"]
+
+        return None
+
     async def update_minecraft_username(self, *, user_id: int, username: str):
         pool = await self.connect()
 
         async with pool.acquire() as connection:
             connection: asyncpg.Connection
             await connection.execute(
-                "INSERT INTO minecraft_usernames (user_id, username) VALUES ($1, $2) ON CONFLICT (user_id) DO UPDATE SET username = EXCLUDED.username",
+                "INSERT INTO minecraft_usernames (user_id, username) VALUES ($1, $2) ON CONFLICT (user_id) DO UPDATE SET username = EXCLUDED.username;",
                 user_id,
                 username,
             )
@@ -165,10 +208,10 @@ class Database:
             connection: asyncpg.Connection
 
             record: asyncpg.Record | None = await connection.fetchrow(
-                    "SELECT user_id, username FROM minecraft_usernames WHERE user_id = $1;",
-                    user_id
-                )
-        
+                "SELECT user_id, username FROM minecraft_usernames WHERE user_id = $1;",
+                user_id,
+            )
+
         if record is not None:
             return record["username"]
 
@@ -516,8 +559,6 @@ class Database:
         limit: int | None = None,
         negative: bool = False,
     ) -> tuple[list[Snipe], int]:
-        pool = await self.connect()
-
         args = []
         query_parts = []
         row_limit = ""
@@ -536,7 +577,7 @@ class Database:
             args.append(channel)
 
         if contains is not None:
-            # the position function returns 1 or above in the substring is within content
+            # the position function returns 1 or above if the substring is within content
             query_parts.append(f"position(${next(counter)} in content) > 0")
             args.append(contains)
 
@@ -561,6 +602,8 @@ class Database:
             order = "ASC"
         else:
             order = "DESC"
+
+        pool = await self.connect()
 
         async with pool.acquire() as connection:
             connection: asyncpg.Connection
