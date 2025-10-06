@@ -122,10 +122,8 @@ class Database:
         if self._ensured:
             return
 
+        await pool.execute(DBSCHEMA)
         self._ensured = True
-
-        async with pool.acquire() as connection:
-            await connection.execute(DBSCHEMA)
 
     async def connect(self) -> asyncpg.Pool:
         async with self._connection_lock:
@@ -161,13 +159,10 @@ class Database:
     async def get_guild_default_minecraft_server(self, *, guild_id: int) -> str | None:
         pool = await self.connect()
 
-        async with pool.acquire() as connection:
-            record: asyncpg.Record | None = await connection.fetchrow(
-                "SELECT guild_id, server_id FROM minecraft_default_servers where guild_id = $1;",
-                guild_id,
-            )
-
-        if record is not None:
+        if record := await pool.fetchrow(
+            "SELECT guild_id, server_id FROM minecraft_default_servers where guild_id = $1;",
+            guild_id,
+        ):
             return record["server_id"]
 
         return None
@@ -185,7 +180,7 @@ class Database:
     async def get_minecraft_usernames(self) -> dict[int, str]:
         pool = await self.connect()
 
-        async with pool.acquire() as connection:         
+        async with pool.acquire() as connection:
             records: list[asyncpg.Record] = await connection.fetch(
                 "SELECT user_id, username FROM minecraft_usernames;"
             )

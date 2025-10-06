@@ -133,7 +133,7 @@ def convert_to_gif(raw_image_data: bytes) -> bytes:
         ) as converted:
             # discord tries to stop us from abusing animated gif slots by detecting single frame gifs
             # so make it two frames
-            converted.sequence[0].delay = ( # type: ignore
+            converted.sequence[0].delay = (  # type: ignore
                 0  # show the first frame forever
             )
             converted.sequence.append(wand.image.Image(width=1, height=1))
@@ -151,7 +151,7 @@ def convert_to_gif(raw_image_data: bytes) -> bytes:
 def mime_type_for_image(data: bytes):
     if data.startswith(b"\x89PNG\r\n\x1a\n"):
         return "image/png"
-    if data.startswith(b"\xFF\xD8") and data.rstrip(b"\0").endswith(b"\xFF\xD9"):
+    if data.startswith(b"\xff\xd8") and data.rstrip(b"\0").endswith(b"\xff\xd9"):
         return "image/jpeg"
     if data.startswith((b"GIF87a", b"GIF89a")):
         return "image/gif"
