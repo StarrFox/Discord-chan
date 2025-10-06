@@ -142,9 +142,9 @@ class Database:
             await self._ensure_tables(self._connection)
             return self._connection
 
-    async def add_minecraft_guild_link(
-        self, *, first_guild_id: int, seconrd_guild_id: int
-    ): ...  # minecraft_guild_links
+    # async def add_minecraft_guild_link(
+    #     self, *, first_guild_id: int, seconrd_guild_id: int
+    # ): ...  # minecraft_guild_links
 
     async def update_guild_default_minecraft_server(
         self, *, guild_id: int, server_id: str
@@ -152,7 +152,6 @@ class Database:
         pool = await self.connect()
 
         async with pool.acquire() as connection:
-            connection: asyncpg.Connection
             await connection.execute(
                 "INSERT INTO minecraft_default_servers (guild_id, server_id) VALUES ($1, $2) ON CONFLICT (guild_id) DO UPDATE SET server_id = EXCLUDED.server_id;",
                 guild_id,
@@ -163,7 +162,6 @@ class Database:
         pool = await self.connect()
 
         async with pool.acquire() as connection:
-            connection: asyncpg.Connection
             record: asyncpg.Record | None = await connection.fetchrow(
                 "SELECT guild_id, server_id FROM minecraft_default_servers where guild_id = $1;",
                 guild_id,
@@ -178,7 +176,6 @@ class Database:
         pool = await self.connect()
 
         async with pool.acquire() as connection:
-            connection: asyncpg.Connection
             await connection.execute(
                 "INSERT INTO minecraft_usernames (user_id, username) VALUES ($1, $2) ON CONFLICT (user_id) DO UPDATE SET username = EXCLUDED.username;",
                 user_id,
@@ -188,8 +185,7 @@ class Database:
     async def get_minecraft_usernames(self) -> dict[int, str]:
         pool = await self.connect()
 
-        async with pool.acquire() as connection:
-            connection: asyncpg.Connection
+        async with pool.acquire() as connection:         
             records: list[asyncpg.Record] = await connection.fetch(
                 "SELECT user_id, username FROM minecraft_usernames;"
             )
@@ -205,8 +201,6 @@ class Database:
         pool = await self.connect()
 
         async with pool.acquire() as connection:
-            connection: asyncpg.Connection
-
             record: asyncpg.Record | None = await connection.fetchrow(
                 "SELECT user_id, username FROM minecraft_usernames WHERE user_id = $1;",
                 user_id,
@@ -223,7 +217,6 @@ class Database:
         pool = await self.connect()
 
         async with pool.acquire() as connection:
-            connection: asyncpg.Connection
             await connection.execute(
                 "INSERT INTO word_track (server, author, word, count) VALUES ($1, $2, $3, $4) ON CONFLICT (server, author, word) DO UPDATE SET count = EXCLUDED.count + word_track.count;",
                 server_id,
@@ -247,7 +240,6 @@ class Database:
             author_condition = ""
 
         async with pool.acquire() as connection:
-            connection: asyncpg.Connection
             records: list[asyncpg.Record] = await connection.fetch(
                 f"SELECT word, sum(count) FROM word_track WHERE server = $1 {author_condition} GROUP BY word ORDER BY sum DESC;",
                 *params,
@@ -268,8 +260,6 @@ class Database:
         # return member_id: usages of word
 
         async with pool.acquire() as connection:
-            connection: asyncpg.Connection
-
             records: list[asyncpg.Record] = await connection.fetch(
                 "SELECT author, count FROM word_track WHERE server = $1 AND word = $2 ORDER BY count DESC;",
                 server_id,
@@ -300,8 +290,6 @@ class Database:
             server_clause = ""
 
         async with pool.acquire() as connection:
-            connection: asyncpg.Connection
-
             records: list[asyncpg.Record] = await connection.fetch(
                 f"SELECT author, count(word) FROM word_track {server_clause} GROUP BY author ORDER BY count DESC;",
                 *params,
@@ -331,8 +319,6 @@ class Database:
             server_clause = ""
 
         async with pool.acquire() as connection:
-            connection: asyncpg.Connection
-
             records: list[asyncpg.Record] = await connection.fetch(
                 f"SELECT author, sum(count) FROM word_track {server_clause} GROUP BY author ORDER BY sum DESC;",
                 *params,
@@ -349,7 +335,6 @@ class Database:
         pool = await self.connect()
 
         async with pool.acquire() as connection:
-            connection: asyncpg.Connection
             records: list[asyncpg.Record] = await connection.fetch(
                 "SELECT feature_name FROM enabled_features WHERE guild_id = $1;",
                 guild_id,
@@ -366,7 +351,6 @@ class Database:
         pool = await self.connect()
 
         async with pool.acquire() as connection:
-            connection: asyncpg.Connection
             await connection.execute(
                 "INSERT INTO enabled_features (guild_id, feature_name) VALUES ($1, $2);",
                 guild_id,
@@ -377,7 +361,6 @@ class Database:
         pool = await self.connect()
 
         async with pool.acquire() as connection:
-            connection: asyncpg.Connection
             await connection.execute(
                 "DELETE FROM enabled_features WHERE guild_id = $1 AND feature_name = $2;",
                 guild_id,
@@ -388,7 +371,6 @@ class Database:
         pool = await self.connect()
 
         async with pool.acquire() as connection:
-            connection: asyncpg.Connection
             await connection.execute(
                 "DELETE FROM enabled_features WHERE feature_name = $1;",
                 feature_name,
@@ -406,7 +388,6 @@ class Database:
         pool = await self.connect()
 
         async with pool.acquire() as connection:
-            connection: asyncpg.Connection
             row = await connection.fetchrow(
                 "SELECT * FROM coins WHERE user_id = $1;", user_id
             )
@@ -420,7 +401,6 @@ class Database:
         pool = await self.connect()
 
         async with pool.acquire() as connection:
-            connection: asyncpg.Connection
             rows = await connection.fetch(
                 "SELECT user_id, amount FROM coins ORDER BY amount DESC;"
             )
@@ -435,7 +415,6 @@ class Database:
         pool = await self.connect()
 
         async with pool.acquire() as connection:
-            connection: asyncpg.Connection
             await connection.execute(
                 "INSERT INTO coins (user_id, amount) VALUES ($1, $2) ON CONFLICT (user_id) DO UPDATE SET amount = EXCLUDED.amount;",
                 user_id,
@@ -468,7 +447,6 @@ class Database:
         pool = await self.connect()
 
         async with pool.acquire() as connection:
-            connection: asyncpg.Connection
             row = await connection.fetchrow(
                 "SELECT * FROM stakes WHERE user_id = $1;", user_id
             )
@@ -485,7 +463,6 @@ class Database:
         pool = await self.connect()
 
         async with pool.acquire() as connection:
-            connection: asyncpg.Connection
             await connection.execute(
                 "INSERT INTO stakes (user_id, amount, bitcoin_price) VALUES ($1, $2, $3) ON CONFLICT (user_id) DO UPDATE SET amount = EXCLUDED.amount, bitcoin_price = EXCLUDED.bitcoin_price;",
                 user_id,
@@ -499,7 +476,6 @@ class Database:
         pool = await self.connect()
 
         async with pool.acquire() as connection:
-            connection: asyncpg.Connection
             await connection.execute(
                 "DELETE FROM stakes WHERE user_id = $1;",
                 user_id,
@@ -606,7 +582,6 @@ class Database:
         pool = await self.connect()
 
         async with pool.acquire() as connection:
-            connection: asyncpg.Connection
             snipe_records = await connection.fetch(
                 "SELECT * FROM snipes "
                 + query
@@ -653,7 +628,6 @@ class Database:
             params = []
 
         async with pool.acquire() as connection:
-            connection: asyncpg.Connection
             records: list[asyncpg.Record] = await connection.fetch(
                 f"SELECT author, count(author) from snipes {where} group by author order by count desc;",
                 *params,
