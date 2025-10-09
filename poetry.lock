@@ -356,13 +356,13 @@ resolved_reference = "8686b5d1bbc1d3c862292eb436ab630d6e9c9b53"
 
 [[package]]
 name = "discord-py"
-version = "2.6.3"
+version = "2.6.4"
 description = "A Python wrapper for the Discord API"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "discord_py-2.6.3-py3-none-any.whl", hash = "sha256:69835269d73d9889a2f0efff4c91264a18998db0fdc4295a3c886fe9196dea4e"},
-    {file = "discord_py-2.6.3.tar.gz", hash = "sha256:92bb3ef9dbe08525803be1e357bc0191f59ae16956690fc96c34f40bcd02c649"},
+    {file = "discord_py-2.6.4-py3-none-any.whl", hash = "sha256:2783b7fb7f8affa26847bfc025144652c294e8fe6e0f8877c67ed895749eb227"},
+    {file = "discord_py-2.6.4.tar.gz", hash = "sha256:44384920bae9b7a073df64ae9b14c8cf85f9274b5ad5d1d07bd5a67539de2da9"},
 ]
 
 [package.dependencies]
