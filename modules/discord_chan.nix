@@ -70,6 +70,7 @@ in {
         description = "discord chan process owner";
         group = defaultUser;
         isSystemUser = true;
+        shell = pkgs.bash;
       };
     };
 
