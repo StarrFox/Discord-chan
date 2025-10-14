@@ -6,11 +6,11 @@ authors = [
     {name="StarrFox", email="starrfox6312@gmail.com"}
 ]
 license = "AGPL-3.0-or-later"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
     "aexaroton>=0.1.2",
     "asyncpg>=0.30.0",
-    "audioop-lts>=0.2.2",
+    "audioop-lts>=0.2.2; python_version >= '3.13'",
     "click>=8.3.0",
     "discord-ext-menus",
     "discord-py>=2.6.4",
