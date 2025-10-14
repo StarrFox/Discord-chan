@@ -82,14 +82,14 @@
         };
       in {
         packages.discord_chan = python.pkgs.buildPythonPackage rec {
-          inherit (pyproject.tool.poetry) version;
+          inherit (pyproject.project) version;
 
           src = ./.;
           pname = "discord_chan";
           format = "pyproject";
           pythonImportsCheck = [pname];
           nativeBuildInputs = [
-            python.pkgs.poetry-core
+            python.pkgs.uv-build
             python.pkgs.pythonRelaxDepsHook
           ];
           # disable cuck mode
@@ -137,7 +137,7 @@
           name = "discord_chan";
           inherit (self'.checks.pre-commit-check) shellHook;
           packages = with pkgs; [
-            (poetry.withPlugins (ps: with ps; [poetry-plugin-up]))
+            uv
             python
             just
             alejandra
