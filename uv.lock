@@ -245,7 +245,6 @@ source = { editable = "." }
 dependencies = [
     { name = "aexaroton" },
     { name = "asyncpg" },
-    { name = "asyncpg-stubs" },
     { name = "audioop-lts" },
     { name = "click" },
     { name = "discord-ext-menus" },
@@ -269,12 +268,14 @@ images = [
     { name = "pillow" },
     { name = "wand" },
 ]
+typing = [
+    { name = "asyncpg-stubs" },
+]
 
 [package.metadata]
 requires-dist = [
     { name = "aexaroton", specifier = ">=0.1.2" },
     { name = "asyncpg", specifier = ">=0.30.0" },
-    { name = "asyncpg-stubs", specifier = ">=0.30.2" },
     { name = "audioop-lts", specifier = ">=0.2.2" },
     { name = "click", specifier = ">=8.3.0" },
     { name = "discord-ext-menus", git = "https://github.com/Rapptz/discord-ext-menus" },
@@ -298,6 +299,7 @@ images = [
     { name = "pillow", specifier = ">=11.3.0" },
     { name = "wand", specifier = ">=0.6.13" },
 ]
+typing = [{ name = "asyncpg-stubs", specifier = ">=0.30.2" }]
 
 [[package]]
 name = "discord-ext-menus"

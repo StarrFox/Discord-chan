@@ -114,6 +114,7 @@
             typing-extensions
             loguru-logging-intercept
             aexaroton
+            audioop-lts
           ];
 
           meta.mainProgram = "discord_chan";
