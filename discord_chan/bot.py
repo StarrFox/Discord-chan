@@ -1,6 +1,7 @@
 import pathlib
 import typing
 from datetime import datetime
+from collections.abc import Iterable
 
 import discord
 from discord.ext import commands
@@ -17,37 +18,36 @@ ROOT = pathlib.Path(__file__).parent
 
 
 class DiscordChan(commands.AutoShardedBot):
-    def __init__(self, *, context: type[commands.Context] = SubContext, **kwargs):
-        self.debug_mode: bool = kwargs.pop("debug_mode", False)
-
-        self.exaroton_token: str | None = kwargs.pop("exaroton_token", None)
-        self.exaroton_client = None
-
+    def __init__(self, *, database: Database, exaroton_client: AexarotonClient, debug_mode: bool = False):
         super().__init__(
-            command_prefix=kwargs.pop("command_prefix", self.get_command_prefix),
-            case_insensitive=kwargs.pop("case_insensitive", True),
-            max_messages=kwargs.pop("max_messages", 10_000),
-            help_command=kwargs.pop("help_command", Minimal()),
-            allowed_mentions=kwargs.pop(
-                "allowed_mentions",
-                discord.AllowedMentions.none(),
-            ),
+            command_prefix=self.get_command_prefix,
+            case_insensitive=True,
+            max_messages=10_000,
+            help_command=Minimal(),
+            allowed_mentions=discord.AllowedMentions.none(),
             activity=discord.Activity(
                 type=discord.ActivityType.listening,
                 name=f"{DEFAULT_PREFIXES[0]}help",
             ),
-            intents=kwargs.pop("intents", discord.Intents.all()),
-            **kwargs,
+            intents=discord.Intents.all(),
         )
-        self.context = context
+        self.debug_mode: bool = debug_mode
+        self.exaroton_client = exaroton_client
+        self.database = database
+        self.context = SubContext
         self.ready_once = False
         self.uptime = datetime.now()
-        self.database = Database(debug_mode=self.debug_mode)
         self.feature_manager = FeatureManager(self.database)
 
         self._owners_cache: int | list[int] | None = None
 
         self.add_check(self.direct_message_check)
+
+    @classmethod
+    async def create(cls, *, exaroton_token: str, debug_mode: bool = False):
+        database: Database = await Database.create(debug_mode=debug_mode)
+        exaroton_client = AexarotonClient(exaroton_token)
+        return cls(database=database, exaroton_client=exaroton_client)
 
     async def _get_owners(self) -> int | list[int]:
         if self._owners_cache is not None:
@@ -67,17 +67,17 @@ class DiscordChan(commands.AutoShardedBot):
         return " ".join(o.mention for o in owners)
 
     @typing.overload
-    async def owners(self, as_users: typing.Literal[False]) -> typing.Iterable[int]: ...
+    async def owners(self, as_users: typing.Literal[False]) -> Iterable[int]: ...
 
     @typing.overload
     async def owners(
         self, as_users: typing.Literal[True]
-    ) -> typing.Iterable[discord.User]: ...
+    ) -> Iterable[discord.User]: ...
 
     @typing.overload
-    async def owners(self) -> typing.Iterable[int]: ...
+    async def owners(self) -> Iterable[int]: ...
 
-    async def owners(self, as_users: bool = False) -> typing.Iterable:
+    async def owners(self, as_users: bool = False) -> Iterable[int | discord.User]:
         owners_or_owner = await self._get_owners()
 
         if isinstance(owners_or_owner, int):
@@ -87,7 +87,7 @@ class DiscordChan(commands.AutoShardedBot):
 
         if as_users:
             # this should work even without intents
-            return [self.get_user(id_) for id_ in owners]
+            return [self.get_user(id_) for id_ in owners]  # type: ignore
 
         return owners
 
@@ -137,9 +137,6 @@ class DiscordChan(commands.AutoShardedBot):
 
         self.ready_once = True
 
-        if self.exaroton_token is not None:
-            self.exaroton_client = AexarotonClient(self.exaroton_token)
-
         try:
             await self.load_extension("jishaku")
         except (commands.errors.ExtensionError, commands.errors.ExtensionFailed):
@@ -173,7 +170,7 @@ class DiscordChan(commands.AutoShardedBot):
 
         before = len(self.extensions.keys())
 
-        extension_names = []
+        extension_names: list[str] = []
 
         for subpath in path.glob("**/[!_]*.py"):  # Ignore if starts with _
             subpath = subpath.relative_to(ROOT)
@@ -192,7 +189,7 @@ class DiscordChan(commands.AutoShardedBot):
 
         return len(self.extensions.keys()) - before
 
-    async def get_command_prefix(self, _, message: discord.Message):
+    async def get_command_prefix(self, _: typing.Self, message: discord.Message):
         prefixes = DEFAULT_PREFIXES
 
         if self.debug_mode:
@@ -201,7 +198,7 @@ class DiscordChan(commands.AutoShardedBot):
         return commands.when_mentioned_or(*prefixes)(self, message)
 
     @staticmethod
-    def direct_message_check(ctx: commands.Context):
+    def direct_message_check(ctx: SubContext):
         if isinstance(ctx.channel, discord.DMChannel):
             raise commands.NoPrivateMessage()
 

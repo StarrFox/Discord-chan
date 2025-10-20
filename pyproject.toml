@@ -43,6 +43,9 @@ typing = [
 [project.scripts]
 discord_chan = "discord_chan.__main__:main"
 
+[tool.pyright]
+reportMissingTypeStubs = false
+
 [tool.uv.build-backend]
 module-root = ""
 

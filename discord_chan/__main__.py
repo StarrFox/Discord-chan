@@ -16,7 +16,7 @@ try:
 except ImportError:
     uvloop = None
 else:
-    uvloop.install()
+    uvloop.install()  # type: ignore
 
 
 os.environ["JISHAKU_HIDE"] = "true"
@@ -61,14 +61,19 @@ def main(debug: bool, secret: Path, exaroton: Path):
         with open(exaroton) as fp:
             exaroton_token = fp.read().strip("\n")
     else:
-        exaroton_token = None
-
-    bot = discord_chan.DiscordChan(debug_mode=debug, exaroton_token=exaroton_token)
+        raise RuntimeError("Missing exaroton.secret file")
 
     with open(secret) as fp:
         discord_token = fp.read().strip("\n")
 
-    bot.run(discord_token)
+    asyncio.run(run_bot(discord_token=discord_token, debug_mode=debug, exaroton_token=exaroton_token))
+
+
+async def run_bot(*, discord_token: str, debug_mode: bool, exaroton_token: str) -> None:
+    bot = await discord_chan.DiscordChan.create(exaroton_token=exaroton_token, debug_mode=debug_mode)
+
+    async with bot:
+        await bot.start(discord_token)
 
 
 if __name__ == "__main__":
