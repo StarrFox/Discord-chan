@@ -13,17 +13,13 @@ test:
 bump-commit type="minor": && create-tag
     uv version --bump {{type}}
     git commit -am ("bump to " + (uv version --short))
-    git fetch --tags
-    git tag (uv version --short)
     git push
-    git push --tags
 
 # creates a new tag for the current version
 create-tag:
     git fetch --tags
     git tag (uv version --short)
     git push --tags
-
 
 # update deps
 [linux]
@@ -35,7 +31,6 @@ update:
 [windows]
 update:
     uv sync --all-groups --upgrade
-
 
 # do a dep bump commit with tag and version
 update-commit: update && create-tag
