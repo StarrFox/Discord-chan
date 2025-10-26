@@ -5,7 +5,7 @@ from typing import NamedTuple, Self
 
 import asyncpg
 import pendulum
-from discord.ext.commands import CommandError  # type: ignore
+from discord.ext.commands import CommandError
 from loguru import logger
 
 from discord_chan.snipe import Snipe, SnipeMode
