@@ -1,7 +1,6 @@
 import asyncio
 import random
 from collections.abc import Sequence
-from string import capwords
 from typing import NamedTuple
 
 import discord
@@ -153,37 +152,6 @@ class NormalPageSource(menus.ListPageSource):
             return "\n".join(page)
 
 
-class CodeblockPageSource(menus.ListPageSource):
-    def __init__(
-        self,
-        entries: Sequence[str],
-        *,
-        per_page: int = 1,
-        language: str | None = None,
-    ):
-        super().__init__(entries, per_page=per_page)
-        self.language = language or ""
-
-    async def format_page(self, menu, page):
-        base = "```" + self.language + "\n"
-        base += "\n".join(page)
-        base += "\n```"
-        return base
-
-
-class EmbedPageSource(menus.ListPageSource):
-    def __init__(self, entries: Sequence[discord.Embed], *, per_page=1):
-        if per_page != 1:
-            raise ValueError(
-                f"EmbedPageSource does not support multipage value of {per_page}"
-            )
-
-        super().__init__(entries, per_page=per_page)
-
-    async def format_page(self, menu, page: discord.Embed):
-        return page
-
-
 class EmbedFieldsPageSource(menus.ListPageSource):
     def __init__(
         self,
@@ -314,52 +282,6 @@ class PartitionPaginator(FixedNonePaginator):
 
         if len(line) > 0:
             super().add_line(line, empty=empty)
-
-
-# TODO: replace this with a group-by subclass
-class PrologPaginator(FixedNonePaginator):
-    def __init__(
-        self,
-        prefix: str = "```prolog",
-        suffix: str = "```",
-        max_size: int = 500,
-        align_option: str = ">",
-        align_places: int = 16,
-    ):
-        """
-        :param align_option: How the options should be aligned, uses same
-        symbols as f-strings (<, ^, >). Defaults to >
-        :param align_places: To how many places the header and options should be aligned,
-        defaults to 16
-        """
-        super().__init__(prefix, suffix, max_size)
-        self.align_option = align_option
-        self.align_places = align_places
-
-    def recursively_add_dictionary(self, dictionary: dict):
-        for key, value in dictionary.items():
-            if isinstance(value, dict):
-                self.add_header(str(key))
-                self.recursively_add_dictionary(value)
-            else:
-                self.add_key_value_pair(str(key), str(value))
-
-    def add_header(self, header: str):
-        """
-        :param header: The new header to add
-        """
-        header = f" {header} ".center(self.align_places * 2, "=")
-        self.add_line(f"\n{capwords(str(header))}\n")
-
-    def add_key_value_pair(self, key: str, value: str):
-        """
-        :param key: The key to add
-        :param value: The value to add
-        """
-        self.add_line(
-            f"{capwords(key):{self.align_option}{self.align_places}.{self.align_places}} :: "
-            f"{capwords(value)}"
-        )
 
 
 class SafebooruEmbedStreamSource(menus.ListPageSource):

@@ -14,7 +14,7 @@ from loguru import logger
 
 
 import discord_chan
-from discord_chan.typing import MessageableGuildChannel
+from discord_chan.typing_helpers import MessageableGuildChannel
 from discord_chan import DiscordChan, SubContext
 from discord_chan.converters import EnumConverter
 from discord_chan.image import get_bytes
