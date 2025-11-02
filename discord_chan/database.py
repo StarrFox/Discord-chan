@@ -1,9 +1,26 @@
 import os
 import sys
-from itertools import count
 from typing import NamedTuple, Self
 
-import asyncpg
+from sqlalchemy import (
+    BigInteger,
+    Integer,
+    Float,
+    Text,
+    select,
+    func,
+    delete,
+    desc,
+    and_,
+    distinct,
+)
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    create_async_engine,
+    async_sessionmaker,
+)
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.dialects.postgresql import insert
 import pendulum
 from discord.ext.commands import CommandError
 from loguru import logger
@@ -54,180 +71,185 @@ class CoinStake(NamedTuple):
     coins: float
 
 
-DBSCHEMA = """
-CREATE TABLE IF NOT EXISTS snipes (
-    id BIGINT,
-    mode INT,
-    server BIGINT,
-    author BIGINT,
-    channel BIGINT,
-    time FLOAT,
-    content TEXT
-);
+class Base(DeclarativeBase):
+    pass
 
-CREATE TABLE IF NOT EXISTS coins (
-    user_id BIGINT PRIMARY KEY,
-    amount BIGINT
-);
 
-CREATE TABLE IF NOT EXISTS enabled_features (
-    guild_id BIGINT,
-    feature_name TEXT,
-    PRIMARY KEY (guild_id, feature_name)
-);
+class SnipeRow(Base):
+    __tablename__ = "snipes"
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    mode: Mapped[int] = mapped_column(Integer)
+    server: Mapped[int] = mapped_column(BigInteger)
+    author: Mapped[int] = mapped_column(BigInteger)
+    channel: Mapped[int] = mapped_column(BigInteger)
+    time: Mapped[float] = mapped_column(Float)
+    content: Mapped[str] = mapped_column(Text)
 
-CREATE TABLE IF NOT EXISTS stakes (
-    user_id BIGINT PRIMARY KEY,
-    amount FLOAT,
-    bitcoin_price FLOAT
-);
 
-CREATE TABLE IF NOT EXISTS word_track (
-    server BIGINT,
-    author BIGINT,
-    word TEXT,
-    count INT,
-    PRIMARY KEY (server, author, word)
-);
+class Coin(Base):
+    __tablename__ = "coins"
+    user_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    amount: Mapped[int] = mapped_column(BigInteger)
 
-CREATE TABLE IF NOT EXISTS minecraft_usernames (
-    user_id BIGINT PRIMARY KEY,
-    username TEXT UNIQUE
-);
 
-CREATE TABLE IF NOT EXISTS minecraft_default_servers (
-    guild_id BIGINT PRIMARY KEY,
-    server_id TEXT
-);
+class EnabledFeature(Base):
+    __tablename__ = "enabled_features"
+    guild_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    feature_name: Mapped[str] = mapped_column(Text, primary_key=True)
 
-CREATE TABLE IF NOT EXISTS minecraft_guild_links (
-    first_guild_id BIGINT,
-    seconrd_guild_id BIGINT,
-    PRIMARY KEY (first_guild_id, seconrd_guild_id)
-);
-""".strip()
+
+class Stake(Base):
+    __tablename__ = "stakes"
+    user_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    amount: Mapped[float] = mapped_column(Float)
+    bitcoin_price: Mapped[float] = mapped_column(Float)
+
+
+class WordTrack(Base):
+    __tablename__ = "word_track"
+    server: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    author: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    word: Mapped[str] = mapped_column(Text, primary_key=True)
+    count: Mapped[int] = mapped_column(Integer)
+
+
+class MinecraftUsername(Base):
+    __tablename__ = "minecraft_usernames"
+    user_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    username: Mapped[str] = mapped_column(Text, unique=True)
+
+
+class MinecraftDefaultServer(Base):
+    __tablename__ = "minecraft_default_servers"
+    guild_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    server_id: Mapped[str] = mapped_column(Text)
+
+
+class MinecraftGuildLink(Base):
+    __tablename__ = "minecraft_guild_links"
+    first_guild_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    # keep original column name typo to match existing DB
+    seconrd_guild_id: Mapped[int] = mapped_column(
+        "seconrd_guild_id", BigInteger, primary_key=True
+    )
 
 
 # TODO: this class is dog
 class Database:
-    def __init__(self, pool: asyncpg.Pool):
-        self.pool = pool
+    def __init__(self, engine: AsyncEngine):
+        self.engine = engine
+        self.sessionmaker = async_sessionmaker(engine, expire_on_commit=False)
 
     @classmethod
     async def create(cls, debug_mode: bool = False) -> Self:
         password = "a" if debug_mode else None
+        if password is None:
+            url = f"postgresql+asyncpg://{DATABASE_user}@localhost/{DATABASE_name}"
+        else:
+            url = f"postgresql+asyncpg://{DATABASE_user}:{password}@localhost/{DATABASE_name}"
 
-        pool = await asyncpg.create_pool(
-            user=DATABASE_user, database=DATABASE_name, password=password
-        )
-        await pool.execute(DBSCHEMA)
-        return cls(pool)
+        engine = create_async_engine(url, future=True)
+        async with engine.begin() as conn:
+            # Create tables if they don't exist using ORM metadata
+            await conn.run_sync(Base.metadata.create_all)
+        return cls(engine)
 
     async def update_guild_default_minecraft_server(
         self, *, guild_id: int, server_id: str
     ):
-        async with self.pool.acquire() as connection:
-            await connection.execute(
-                "INSERT INTO minecraft_default_servers (guild_id, server_id) VALUES ($1, $2) ON CONFLICT (guild_id) DO UPDATE SET server_id = EXCLUDED.server_id;",
-                guild_id,
-                server_id,
+        async with self.sessionmaker() as session:
+            stmt = insert(MinecraftDefaultServer).values(
+                guild_id=guild_id, server_id=server_id
             )
+            stmt = stmt.on_conflict_do_update(
+                index_elements=[MinecraftDefaultServer.guild_id],
+                set_={"server_id": stmt.excluded.server_id},
+            )
+            await session.execute(stmt)
+            await session.commit()
 
     async def get_guild_default_minecraft_server(self, *, guild_id: int) -> str | None:
-        if record := await self.pool.fetchrow(
-            "SELECT guild_id, server_id FROM minecraft_default_servers where guild_id = $1;",
-            guild_id,
-        ):
-            return record["server_id"]
-
+        async with self.sessionmaker() as session:
+            stmt = select(MinecraftDefaultServer).where(
+                MinecraftDefaultServer.guild_id == guild_id
+            )
+            row = (await session.execute(stmt)).scalars().first()
+            if row is not None:
+                return row.server_id
         return None
 
     async def update_minecraft_username(self, *, user_id: int, username: str):
-        async with self.pool.acquire() as connection:
-            await connection.execute(
-                "INSERT INTO minecraft_usernames (user_id, username) VALUES ($1, $2) ON CONFLICT (user_id) DO UPDATE SET username = EXCLUDED.username;",
-                user_id,
-                username,
+        async with self.sessionmaker() as session:
+            stmt = insert(MinecraftUsername).values(user_id=user_id, username=username)
+            stmt = stmt.on_conflict_do_update(
+                index_elements=[MinecraftUsername.user_id],
+                set_={"username": stmt.excluded.username},
             )
+            await session.execute(stmt)
+            await session.commit()
 
     async def get_minecraft_usernames(self) -> dict[int, str]:
-        async with self.pool.acquire() as connection:
-            records: list[asyncpg.Record] = await connection.fetch(
-                "SELECT user_id, username FROM minecraft_usernames;"
-            )
-
+        async with self.sessionmaker() as session:
+            rows = (
+                await session.execute(
+                    select(MinecraftUsername.user_id, MinecraftUsername.username)
+                )
+            ).all()
         result: dict[int, str] = {}
-
-        for record in records:
-            result[record["user_id"]] = record["username"]
-
+        for user_id, username in rows:
+            result[int(user_id)] = str(username)
         return result
 
     async def get_minecraft_username(self, user_id: int) -> str | None:
-        async with self.pool.acquire() as connection:
-            record: asyncpg.Record | None = await connection.fetchrow(
-                "SELECT user_id, username FROM minecraft_usernames WHERE user_id = $1;",
-                user_id,
-            )
-
-        if record is not None:
-            return record["username"]
-
+        async with self.sessionmaker() as session:
+            row = await session.get(MinecraftUsername, user_id)
+        if row is not None:
+            return str(row.username)
         return None
 
     async def update_word_track_word(
         self, *, server_id: int, author_id: int, word: str, amount: int
     ):
-        async with self.pool.acquire() as connection:
-            await connection.execute(
-                "INSERT INTO word_track (server, author, word, count) VALUES ($1, $2, $3, $4) ON CONFLICT (server, author, word) DO UPDATE SET count = EXCLUDED.count + word_track.count;",
-                server_id,
-                author_id,
-                word,
-                amount,
+        async with self.sessionmaker() as session:
+            stmt = insert(WordTrack).values(
+                server=server_id, author=author_id, word=word, count=amount
             )
+            stmt = stmt.on_conflict_do_update(
+                index_elements=[WordTrack.server, WordTrack.author, WordTrack.word],
+                set_={"count": WordTrack.count + stmt.excluded.count},
+            )
+            await session.execute(stmt)
+            await session.commit()
 
     async def get_server_word_track_leaderboard(
         self, *, server_id: int, author_id: int | None = None
     ) -> dict[str, int]:
-        params = [server_id]
-
-        if author_id is not None:
-            author_condition = "and author = $2"
-            params.append(author_id)
-
-        else:
-            author_condition = ""
-
-        async with self.pool.acquire() as connection:
-            records: list[asyncpg.Record] = await connection.fetch(
-                f"SELECT word, sum(count) FROM word_track WHERE server = $1 {author_condition} GROUP BY word ORDER BY sum DESC;",
-                *params,
+        async with self.sessionmaker() as session:
+            stmt = select(WordTrack.word, func.sum(WordTrack.count).label("sum")).where(
+                WordTrack.server == server_id
             )
-
+            if author_id is not None:
+                stmt = stmt.where(WordTrack.author == author_id)
+            stmt = stmt.group_by(WordTrack.word).order_by(
+                desc(func.sum(WordTrack.count))
+            )
+            rows = (await session.execute(stmt)).all()
         result: dict[str, int] = {}
-
-        for record in records:
-            result[record["word"]] = record["sum"]
-
+        for word, total in rows:
+            result[str(word)] = int(total)
         return result
 
     async def get_member_bound_word_rank(
         self, *, server_id: int, word: str
     ) -> list[tuple[int, int]]:
-        async with self.pool.acquire() as connection:
-            records: list[asyncpg.Record] = await connection.fetch(
-                "SELECT author, count FROM word_track WHERE server = $1 AND word = $2 ORDER BY count DESC;",
-                server_id,
-                word,
+        async with self.sessionmaker() as session:
+            stmt = (
+                select(WordTrack.author, WordTrack.count)
+                .where(and_(WordTrack.server == server_id, WordTrack.word == word))
+                .order_by(desc(WordTrack.count))
             )
-
-        result: list[tuple[int, int]] = []
-
-        for record in records:
-            result.append((record["author"], record["count"]))
-
-        return result
+            rows = (await session.execute(stmt)).all()
+        return [(int(author), int(count)) for author, count in rows]
 
     # user_id: unique words
     async def get_word_track_unique_word_leaderboard(
@@ -235,25 +257,19 @@ class Database:
         *,
         server_id: int | None = None,
     ):
-        params: list[int] = []
-
-        if server_id is not None:
-            server_clause = "WHERE server = $1"
-            params.append(server_id)
-        else:
-            server_clause = ""
-
-        async with self.pool.acquire() as connection:
-            records: list[asyncpg.Record] = await connection.fetch(
-                f"SELECT author, count(word) FROM word_track {server_clause} GROUP BY author ORDER BY count DESC;",
-                *params,
+        async with self.sessionmaker() as session:
+            stmt = select(
+                WordTrack.author, func.count(distinct(WordTrack.word)).label("count")
             )
-
+            if server_id is not None:
+                stmt = stmt.where(WordTrack.server == server_id)
+            stmt = stmt.group_by(WordTrack.author).order_by(
+                desc(func.count(distinct(WordTrack.word)))
+            )
+            rows = (await session.execute(stmt)).all()
         result: list[tuple[int, int]] = []
-
-        for record in records:
-            result.append((record["author"], record["count"]))
-
+        for author, count_val in rows:
+            result.append((int(author), int(count_val)))
         return result
 
     # user_id: total words
@@ -262,100 +278,104 @@ class Database:
         *,
         server_id: int | None = None,
     ):
-        params: list[int] = []
-
-        if server_id is not None:
-            server_clause = "WHERE server = $1"
-            params.append(server_id)
-        else:
-            server_clause = ""
-
-        async with self.pool.acquire() as connection:
-            records: list[asyncpg.Record] = await connection.fetch(
-                f"SELECT author, sum(count) FROM word_track {server_clause} GROUP BY author ORDER BY sum DESC;",
-                *params,
+        async with self.sessionmaker() as session:
+            stmt = select(WordTrack.author, func.sum(WordTrack.count).label("sum"))
+            if server_id is not None:
+                stmt = stmt.where(WordTrack.server == server_id)
+            stmt = stmt.group_by(WordTrack.author).order_by(
+                desc(func.sum(WordTrack.count))
             )
-
+            rows = (await session.execute(stmt)).all()
         result: list[tuple[int, int]] = []
-
-        for record in records:
-            result.append((record["author"], record["sum"]))
-
+        for author, sum_val in rows:
+            result.append((int(author), int(sum_val)))
         return result
 
     async def get_guild_enabled_features(self, guild_id: int) -> list[str]:
-        async with self.pool.acquire() as connection:
-            records: list[asyncpg.Record] = await connection.fetch(
-                "SELECT feature_name FROM enabled_features WHERE guild_id = $1;",
-                guild_id,
+        async with self.sessionmaker() as session:
+            rows = (
+                (
+                    await session.execute(
+                        select(EnabledFeature.feature_name).where(
+                            EnabledFeature.guild_id == guild_id
+                        )
+                    )
+                )
+                .scalars()
+                .all()
             )
-
-            result: list[str] = []
-
-            for record in records:
-                result.append(record["feature_name"])
-
-        return result
+        return [str(name) for name in rows]
 
     async def enable_guild_enabled_feature(self, guild_id: int, feature_name: str):
-        async with self.pool.acquire() as connection:
-            await connection.execute(
-                "INSERT INTO enabled_features (guild_id, feature_name) VALUES ($1, $2);",
-                guild_id,
-                feature_name,
+        async with self.sessionmaker() as session:
+            stmt = insert(EnabledFeature).values(
+                guild_id=guild_id, feature_name=feature_name
             )
+            stmt = stmt.on_conflict_do_nothing(
+                index_elements=[EnabledFeature.guild_id, EnabledFeature.feature_name]
+            )
+            await session.execute(stmt)
+            await session.commit()
 
     async def disable_guild_enabled_feature(self, guild_id: int, feature_name: str):
-        async with self.pool.acquire() as connection:
-            await connection.execute(
-                "DELETE FROM enabled_features WHERE guild_id = $1 AND feature_name = $2;",
-                guild_id,
-                feature_name,
+        async with self.sessionmaker() as session:
+            await session.execute(
+                delete(EnabledFeature).where(
+                    and_(
+                        EnabledFeature.guild_id == guild_id,
+                        EnabledFeature.feature_name == feature_name,
+                    )
+                )
             )
+            await session.commit()
 
     async def purge_feature(self, feature_name: str):
-        async with self.pool.acquire() as connection:
-            await connection.execute(
-                "DELETE FROM enabled_features WHERE feature_name = $1;",
-                feature_name,
+        async with self.sessionmaker() as session:
+            await session.execute(
+                delete(EnabledFeature).where(
+                    EnabledFeature.feature_name == feature_name
+                )
             )
+            await session.commit()
 
     async def delete_coin_account(self, user_id: int):
-        async with self.pool.acquire() as connection:
-            await connection.execute("DELETE FROM coins WHERE user_id = $1;", user_id)
-
+        async with self.sessionmaker() as session:
+            await session.execute(delete(Coin).where(Coin.user_id == user_id))
+            await session.commit()
         logger.info(f"Deleted coin account {user_id}")
 
     async def get_coin_balance(self, user_id: int) -> int:
-        async with self.pool.acquire() as connection:
-            row = await connection.fetchrow(
-                "SELECT * FROM coins WHERE user_id = $1;", user_id
-            )
-
-            if row is not None:
-                return row["amount"]
-
+        async with self.sessionmaker() as session:
+            amount = (
+                await session.execute(
+                    select(Coin.amount).where(Coin.user_id == user_id)
+                )
+            ).scalar_one_or_none()
+            if amount is not None:
+                return int(amount)
             return 0
 
     async def get_all_coin_balances(self) -> list[CoinsEntry]:
-        async with self.pool.acquire() as connection:
-            rows = await connection.fetch(
-                "SELECT user_id, amount FROM coins ORDER BY amount DESC;"
-            )
-
-            result: list[CoinsEntry] = []
-            for row in rows:
-                result.append(CoinsEntry(row["user_id"], row["amount"]))
-
-            return result
+        async with self.sessionmaker() as session:
+            rows = (
+                await session.execute(
+                    select(Coin.user_id, Coin.amount).order_by(desc(Coin.amount))
+                )
+            ).all()
+        result: list[CoinsEntry] = []
+        for user_id, amount in rows:
+            result.append(CoinsEntry(int(user_id), int(amount)))
+        return result
 
     async def set_coins(self, user_id: int, amount: int):
-        async with self.pool.acquire() as connection:
-            await connection.execute(
-                "INSERT INTO coins (user_id, amount) VALUES ($1, $2) ON CONFLICT (user_id) DO UPDATE SET amount = EXCLUDED.amount;",
-                user_id,
-                amount,
+        async with self.sessionmaker() as session:
+            stmt = insert(Coin).values(user_id=user_id, amount=amount)
+            stmt = stmt.on_conflict_do_update(
+                index_elements=[Coin.user_id],
+                set_={"amount": stmt.excluded.amount},
             )
+            await session.execute(stmt)
+            await session.commit()
 
         logger.info(f"Set coin account {user_id} to {amount}")
 
@@ -380,37 +400,39 @@ class Database:
         return new_balance
 
     async def get_coin_stake(self, user_id: int) -> CoinStake | None:
-        async with self.pool.acquire() as connection:
-            row = await connection.fetchrow(
-                "SELECT * FROM stakes WHERE user_id = $1;", user_id
-            )
-
-            if row is not None:
-                return CoinStake(
-                    bitcoin_price=row["bitcoin_price"], coins=row["amount"]
+        async with self.sessionmaker() as session:
+            row = (
+                await session.execute(
+                    select(Stake.amount, Stake.bitcoin_price).where(
+                        Stake.user_id == user_id
+                    )
                 )
-
-            # explicit None for non-existing account
+            ).first()
+            if row is not None:
+                amount, btc = row
+                return CoinStake(bitcoin_price=float(btc), coins=float(amount))
             return None
 
     async def set_coin_stake(self, user_id: int, amount: float, bitcoin_price: float):
-        async with self.pool.acquire() as connection:
-            await connection.execute(
-                "INSERT INTO stakes (user_id, amount, bitcoin_price) VALUES ($1, $2, $3) ON CONFLICT (user_id) DO UPDATE SET amount = EXCLUDED.amount, bitcoin_price = EXCLUDED.bitcoin_price;",
-                user_id,
-                amount,
-                bitcoin_price,
+        async with self.sessionmaker() as session:
+            stmt = insert(Stake).values(
+                user_id=user_id, amount=amount, bitcoin_price=bitcoin_price
             )
-
+            stmt = stmt.on_conflict_do_update(
+                index_elements=[Stake.user_id],
+                set_={
+                    "amount": stmt.excluded.amount,
+                    "bitcoin_price": stmt.excluded.bitcoin_price,
+                },
+            )
+            await session.execute(stmt)
+            await session.commit()
         logger.info(f"Set coin stake for {user_id}: {amount=} {bitcoin_price=}")
 
     async def clear_coin_stake(self, user_id: int):
-        async with self.pool.acquire() as connection:
-            await connection.execute(
-                "DELETE FROM stakes WHERE user_id = $1;",
-                user_id,
-            )
-
+        async with self.sessionmaker() as session:
+            await session.execute(delete(Stake).where(Stake.user_id == user_id))
+            await session.commit()
         logger.info(f"Cleared coin stake for {user_id}")
 
     async def add_coin_stake(self, user_id: int, amount: float, bitcoin_price: float):
@@ -440,17 +462,18 @@ class Database:
         return new_balance
 
     async def add_snipe(self, snipe: Snipe):
-        async with self.pool.acquire() as connection:
-            await connection.execute(
-                "INSERT INTO snipes(id, server, author, channel, mode, time, content) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-                snipe.id,
-                snipe.server,
-                snipe.author,
-                snipe.channel,
-                snipe.mode.value,
-                snipe.time.timestamp(),
-                snipe.content,
+        async with self.sessionmaker() as session:
+            row = SnipeRow(
+                id=snipe.id,
+                server=snipe.server,
+                author=snipe.author,
+                channel=snipe.channel,
+                mode=snipe.mode.value,
+                time=snipe.time.timestamp(),
+                content=snipe.content,
             )
+            session.add(row)
+            await session.commit()
 
     async def get_snipes(
         self,
@@ -463,103 +486,86 @@ class Database:
         limit: int | None = None,
         negative: bool = False,
     ) -> tuple[list[Snipe], int]:
-        args: list[int | str] = []
-        query_parts: list[str] = []
-        row_limit = ""
-        counter = count(start=1, step=1)
+        order_desc = not negative
 
-        if server is not None:
-            query_parts.append(f"server = ${next(counter)}")
-            args.append(server)
+        async with self.sessionmaker() as session:
+            conditions = []
+            if server is not None:
+                conditions.append(SnipeRow.server == server)
+            if author is not None:
+                conditions.append(SnipeRow.author == author)
+            if channel is not None:
+                conditions.append(SnipeRow.channel == channel)
+            if contains is not None:
+                conditions.append(SnipeRow.content.contains(contains))
+            if mode is not None:
+                conditions.append(SnipeRow.mode == mode.value)
 
-        if author is not None:
-            query_parts.append(f"author = ${next(counter)}")
-            args.append(author)
+            base_stmt = select(SnipeRow)
+            if conditions:
+                base_stmt = base_stmt.where(and_(*conditions))
 
-        if channel is not None:
-            query_parts.append(f"channel = ${next(counter)}")
-            args.append(channel)
+            filtered = base_stmt.cte("filtered")
 
-        if contains is not None:
-            # the position function returns 1 or above if the substring is within content
-            query_parts.append(f"position(${next(counter)} in content) > 0")
-            args.append(contains)
+            order_expr = (
+                filtered.c.time.desc() if order_desc else filtered.c.time.asc()
+            )
 
-        if mode is not None:
-            query_parts.append(f"mode = ${next(counter)}")
-            args.append(mode.value)
-
-        if query_parts:
-            query = "WHERE " + " and ".join(query_parts) + " "
-        else:
-            query = ""
-
-        if limit is not None:
-            if limit > 10_000_000:
-                raise RuntimeError(
-                    f"requested limit of {limit} when the max is 10,000,000"
+            stmt = (
+                select(
+                    filtered.c.id,
+                    filtered.c.mode,
+                    filtered.c.server,
+                    filtered.c.author,
+                    filtered.c.channel,
+                    filtered.c.time,
+                    filtered.c.content,
+                    select(func.count()).select_from(filtered).label("total_count"),
                 )
-
-            row_limit = f"LIMIT {limit}"
-
-        if negative:
-            order = "ASC"
-        else:
-            order = "DESC"
-
-        async with self.pool.acquire() as connection:
-            snipe_records = await connection.fetch(
-                "SELECT * FROM snipes "
-                + query
-                + f"ORDER BY time {order} "
-                + row_limit
-                + ";",
-                *args,
+                .order_by(order_expr)
             )
 
-            snipe_count_record = await connection.fetchrow(
-                "SELECT count(*) FROM snipes " + query + ";", *args
-            )
-            if snipe_count_record is None:
-                snipe_count = 0
-            else:
-                snipe_count: int = snipe_count_record["count"]
+            if limit is not None:
+                stmt = stmt.limit(limit)
+
+            result = await session.execute(stmt)
+            rows = result.all()
+
+            if not rows:
+                return [], 0
+
+            total_count = int(rows[0].total_count)
 
             snipes: list[Snipe] = []
-            for snipe_record in snipe_records:
+            for r in rows:
                 snipes.append(
                     Snipe(
-                        id=snipe_record["id"],
-                        mode=SnipeMode(snipe_record["mode"]),
-                        author=snipe_record["author"],
-                        content=snipe_record["content"],
-                        server=snipe_record["server"],
-                        channel=snipe_record["channel"],
-                        time=pendulum.from_timestamp(snipe_record["time"]),
+                        id=int(r.id),
+                        mode=SnipeMode(int(r.mode)),
+                        author=int(r.author),
+                        content=str(r.content),
+                        server=int(r.server),
+                        channel=int(r.channel),
+                        time=pendulum.from_timestamp(float(r.time)),
                     )
                 )
 
-            return snipes, snipe_count
+            return snipes, total_count
 
     async def get_snipe_leaderboard(
         self, server_id: int | None = None
     ) -> dict[int, int]:
-        if server_id:
-            where = "where server = $1"
-            params = [server_id]
-        else:
-            where = ""
-            params = []
-
-        async with self.pool.acquire() as connection:
-            records: list[asyncpg.Record] = await connection.fetch(
-                f"SELECT author, count(author) from snipes {where} group by author order by count desc;",
-                *params,
+        async with self.sessionmaker() as session:
+            stmt = select(SnipeRow.author, func.count(SnipeRow.author).label("count"))
+            if server_id is not None:
+                stmt = stmt.where(SnipeRow.server == server_id)
+            stmt = stmt.group_by(SnipeRow.author).order_by(
+                desc(func.count(SnipeRow.author))
             )
+            rows = (await session.execute(stmt)).all()
 
-            result: dict[int, int] = {}
-
-            for record in records:
-                result[record["author"]] = record["count"]
+        result: dict[int, int] = {}
+        for author, count_val in rows:
+            result[int(author)] = int(count_val)
 
         return result

@@ -18,7 +18,13 @@ ROOT = pathlib.Path(__file__).parent
 
 
 class DiscordChan(commands.AutoShardedBot):
-    def __init__(self, *, database: Database, exaroton_client: AexarotonClient, debug_mode: bool = False):
+    def __init__(
+        self,
+        *,
+        database: Database,
+        exaroton_client: AexarotonClient,
+        debug_mode: bool = False,
+    ):
         super().__init__(
             command_prefix=self.get_command_prefix,
             case_insensitive=True,

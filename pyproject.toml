@@ -10,6 +10,7 @@ requires-python = ">=3.12"
 dependencies = [
     "aexaroton>=0.1.2",
     "asyncpg>=0.30.0",
+    "SQLAlchemy>=2.0.36",
     "audioop-lts>=0.2.2; python_version >= '3.13'",
     "click>=8.3.0",
     "discord-ext-menus",
@@ -36,6 +37,10 @@ images = [
     "pillow>=12.0.0",
     "wand>=0.6.13",
 ]
+tests = [
+    "pytest>=8.4.2",
+    "pytest-asyncio>=0.24.0",
+]
 typing = [
     "asyncpg-stubs>=0.30.2",
 ]
@@ -45,6 +50,9 @@ discord_chan = "discord_chan.__main__:main"
 
 [tool.pyright]
 reportMissingTypeStubs = false
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
 
 [tool.uv.build-backend]
 module-root = ""

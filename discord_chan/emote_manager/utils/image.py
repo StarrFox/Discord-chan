@@ -128,9 +128,10 @@ def convert_to_gif(raw_image_data: bytes) -> bytes:
 
     image_data = io.BytesIO(raw_image_data)
     try:
-        with wand.image.Image(blob=image_data) as orig, orig.convert(
-            "gif"
-        ) as converted:
+        with (
+            wand.image.Image(blob=image_data) as orig,
+            orig.convert("gif") as converted,
+        ):
             # discord tries to stop us from abusing animated gif slots by detecting single frame gifs
             # so make it two frames
             converted.sequence[0].delay = (  # type: ignore

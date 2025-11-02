@@ -23,7 +23,6 @@ class Glorpies(commands.Cog, name="glorpies"):
 
         self.landmine_rarity = 20
 
-
     async def cog_check(self, ctx: commands.Context) -> bool:  # type: ignore (this method is allowed to be sync and async)
         if ctx.guild is None:
             raise commands.NoPrivateMessage()
@@ -37,7 +36,7 @@ class Glorpies(commands.Cog, name="glorpies"):
     async def on_message(self, message: discord.Message):
         if not message.guild or message.guild.id != GLORPY_ID:
             return
-        
+
         should_time = random.randrange(0, self.landmine_rarity) == 1
 
         if should_time:
@@ -50,7 +49,9 @@ class Glorpies(commands.Cog, name="glorpies"):
                 return
 
             await message.author.timeout(timedelta(minutes=10), reason="sus")
-            await message.channel.send(f"\N{COLLISION SYMBOL} {message.author.mention} stepped on a landmine and has been timed out for 10 years!")
+            await message.channel.send(
+                f"\N{COLLISION SYMBOL} {message.author.mention} stepped on a landmine and has been timed out for 10 years!"
+            )
 
             # progressively more rare
             self.landmine_rarity += 10
