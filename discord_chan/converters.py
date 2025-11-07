@@ -232,15 +232,11 @@ class ImageUrlConverter(commands.Converter):
                 return str(message.attachments[0].url)
 
             elif message.embeds:
-                embed = message.embeds[0]
+                for embed in message.embeds:
+                    embed_image = _get_embed_image(embed)
 
-                if embed.type == "image":
-                    if embed.url:
-                        return embed.url
-
-                elif embed.image:
-                    # .url should always be set in this case
-                    return embed.image.url  # type: ignore
+                    if embed_image is not None:
+                        return embed_image
 
             raise commands.BadArgument("Message has no attachments/embed images")
 
@@ -279,20 +275,28 @@ async def last_image_url(ctx: commands.Context) -> str:
             return message.attachments[0].url
 
         if message.embeds:
-            embed = message.embeds[0]
+            for embed in message.embeds:
+                embed_image = _get_embed_image(embed)
 
-            if embed.type == "image":
-                if embed.url:
-                    return embed.url
-
-            elif embed.image is not None:
-                # this can happen sometimes, just ignore those embeds
-                if embed.image.proxy_url is None:
-                    raise commands.CheckFailure("No image attached or in history")
-
-                return embed.image.proxy_url
+                if embed_image is not None:
+                    return embed_image
 
     raise commands.CheckFailure("No image attached or in history")
+
+
+def _get_embed_image(embed: discord.Embed) -> str | None:
+    if embed.type == "image":
+        if embed.url:
+            return embed.url
+
+    elif embed.image is not None:
+        # this can happen sometimes, just ignore those embeds
+        if embed.image.proxy_url is None:
+            return None
+
+        return embed.image.proxy_url
+    
+    return None
 
 
 LastImageUrl = commands.parameter(

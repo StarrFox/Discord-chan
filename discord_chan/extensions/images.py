@@ -81,6 +81,39 @@ class Images(commands.Cog, name="images"):
 
         await ctx.send(ctx.author.mention, file=file)
 
+    @commands.command()
+    @commands.cooldown(1, 1, commands.cooldowns.BucketType.user)
+    async def invert(self, ctx: SubContext, image: Annotated[PilImage, ImageConverter("png")] = LastImage):
+        """
+        Invert an image
+        """
+        async with ctx.typing():
+            inverted_image = await discord_chan.image.invert_image(image)
+
+            file = await discord_chan.image.image_to_file(inverted_image, "inverted.png")
+
+        await ctx.send(ctx.author.mention, file=file)
+
+    @commands.command()
+    @commands.cooldown(1, 1, commands.cooldowns.BucketType.user)
+    async def overlay(
+        self,
+        ctx: SubContext,
+        image1: Annotated[PilImage, ImageConverter("png")],
+        image2: Annotated[PilImage, ImageConverter("png")] = LastImage,
+    ):
+        """
+        Overlay an image on top of another
+        """
+        async with ctx.typing():
+            superimposed_image = await discord_chan.image.superimpose_image(image1, image2)
+
+            file = await discord_chan.image.image_to_file(
+                superimposed_image, "superimposed.png"
+            )
+
+        await ctx.send(ctx.author.mention, file=file)
+
     @commands.command(aliases=["gray"])
     @commands.cooldown(1, 1, commands.cooldowns.BucketType.user)
     async def grayscale(

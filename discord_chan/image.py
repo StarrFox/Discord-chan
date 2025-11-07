@@ -10,7 +10,7 @@ import re
 
 import aiohttp
 from discord import File
-from PIL import Image, ImageChops, ImageSequence, ImagePalette
+from PIL import Image, ImageChops, ImageSequence, ImageOps
 
 
 try:
@@ -70,7 +70,7 @@ P = ParamSpec("P")
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-def executor_function(sync_function: Callable[P, T]):  # type: ignore
+def executor_function(sync_function: Callable[P, T]):
     @functools.wraps(sync_function)
     async def sync_wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
         loop = asyncio.get_event_loop()
@@ -146,6 +146,7 @@ async def url_to_image(link: str) -> Image.Image:
     image_bytes, content_type = await get_bytes(link, max_length=10)
 
     # TODO: get the exact formats the running PIL supports
+    # can read Image.ID for a list of formats
     # Check before to try and save some memory
     if "image" not in content_type.lower():
         raise InvalidImageType(f"{content_type.lower()} is not a valid image type")
@@ -383,6 +384,34 @@ def difference_image(image1: Image.Image, image2: Image.Image) -> Image.Image:
     equalized = equalize_images(*images)
 
     return ImageChops.difference(*equalized)
+
+
+@executor_function
+def invert_image(image: Image.Image) -> Image.Image:
+    """Invert an image
+
+    Args:
+        image (Image.Image): The image to invert
+
+    Returns:
+        Image.Image: The inverted image
+    """
+    return ImageOps.invert(image.convert("RGB"))
+
+
+@executor_function
+def superimpose_image(image1: Image.Image, image2: Image.Image) -> Image.Image:
+    images: list[Image.Image] = []
+    for image in (image1, image2):
+        if image.mode == "RGB":
+            images.append(image)
+
+        else:
+            images.append(image.convert("RGB"))
+
+    equalized = equalize_images(*images)
+
+    return ImageChops.multiply(*equalized)
 
 
 @executor_function
