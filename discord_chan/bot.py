@@ -13,7 +13,7 @@ from .database import Database
 from .features import FeatureManager
 from .help import Minimal
 
-DEFAULT_PREFIXES = ["sf/", "SF/", "dc/", "DC/"]
+DEFAULT_PREFIXES = ["dc/", "DC/"]
 ROOT = pathlib.Path(__file__).parent
 
 
@@ -47,7 +47,7 @@ class DiscordChan(commands.AutoShardedBot):
     async def create(cls, *, exaroton_token: str, debug_mode: bool = False):
         database: Database = await Database.create(debug_mode=debug_mode)
         exaroton_client = AexarotonClient(exaroton_token)
-        return cls(database=database, exaroton_client=exaroton_client)
+        return cls(database=database, exaroton_client=exaroton_client, debug_mode=debug_mode)
 
     async def _get_owners(self) -> int | list[int]:
         if self._owners_cache is not None:
