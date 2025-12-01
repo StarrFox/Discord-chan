@@ -8,7 +8,7 @@
 with lib; let
   cfg = config.services.discord_chan;
   defaultUser = "discord_chan";
-  spkgs = selfpkgs.${pkgs.system};
+  spkgs = selfpkgs.${pkgs.stdenv.hostPlatform.system};
 in {
   # used for debugging
   _file = "discord_chan.nix";
