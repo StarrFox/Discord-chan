@@ -10,9 +10,17 @@ test:
     uv run pytest
 
 # does a version bump commit
+[windows]
 bump-commit type="minor": && create-tag
     uv version --bump {{type}}
     git commit -am ("bump to " + (uv version --short))
+    git push
+
+# does a version bump commit
+[linux]
+bump-commit type="minor": && create-tag
+    uv version --bump {{type}}
+    git commit -am "bump to "(uv version --short)
     git push
 
 # creates a new tag for the current version
