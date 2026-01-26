@@ -24,9 +24,17 @@ bump-commit type="minor": && create-tag
     git push
 
 # creates a new tag for the current version
+[windows]
 create-tag:
     git fetch --tags
     git tag (uv version --short)
+    git push --tags
+
+# creates a new tag for the current version
+[linux]
+create-tag:
+    git fetch --tags
+    git tag ""(uv version --short)
     git push --tags
 
 # update deps
