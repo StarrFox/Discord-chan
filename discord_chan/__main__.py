@@ -54,23 +54,29 @@ def main(debug: bool, secret: Path, exaroton: Path):
     logger.add(sys.stderr, level="INFO", filter="discord_chan")
 
     if debug:
-        asyncio.get_event_loop().set_debug(True)
+        # asyncio.get_event_loop().set_debug(True)
         logging.getLogger("asyncio").setLevel(logging.DEBUG)
 
     if exaroton.exists():
         with open(exaroton) as fp:
             exaroton_token = fp.read().strip("\n")
     else:
-        raise RuntimeError("Missing exaroton.secret file")
+        exaroton_token = None
 
     with open(secret) as fp:
         discord_token = fp.read().strip("\n")
 
-    asyncio.run(run_bot(discord_token=discord_token, debug_mode=debug, exaroton_token=exaroton_token))
+    asyncio.run(
+        run_bot(
+            discord_token=discord_token, debug_mode=debug, exaroton_token=exaroton_token
+        )
+    )
 
 
 async def run_bot(*, discord_token: str, debug_mode: bool, exaroton_token: str) -> None:
-    bot = await discord_chan.DiscordChan.create(exaroton_token=exaroton_token, debug_mode=debug_mode)
+    bot = await discord_chan.DiscordChan.create(
+        exaroton_token=exaroton_token, debug_mode=debug_mode
+    )
 
     async with bot:
         await bot.start(discord_token)

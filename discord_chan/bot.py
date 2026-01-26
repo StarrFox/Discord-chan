@@ -18,7 +18,13 @@ ROOT = pathlib.Path(__file__).parent
 
 
 class DiscordChan(commands.AutoShardedBot):
-    def __init__(self, *, database: Database, exaroton_client: AexarotonClient, debug_mode: bool = False):
+    def __init__(
+        self,
+        *,
+        database: Database,
+        exaroton_client: AexarotonClient | None = None,
+        debug_mode: bool = False,
+    ):
         super().__init__(
             command_prefix=self.get_command_prefix,
             case_insensitive=True,
@@ -44,10 +50,17 @@ class DiscordChan(commands.AutoShardedBot):
         self.add_check(self.direct_message_check)
 
     @classmethod
-    async def create(cls, *, exaroton_token: str, debug_mode: bool = False):
+    async def create(
+        cls, *, exaroton_token: str | None = None, debug_mode: bool = False
+    ):
         database: Database = await Database.create(debug_mode=debug_mode)
-        exaroton_client = AexarotonClient(exaroton_token)
-        return cls(database=database, exaroton_client=exaroton_client, debug_mode=debug_mode)
+        if exaroton_token is not None:
+            exaroton_client = AexarotonClient(exaroton_token)
+        else:
+            exaroton_client = None
+        return cls(
+            database=database, exaroton_client=exaroton_client, debug_mode=debug_mode
+        )
 
     async def _get_owners(self) -> int | list[int]:
         if self._owners_cache is not None:
