@@ -17,9 +17,10 @@ class Accessibility(commands.Cog, name="accessibility"):
     @commands.command(name="steal-these")
     async def steal_these(self, ctx: SubContext, message: discord.Message):
         """
-        "Steal" the custom emojis from a message
+        "Steal" the custom emojis/stickers from a message
         """
         emojis = []
+        stickers = message.stickers
 
         for group in re.finditer(CUSTOM_EMOJI_REGEX, message.content):
             groups = group.groups()
@@ -29,10 +30,24 @@ class Accessibility(commands.Cog, name="accessibility"):
                 )
             )
 
-        if not emojis:
-            return await ctx.send("No custom emojis found in message")
+        if not emojis and not stickers:
+            return await ctx.send("No custom emojis/stickers found in message")
 
-        await ctx.send("\n".join([f"{e.name}: <{e.url!s}>" for e in emojis]))
+        if emojis:
+            emoji_message = "Emojis:\n" + "\n".join(
+                [f"{e.name}: <{e.url!s}>" for e in emojis]
+            )
+        else:
+            emoji_message = ""
+
+        if stickers:
+            sticker_message = "Stickers:\n" + "\n".join(
+                [f"{s.name}: <{s.url!s}>" for s in stickers]
+            )
+        else:
+            sticker_message = ""
+
+        await ctx.send(f"{emoji_message}\n{sticker_message}")
 
 
 async def setup(bot: DiscordChan):
