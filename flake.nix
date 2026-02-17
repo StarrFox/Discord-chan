@@ -107,7 +107,7 @@
             numpy
             uwuify
             parsedatetime
-            ((jishaku.override {youtube-dl = yt-dlp;}).overrideAttrs {patches = [];})
+            jishaku
             unidecode
             uvloop
             psutil

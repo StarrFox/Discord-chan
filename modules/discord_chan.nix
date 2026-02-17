@@ -50,34 +50,38 @@ in {
     };
   };
   config = let
-    exaroton = if cfg.exarotonTokenFile == null then "" else "--exaroton ${cfg.exarotonTokenFile}";
-  in mkIf cfg.enable {
-    systemd.services.discord_chan = {
-      description = "Discord chan bot";
-      wantedBy = ["multi-user.target"];
-      after = ["network-online.target"];
-      wants = ["network-online.target"];
-      serviceConfig = {
-        User = cfg.user;
-        Group = cfg.group;
-        Restart = "always";
-        ExecStart = "${lib.getExe spkgs.discord_chan} --secret ${cfg.tokenFile} ${exaroton}";
+    exaroton =
+      if cfg.exarotonTokenFile == null
+      then ""
+      else "--exaroton ${cfg.exarotonTokenFile}";
+  in
+    mkIf cfg.enable {
+      systemd.services.discord_chan = {
+        description = "Discord chan bot";
+        wantedBy = ["multi-user.target"];
+        after = ["network-online.target"];
+        wants = ["network-online.target"];
+        serviceConfig = {
+          User = cfg.user;
+          Group = cfg.group;
+          Restart = "always";
+          ExecStart = "${lib.getExe spkgs.discord_chan} --secret ${cfg.tokenFile} ${exaroton}";
+        };
       };
-    };
 
-    users.users = optionalAttrs (cfg.user == defaultUser) {
-      ${defaultUser} = {
-        description = "discord chan process owner";
-        group = defaultUser;
-        isSystemUser = true;
-        shell = pkgs.bash;
+      users.users = optionalAttrs (cfg.user == defaultUser) {
+        ${defaultUser} = {
+          description = "discord chan process owner";
+          group = defaultUser;
+          isSystemUser = true;
+          shell = pkgs.bash;
+        };
       };
-    };
 
-    users.groups = optionalAttrs (cfg.user == defaultUser) {
-      ${defaultUser} = {
-        members = [defaultUser];
+      users.groups = optionalAttrs (cfg.user == defaultUser) {
+        ${defaultUser} = {
+          members = [defaultUser];
+        };
       };
     };
-  };
 }
