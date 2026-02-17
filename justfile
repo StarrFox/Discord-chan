@@ -1,5 +1,7 @@
 set windows-shell := ["powershell"]
 
+set shell := ["fish", "-c"]
+
 # show this list
 [default]
 default:
