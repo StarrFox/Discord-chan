@@ -55,7 +55,7 @@ class DiscordChan(commands.AutoShardedBot):
     ):
         database: Database = await Database.create(debug_mode=debug_mode)
         if exaroton_token is not None:
-            exaroton_client = AexarotonClient(exaroton_token)
+            exaroton_client = await AexarotonClient.from_token(exaroton_token)
         else:
             exaroton_client = None
         return cls(
