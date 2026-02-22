@@ -32,29 +32,29 @@ class Glorpies(commands.Cog, name="glorpies"):
 
         return True
 
-    @commands.Cog.listener()
-    async def on_message(self, message: discord.Message):
-        if not message.guild or message.guild.id != GLORPY_ID:
-            return
+    # @commands.Cog.listener()
+    # async def on_message(self, message: discord.Message):
+    #     if not message.guild or message.guild.id != GLORPY_ID:
+    #         return
 
-        should_time = random.randrange(0, self.landmine_rarity) == 1
+    #     should_time = random.randrange(0, self.landmine_rarity) == 1
 
-        if should_time:
-            if not isinstance(message.author, discord.Member):
-                logger.warning("Guild member cache polluted")
-                return
+    #     if should_time:
+    #         if not isinstance(message.author, discord.Member):
+    #             logger.warning("Guild member cache polluted")
+    #             return
 
-            if not message.channel.permissions_for(message.guild.me).moderate_members:
-                logger.info("Missing permission to timeout members in glorp server")
-                return
+    #         if not message.channel.permissions_for(message.guild.me).moderate_members:
+    #             logger.info("Missing permission to timeout members in glorp server")
+    #             return
 
-            await message.author.timeout(timedelta(minutes=10), reason="sus")
-            await message.channel.send(
-                f"\N{COLLISION SYMBOL} {message.author.mention} stepped on a landmine and has been timed out for 10 years!"
-            )
+    #         await message.author.timeout(timedelta(minutes=10), reason="sus")
+    #         await message.channel.send(
+    #             f"\N{COLLISION SYMBOL} {message.author.mention} stepped on a landmine and has been timed out for 10 years!"
+    #         )
 
-            # progressively more rare
-            self.landmine_rarity += 10
+    #         # progressively more rare
+    #         self.landmine_rarity += 10
 
     @commands.command(name="rename")
     async def rename_command(
