@@ -30,14 +30,14 @@
 
         aexaroton = python.pkgs.buildPythonPackage rec {
           pname = "aexaroton";
-          version = "0.1.2";
+          version = "0.2.0";
           format = "pyproject";
           src = python.pkgs.fetchPypi {
             inherit pname version;
-            hash = "sha256-Mn+IJFCqg8YnuVXS4174fg/o14iZazXuXNcB+f923B4=";
+            hash = "sha256-3ONnH3zUATVxf8qlaTDZIGw1kfdH9XQ1QsjOKHGKkKc=";
           };
           pythonImportsCheck = [pname];
-          nativeBuildInputs = with python.pkgs; [poetry-core];
+          nativeBuildInputs = with python.pkgs; [uv-build];
           propagatedBuildInputs = with python.pkgs; [aiohttp yarl pydantic];
         };
 
