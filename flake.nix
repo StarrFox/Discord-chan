@@ -28,6 +28,19 @@
 
         pyproject = builtins.fromTOML (builtins.readFile ./pyproject.toml);
 
+        discordpy_patched = (python.pkgs.discordpy.override {withVoice = false;}).overrideAttrs {
+          patches = [
+            (pkgs.fetchpatch {
+              url = "https://github.com/Rapptz/discord.py/commit/6d19bc763c540a36b83429f8e9c6bb3dd8e16c7d.patch";
+              hash = "sha256-zSf23KUi9IsqAOkgvC4KYGI/ZYvMOgdenu4dXSvCmkw=";
+            })
+            (pkgs.fetchpatch {
+              url = "https://github.com/Rapptz/discord.py/commit/c342db853486ef6e26d72b10bf901e951c4b4d8e.patch";
+              hash = "sha256-OwonE4WHCdvuiTmjK3hJTxrkVjPEGvHmfu0ftJL1/H8=";
+            })
+          ];
+        };
+
         aexaroton = python.pkgs.buildPythonPackage rec {
           pname = "aexaroton";
           version = "0.2.0";
@@ -65,7 +78,7 @@
           };
           pythonImportsCheck = ["discord.ext.menus"];
           nativeBuildInputs = with python.pkgs; [pip];
-          propagatedBuildInputs = with python.pkgs; [discordpy];
+          propagatedBuildInputs = with python.pkgs; [discordpy_patched];
         };
 
         uwuify = python.pkgs.buildPythonPackage rec {
@@ -97,7 +110,7 @@
           pythonRemoveDeps = ["discord-ext-menus"];
           propagatedBuildInputs = with python.pkgs; [
             loguru
-            discordpy
+            discordpy_patched
             wand
             humanize
             pillow
@@ -107,7 +120,7 @@
             numpy
             uwuify
             parsedatetime
-            jishaku
+            (jishaku.override {discordpy = discordpy_patched;})
             unidecode
             uvloop
             psutil
@@ -150,7 +163,7 @@
         };
       };
       flake = {
-        nixosModules.discord_chan = import ./modules/discord_chan.nix {
+        nixosModules.discord_chan = import ./nix/discord_chan.nix {
           # packages.system is taken from pkgs.system
           selfpkgs = self.packages;
         };
