@@ -127,24 +127,26 @@ class Minecraft(commands.Cog):
             return await ctx.send("No one on whitelist")
 
         usernames = await self.bot.database.get_minecraft_usernames()
+        usernames_reversed = {v: k for k, v in usernames.items()}
 
         member_message_parts: list[str] = []
 
         for whitelist_username in whitelist_usernames:
-            for user_id, username in usernames.items():
-                if whitelist_username == username:
-                    if (member := ctx.guild.get_member(user_id)) is not None:
-                        member_message_parts.append(
-                            f"{whitelist_username}: [{member.mention}]"
-                        )
-                        break
-                    else:
-                        member_message_parts.append(
-                            f"{whitelist_username}: [member not in server ({user_id})]"
-                        )
-                        break
-            else:
-                member_message_parts.append(whitelist_username)
+            try:
+                if (
+                    member := ctx.guild.get_member(
+                        usernames_reversed[whitelist_username]
+                    )
+                ) is not None:
+                    member_message_parts.append(
+                        f"{whitelist_username}: [{member.mention}]"
+                    )
+                else:
+                    member_message_parts.append(
+                        f"{whitelist_username}: [not in server]"
+                    )
+            except KeyError:
+                member_message_parts.append(f"{whitelist_username}: [not saved in bot]")
 
         await ctx.send("\n".join(member_message_parts))
 
@@ -172,7 +174,7 @@ class Minecraft(commands.Cog):
         # dc/mc server sync 123 456 789
         # syncs any users in any of the servers
         # dc/mc server sync link 123
-        # links two servers togehter
+        # links two servers together
 
         search_guilds = list(guilds)
         search_guilds.append(ctx.guild)
@@ -187,7 +189,9 @@ class Minecraft(commands.Cog):
             if name not in to_add:
                 to_remove.append(name)
 
-        await server.remove_from_player_list("whitelist", to_remove)
+        if len(to_remove) > 0:
+            await server.remove_from_player_list("whitelist", to_remove)
+
         await server.add_to_player_list("whitelist", to_add)
 
         await ctx.confirm("Synced")
