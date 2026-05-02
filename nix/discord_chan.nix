@@ -59,8 +59,8 @@ in {
       systemd.services.discord_chan = {
         description = "Discord chan bot";
         wantedBy = ["multi-user.target"];
-        after = ["network-online.target"];
-        wants = ["network-online.target"];
+        after = ["network-online.target" "postgresql.target"];
+        requires = ["network-online.target" "postgresql.target"];
         serviceConfig = {
           User = cfg.user;
           Group = cfg.group;
