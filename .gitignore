@@ -114,3 +114,5 @@ result
 .pre-commit-config.yaml
 
 scratchpad.py
+
+test_images
