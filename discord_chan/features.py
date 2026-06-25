@@ -11,6 +11,7 @@ class Feature(Enum):
     gamer_words = 3
     cope = 4  # removed
     snipe = 5
+    pfpquilt = 6
 
 
 # features that had their impl removed

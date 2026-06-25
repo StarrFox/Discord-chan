@@ -128,6 +128,8 @@
             loguru-logging-intercept
             aexaroton
             audioop-lts
+            aiobotocore
+            types-aiobotocore
           ];
 
           meta.mainProgram = "discord_chan";

@@ -8,9 +8,39 @@ from PIL.Image import Image as PilImage
 import discord_chan
 from discord_chan import BetweenConverter, ImageConverter, LastImage, SubContext
 from discord_chan.menus import DCMenuPages, NormalPageSource
+from discord_chan.features import Feature
 
 
 class Images(commands.Cog, name="images"):
+    def __init__(self, bot: discord_chan.DiscordChan):
+        self.bot = bot
+
+    @commands.Cog.listener("on_member_update")
+    async def guild_avatar_change(
+        self, old_member: discord.Member, new_member: discord.Member
+    ):
+        # this is only called for guild avatar changes (member.guild_avatar)
+        if not self.bot.feature_manager.is_enabled(
+            Feature.pfpquilt, new_member.guild.id
+        ):
+            return
+
+        if old_member.guild_avatar != new_member.guild_avatar:
+            ...
+
+    @commands.Cog.listener("on_user_update")
+    async def avatar_change(self, old_user: discord.User, new_user: discord.User):
+        if old_user.avatar == new_user.avatar:
+            return
+
+        if any(
+            [
+                (await self.bot.feature_manager.is_enabled(Feature.pfpquilt, guild.id))
+                for guild in new_user.mutual_guilds
+            ]
+        ):
+            ...
+
     @commands.command()
     @commands.cooldown(1, 30, commands.cooldowns.BucketType.user)
     async def wallemoji(
@@ -83,14 +113,20 @@ class Images(commands.Cog, name="images"):
 
     @commands.command()
     @commands.cooldown(1, 1, commands.cooldowns.BucketType.user)
-    async def invert(self, ctx: SubContext, image: Annotated[PilImage, ImageConverter("png")] = LastImage):
+    async def invert(
+        self,
+        ctx: SubContext,
+        image: Annotated[PilImage, ImageConverter("png")] = LastImage,
+    ):
         """
         Invert an image
         """
         async with ctx.typing():
             inverted_image = await discord_chan.image.invert_image(image)
 
-            file = await discord_chan.image.image_to_file(inverted_image, "inverted.png")
+            file = await discord_chan.image.image_to_file(
+                inverted_image, "inverted.png"
+            )
 
         await ctx.send(ctx.author.mention, file=file)
 
@@ -106,7 +142,9 @@ class Images(commands.Cog, name="images"):
         Overlay an image on top of another
         """
         async with ctx.typing():
-            superimposed_image = await discord_chan.image.superimpose_image(image1, image2)
+            superimposed_image = await discord_chan.image.superimpose_image(
+                image1, image2
+            )
 
             file = await discord_chan.image.image_to_file(
                 superimposed_image, "superimposed.png"
@@ -213,5 +251,5 @@ class Images(commands.Cog, name="images"):
         await menu.start(ctx)
 
 
-async def setup(bot: commands.Bot):
-    await bot.add_cog(Images())
+async def setup(bot: discord_chan.DiscordChan):
+    await bot.add_cog(Images(bot))

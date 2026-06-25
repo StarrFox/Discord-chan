@@ -7,6 +7,7 @@ from tarfile import TarFile, TarInfo
 from typing import NamedTuple, ParamSpec, TypeVar
 import operator
 import re
+import math
 
 import aiohttp
 from discord import File
@@ -87,7 +88,58 @@ class TypedBytes(NamedTuple):
     content_type: str
 
 
-async def get_bytes(link: str, *, max_length: int = 100) -> TypedBytes:
+class ByteSize:
+    def __init__(self, size: float):
+        """Byte size converter
+
+        Args:
+            size: size in bytes
+        """
+        self._size = size
+
+    def as_bits(self) -> int:
+        return int(self._size * 8)
+
+    def as_bytes(self) -> float:
+        return self._size
+
+    def as_kilobytes(self) -> float:
+        return self._size * 1_000
+
+    def as_megabytes(self) -> float:
+        return self._size * 1_000_000
+
+    def as_gigabytes(self) -> float:
+        return self._size * 1_000_000_000
+
+    @classmethod
+    def from_units(
+        cls,
+        bits: int | None = None,
+        bytes: float | None = None,
+        kilobytes: float | None = None,
+        megabytes: float | None = None,
+        gigabytes: float | None = None,
+    ):
+        total: float = 0
+
+        if bits:
+            total += bits / 8
+        if bytes:
+            total += bytes
+        if kilobytes:
+            total += kilobytes * 1_000
+        if megabytes:
+            total += megabytes * 1_000_000
+        if gigabytes:
+            total += gigabytes * 1_000_000_000
+
+        return cls(total)
+
+
+async def get_bytes(
+    link: str, *, max_length: ByteSize = ByteSize.from_units(megabytes=100)
+) -> TypedBytes:
     """
     Get bytes and content_type from a link
     :param link: URL to the file
@@ -95,8 +147,6 @@ async def get_bytes(link: str, *, max_length: int = 100) -> TypedBytes:
     :return: TypedBytes representing the bytes and content_type
     :raise FileTooLarge: If the file was beyond max_length
     """
-    # Bytes *1000 -> kb *1000 -> MB
-    max_length = round((max_length * 1000) * 1000)
     async with aiohttp.ClientSession() as session:
         async with session.get(link) as response:
             # TODO: handle these
@@ -105,9 +155,9 @@ async def get_bytes(link: str, *, max_length: int = 100) -> TypedBytes:
             if response.content_length is None:
                 raise ValueError("content_length was None")
 
-            if response.content_length > max_length:
+            if response.content_length > max_length.as_bytes():
                 raise FileTooLarge(
-                    f"{round((response.content_length / 1000) / 1000, 2)}mb is over max size of {(max_length / 1000 / 1000)}mb"
+                    f"{round(ByteSize(response.content_length).as_megabytes(), 2)}mb is over max size of {max_length.as_megabytes()}mb"
                 )
 
             return TypedBytes(
@@ -143,7 +193,9 @@ async def url_to_image(link: str) -> Image.Image:
     if link.startswith("https://tenor.com/"):
         link = await _get_inner_tenor_gif(link)
 
-    image_bytes, content_type = await get_bytes(link, max_length=10)
+    image_bytes, content_type = await get_bytes(
+        link, max_length=ByteSize.from_units(megabytes=25)
+    )
 
     # TODO: get the exact formats the running PIL supports
     # can read Image.ID for a list of formats
@@ -489,6 +541,122 @@ def get_image_colors(
     }
 
     return color_map
+
+
+# TODO: improve speed
+# TODO: what happens with gifs (should take first or last frame)
+# adapted from https://github.com/CuteFwan/Koishi/blob/34c1681a1308cd4e9ea02c027a2800638ad4baf9/cogs/avatar.py#L82
+# see https://github.com/CuteFwan/Koishi/blob/34c1681a1308cd4e9ea02c027a2800638ad4baf9/LICENSE for license
+@executor_function
+def create_image_quilt(
+    image_blobs: list[BytesIO],
+    pixel_limit: int = 2048,
+    size_limit: ByteSize = ByteSize.from_units(megabytes=25),
+) -> BytesIO:
+    if len(image_blobs) == 0:
+        raise ValueError("image_blobs must contain at least 1 element")
+
+    horizontal_bound = math.ceil(math.sqrt(len(image_blobs)))
+    vertical_bound = math.ceil(len(image_blobs) / horizontal_bound)
+
+    item_limit = pixel_limit // horizontal_bound
+
+    with Image.new(
+        "RGBA",
+        size=(horizontal_bound * item_limit, vertical_bound * item_limit),
+        color=(0, 0, 0, 0),
+    ) as base:
+        horizontal = vertical = 0
+        for image_blob in image_blobs:
+            sub_image = Image.open(image_blob).resize(
+                (item_limit, item_limit), resample=Image.Resampling.BICUBIC
+            )
+            base.paste(sub_image, box=(horizontal * item_limit, vertical * item_limit))
+
+            if horizontal < horizontal_bound - 1:
+                horizontal += 1
+            else:
+                horizontal = 0
+                vertical += 1
+
+        buffer = BytesIO()
+        base.save(buffer, "png")
+        buffer.seek(0)
+
+        buffer = _resize_to_byte_size_limit(buffer, size_limit)
+
+        return buffer
+
+
+# from https://github.com/CuteFwan/Koishi/blob/34c1681a1308cd4e9ea02c027a2800638ad4baf9/cogs/utils/images.py#L4
+# see https://github.com/CuteFwan/Koishi/blob/34c1681a1308cd4e9ea02c027a2800638ad4baf9/LICENSE for license
+def _resize_to_byte_size_limit(
+    buffer: BytesIO, limit: ByteSize = ByteSize.from_units(megabytes=25)
+):
+    current_size = buffer.getbuffer().nbytes
+    while current_size > limit.as_bytes():
+        with Image.open(buffer) as im:
+            buffer = BytesIO()
+            if im.format == "PNG":
+                im = im.resize(
+                    [i // 2 for i in im.size], resample=Image.Resampling.BICUBIC
+                )
+                im.save(buffer, "png")
+            elif im.format == "GIF":
+                durations = []
+                new_frames = []
+                for frame in ImageSequence.Iterator(im):
+                    durations.append(frame.info["duration"])
+                    new_frames.append(
+                        frame.resize(
+                            [i // 2 for i in im.size], resample=Image.Resampling.BICUBIC
+                        )
+                    )
+                new_frames[0].save(
+                    buffer,
+                    save_all=True,
+                    append_images=new_frames[1:],
+                    format="gif",
+                    version=im.info["version"],
+                    duration=durations,
+                    loop=0,
+                    background=im.info["background"],
+                    palette=im.getpalette(),
+                )
+            buffer.seek(0)
+            current_size = buffer.getbuffer().nbytes
+
+    return buffer
+
+
+if __name__ == "__main__":
+
+    async def main():
+        from pathlib import Path
+
+        root = Path(".")
+        test_images = root / "test_images"
+        out = test_images / "out.png"
+
+        if out.exists():
+            from uuid import uuid4
+
+            out.rename(test_images / f"{uuid4()}.png")
+
+        image_blobs: list[BytesIO] = []
+        for image_file in test_images.glob("*.png"):
+            data = image_file.read_bytes()
+            image_blobs.append(BytesIO(data))
+
+        quilt = await create_image_quilt(
+            image_blobs, size_limit=ByteSize.from_units(bytes=100)
+        )
+
+        out.write_bytes(quilt.getbuffer())
+
+    import asyncio
+
+    asyncio.run(main())
 
 
 # def _get_random_color() -> tuple[int, int, int]:

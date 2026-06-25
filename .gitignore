@@ -114,3 +114,6 @@ result
 .pre-commit-config.yaml
 
 scratchpad.py
+
+scalene-profile.*
+test_images
