@@ -199,9 +199,11 @@ class Gambling(commands.Cog):
         return coin_amount * ratio
 
     @commands.command(aliases=["cf"])
-    async def coinflip(self, ctx: "SubContext", guess: Literal["h", "t"], bet: int):
+    async def coinflip(
+        self, ctx: "SubContext", guess: Literal["h", "t", "heads", "tails"], bet: int
+    ):
         """
-        Guess a coinflip with h or t
+        Guess a coinflip with h, t, heads, or tails
         win or lose bet amount
         """
         if bet < 1:
@@ -214,7 +216,8 @@ class Gambling(commands.Cog):
 
         status = "won"
         gain = bet
-        if guess != outcome:
+        # guess[0]: heads -> h, tails -> t
+        if guess[0] != outcome:
             gain = -bet
             status = "lost"
 
@@ -222,7 +225,9 @@ class Gambling(commands.Cog):
 
         singular = "" if bet == 1 else "s"
 
-        await ctx.send(f"You {status} {bet} coin{singular}")
+        await ctx.send(
+            f"You rolled {'heads' if outcome == 'h' else 'tails'} and {status} {bet} coin{singular} {'<:helli:1493873386005205042>' if status == 'won' else '<:woe:1334335365477040178>'}"
+        )
 
 
 async def setup(bot):
