@@ -11,6 +11,7 @@ class Feature(Enum):
     gamer_words = 3
     cope = 4  # removed
     snipe = 5
+    content_filter = 7  # reserve 6 for avyquilt
 
 
 # features that had their impl removed
