@@ -301,7 +301,7 @@ wheels = [
 
 [[package]]
 name = "discord-chan"
-version = "2.32.0"
+version = "2.33.0"
 source = { editable = "." }
 dependencies = [
     { name = "aexaroton" },
