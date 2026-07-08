@@ -13,7 +13,7 @@ from .database import Database
 from .features import FeatureManager
 from .help import Minimal
 
-DEFAULT_PREFIXES = ["dc/", "DC/"]
+DEFAULT_PREFIXES = ["dc/", "DC/", "Dc/", "dC/"]
 ROOT = pathlib.Path(__file__).parent
 
 
