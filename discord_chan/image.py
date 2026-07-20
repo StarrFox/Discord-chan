@@ -9,6 +9,7 @@ import operator
 import re
 
 import aiohttp
+import imagehash
 from discord import File
 from PIL import Image, ImageChops, ImageSequence, ImageOps
 
@@ -489,6 +490,26 @@ def get_image_colors(
     }
 
     return color_map
+
+
+# tiny wrapper to make it async
+@executor_function
+def phash_image(image: Image.Image):
+    return imagehash.phash(image)
+
+
+# run it all in the same executor
+@executor_function
+def phash_compare_image(
+    sources: list[tuple[imagehash.ImageHash, str]], comparison: Image.Image
+) -> str | None:
+    comparison_hash = imagehash.phash(comparison)
+
+    # TODO: if this is really slow look into doing hamming distance with postgres
+    for source_hash, message_url in sources:
+        if source_hash - comparison_hash <= 5:
+            return message_url
+    return None
 
 
 # def _get_random_color() -> tuple[int, int, int]:

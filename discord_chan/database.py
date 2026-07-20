@@ -105,6 +105,13 @@ CREATE TABLE IF NOT EXISTS minecraft_guild_links (
     seconrd_guild_id BIGINT,
     PRIMARY KEY (first_guild_id, seconrd_guild_id)
 );
+
+CREATE TABLE IF NOT EXISTS content_filter_blocked_images (
+    id SERIAL PRIMARY KEY,
+    guild_id BIGINT NOT NULL,
+    hash TEXT NOT NULL,
+    message_url TEXT NOT NULL
+);
 """.strip()
 
 
@@ -403,6 +410,25 @@ class Database:
             )
 
         logger.info(f"Set coin stake for {user_id}: {amount=} {bitcoin_price=}")
+
+    async def add_content_filter_image(
+        self, guild_id: int, hash_str: str, message_url: str
+    ) -> None:
+        async with self.pool.acquire() as connection:
+            await connection.execute(
+                "INSERT INTO content_filter_blocked_images (guild_id, hash, message_url) VALUES ($1, $2, $3);",
+                guild_id,
+                hash_str,
+                message_url,
+            )
+
+    async def get_content_filter_images(self, guild_id: int) -> list[tuple[str, str]]:
+        async with self.pool.acquire() as connection:
+            records: list[asyncpg.Record] = await connection.fetch(
+                "SELECT hash, message_url FROM content_filter_blocked_images WHERE guild_id = $1;",
+                guild_id,
+            )
+        return [(r["hash"], r["message_url"]) for r in records]
 
     async def clear_coin_stake(self, user_id: int):
         async with self.pool.acquire() as connection:

@@ -3,6 +3,7 @@ from contextlib import suppress
 from operator import attrgetter
 
 import discord
+import imagehash
 from discord.ext import commands
 
 import discord_chan
@@ -22,6 +23,146 @@ class Mod(commands.Cog, name="mod"):
 
     def __init__(self, bot: discord_chan.DiscordChan):
         self.bot = bot
+
+    @commands.Cog.listener("on_message")
+    async def content_filter_listener(self, message: discord.Message) -> None:
+        # this could potentially be a good idea to remove i.e /say based attacks
+        if message.author.bot:
+            return
+
+        # dms
+        if message.guild is None:
+            return
+
+        if not message.attachments and not message.embeds:
+            return
+
+        if not await self.bot.feature_manager.is_enabled(
+            discord_chan.Feature.content_filter, message.guild.id
+        ):
+            return
+
+        download_urls: list[str] = []
+
+        for attachment in message.attachments:
+            if (
+                attachment.content_type is not None
+                and attachment.content_type.startswith("image")
+            ):
+                download_urls.append(attachment.url)
+
+        for embed in message.embeds:
+            match embed.type:
+                case "gifv":
+                    assert (
+                        embed.thumbnail.url is not None
+                    ), f"Gifv embed without thumbnail url {embed.to_dict()}"
+                    download_urls.append(embed.thumbnail.url)
+                case "image":
+                    assert (
+                        embed.url is not None
+                    ), f"Image embed without url {embed.to_dict()}"
+                    download_urls.append(embed.url)
+                case _:
+                    continue
+
+        blocked_images = await self.bot.database.get_content_filter_images(
+            message.guild.id
+        )
+        if not blocked_images:
+            return
+
+        sources = [(imagehash.hex_to_hash(h), url) for h, url in blocked_images]
+
+        for url in download_urls:
+            try:
+                image = await discord_chan.image.url_to_image(url)
+            except (
+                discord_chan.image.FileTooLarge,
+                discord_chan.image.InvalidImageType,
+            ):
+                continue
+
+            match_url = await discord_chan.image.phash_compare_image(sources, image)
+            if match_url is not None:
+                with suppress(discord.Forbidden, discord.NotFound):
+                    await message.delete()
+                with suppress(discord.Forbidden, discord.NotFound):
+                    await message.channel.send(
+                        f"{message.author.mention} posted a blocked image. Reference: {match_url}"
+                    )
+                return
+
+    @commands.group(name="content_filter", aliases=["cf"], invoke_without_command=True)
+    @commands.guild_only()
+    async def content_filter_cmd(self, ctx: SubContext):
+        """Content filter commands"""
+        await ctx.send_help("content_filter")
+
+    @content_filter_cmd.command(name="add")
+    @commands.guild_only()
+    @commands.has_permissions(manage_messages=True)
+    async def content_filter_add(
+        self, ctx: SubContext, message: discord.Message | None = None
+    ):
+        """
+        Add a message's images to the content filter blocked list.
+        Provide a message link, or reply to / attach images in the command message.
+        """
+        if message is None:
+            if ctx.message.reference is not None:
+                ref = ctx.message.reference.resolved
+                if isinstance(ref, discord.Message):
+                    message = ref
+
+        if message is None:
+            if ctx.message.attachments:
+                message = ctx.message
+            else:
+                return await ctx.send(
+                    "Provide a message link, reply to a message, or attach images."
+                )
+
+        download_urls: list[str] = []
+        for attachment in message.attachments:
+            if (
+                attachment.content_type is not None
+                and attachment.content_type.startswith("image")
+            ):
+                download_urls.append(attachment.url)
+
+        for embed in message.embeds:
+            match embed.type:
+                case "gifv":
+                    if embed.thumbnail.url:
+                        download_urls.append(embed.thumbnail.url)
+                case "image":
+                    if embed.url:
+                        download_urls.append(embed.url)
+
+        if not download_urls:
+            return await ctx.send("No images found in that message.")
+
+        added = 0
+        for url in download_urls:
+            try:
+                image = await discord_chan.image.url_to_image(url)
+            except (
+                discord_chan.image.FileTooLarge,
+                discord_chan.image.InvalidImageType,
+            ):
+                continue
+
+            hash_obj = await discord_chan.image.phash_image(image)
+            await self.bot.database.add_content_filter_image(
+                ctx.guild.id, str(hash_obj), message.jump_url
+            )
+            added += 1
+
+        if added:
+            await ctx.confirm(f"Added {added} image(s) to the content filter.")
+        else:
+            await ctx.send("No images could be processed.")
 
     @commands.group(aliases=["feature"], invoke_without_command=True)
     @commands.guild_only()

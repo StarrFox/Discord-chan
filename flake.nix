@@ -128,6 +128,7 @@
             loguru-logging-intercept
             aexaroton
             audioop-lts
+            imagehash
           ];
 
           meta.mainProgram = "discord_chan";
